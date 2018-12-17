@@ -16,7 +16,7 @@ if [ -f /usr/local/kcptun/kcptun-server ]; then
 elif [ -f /usr/bin/kcptun-server ]; then
     DAEMON=/usr/bin/kcptun-server
 fi
-NAME=kcptun
+NAME=kcptun-server
 CONF=/etc/kcptun/config.json
 PID_DIR=/var/run
 PID_FILE=$PID_DIR/kcptun-server.pid
@@ -36,6 +36,10 @@ if [ ! -f $CONF ]; then
     echo "$NAME config file $CONF not found"
     exit 1
 fi
+
+check_pid(){
+	PID=`ps -ef |grep -v grep | grep ${NAME} |awk '{print $2}'`
+}
 
 check_running() {
     if [ -r $PID_FILE ]; then
@@ -69,7 +73,8 @@ do_start() {
         echo "$NAME (pid $PID) is already running..."
         return 0
     fi
-    $DAEMON -c $CONF -f $PID_FILE
+    $DAEMON -c $CONF
+    check_pid > $PID_FILE
     if check_running; then
         echo "Starting $NAME success"
     else

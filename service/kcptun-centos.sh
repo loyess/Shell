@@ -27,7 +27,7 @@ RET_VAL=0
 [ -x $DAEMON ] || exit 0
 
 check_pid(){
-	get_pid=`ps -ef |grep -v grep | grep ${NAME} |awk '{print $2}'`
+	get_pid=`ps -ef |grep -v grep | grep $NAME |awk '{print $2}'`
 }
 
 check_pid
@@ -52,14 +52,15 @@ fi
 
 
 check_running() {
-    if [ -r $PID_FILE ]; then
-        read PID < $PID_FILE
-        if [ -d "/proc/$PID" ]; then
-            return 0
-        else
-            rm -f $PID_FILE
-            return 1
-        fi
+    if [ -e $PID_FILE ]; then
+        if [ -r $PID_FILE ]; then
+            read PID < $PID_FILE
+            if [ -d "/proc/$PID" ]; then
+                return 0
+            else
+                rm -f $PID_FILE
+                return 1
+            fi
     else
         return 2
     fi
@@ -85,7 +86,7 @@ do_start() {
     fi
     $DAEMON -c $CONF > /dev/null 2>&1 &
     check_pid
-    echo ${get_pid} > $PID_FILE
+    echo $get_pid > $PID_FILE
     if check_running; then
         echo "Starting $NAME success"
     else

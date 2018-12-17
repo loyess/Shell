@@ -59,6 +59,7 @@ check_running() {
                 rm -f $PID_FILE
                 return 1
             fi
+        fi
     else
         return 2
     fi

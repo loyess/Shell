@@ -720,7 +720,7 @@ install_prepare(){
   ${Green_font_prefix}2.${Font_color_suffix} 安装 simple-obfs
   "
     echo && read -e -p "(默认: 不安装)：" plugin_num
-    [[ -z "${plugin_num}" ]] && plugin_num='' && echo -e "\n${Tip} 当前未选择任何插件，仅安装Shadowsocks-libev."
+    [[ -z "${plugin_num}" ]] && plugin_num="" && echo -e "\n${Tip} 当前未选择任何插件，仅安装Shadowsocks-libev."
     if [[ ${plugin_num} == "1" ]]; then
         install_prepare_libev_kcptun
 	elif [[ ${plugin_num} == "2" ]]; then
@@ -768,7 +768,7 @@ install_dependencies(){
         done
     elif check_sys packageManager apt; then
         apt_depends=(
-            gettext build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libc-ares-dev automake libmbedtls-dev libsodium-dev libssl-dev git wget qrencode
+            gettext build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libc-ares-dev automake libmbedtls-dev libssl-dev git wget qrencode
         )
 
         apt-get -y update
@@ -1064,6 +1064,8 @@ install_completed_libev(){
         echo >> ${HUMAN_CONFIG}
         echo -e "Kcptun配置路径：${KCPTUN_CONFIG}" >> ${HUMAN_CONFIG}
         echo -e "Shadowsocks-libev配置路径：${SHADOWSOCKS_LIBEV_CONFIG}" >> ${HUMAN_CONFIG}
+        echo >> ${HUMAN_CONFIG}
+        echo >> ${HUMAN_CONFIG}
         echo -e "${Tip} 插件程序下载：https://github.com/xtaci/kcptun/releases/download/v20181114/kcptun-windows-amd64-20181114.tar.gz" >> ${HUMAN_CONFIG}
         echo -e "       请将解压后的两个文件中的 client_windows_amd64.exe ，移至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
         echo >> ${HUMAN_CONFIG}
@@ -1085,6 +1087,8 @@ install_completed_libev(){
         echo >> ${HUMAN_CONFIG}
         echo >> ${HUMAN_CONFIG}
         echo -e "Shadowsocks-libev配置路径：${SHADOWSOCKS_LIBEV_CONFIG}" >> ${HUMAN_CONFIG}
+        echo >> ${HUMAN_CONFIG}
+        echo >> ${HUMAN_CONFIG}
         echo -e "${Tip} 插件程序下载：https://github.com/shadowsocks/simple-obfs/releases/download/v0.0.5/obfs-local.zip" >> ${HUMAN_CONFIG}
         echo -e "       请将 obfs-local.exe 和 libwinpthread-1.dll 两个文件解压至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
         echo >> ${HUMAN_CONFIG}
@@ -1102,6 +1106,8 @@ install_completed_libev(){
         echo >> ${HUMAN_CONFIG}
         echo >> ${HUMAN_CONFIG}
         echo -e "Shadowsocks-libev配置路径：${SHADOWSOCKS_LIBEV_CONFIG}" >> ${HUMAN_CONFIG}
+        echo >> ${HUMAN_CONFIG}
+        echo >> ${HUMAN_CONFIG}
     fi
 }
 

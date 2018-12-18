@@ -795,7 +795,7 @@ download(){
 download_files(){
     cd ${CUR_DIR}
 
-    if [ "${plugin_num}" == "1" ]; then
+    if [[ "${plugin_num}" == "1" ]]; then
         get_ver
         
         # 下载Shadowsocks-libev
@@ -820,7 +820,7 @@ download_files(){
             download "${KCPTUN_INIT}" "${KCPTUN_DEBIAN}"
         fi
         
-    elif [ "${plugin_num}" == "2" || "${plugin_num}" == "" ]; then
+    elif [[ "${plugin_num}" == "2" || "${plugin_num}" == "" ]]; then
         get_ver
         shadowsocks_libev_file="shadowsocks-libev-${libev_ver}"
         shadowsocks_libev_url="https://github.com/shadowsocks/shadowsocks-libev/releases/download/v${libev_ver}/shadowsocks-libev-${libev_ver}.tar.gz"

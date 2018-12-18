@@ -768,7 +768,7 @@ install_dependencies(){
         done
     elif check_sys packageManager apt; then
         apt_depends=(
-            gettext build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libc-ares-dev automake libmbedtls-dev libssl-dev git wget qrencode
+            gettext build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libc-ares-dev automake libssl-dev git wget qrencode
         )
 
         apt-get -y update

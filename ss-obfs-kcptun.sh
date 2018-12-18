@@ -1061,7 +1061,7 @@ install_completed_libev(){
         echo -e "Mobile Terminal Params: crypt=${crypt};key=${key};mtu=${MTU};sndwnd=${sndwnd};rcvwnd=${rcvwnd};mode=${mode};datashard=${datashard};parityshard=${parityshard};dscp=${DSCP}" >> ${HUMAN_CONFIG}
         echo >> ${HUMAN_CONFIG}
         echo >> ${HUMAN_CONFIG}
-        echo -e "Kcptun配置路径：${KCPTUN_CONFIG}" >> ${HUMAN_CONFIG}
+        echo -e "           Kcptun配置路径：${KCPTUN_CONFIG}" >> ${HUMAN_CONFIG}
         echo -e "Shadowsocks-libev配置路径：${SHADOWSOCKS_LIBEV_CONFIG}" >> ${HUMAN_CONFIG}
         echo >> ${HUMAN_CONFIG}
         echo >> ${HUMAN_CONFIG}

@@ -962,6 +962,8 @@ install_mbedtls(){
             install_cleanup
             echo -e "${Error} mbedtls 安装失败..."
             exit 1
+        else
+            echo && echo -e "${Info} mbedtls 安装成功 !"
         fi
     elif check_sys packageManager apt; then
         if [ ! -f /usr/lib/libmbedtls.a ]; then
@@ -976,6 +978,8 @@ install_mbedtls(){
                 install_cleanup
                 echo -e "${Error} ${MBEDTLS_FILE} 安装失败..."
                 exit 1
+            else
+                echo && echo -e "${Info} mbedtls 安装成功 !"
             fi
         else
             echo -e "${Info} ${MBEDTLS_FILE} 已经安装."
@@ -983,7 +987,6 @@ install_mbedtls(){
     fi
     cd ${CUR_DIR}
     ldconfig
-    echo && echo -e "${Info} mbedtls 安装成功 !" && echo
 }
 
 install_shadowsocks_libev(){

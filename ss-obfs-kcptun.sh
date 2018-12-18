@@ -359,13 +359,14 @@ install_prepare_cipher(){
 
 autoconf_version(){
     if [ ! "$(command -v autoconf)" ]; then
-        echo -e "${Info} 开始安装autoconf软件包."
+        echo -e "${Info} 开始安装autoconf 软件包."
         if check_sys packageManager yum; then
             yum install -y autoconf > /dev/null 2>&1 || echo -e "${Error} 安装autoconf失败."
         elif check_sys packageManager apt; then
             apt-get -y update > /dev/null 2>&1
             apt-get -y install autoconf > /dev/null 2>&1 || echo -e "${Error} 安装autoconf失败."
         fi
+        echo -e "${Info} autoconf 安装完成."
     fi
     local autoconf_ver=$(autoconf --version | grep autoconf | grep -oE "[0-9.]+")
     if version_ge ${autoconf_ver} 2.67; then
@@ -1316,7 +1317,7 @@ else
   ${Green_font_prefix}2.${Font_color_suffix} Uninstall
  "
 	menu_status
-	echo && read -e -p "请输入数字 [1-4]：" menu_num
+	echo && read -e -p "请输入数字 [1-2]：" menu_num
 case "${menu_num}" in
 	1)
 	install_shadowsocks

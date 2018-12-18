@@ -1257,7 +1257,6 @@ uninstall_shadowsocks(){
         rm -f /usr/local/share/man/man8/shadowsocks-libev.8
         rm -fr /usr/local/share/doc/shadowsocks-libev
         rm -f ${SHADOWSOCKS_LIBEV_INIT}
-        rm -f ${HUMAN_CONFIG}
         rm -fr $(dirname ${KCPTUN_INSTALL_DIR})
         rm -fr $(dirname ${KCPTUN_CONFIG})
         rm -f ${KCPTUN_INIT}

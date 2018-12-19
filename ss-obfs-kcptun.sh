@@ -12,6 +12,12 @@ SHELL_VERSION="1.0.0"
 # current path
 CUR_DIR=$( pwd )
 
+
+# bbr
+BBR_SCRIPT_URL="https://git.io/vbUk0"
+BBR_SHELL_FILE="$CUR_DIR/bbr.sh"
+
+
 # Humanization config PATH
 HUMAN_CONFIG="/etc/shadowsocks-libev/human-config"
 
@@ -1004,6 +1010,7 @@ install_shadowsocks_libev(){
         elif check_sys packageManager apt; then
             update-rc.d -f ${service_name} defaults
         fi
+        echo -e "${Info} Shadowsocks-libev安装成功."
     else
         echo
         echo -e "${Error} Shadowsocks-libev安装失败."
@@ -1148,6 +1155,7 @@ install_kcptun(){
         elif check_sys packageManager apt; then
             update-rc.d -f ${service_name} defaults
         fi
+        echo -e "${Info} kcptun安装成功."
     else
         echo
         echo -e "${Error} kcptun安装失败."
@@ -1156,6 +1164,12 @@ install_kcptun(){
         exit 1
     fi
     [ -f ${KCPTUN_INSTALL_DIR} ] && ln -s ${KCPTUN_INSTALL_DIR} /usr/bin
+}
+
+install_bbr(){
+    download ${BBR_SHELL_FILE} ${BBR_SCRIPT_URL}
+    chmod +x ${BBR_SHELL_FILE}
+    ./$(basename ${BBR_SHELL_FILE})
 }
 
 install_main(){
@@ -1313,20 +1327,24 @@ elif [[ "${action}" == "config" ]]; then
 else
 	echo -e "  Shadowsocks-libev一键管理脚本 ${Red_font_prefix}[v${SHELL_VERSION}]${Font_color_suffix}
 
-  ${Green_font_prefix}1.${Font_color_suffix} Install
-  ${Green_font_prefix}2.${Font_color_suffix} Uninstall
+  ${Green_font_prefix}1.${Font_color_suffix} BBR
+  ${Green_font_prefix}2.${Font_color_suffix} Install
+  ${Green_font_prefix}3.${Font_color_suffix} Uninstall
  "
 	menu_status
-	echo && read -e -p "请输入数字 [1-2]：" menu_num
+	echo && read -e -p "请输入数字 [1-3]：" menu_num
 case "${menu_num}" in
-	1)
-	install_shadowsocks
+    1)
+	install_bbr
 	;;
 	2)
+	install_shadowsocks
+	;;
+	3)
 	uninstall_shadowsocks
 	;;
 	*)
-	echo -e "${Error} 请输入正确的数字 [1-2]"
+	echo -e "${Error} 请输入正确的数字 [1-3]"
 	;;
 esac
 fi

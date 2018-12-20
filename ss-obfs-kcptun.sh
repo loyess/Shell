@@ -119,6 +119,17 @@ Separator_1="——————————————————————�
 
 [[ $EUID -ne 0 ]] && echo -e "[${red}Error${Font_color_suffix}] This script must be run as root!" && exit 1
 
+install_check(){
+    if check_sys packageManager yum || check_sys packageManager apt; then
+        if centosversion 5; then
+            return 1
+        fi
+        return 0
+    else
+        return 1
+    fi
+}
+
 disable_selinux(){
     if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
         sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
@@ -1180,6 +1191,7 @@ install_main(){
 }
 
 install_shadowsocks(){
+    [[ -e '/usr/local/bin/ss-server' ]] && echo -e "${Info} Shadowsocks-libev 已经安装..." && exit 1
     disable_selinux
     install_prepare
     install_dependencies
@@ -1272,8 +1284,8 @@ install_cleanup(){
     rm -rf client_linux_amd64 server_linux_amd64 ${kcptun_file}.tar.gz 
 }
 
-# 显示 菜单状态
-menu_status(){
+# install status
+install_status(){
 	if [[ -e '/usr/local/bin/ss-server' ]]; then
 		check_pid
 		if [[ ! -z "${PID}" ]]; then
@@ -1288,7 +1300,16 @@ menu_status(){
 }
 
 
+
 action=$1
+
+# check supported
+if ! install_check; then
+    echo -e "[${red}Error${plain}] Your OS is not supported to run it!"
+    echo "Please change to CentOS 6+/Debian 7+/Ubuntu 12+ and try again."
+    exit 1
+fi
+
 if [[ "${action}" == "install" ]]; then
 	install_shadowsocks
 elif [[ "${action}" == "uninstall" ]]; then
@@ -1302,7 +1323,7 @@ else
   ${Green_font_prefix}2.${Font_color_suffix} Install
   ${Green_font_prefix}3.${Font_color_suffix} Uninstall
  "
-	menu_status
+	install_status
 	echo && read -e -p "请输入数字 [1-3]：" menu_num
 case "${menu_num}" in
     1)

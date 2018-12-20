@@ -925,75 +925,44 @@ EOF
 fi
 }
 
-install_libsodium(){
-    if [ ! -e /usr/local/lib/libsodium.so ]; then
-        if check_sys packageManager yum; then
-            cd ${CUR_DIR}
-            yum update
-            echo -e "${Info} 为${LIBSODIUM_FILE}安装依赖..."
-            yum -y groupinstall "Development Tools"
-            echo -e "${Info} 下载${LIBSODIUM_FILE}..."
-            download "${LIBSODIUM_FILE}.tar.gz" "${LIBSODIUM_URL}"
-            echo -e "${Info} 解压${LIBSODIUM_FILE}..."
-            tar zxf ${LIBSODIUM_FILE}.tar.gz && cd ${LIBSODIUM_FILE}
-            echo -e "${Info} 编译安装${LIBSODIUM_FILE}..."
-            ./configure --disable-maintainer-mode && make -j2 && make install
-            echo /usr/local/lib > /etc/ld.so.conf.d/usr_local_lib.conf
-
-        elif check_sys packageManager apt; then
-            cd ${CUR_DIR}
-            apt-get update
-            # echo -e "${Info} 安装依赖..." # 已经在依赖安装里面安装过了
-            # apt-get install -y build-essential
-            echo -e "${Info} 下载${LIBSODIUM_FILE}..."
-            download "${LIBSODIUM_FILE}.tar.gz" "${LIBSODIUM_URL}"
-            echo -e "${Info} 解压${LIBSODIUM_FILE}..."
-            tar zxf ${LIBSODIUM_FILE}.tar.gz && cd ${LIBSODIUM_FILE}
-            echo -e "${Info} 编译安装${LIBSODIUM_FILE}..."
-            ./configure --disable-maintainer-mode && make -j2 && make install
+install_libsodium(){    
+    if [ ! -f /usr/lib/libsodium.a ]; then
+        cd ${cur_dir}
+        echo -e "${Info} 下载${LIBSODIUM_FILE}..."
+        download "${LIBSODIUM_FILE}.tar.gz" "${LIBSODIUM_URL}"
+        echo -e "${Info} 解压${LIBSODIUM_FILE}..."
+        tar zxf ${LIBSODIUM_FILE}.tar.gz && cd ${LIBSODIUM_FILE}
+        echo -e "${Info} 编译安装${LIBSODIUM_FILE}..."
+        ./configure --prefix=/usr && make && make install
+        if [ $? -ne 0 ]; then
+            echo -e "${Error} ${LIBSODIUM_FILE} 安装失败 !"
+            install_cleanup
+            exit 1
         fi
-        cd ${CUR_DIR}
-        ldconfig
-        [[ ! -e /usr/local/lib/libsodium.so ]] && echo -e "${Error} ${LIBSODIUM_FILE} 安装失败 !" && install_cleanup && exit 1
-        echo && echo -e "${Info} ${LIBSODIUM_FILE} 安装成功 !" && echo
+        echo -e "${Info} ${LIBSODIUM_FILE} 安装成功 !"    
     else
         echo -e "${Info} ${LIBSODIUM_FILE} 已经安装."
     fi
 }
 
 install_mbedtls(){
-    if check_sys packageManager yum; then
-        echo -e "${Info} 开始安装${MBEDTLS_FILE}..."
-        yum install -y mbedtls-devel
+    if [ ! -f /usr/lib/libmbedtls.a ]; then
+        cd ${cur_dir}
+        echo -e "${Info} 下载${MBEDTLS_FILE}..."
+        download "${MBEDTLS_FILE}-gpl.tgz" "${MBEDTLS_URL}"
+        echo -e "${Info} 解压${MBEDTLS_FILE}..."
+        tar xf ${MBEDTLS_FILE}-gpl.tgz && cd ${MBEDTLS_FILE}
+        echo -e "${Info} 编译安装${MBEDTLS_FILE}..."
+        make SHARED=1 CFLAGS=-fPIC && make DESTDIR=/usr install
         if [ $? -ne 0 ]; then
+            echo -e "${Error} ${MBEDTLS_FILE} 安装失败..."
             install_cleanup
-            echo -e "${Error} mbedtls 安装失败..."
             exit 1
-        else
-            echo && echo -e "${Info} mbedtls 安装成功 !"
         fi
-    elif check_sys packageManager apt; then
-        if [ ! -f /usr/lib/libmbedtls.a ]; then
-            cd ${CUR_DIR}
-            echo -e "${Info} 下载${MBEDTLS_FILE}..."
-            download "${MBEDTLS_FILE}-gpl.tgz" "${MBEDTLS_URL}"
-            echo -e "${Info} 解压${MBEDTLS_FILE}..."
-            tar xf ${MBEDTLS_FILE}-gpl.tgz && cd ${MBEDTLS_FILE}
-            echo -e "${Info} 编译安装${MBEDTLS_FILE}..."
-            make SHARED=1 CFLAGS=-fPIC && make DESTDIR=/usr install
-            if [ $? -ne 0 ]; then
-                install_cleanup
-                echo -e "${Error} ${MBEDTLS_FILE} 安装失败..."
-                exit 1
-            else
-                echo && echo -e "${Info} mbedtls 安装成功 !"
-            fi
-        else
-            echo -e "${Info} ${MBEDTLS_FILE} 已经安装."
-        fi
+        echo -e "${Info} ${MBEDTLS_FILE} 安装成功 !"
+    else
+        echo -e "${Info} ${MBEDTLS_FILE} 已经安装."
     fi
-    cd ${CUR_DIR}
-    ldconfig
 }
 
 install_shadowsocks_libev(){

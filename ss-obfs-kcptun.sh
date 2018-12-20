@@ -1007,16 +1007,18 @@ install_simple_obfs(){
         sed -i 's@^#include <ev.h>@#include <libev/ev.h>@' src/server.h
     fi
     
+    echo -e "${Info} 编译安装 simple-obfs-${simple_obfs_ver}."
     ./autogen.sh
     ./configure --disable-documentation
     make
     make install
     if [ ! "$(command -v obfs-server)" ]; then
-        echo -e "${Error} Shadowsocks-libev插件simple-obfs安装失败."
+        echo -e "${Error} simple-obfs-${simple_obfs_ver} 安装失败."
         install_cleanup
         exit 1
     fi
     [ -f /usr/local/bin/obfs-server ] && ln -s /usr/local/bin/obfs-server /usr/bin
+    echo -e "${Info} simple-obfs-${simple_obfs_ver} 安装成功."
 
 }
 

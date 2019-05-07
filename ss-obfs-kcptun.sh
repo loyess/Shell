@@ -25,8 +25,8 @@ HUMAN_CONFIG="/etc/shadowsocks-libev/human-config"
 # shadowsocklibev-libev config and init
 SHADOWSOCKS_LIBEV_INIT="/etc/init.d/shadowsocks-libev"
 SHADOWSOCKS_LIBEV_CONFIG="/etc/shadowsocks-libev/config.json"
-SHADOWSOCKS_LIBEV_CENTOS="https://git.io/fpxFf"
-SHADOWSOCKS_LIBEV_DEBIAN="https://git.io/fpxFc"
+SHADOWSOCKS_LIBEV_CENTOS="https://git.io/fjcLb"
+SHADOWSOCKS_LIBEV_DEBIAN="https://git.io/fjcLN"
 
 
 # shadowsocklibev-libev dependencies
@@ -42,8 +42,8 @@ KCPTUN_INSTALL_DIR="/usr/local/kcptun/kcptun-server"
 KCPTUN_INIT="/etc/init.d/kcptun"
 KCPTUN_CONFIG="/etc/kcptun/config.json"
 KCPTUN_LOG_DIR="/var/log/kcptun-server.log"
-KCPTUN_CENTOS="https://git.io/fpxF8"
-KCPTUN_DEBIAN="https://git.io/fpxFu"
+KCPTUN_CENTOS="https://git.io/fjcLx"
+KCPTUN_DEBIAN="https://git.io/fjcLp"
 
 
 # shadowsocklibev-libev Ciphers

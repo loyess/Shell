@@ -88,6 +88,14 @@ none
 )
 
 
+# v2ray-plugin opts
+V2RAY_PLUGIN_OPTS=(
+http
+tls
+quic
+)
+
+
 # kcptun mode(no manual)
 KCPTUN_MODE=(
 fast3
@@ -284,6 +292,8 @@ get_ver(){
     [ -z ${simple_obfs_ver} ] && echo -e "${Error} 获取 simple-obfs 最新版本失败." && exit 1
     kcptun_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/xtaci/kcptun/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
     [ -z ${kcptun_ver} ] && echo -e "${Error} 获取 kcptun 最新版本失败." && exit 1
+    v2ray_plugin_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/v2ray-plugin/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+    [ -z ${v2ray_plugin_ver} ] && echo -e "${Error} 获取 v2ray-plugin 最新版本失败." && exit 1
 }
 
 get_char(){
@@ -414,6 +424,38 @@ centosversion(){
     else
         return 1
     fi
+}
+
+install_prepare_libev_v2ray(){
+    while true
+        do
+        echo -e "请为v2ray-plugin选择伪装方式\n"
+        for ((i=1;i<=${#V2RAY_PLUGIN_OPTS[@]};i++ )); do
+            hint="${V2RAY_PLUGIN_OPTS[$i-1]}"
+            echo -e "${Green_font_prefix}  ${i}.${Font_color_suffix} ${hint}"
+        done
+        echo
+        read -p "(默认: ${V2RAY_PLUGIN_OPTS[0]}):" libev_v2ray
+        [ -z "$libev_v2ray" ] && libev_v2ray=1
+        expr ${libev_v2ray} + 1 &>/dev/null
+        if [ $? -ne 0 ]; then
+            echo
+            echo -e "${Error} 请输入一个数字"
+            echo
+            continue
+        fi
+        if [[ "$libev_v2ray" -lt 1 || "$libev_v2ray" -gt ${#V2RAY_PLUGIN_OPTS[@]} ]]; then
+            echo
+            echo -e "${Error} 请输入一个数字在 [1-${#V2RAY_PLUGIN_OPTS[@]}] 之间"
+            echo
+            continue
+        fi
+        shadowsocklibev_v2ray=${V2RAY_PLUGIN_OPTS[$libev_v2ray-1]}
+        echo
+        echo -e "${Red_font_prefix}  over = ${shadowsocklibev_v2ray}${Font_color_suffix}"
+        echo   
+        break
+        done
 }
 
 install_prepare_libev_obfs(){
@@ -733,19 +775,22 @@ install_prepare(){
     install_prepare_cipher
     echo -e "请选择要安装的SS-Plugin
     
-  ${Green_font_prefix}1.${Font_color_suffix} 安装 kcptun
-  ${Green_font_prefix}2.${Font_color_suffix} 安装 simple-obfs
+  ${Green_font_prefix}1.${Font_color_suffix} v2ray
+  ${Green_font_prefix}2.${Font_color_suffix} kcptun
+  ${Green_font_prefix}3.${Font_color_suffix} simple-obfs
   "
     echo && read -e -p "(默认: 不安装)：" plugin_num
     [[ -z "${plugin_num}" ]] && plugin_num="" && echo -e "\n${Tip} 当前未选择任何插件，仅安装Shadowsocks-libev."
     if [[ ${plugin_num} == "1" ]]; then
+        install_prepare_libev_v2ray
+    elif [[ ${plugin_num} == "2" ]]; then
         install_prepare_libev_kcptun
-	elif [[ ${plugin_num} == "2" ]]; then
+	elif [[ ${plugin_num} == "3" ]]; then
 		install_prepare_libev_obfs
     elif [[ ${plugin_num} == "" ]]; then
         :
     else
-        echo -e "${Error} 请输入正确的数字 [1-2]" && exit 1
+        echo -e "${Error} 请输入正确的数字 [1-3]" && exit 1
 	fi
     
     echo
@@ -811,8 +856,28 @@ download(){
 
 download_files(){
     cd ${CUR_DIR}
-
+    
     if [[ "${plugin_num}" == "1" ]]; then
+        get_ver
+        
+        # 下载Shadowsocks-libev
+        shadowsocks_libev_file="shadowsocks-libev-${libev_ver}"
+        shadowsocks_libev_url="https://github.com/shadowsocks/shadowsocks-libev/releases/download/v${libev_ver}/shadowsocks-libev-${libev_ver}.tar.gz"
+        download "${shadowsocks_libev_file}.tar.gz" "${shadowsocks_libev_url}"
+        
+        if check_sys packageManager yum; then
+            download "${SHADOWSOCKS_LIBEV_INIT}" "${SHADOWSOCKS_LIBEV_CENTOS}"
+        elif check_sys packageManager apt; then
+            download "${SHADOWSOCKS_LIBEV_INIT}" "${SHADOWSOCKS_LIBEV_DEBIAN}"
+        fi
+        
+        # 下载v2ray-plugin
+        v2ray_plugin_file="v2ray-plugin-linux-amd64-v${v2ray_plugin_ver}"
+        v2ray_plugin_url="https://github.com/shadowsocks/v2ray-plugin/releases/download/v${v2ray_plugin_ver}/v2ray-plugin-linux-amd64-v${v2ray_plugin_ver}.tar.gz"
+        download "${v2ray_plugin_file}.tar.gz" "${v2ray_plugin_url}"
+        
+        
+    elif [[ "${plugin_num}" == "2" ]]; then
         get_ver
         
         # 下载Shadowsocks-libev
@@ -837,7 +902,7 @@ download_files(){
             download "${KCPTUN_INIT}" "${KCPTUN_DEBIAN}"
         fi
         
-    elif [[ "${plugin_num}" == "2" || "${plugin_num}" == "" ]]; then
+    elif [[ "${plugin_num}" == "3" || "${plugin_num}" == "" ]]; then
         get_ver
         shadowsocks_libev_file="shadowsocks-libev-${libev_ver}"
         shadowsocks_libev_url="https://github.com/shadowsocks/shadowsocks-libev/releases/download/v${libev_ver}/shadowsocks-libev-${libev_ver}.tar.gz"
@@ -868,12 +933,90 @@ if [ ! -d "$(dirname ${SHADOWSOCKS_LIBEV_CONFIG})" ]; then
     mkdir -p $(dirname ${SHADOWSOCKS_LIBEV_CONFIG})
 fi
 
-if [ ! -d "$(dirname ${KCPTUN_CONFIG})" ]; then
-    mkdir -p $(dirname ${KCPTUN_CONFIG})
-fi
-
 if [[ ${plugin_num} == "1" ]]; then
-   cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
+    if [[ ${libev_v2ray} == "1" ]]; then
+        ${shadowsocksport}=80
+        echo
+        echo -e "${Tip} server_port将被重置为：port = ${shadowsocksport}"
+        echo 
+        
+    cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
+{ 
+    "server":${server_value},
+    "server_port":${shadowsocksport},
+    "password":${shadowsockspwd},
+    "timeout":300,
+    "method":${shadowsockscipher},
+    "fast_open":${fast_open},
+    "user":"nobody",
+    "nameserver":"8.8.8.8",
+    "mode":"tcp_and_udp",
+    "plugin":"v2ray-plugin",
+    "plugin_opts":"server"
+}
+EOF
+    elif [[ ${libev_v2ray} == "2" ]]; then
+        ${shadowsocksport}=443
+        echo
+        echo -e "${Tip} server_port将被重置为：port = ${shadowsocksport}"
+        echo 
+        echo
+        read -p "请输入你的域名：" domain
+        echo
+        read -p "请输入你的cert路径：" cerpath
+        echo
+        read -p "请输入你的key路径：" keypath
+        echo
+        
+    cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
+{ 
+    "server":${server_value},
+    "server_port":${shadowsocksport},
+    "password":${shadowsockspwd},
+    "timeout":300,
+    "method":${shadowsockscipher},
+    "fast_open":${fast_open},
+    "user":"nobody",
+    "nameserver":"8.8.8.8",
+    "mode":"tcp_and_udp",
+    "plugin":"v2ray-plugin",
+    "plugin_opts":"server;tls;host=${domain};cert=${cerpath};key=${keypath}"
+}
+EOF
+    elif [[ ${libev_v2ray} == "3" ]]; then
+        ${shadowsocksport}=443
+        echo
+        echo -e "${Tip} server_port将被重置为：port = ${shadowsocksport}"
+        echo 
+        echo
+        read -p "请输入你的域名：" domain
+        echo
+        read -p "请输入你的cert路径：" cerpath
+        echo
+        read -p "请输入你的key路径：" keypath
+        echo
+        
+    cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
+{ 
+    "server":${server_value},
+    "server_port":${shadowsocksport},
+    "password":${shadowsockspwd},
+    "timeout":300,
+    "method":${shadowsockscipher},
+    "fast_open":${fast_open},
+    "user":"nobody",
+    "nameserver":"8.8.8.8",
+    "mode":"tcp_and_udp",
+    "plugin":"v2ray-plugin",
+    "plugin_opts":"server;mode=quic;host=${domain};cert=${cerpath};key=${keypath}"
+}
+EOF
+    
+elif [[ ${plugin_num} == "2" ]]; then
+    if [ ! -d "$(dirname ${KCPTUN_CONFIG})" ]; then
+        mkdir -p $(dirname ${KCPTUN_CONFIG})
+    fi
+    cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
 {
     "server":${server_value},
     "server_port":${shadowsocksport},
@@ -903,7 +1046,7 @@ EOF
 }
 EOF
  
-elif [[ ${plugin_num} == "2" ]]; then
+elif [[ ${plugin_num} == "3" ]]; then
     cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
 {
     "server":${server_value},
@@ -1034,7 +1177,7 @@ install_simple_obfs(){
 }
 
 install_completed_libev(){
-    if [ "${plugin_num}" == "1" ]; then
+    if [ "${plugin_num}" == "2" ]; then
         clear
         ldconfig
         ${SHADOWSOCKS_LIBEV_INIT} start
@@ -1062,7 +1205,7 @@ install_completed_libev(){
         echo -e "       请将解压后的两个文件中的 client_windows_amd64.exe ，移至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
         echo >> ${HUMAN_CONFIG}
         fi 
-    elif [ "${plugin_num}" == "2" ]; then
+    elif [ "${plugin_num}" == "3" ]; then
         clear
         ldconfig
         ${SHADOWSOCKS_LIBEV_INIT} start
@@ -1105,7 +1248,7 @@ install_completed_libev(){
 
 qr_generate_libev(){
     if [ "$(command -v qrencode)" ]; then
-        if [[ ${plugin_num} == "1" ]]; then
+        if [[ ${plugin_num} == "2" ]]; then
             local tmp=$(echo -n "${shadowsockscipher}:${shadowsockspwd}@$(get_ip):${listen_port}" | base64 -w0)
             local qr_code="ss://${tmp}"
         else
@@ -1161,7 +1304,7 @@ install_main(){
     fi
     ldconfig
 
-    if [ "${plugin_num}" == "1" ]; then
+    if [ "${plugin_num}" == "2" ]; then
         install_mbedtls
         install_shadowsocks_libev
         install_kcptun
@@ -1169,7 +1312,7 @@ install_main(){
         qr_generate_libev
         view_config
         
-    elif [ "${plugin_num}" == "2" ]; then
+    elif [ "${plugin_num}" == "3" ]; then
         install_mbedtls
         install_shadowsocks_libev
         install_simple_obfs

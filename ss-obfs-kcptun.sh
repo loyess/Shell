@@ -940,7 +940,7 @@ if [[ ${plugin_num} == "1" ]]; then
         echo -e "${Tip} server_port将被重置为：port = ${shadowsocksport}"
         echo 
         
-    cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
+        cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
 { 
     "server":${server_value},
     "server_port":${shadowsocksport},
@@ -968,7 +968,7 @@ EOF
         read -p "请输入你的key路径：" keypath
         echo
         
-    cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
+        cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
 { 
     "server":${server_value},
     "server_port":${shadowsocksport},
@@ -996,7 +996,7 @@ EOF
         read -p "请输入你的key路径：" keypath
         echo
         
-    cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
+        cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
 { 
     "server":${server_value},
     "server_port":${shadowsocksport},
@@ -1011,6 +1011,7 @@ EOF
     "plugin_opts":"server;mode=quic;host=${domain};cert=${cerpath};key=${keypath}"
 }
 EOF
+    fi
     
 elif [[ ${plugin_num} == "2" ]]; then
     if [ ! -d "$(dirname ${KCPTUN_CONFIG})" ]; then

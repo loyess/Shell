@@ -935,7 +935,7 @@ fi
 
 if [[ ${plugin_num} == "1" ]]; then
     if [[ ${libev_v2ray} == "1" ]]; then
-        ${shadowsocksport}=80
+        shadowsocksport=80
         echo
         echo -e "${Tip} server_port将被重置为：port = ${shadowsocksport}"
         echo 
@@ -956,7 +956,7 @@ if [[ ${plugin_num} == "1" ]]; then
 }
 EOF
     elif [[ ${libev_v2ray} == "2" ]]; then
-        ${shadowsocksport}=443
+        shadowsocksport=443
         echo
         echo -e "${Tip} server_port将被重置为：port = ${shadowsocksport}"
         echo 
@@ -984,7 +984,7 @@ EOF
 }
 EOF
     elif [[ ${libev_v2ray} == "3" ]]; then
-        ${shadowsocksport}=443
+        shadowsocksport=443
         echo
         echo -e "${Tip} server_port将被重置为：port = ${shadowsocksport}"
         echo 

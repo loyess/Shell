@@ -527,12 +527,9 @@ install_prepare_libev_v2ray(){
                     ~/.acme.sh/acme.sh --issue -d ${domain}   --standalone
                     echo
                     cerpath="/root/.acme.sh/${domain}/fullchain.cer"
-                    keypath="${Tip} key = /root/.acme.sh/${domain}/${domain}.key"
-                    echo -e "${Info} ${domain} 证书生成完成. "
-                    echo 
-                    echo -e "${Tip} cert = /root/.acme.sh/${domain}/fullchain.cer"
+                    keypath="/root/.acme.sh/${domain}/${domain}.key"
                     echo
-                    echo -e "${Tip} key = /root/.acme.sh/${domain}/${domain}.key"
+                    echo -e "${Info} ${domain} 证书生成完成. "
                     echo
                     
                 else

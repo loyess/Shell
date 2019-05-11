@@ -1269,7 +1269,7 @@ install_completed_libev(){
             echo -e "       请解压将插件重命名为 v2ray-plugin.exe 并移动至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
         fi
-    if [ "${plugin_num}" == "2" ]; then
+    elif [ "${plugin_num}" == "2" ]; then
         clear
         ldconfig
         ${SHADOWSOCKS_LIBEV_INIT} start

@@ -1012,7 +1012,7 @@ if [[ ${plugin_num} == "1" ]]; then
 { 
     "server":${server_value},
     "server_port":${shadowsocksport},
-    "password":${shadowsockspwd},
+    "password":"${shadowsockspwd}",
     "timeout":300,
     "method":${shadowsockscipher},
     "fast_open":${fast_open},
@@ -1028,7 +1028,7 @@ EOF
 { 
     "server":${server_value},
     "server_port":${shadowsocksport},
-    "password":${shadowsockspwd},
+    "password":"${shadowsockspwd}",
     "timeout":300,
     "method":${shadowsockscipher},
     "fast_open":${fast_open},
@@ -1044,7 +1044,7 @@ EOF
 { 
     "server":${server_value},
     "server_port":${shadowsocksport},
-    "password":${shadowsockspwd},
+    "password":"${shadowsockspwd}",
     "timeout":300,
     "method":${shadowsockscipher},
     "fast_open":${fast_open},

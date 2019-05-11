@@ -1517,6 +1517,9 @@ uninstall_shadowsocks(){
             update-rc.d -f ${kcp_service_name} remove
         fi
         
+        # kill v2ray-plugin 
+        ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+        
         rm -fr $(dirname ${SHADOWSOCKS_LIBEV_CONFIG})
         rm -f /usr/local/bin/ss-local
         rm -f /usr/local/bin/ss-tunnel

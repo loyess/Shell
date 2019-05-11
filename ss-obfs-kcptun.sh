@@ -88,8 +88,8 @@ none
 )
 
 
-# v2ray-plugin opts
-V2RAY_PLUGIN_OPTS=(
+# v2ray-plugin Transport mode
+V2RAY_PLUGIN_TRANSPORT_MODE=(
 http
 tls
 quic
@@ -110,6 +110,10 @@ OBFUSCATION_WRAPPER=(
 http
 tls
 )
+
+
+# domain Re
+DOMAIN_RE="^(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+$"
 
 
 # ipv4 and ipv6 Re
@@ -142,6 +146,16 @@ disable_selinux(){
     if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
         sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
         setenforce 0
+    fi
+}
+
+is_domain(){
+    domain=$1
+    
+    if [ -n "$(echo $domain | grep -P $DOMAIN_RE)" ]; then
+        return 0
+    else
+        return 1
     fi
 }
 
@@ -327,6 +341,8 @@ install_prepare_port() {
             echo
             echo -e "${Red_font_prefix}  port = ${shadowsocksport}${Font_color_suffix}"
             echo
+            echo -e "${Tip} 如果选择v2ray-plugin 此参数将会被重置"
+            echo 
             break
         fi
     fi
@@ -429,13 +445,13 @@ centosversion(){
 install_prepare_libev_v2ray(){
     while true
         do
-        echo -e "请为v2ray-plugin选择伪装方式\n"
-        for ((i=1;i<=${#V2RAY_PLUGIN_OPTS[@]};i++ )); do
-            hint="${V2RAY_PLUGIN_OPTS[$i-1]}"
+        echo -e "请为v2ray-plugin选择Transport mode\n"
+        for ((i=1;i<=${#V2RAY_PLUGIN_TRANSPORT_MODE[@]};i++ )); do
+            hint="${V2RAY_PLUGIN_TRANSPORT_MODE[$i-1]}"
             echo -e "${Green_font_prefix}  ${i}.${Font_color_suffix} ${hint}"
         done
         echo
-        read -p "(默认: ${V2RAY_PLUGIN_OPTS[0]}):" libev_v2ray
+        read -p "(默认: ${V2RAY_PLUGIN_TRANSPORT_MODE[0]}):" libev_v2ray
         [ -z "$libev_v2ray" ] && libev_v2ray=1
         expr ${libev_v2ray} + 1 &>/dev/null
         if [ $? -ne 0 ]; then
@@ -444,13 +460,13 @@ install_prepare_libev_v2ray(){
             echo
             continue
         fi
-        if [[ "$libev_v2ray" -lt 1 || "$libev_v2ray" -gt ${#V2RAY_PLUGIN_OPTS[@]} ]]; then
+        if [[ "$libev_v2ray" -lt 1 || "$libev_v2ray" -gt ${#V2RAY_PLUGIN_TRANSPORT_MODE[@]} ]]; then
             echo
-            echo -e "${Error} 请输入一个数字在 [1-${#V2RAY_PLUGIN_OPTS[@]}] 之间"
+            echo -e "${Error} 请输入一个数字在 [1-${#V2RAY_PLUGIN_TRANSPORT_MODE[@]}] 之间"
             echo
             continue
         fi
-        shadowsocklibev_v2ray=${V2RAY_PLUGIN_OPTS[$libev_v2ray-1]}
+        shadowsocklibev_v2ray=${V2RAY_PLUGIN_TRANSPORT_MODE[$libev_v2ray-1]}
         echo
         echo -e "${Red_font_prefix}  over = ${shadowsocklibev_v2ray}${Font_color_suffix}"
         echo  
@@ -458,34 +474,53 @@ install_prepare_libev_v2ray(){
         if [[ ${libev_v2ray} == "1" ]]; then
             shadowsocksport=80
             echo
-            echo -e "${Tip} server_port将被重置为：port = ${shadowsocksport}"
+            echo -e "${Tip} server_port已被重置为：port = ${shadowsocksport}"
             echo 
 
-        elif [[ ${libev_v2ray} == "2" ]]; then
+        elif [[ ${libev_v2ray} == "2" || ${libev_v2ray} == "3"]]; then
             shadowsocksport=443
             echo
-            echo -e "${Tip} server_port将被重置为：port = ${shadowsocksport}"
+            echo -e "${Tip} server_port已被重置为：port = ${shadowsocksport}"
             echo 
             echo
             read -p "请输入你的域名：" domain
             echo
-            read -p "请输入你的cert路径：" cerpath
-            echo
-            read -p "请输入你的key路径：" keypath
-            echo
+            [ -z "${domain}" ]
+            if is_domain ${domain}; then
+                echo
+                echo -e "${Red_font_prefix}  host = ${domain}${Font_color_suffix}"
+                echo
+            else
+                echo
+                echo -e "${Error} 请输入正确合法的domain地址."
+                echo
+                continue
+            fi
+            read -p "请输入你的 TLS certificate 文件路径：" cerpath
+            if [ -e ${cerpath} ]; then
+                echo
+                echo -e "${Red_font_prefix}  cert = ${cerpath}${Font_color_suffix}"
+                echo
+            else
+                echo
+                echo -e "${Error} 请输入正确合法的 TLS certificate 文件路径"
+                echo
+                continue
+            fi
             
-        elif [[ ${libev_v2ray} == "3" ]]; then
-            shadowsocksport=443
             echo
-            echo -e "${Tip} server_port将被重置为：port = ${shadowsocksport}"
-            echo 
+            read -p "请输入你的 TLS key 文件路径：" keypath
             echo
-            read -p "请输入你的域名：" domain
-            echo
-            read -p "请输入你的cert路径：" cerpath
-            echo
-            read -p "请输入你的key路径：" keypath
-            echo
+            if [ -e ${keypath} ]; then
+                echo
+                echo -e "${Red_font_prefix}  cert = ${keypath}${Font_color_suffix}"
+                echo
+            else
+                echo
+                echo -e "${Error} 请输入正确合法的 TLS key 文件路径"
+                echo
+                continue
+            fi
             
         fi        
         break

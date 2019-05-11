@@ -334,7 +334,7 @@ install_prepare_port() {
     do
     gen_random_prot
     echo -e "\n请输入Shadowsocks-libev端口 [1-65535]"
-    read -p "(默认: ${ran_prot}):" shadowsocksport
+    read -e -p "(默认: ${ran_prot}):" shadowsocksport
     [ -z "${shadowsocksport}" ] && shadowsocksport=${ran_prot}
     expr ${shadowsocksport} + 1 &>/dev/null
     if [ $? -eq 0 ]; then
@@ -356,7 +356,7 @@ install_prepare_port() {
 install_prepare_password(){
     gen_random_str
     echo -e "\n请输入Shadowsocks-libev密码"
-    read -p "(默认: ${ran_str}):" shadowsockspwd
+    read -e -p "(默认: ${ran_str}):" shadowsockspwd
     [ -z "${shadowsockspwd}" ] && shadowsockspwd=${ran_str}
     echo
     echo -e "${Red_font_prefix}  password = ${shadowsockspwd}${Font_color_suffix}"
@@ -377,7 +377,7 @@ install_prepare_cipher(){
         fi
     done
     echo
-    read -p "(默认: ${SHADOWSOCKS_CIPHERS[14]}):" pick
+    read -e -p "(默认: ${SHADOWSOCKS_CIPHERS[14]}):" pick
     [ -z "$pick" ] && pick=15
     expr ${pick} + 1 &>/dev/null
     if [ $? -ne 0 ]; then
@@ -452,7 +452,7 @@ install_prepare_libev_v2ray(){
             echo -e "${Green_font_prefix}  ${i}.${Font_color_suffix} ${hint}"
         done
         echo
-        read -p "(默认: ${V2RAY_PLUGIN_TRANSPORT_MODE[0]}):" libev_v2ray
+        read -e -p "(默认: ${V2RAY_PLUGIN_TRANSPORT_MODE[0]}):" libev_v2ray
         [ -z "$libev_v2ray" ] && libev_v2ray=1
         expr ${libev_v2ray} + 1 &>/dev/null
         if [ $? -ne 0 ]; then
@@ -486,7 +486,7 @@ install_prepare_libev_v2ray(){
                 echo -e "${Tip} server_port已被重置为：port = ${shadowsocksport}"
                 echo 
                 echo
-                read -p "请输入你的域名：" domain
+                read -e -p "请输入你的域名：" domain
                 echo
                 if is_domain ${domain}; then
                     echo
@@ -498,30 +498,73 @@ install_prepare_libev_v2ray(){
                     echo
                     continue
                 fi
-                read -p "请输入你的 TLS certificate 文件路径：" cerpath
-                if [[ -n "${cerpath}" && -f "${cerpath}" ]]; then
-                    echo
-                    echo -e "${Red_font_prefix}  cert = ${cerpath}${Font_color_suffix}"
-                    echo
-                else
-                    echo
-                    echo -e "${Error} 请输入正确合法的 TLS certificate 文件路径"
-                    echo
-                    continue
-                fi
                 
                 echo
-                read -p "请输入你的 TLS key 文件路径：" keypath
+                read -e -p "是否自动生成证书相关文件 ？[Y/n] :" yn
                 echo
-                if [[ -n "${cerpath}" && -f "${cerpath}" ]]; then
+                [[ -z "${yn}" ]] && yn="y"
+                if [[ $yn == [Yy] ]]; then
+                    echo -e "正在自动生成..."
+                    if [ ! "$(command -v socat)" ]; then
+                        echo -e "${Info} 开始安装socat 软件包."
+                        if check_sys packageManager yum; then
+                            yum install -y socat > /dev/null 2>&1 || echo -e "${Error} 安装socat失败." && exit 1
+                        elif check_sys packageManager apt; then
+                            apt-get -y update > /dev/null 2>&1
+                            apt-get -y install socat > /dev/null 2>&1 || echo -e "${Error} 安装socat失败." && exit 1
+                        fi
+                        echo -e "${Info} socat 安装完成."
+                    fi
                     echo
-                    echo -e "${Red_font_prefix}  cert = ${keypath}${Font_color_suffix}"
+                    echo -e "${Info} 开始安装 acme.sh "
                     echo
+                    curl  https://get.acme.sh | sh
+                    echo
+                    echo -e "${Info} acme.sh 安装完成. "
+                    echo
+                    echo -e "${Info} 开始生成域名 ${domain} 相关的证书 "
+                    echo
+                    ~/.acme.sh/acme.sh --issue -d ${domain}   --standalone
+                    echo
+                    cerpath="/root/.acme.sh/${domain}/fullchain.cer"
+                    keypath="${Tip} key = /root/.acme.sh/${domain}/${domain}.key"
+                    echo -e "${Info} ${domain} 证书生成完成. "
+                    echo 
+                    echo -e "${Tip} cert = /root/.acme.sh/${domain}/fullchain.cer"
+                    echo
+                    echo -e "${Tip} key = /root/.acme.sh/${domain}/${domain}.key"
+                    echo
+                    
                 else
                     echo
-                    echo -e "${Error} 请输入正确合法的 TLS key 文件路径"
+                    echo -e "接下来需要手动输入..."
                     echo
-                    continue
+                    read -e -p "请输入你的 TLS certificate 文件路径：" cerpath
+                    echo
+                    if [[ -n "${cerpath}" && -f "${cerpath}" ]]; then
+                        echo
+                        echo -e "${Red_font_prefix}  cert = ${cerpath}${Font_color_suffix}"
+                        echo
+                    else
+                        echo
+                        echo -e "${Error} 请输入正确合法的 TLS certificate 文件路径"
+                        echo
+                        continue
+                    fi
+                    
+                    echo
+                    read -e -p "请输入你的 TLS key 文件路径：" keypath
+                    echo
+                    if [[ -n "${cerpath}" && -f "${cerpath}" ]]; then
+                        echo
+                        echo -e "${Red_font_prefix}  key = ${keypath}${Font_color_suffix}"
+                        echo
+                    else
+                        echo
+                        echo -e "${Error} 请输入正确合法的 TLS key 文件路径"
+                        echo
+                        continue
+                    fi
                 fi
             fi
             break
@@ -541,7 +584,7 @@ install_prepare_libev_obfs(){
             echo -e "${Green_font_prefix}  ${i}.${Font_color_suffix} ${hint}"
         done
         echo
-        read -p "(默认: ${OBFUSCATION_WRAPPER[0]}):" libev_obfs
+        read -e -p "(默认: ${OBFUSCATION_WRAPPER[0]}):" libev_obfs
         [ -z "$libev_obfs" ] && libev_obfs=1
         expr ${libev_obfs} + 1 &>/dev/null
         if [ $? -ne 0 ]; then
@@ -575,7 +618,7 @@ install_prepare_libev_kcptun(){
     while true
     do
     echo -e "请输入 Kcptun 服务端运行端口 [1-65535]\n${Tip} 这个端口，就是 Kcptun 客户端要连接的端口."
-    read -p "(默认: 29900):" listen_port
+    read -e -p "(默认: 29900):" listen_port
     [ -z "${listen_port}" ] && listen_port=29900
     expr ${listen_port} + 1 &>/dev/null
     if [ $? -eq 0 ]; then
@@ -596,7 +639,7 @@ install_prepare_libev_kcptun(){
     while true
     do
     echo -e "请输入需要加速的地址\n${Tip} 可以输入IPv4 地址或者 IPv6 地址."
-    read -p "(默认: 127.0.0.1):" target_addr
+    read -e -p "(默认: 127.0.0.1):" target_addr
     [ -z "${target_addr}" ] && target_addr=127.0.0.1
     if is_ipv4_or_ipv6 ${target_addr}; then
         echo
@@ -615,7 +658,7 @@ install_prepare_libev_kcptun(){
     while true
     do
     echo -e "请输入需要加速的端口 [1-65535]\n${Tip} 这里用来加速SS，那就输入前面填写过的SS的端口: ${Red_font_prefix}${shadowsocksport}${Font_color_suffix}"
-    read -p "(默认: ${shadowsocksport}):" target_port
+    read -e -p "(默认: ${shadowsocksport}):" target_port
     [ -z "${target_port}" ] && target_port=${shadowsocksport}
     expr ${target_port} + 1 &>/dev/null
     if [ $? -eq 0 ]; then
@@ -635,7 +678,7 @@ install_prepare_libev_kcptun(){
     # 设置 Kcptun 密码 key
     gen_random_str
     echo -e "请设置 Kcptun 密码(key)\n${Tip} 该参数必须两端一致，另外这里的密码是kcptun的密码，与Shadowsocks半毛钱关系都没有，别弄混淆了."
-    read -p "(默认: ${ran_str}):" key
+    read -e -p "(默认: ${ran_str}):" key
     [ -z "${key}" ] && key=${ran_str}
     echo
     echo -e "${Red_font_prefix}  key = ${key}${Font_color_suffix}"
@@ -655,7 +698,7 @@ install_prepare_libev_kcptun(){
         fi
     done
     echo
-    read -p "(默认: ${KCPTUN_CRYPT[0]}):" crypt
+    read -e -p "(默认: ${KCPTUN_CRYPT[0]}):" crypt
     [ -z "$crypt" ] && crypt=1
     expr ${crypt} + 1 &>/dev/null
     if [ $? -ne 0 ]; then
@@ -692,7 +735,7 @@ install_prepare_libev_kcptun(){
         fi
     done
     echo
-    read -p "(默认: ${KCPTUN_MODE[1]}):" mode
+    read -e -p "(默认: ${KCPTUN_MODE[1]}):" mode
     [ -z "$mode" ] && mode=2
     expr ${mode} + 1 &>/dev/null
     if [ $? -ne 0 ]; then
@@ -719,7 +762,7 @@ install_prepare_libev_kcptun(){
     while true
     do
     echo -e "请设置 UDP 数据包的 MTU (最大传输单元)值"
-    read -p "(默认: 1350):" MTU
+    read -e -p "(默认: 1350):" MTU
     [ -z "${MTU}" ] && MTU=1350
     expr ${MTU} + 1 &>/dev/null
     if [ $? -eq 0 ]; then
@@ -740,7 +783,7 @@ install_prepare_libev_kcptun(){
     while true
     do
     echo -e "请设置发送窗口大小(sndwnd)\n${Tip} 发送窗口过大会浪费过多流量"
-    read -p "(默认: 1024):" sndwnd
+    read -e -p "(默认: 1024):" sndwnd
     [ -z "${sndwnd}" ] && sndwnd=1024
     expr ${sndwnd} + 1 &>/dev/null
     if [ $? -eq 0 ]; then
@@ -761,7 +804,7 @@ install_prepare_libev_kcptun(){
     while true
     do
     echo -e "请设置接收窗口大小(rcvwnd)"
-    read -p "(默认: 1024):" rcvwnd
+    read -e -p "(默认: 1024):" rcvwnd
     [ -z "${rcvwnd}" ] && rcvwnd=1024
     expr ${rcvwnd} + 1 &>/dev/null
     if [ $? -eq 0 ]; then
@@ -782,7 +825,7 @@ install_prepare_libev_kcptun(){
     while true
     do
     echo -e "请设置前向纠错(datashard) \n${Tip} 该参数必须两端一致"
-    read -p "(默认: 10):" datashard
+    read -e -p "(默认: 10):" datashard
     [ -z "${datashard}" ] && datashard=10
     expr ${datashard} + 1 &>/dev/null
     if [ $? -eq 0 ]; then
@@ -803,7 +846,7 @@ install_prepare_libev_kcptun(){
     while true
     do
     echo -e "请设置前向纠错(parityshard) \n${Tip} 该参数必须两端一致"
-    read -p "(默认: 3):" parityshard
+    read -e -p "(默认: 3):" parityshard
     [ -z "${parityshard}" ] && parityshard=3
     expr ${parityshard} + 1 &>/dev/null
     if [ $? -eq 0 ]; then
@@ -824,7 +867,7 @@ install_prepare_libev_kcptun(){
     while true
     do
     echo -e "设置差分服务代码点(DSCP)"
-    read -p "(默认: 46):" DSCP
+    read -e -p "(默认: 46):" DSCP
     [ -z "${DSCP}" ] && DSCP=46
     expr ${DSCP} + 1 &>/dev/null
     if [ $? -eq 0 ]; then
@@ -1447,7 +1490,7 @@ install_shadowsocks(){
 
 uninstall_shadowsocks(){
     printf "你确定要卸载Shadowsocks-libev吗? [y/n]\n"
-    read -p "(默认: n):" answer
+    read -e -p "(默认: n):" answer
     [ -z ${answer} ] && answer="n"
     if [ "${answer}" == "y" ] || [ "${answer}" == "Y" ]; then
         # check Shadowsocks-libev status

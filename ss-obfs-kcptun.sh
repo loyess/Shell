@@ -23,6 +23,7 @@ HUMAN_CONFIG="/etc/shadowsocks-libev/human-config"
 
 
 # shadowsocklibev-libev config and init
+SHADOWSOCKS_LIBEV_INSTALL_PATH="/usr/local/bin"
 SHADOWSOCKS_LIBEV_INIT="/etc/init.d/shadowsocks-libev"
 SHADOWSOCKS_LIBEV_CONFIG="/etc/shadowsocks-libev/config.json"
 SHADOWSOCKS_LIBEV_CENTOS="https://git.io/fjcLb"
@@ -1187,6 +1188,24 @@ install_shadowsocks_libev(){
     fi
 }
 
+install_v2ray_plugin(){
+    cd ${CUR_DIR}
+    tar zxf ${v2ray_plugin_file}.tar.gz
+    if [ ! -d "${SHADOWSOCKS_LIBEV_INSTALL_PATH}" ]; then
+        mkdir -p ${SHADOWSOCKS_LIBEV_INSTALL_PATH}
+    fi
+    mv v2ray-plugin_linux_amd64 ${SHADOWSOCKS_LIBEV_INSTALL_PATH}/v2ray-plugin
+    if [ $? -eq 0 ]; then
+        echo -e "${Info} v2ray-plugin安装成功."
+    else
+        echo
+        echo -e "${Error} v2ray-plugin安装失败."
+        echo
+        install_cleanup
+        exit 1
+    fi
+}
+
 install_simple_obfs(){
     cd ${CUR_DIR}
     git clone https://github.com/shadowsocks/simple-obfs.git
@@ -1221,6 +1240,35 @@ install_simple_obfs(){
 }
 
 install_completed_libev(){
+    if [ "${plugin_num}" == "1" ]; then
+        clear
+        ldconfig
+        ${SHADOWSOCKS_LIBEV_INIT} start
+        echo > ${HUMAN_CONFIG}
+        echo -e "Congratulations, ${Green_font_prefix}Shadowsocks-libev${Font_color_suffix} server install completed!" >> ${HUMAN_CONFIG}
+        echo -e "服务器地址            : ${red_font_prefix} $(get_ip) ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        echo -e "服务器端口            : ${red_font_prefix} ${shadowsocksport} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        echo -e "      密码            : ${red_font_prefix} ${shadowsockspwd} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        echo -e "      加密            : ${red_font_prefix} ${shadowsockscipher} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        if [ "$(command -v v2ray-plugin)" ]; then
+            echo -e "  插件程序            : ${red_font_prefix} v2ray-plugin ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+            if [[ ${libev_v2ray} == "1" ]]; then
+                :
+            elif [[ ${libev_v2ray} == "2" ]]; then
+                echo -e "  插件选项            : ${red_font_prefix} tls;host=${domain} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+            elif [[ ${libev_v2ray} == "3" ]]; then
+                echo -e "  插件选项            : ${red_font_prefix} mode=quic;host=${domain} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+            fi
+            echo -e "  插件参数            :                                                                     " >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo -e "Shadowsocks-libev配置路径：${SHADOWSOCKS_LIBEV_CONFIG}" >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo -e "${Tip} 插件程序下载：https://github.com/shadowsocks/v2ray-plugin/releases 下载v2ray-plugin-windows-amd64 版本" >> ${HUMAN_CONFIG}
+            echo -e "       请解压将插件重命名为 v2ray-plugin.exe 并移动至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+        fi
     if [ "${plugin_num}" == "2" ]; then
         clear
         ldconfig
@@ -1347,8 +1395,14 @@ install_main(){
         echo "/usr/lib" > /etc/ld.so.conf.d/lib.conf
     fi
     ldconfig
-
-    if [ "${plugin_num}" == "2" ]; then
+    if [ "${plugin_num}" == "1" ]; then
+        install_mbedtls
+        install_shadowsocks_libev
+        install_v2ray_plugin
+        install_completed_libev
+        qr_generate_libev
+        view_config    
+    elif [ "${plugin_num}" == "2" ]; then
         install_mbedtls
         install_shadowsocks_libev
         install_kcptun
@@ -1469,6 +1523,8 @@ install_cleanup(){
     rm -rf ${MBEDTLS_FILE} ${MBEDTLS_FILE}-gpl.tgz
     rm -rf ${shadowsocks_libev_file} ${shadowsocks_libev_file}.tar.gz
     rm -rf client_linux_amd64 server_linux_amd64 ${kcptun_file}.tar.gz 
+    rm -rf v2ray-plugin_linux_amd64 ${v2ray_plugin_file}.tar.gz
+
 }
 
 # install status

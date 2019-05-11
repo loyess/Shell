@@ -471,58 +471,62 @@ install_prepare_libev_v2ray(){
         echo -e "${Red_font_prefix}  over = ${shadowsocklibev_v2ray}${Font_color_suffix}"
         echo  
 
-        if [[ ${libev_v2ray} == "1" ]]; then
-            shadowsocksport=80
-            echo
-            echo -e "${Tip} server_port已被重置为：port = ${shadowsocksport}"
-            echo 
+        while true
+            do
+            if [[ ${libev_v2ray} == "1" ]]; then
+                shadowsocksport=80
+                echo
+                echo -e "${Tip} server_port已被重置为：port = ${shadowsocksport}"
+                echo 
 
-        elif [[ ${libev_v2ray} = "2" || ${libev_v2ray} = "3" ]]; then
-            shadowsocksport=443
-            echo
-            echo -e "${Tip} server_port已被重置为：port = ${shadowsocksport}"
-            echo 
-            echo
-            read -p "请输入你的域名：" domain
-            echo
-            [ -z "${domain}" ]
-            if is_domain ${domain}; then
+            elif [[ ${libev_v2ray} = "2" || ${libev_v2ray} = "3" ]]; then
+                shadowsocksport=443
                 echo
-                echo -e "${Red_font_prefix}  host = ${domain}${Font_color_suffix}"
+                echo -e "${Tip} server_port已被重置为：port = ${shadowsocksport}"
+                echo 
                 echo
-            else
+                read -p "请输入你的域名：" domain
                 echo
-                echo -e "${Error} 请输入正确合法的domain地址."
+                [ -z "${domain}" ]
+                if is_domain ${domain}; then
+                    echo
+                    echo -e "${Red_font_prefix}  host = ${domain}${Font_color_suffix}"
+                    echo
+                else
+                    echo
+                    echo -e "${Error} 请输入正确合法的domain地址."
+                    echo
+                    continue
+                fi
+                read -p "请输入你的 TLS certificate 文件路径：" cerpath
+                if [ -e ${cerpath} ]; then
+                    echo
+                    echo -e "${Red_font_prefix}  cert = ${cerpath}${Font_color_suffix}"
+                    echo
+                else
+                    echo
+                    echo -e "${Error} 请输入正确合法的 TLS certificate 文件路径"
+                    echo
+                    continue
+                fi
+                
                 echo
-                continue
+                read -p "请输入你的 TLS key 文件路径：" keypath
+                echo
+                if [ -e ${keypath} ]; then
+                    echo
+                    echo -e "${Red_font_prefix}  cert = ${keypath}${Font_color_suffix}"
+                    echo
+                else
+                    echo
+                    echo -e "${Error} 请输入正确合法的 TLS key 文件路径"
+                    echo
+                    continue
+                fi
             fi
-            read -p "请输入你的 TLS certificate 文件路径：" cerpath
-            if [ -e ${cerpath} ]; then
-                echo
-                echo -e "${Red_font_prefix}  cert = ${cerpath}${Font_color_suffix}"
-                echo
-            else
-                echo
-                echo -e "${Error} 请输入正确合法的 TLS certificate 文件路径"
-                echo
-                continue
-            fi
-            
-            echo
-            read -p "请输入你的 TLS key 文件路径：" keypath
-            echo
-            if [ -e ${keypath} ]; then
-                echo
-                echo -e "${Red_font_prefix}  cert = ${keypath}${Font_color_suffix}"
-                echo
-            else
-                echo
-                echo -e "${Error} 请输入正确合法的 TLS key 文件路径"
-                echo
-                continue
-            fi
-            
-        fi        
+            break
+            done 
+                
         break
         done
 }

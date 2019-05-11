@@ -1281,7 +1281,7 @@ install_completed_libev(){
         echo -e "      密码            : ${red_font_prefix} ${shadowsockspwd} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "      加密            : ${red_font_prefix} ${shadowsockscipher} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         if [ "$(command -v kcptun-server)" ]; then
-        echo -e "  插件程序            : ${red_font_prefix} client_windows_amd64 ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        echo -e "  插件程序            : ${red_font_prefix} kcptun ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "  插件选项            :                                                             " >> ${HUMAN_CONFIG}
         echo -e "  插件参数            : ${red_font_prefix} -l %SS_LOCAL_HOST%:%SS_LOCAL_PORT% -r %SS_REMOTE_HOST%:%SS_REMOTE_PORT% --crypt ${crypt} --key ${key} --mtu ${MTU} --sndwnd ${sndwnd} --rcvwnd ${rcvwnd} --mode ${mode} --datashard ${datashard} --parityshard ${parityshard} --dscp ${DSCP}${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo  >> ${HUMAN_CONFIG}
@@ -1293,8 +1293,8 @@ install_completed_libev(){
         echo -e "Shadowsocks-libev配置路径：${SHADOWSOCKS_LIBEV_CONFIG}" >> ${HUMAN_CONFIG}
         echo >> ${HUMAN_CONFIG}
         echo >> ${HUMAN_CONFIG}
-        echo -e "${Tip} 插件程序下载：https://github.com/xtaci/kcptun/releases/download/v20181114/kcptun-windows-amd64-20181114.tar.gz" >> ${HUMAN_CONFIG}
-        echo -e "       请将解压后的两个文件中的 client_windows_amd64.exe ，移至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
+        echo -e "${Tip} 插件程序下载：https://github.com/xtaci/kcptun/releases 下载kcptun-windows-amd64 版本" >> ${HUMAN_CONFIG}
+        echo -e "       请解压将带client字样的文件重命名为 kcptun.exe 并移至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
         echo >> ${HUMAN_CONFIG}
         fi 
     elif [ "${plugin_num}" == "3" ]; then
@@ -1316,7 +1316,7 @@ install_completed_libev(){
         echo -e "Shadowsocks-libev配置路径：${SHADOWSOCKS_LIBEV_CONFIG}" >> ${HUMAN_CONFIG}
         echo >> ${HUMAN_CONFIG}
         echo >> ${HUMAN_CONFIG}
-        echo -e "${Tip} 插件程序下载：https://github.com/shadowsocks/simple-obfs/releases/download/v0.0.5/obfs-local.zip" >> ${HUMAN_CONFIG}
+        echo -e "${Tip} 插件程序下载：https://github.com/shadowsocks/simple-obfs/releases 下载obfs-local.zip 版本" >> ${HUMAN_CONFIG}
         echo -e "       请将 obfs-local.exe 和 libwinpthread-1.dll 两个文件解压至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
         echo >> ${HUMAN_CONFIG}
         fi

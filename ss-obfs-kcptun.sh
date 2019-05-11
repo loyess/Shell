@@ -477,7 +477,7 @@ install_prepare_libev_v2ray(){
             echo -e "${Tip} server_port已被重置为：port = ${shadowsocksport}"
             echo 
 
-        elif [[ ${libev_v2ray} == "2" || ${libev_v2ray} == "3"]]; then
+        elif [[ ${libev_v2ray} = "2" || ${libev_v2ray} = "3" ]]; then
             shadowsocksport=443
             echo
             echo -e "${Tip} server_port已被重置为：port = ${shadowsocksport}"

@@ -1014,7 +1014,7 @@ if [[ ${plugin_num} == "1" ]]; then
     "server_port":${shadowsocksport},
     "password":"${shadowsockspwd}",
     "timeout":300,
-    "method":${shadowsockscipher},
+    "method":"${shadowsockscipher}",
     "fast_open":${fast_open},
     "user":"nobody",
     "nameserver":"8.8.8.8",
@@ -1030,7 +1030,7 @@ EOF
     "server_port":${shadowsocksport},
     "password":"${shadowsockspwd}",
     "timeout":300,
-    "method":${shadowsockscipher},
+    "method":"${shadowsockscipher}",
     "fast_open":${fast_open},
     "user":"nobody",
     "nameserver":"8.8.8.8",
@@ -1046,7 +1046,7 @@ EOF
     "server_port":${shadowsocksport},
     "password":"${shadowsockspwd}",
     "timeout":300,
-    "method":${shadowsockscipher},
+    "method":"${shadowsockscipher}",
     "fast_open":${fast_open},
     "user":"nobody",
     "nameserver":"8.8.8.8",
@@ -1241,7 +1241,7 @@ install_simple_obfs(){
 
 install_completed_libev(){
     if [ "${plugin_num}" == "1" ]; then
-        clear
+        clear -x
         ldconfig
         ${SHADOWSOCKS_LIBEV_INIT} start
         echo > ${HUMAN_CONFIG}
@@ -1270,7 +1270,7 @@ install_completed_libev(){
             echo >> ${HUMAN_CONFIG}
         fi
     elif [ "${plugin_num}" == "2" ]; then
-        clear
+        clear -x
         ldconfig
         ${SHADOWSOCKS_LIBEV_INIT} start
         ${KCPTUN_INIT} start
@@ -1298,7 +1298,7 @@ install_completed_libev(){
         echo >> ${HUMAN_CONFIG}
         fi 
     elif [ "${plugin_num}" == "3" ]; then
-        clear
+        clear -x
         ldconfig
         ${SHADOWSOCKS_LIBEV_INIT} start
         echo > ${HUMAN_CONFIG}
@@ -1321,7 +1321,7 @@ install_completed_libev(){
         echo >> ${HUMAN_CONFIG}
         fi
     else
-        clear
+        clear -x
         ldconfig
         ${SHADOWSOCKS_LIBEV_INIT} start
         echo > ${HUMAN_CONFIG}

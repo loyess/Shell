@@ -453,7 +453,41 @@ install_prepare_libev_v2ray(){
         shadowsocklibev_v2ray=${V2RAY_PLUGIN_OPTS[$libev_v2ray-1]}
         echo
         echo -e "${Red_font_prefix}  over = ${shadowsocklibev_v2ray}${Font_color_suffix}"
-        echo   
+        echo  
+
+        if [[ ${libev_v2ray} == "1" ]]; then
+            shadowsocksport=80
+            echo
+            echo -e "${Tip} server_port将被重置为：port = ${shadowsocksport}"
+            echo 
+
+        elif [[ ${libev_v2ray} == "2" ]]; then
+            shadowsocksport=443
+            echo
+            echo -e "${Tip} server_port将被重置为：port = ${shadowsocksport}"
+            echo 
+            echo
+            read -p "请输入你的域名：" domain
+            echo
+            read -p "请输入你的cert路径：" cerpath
+            echo
+            read -p "请输入你的key路径：" keypath
+            echo
+            
+        elif [[ ${libev_v2ray} == "3" ]]; then
+            shadowsocksport=443
+            echo
+            echo -e "${Tip} server_port将被重置为：port = ${shadowsocksport}"
+            echo 
+            echo
+            read -p "请输入你的域名：" domain
+            echo
+            read -p "请输入你的cert路径：" cerpath
+            echo
+            read -p "请输入你的key路径：" keypath
+            echo
+            
+        fi        
         break
         done
 }
@@ -935,11 +969,6 @@ fi
 
 if [[ ${plugin_num} == "1" ]]; then
     if [[ ${libev_v2ray} == "1" ]]; then
-        shadowsocksport=80
-        echo
-        echo -e "${Tip} server_port将被重置为：port = ${shadowsocksport}"
-        echo 
-        
         cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
 { 
     "server":${server_value},
@@ -955,19 +984,7 @@ if [[ ${plugin_num} == "1" ]]; then
     "plugin_opts":"server"
 }
 EOF
-    elif [[ ${libev_v2ray} == "2" ]]; then
-        shadowsocksport=443
-        echo
-        echo -e "${Tip} server_port将被重置为：port = ${shadowsocksport}"
-        echo 
-        echo
-        read -p "请输入你的域名：" domain
-        echo
-        read -p "请输入你的cert路径：" cerpath
-        echo
-        read -p "请输入你的key路径：" keypath
-        echo
-        
+    elif [[ ${libev_v2ray} == "2" ]]; then    
         cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
 { 
     "server":${server_value},
@@ -984,18 +1001,6 @@ EOF
 }
 EOF
     elif [[ ${libev_v2ray} == "3" ]]; then
-        shadowsocksport=443
-        echo
-        echo -e "${Tip} server_port将被重置为：port = ${shadowsocksport}"
-        echo 
-        echo
-        read -p "请输入你的域名：" domain
-        echo
-        read -p "请输入你的cert路径：" cerpath
-        echo
-        read -p "请输入你的key路径：" keypath
-        echo
-        
         cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
 { 
     "server":${server_value},

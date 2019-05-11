@@ -502,9 +502,8 @@ install_prepare_libev_v2ray(){
                 echo
                 read -e -p "是否自动生成证书相关文件 ？[Y/n] :" yn
                 echo
-                [[ -z "${yn}" ]] && yn="y"
+                [[ -z "${yn}" ]] && yn="n"
                 if [[ $yn == [Yy] ]]; then
-                    echo -e "正在自动生成..."
                     if [ ! "$(command -v socat)" ]; then
                         echo -e "${Info} 开始安装socat 软件包."
                         if check_sys packageManager yum; then
@@ -515,12 +514,15 @@ install_prepare_libev_v2ray(){
                         fi
                         echo -e "${Info} socat 安装完成."
                     fi
-                    echo
-                    echo -e "${Info} 开始安装 acme.sh "
-                    echo
-                    curl  https://get.acme.sh | sh
-                    echo
-                    echo -e "${Info} acme.sh 安装完成. "
+                    if [ ! "$(command -v acme.sh)" ]; then
+                        echo
+                        echo -e "${Info} 开始安装 acme.sh "
+                        echo
+                        curl  https://get.acme.sh | sh
+                        echo
+                        echo -e "${Info} acme.sh 安装完成. "
+                        echo
+                    fi
                     echo
                     echo -e "${Info} 开始生成域名 ${domain} 相关的证书 "
                     echo
@@ -1090,7 +1092,7 @@ EOF
     "fast_open":${fast_open},
     "user":"nobody",
     "nameserver":"8.8.8.8",
-    "mode":"tcp_and_udp",
+    "mode":"tcp_only",
     "plugin":"v2ray-plugin",
     "plugin_opts":"server;mode=quic;host=${domain};cert=${cerpath};key=${keypath}"
 }

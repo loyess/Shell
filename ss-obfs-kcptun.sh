@@ -1338,9 +1338,9 @@ install_shadowsocks(){
     [[ -e '/usr/local/bin/ss-server' ]] && echo -e "${Info} Shadowsocks-libev 已经安装..." && exit 1
     disable_selinux
     install_prepare
+    config_shadowsocks
     install_dependencies
     download_files
-    config_shadowsocks
     if check_sys packageManager yum; then
         config_firewall
     fi

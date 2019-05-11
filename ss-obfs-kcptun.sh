@@ -515,7 +515,7 @@ install_prepare_libev_v2ray(){
                         fi
                         echo -e "${Info} socat 安装完成."
                     fi
-                    if [ ! "$(command -v acme.sh)" ]; then
+                    if [ ! -e ~/.acme.sh/acme.sh ]; then
                         echo
                         echo -e "${Info} 开始安装 acme.sh "
                         echo

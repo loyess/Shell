@@ -500,7 +500,8 @@ install_prepare_libev_v2ray(){
                 fi
                 
                 echo
-                read -e -p "是否自动生成证书相关文件 ？[Y/n] :" yn
+                echo -e "是否自动生成证书相关文件? [Y/n]\n" 
+                read -e -p "(默认: n):" yn
                 echo
                 [[ -z "${yn}" ]] && yn="n"
                 if [[ $yn == [Yy] ]]; then
@@ -536,7 +537,7 @@ install_prepare_libev_v2ray(){
                     
                 else
                     echo
-                    echo -e "接下来需要手动输入..."
+                    echo -e "${Tip} 接下来需要手动输入..."
                     echo
                     read -e -p "请输入你的 TLS certificate 文件路径：" cerpath
                     echo

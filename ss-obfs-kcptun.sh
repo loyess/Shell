@@ -498,8 +498,7 @@ install_prepare_libev_v2ray(){
                     continue
                 fi
                 read -p "请输入你的 TLS certificate 文件路径：" cerpath
-                [  ]
-                if [[ -e ${cerpath} && -n ${cerpath}]]; then
+                if [ -n ${cerpath} && -f ${cerpath} ]; then
                     echo
                     echo -e "${Red_font_prefix}  cert = ${cerpath}${Font_color_suffix}"
                     echo
@@ -513,7 +512,7 @@ install_prepare_libev_v2ray(){
                 echo
                 read -p "请输入你的 TLS key 文件路径：" keypath
                 echo
-                if [[ -e ${keypath} && -n ${keypath}]]; then
+                if [ -n ${cerpath} && -f ${cerpath} ]; then
                     echo
                     echo -e "${Red_font_prefix}  cert = ${keypath}${Font_color_suffix}"
                     echo

@@ -31,10 +31,10 @@ SHADOWSOCKS_LIBEV_DEBIAN="https://git.io/fjcLN"
 
 
 # shadowsocklibev-libev dependencies
-LIBSODIUM_FILE="libsodium-1.0.16"
-LIBSODIUM_URL="https://github.com/jedisct1/libsodium/releases/download/1.0.16/libsodium-1.0.16.tar.gz"
-MBEDTLS_FILE="mbedtls-2.14.1"
-MBEDTLS_URL="https://tls.mbed.org/download/mbedtls-2.14.1-gpl.tgz"
+LIBSODIUM_FILE="libsodium-1.0.17"
+LIBSODIUM_URL="https://github.com/jedisct1/libsodium/releases/download/1.0.17/libsodium-1.0.17.tar.gz"
+MBEDTLS_FILE="mbedtls-2.16.0"
+MBEDTLS_URL="https://tls.mbed.org/download/mbedtls-2.16.0-gpl.tgz"
 
 
 

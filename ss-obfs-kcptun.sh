@@ -508,10 +508,18 @@ install_prepare_libev_v2ray(){
                     if [ ! "$(command -v socat)" ]; then
                         echo -e "${Info} 开始安装socat 软件包."
                         if check_sys packageManager yum; then
-                            yum install -y socat > /dev/null 2>&1 || echo -e "${Error} 安装socat失败." && exit 1
+                            yum install -y socat > /dev/null 2>&1
+                            if [ $? -ne 0 ]; then
+                                echo -e "${Error} 安装socat失败."
+                                exit 1
+                            fi
                         elif check_sys packageManager apt; then
                             apt-get -y update > /dev/null 2>&1
-                            apt-get -y install socat > /dev/null 2>&1 || echo -e "${Error} 安装socat失败." && exit 1
+                            apt-get -y install socat > /dev/null 2>&1
+                            if [ $? -ne 0 ]; then
+                                echo -e "${Error} 安装socat失败."
+                                exit 1
+                            fi
                         fi
                         echo -e "${Info} socat 安装完成."
                     fi

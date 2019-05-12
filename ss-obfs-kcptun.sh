@@ -1315,7 +1315,11 @@ install_completed_libev(){
             elif [[ ${libev_v2ray} == "3" ]]; then
                 echo -e "  插件选项            : ${red_font_prefix} mode=quic;host=${domain} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
             fi
-            echo -e "  插件参数            :                                                                     " >> ${HUMAN_CONFIG}
+            if ${fast_open}; then
+                echo -e "  插件参数            : ${red_font_prefix} fast-open=${fast_open} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+            else
+                echo -e "  插件参数            :                                                                     " >> ${HUMAN_CONFIG}
+            fi
             echo >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo -e "Shadowsocks-libev配置路径：${SHADOWSOCKS_LIBEV_CONFIG}" >> ${HUMAN_CONFIG}
@@ -1366,7 +1370,11 @@ install_completed_libev(){
         if [ "$(command -v obfs-server)" ]; then
         echo -e "  插件程序            : ${red_font_prefix} obfs-local ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "  插件选项            : ${red_font_prefix} obfs=${shadowsocklibev_obfs} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        echo -e "  插件参数            : ${red_font_prefix} obfs-host=www.bing.com;fast-open=${fast_open} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        if ${fast_open}; then
+            echo -e "  插件参数            : ${red_font_prefix} obfs-host=www.bing.com;fast-open=${fast_open} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        else
+            echo -e "  插件参数            : ${red_font_prefix} obfs-host=www.bing.com ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        fi
         echo >> ${HUMAN_CONFIG}
         echo >> ${HUMAN_CONFIG}
         echo -e "Shadowsocks-libev配置路径：${SHADOWSOCKS_LIBEV_CONFIG}" >> ${HUMAN_CONFIG}

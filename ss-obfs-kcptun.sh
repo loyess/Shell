@@ -537,6 +537,11 @@ install_prepare_libev_v2ray(){
                     echo
                     ~/.acme.sh/acme.sh --issue -d ${domain}   --standalone
                     echo
+                    if [ $? -ne 0 ]; then
+                        echo -e "${Error} 证书生成失败，请确定是否该域名解析过本机ip地址."
+                        ~/.acme.sh/acme.sh --uninstall && rm -rf ~/.acme.sh
+                        exit 1
+                    fi
                     cerpath="/root/.acme.sh/${domain}/fullchain.cer"
                     keypath="/root/.acme.sh/${domain}/${domain}.key"
                     echo

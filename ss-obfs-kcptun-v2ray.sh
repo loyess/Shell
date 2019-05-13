@@ -476,8 +476,9 @@ install_prepare_libev_v2ray(){
                 echo
                 read -e -p "请输入你的域名[${Red_font_prefix} 必须是已经成功解析过本机ip地址 ${Font_color_suffix}]：" domain
                 echo
+                
                 ping_get_ip="ping ${domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}'"
-                if [[ $? -ne 0 && test ${ping_get_ip} == ${get_ip} ]]; then
+                if [[ $? -eq 0 && test ${ping_get_ip} == ${get_ip} ]]; then
                     echo
                     echo -e "${Red_font_prefix}  host = ${domain}${Font_color_suffix}"
                     echo

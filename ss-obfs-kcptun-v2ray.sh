@@ -477,8 +477,9 @@ install_prepare_libev_v2ray(){
                 read -e -p "请输入你的域名[${Red_font_prefix} 必须是已经成功解析过本机ip地址 ${Font_color_suffix}]：" domain
                 echo
                 
-                ping_get_ip="ping ${domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}'"
-                if [[ $? -eq 0 && test ${ping_get_ip} == ${get_ip} ]]; then
+                # Is the test domain correct.
+                ping ${domain} > /dev/null 2>&1
+                if [[ $? -eq 0 && test "$(ping ${domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}' | head -n 1)" = "$(get_ip)" ]]; then
                     echo
                     echo -e "${Red_font_prefix}  host = ${domain}${Font_color_suffix}"
                     echo
@@ -1293,7 +1294,7 @@ install_completed_libev(){
         ${SHADOWSOCKS_LIBEV_INIT} start
         echo > ${HUMAN_CONFIG}
         echo -e "Congratulations, ${Green_font_prefix}Shadowsocks-libev${Font_color_suffix} server install completed!" >> ${HUMAN_CONFIG}
-        echo -e "服务器地址            : ${red_font_prefix} ${get_ip} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        echo -e "服务器地址            : ${red_font_prefix} $(get_ip) ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "服务器端口            : ${red_font_prefix} ${shadowsocksport} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "      密码            : ${red_font_prefix} ${shadowsockspwd} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "      加密            : ${red_font_prefix} ${shadowsockscipher} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
@@ -1327,7 +1328,7 @@ install_completed_libev(){
         ${KCPTUN_INIT} start
         echo > ${HUMAN_CONFIG}
         echo -e "Congratulations, ${Green_font_prefix}Shadowsocks-libev${Font_color_suffix} server install completed!" >> ${HUMAN_CONFIG}
-        echo -e "服务器地址            : ${red_font_prefix} ${get_ip} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        echo -e "服务器地址            : ${red_font_prefix} $(get_ip) ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "服务器端口            : ${red_font_prefix} ${listen_port} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "      密码            : ${red_font_prefix} ${shadowsockspwd} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "      加密            : ${red_font_prefix} ${shadowsockscipher} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
@@ -1354,7 +1355,7 @@ install_completed_libev(){
         ${SHADOWSOCKS_LIBEV_INIT} start
         echo > ${HUMAN_CONFIG}
         echo -e "Congratulations, ${Green_font_prefix}Shadowsocks-libev${Font_color_suffix} server install completed!" >> ${HUMAN_CONFIG}
-        echo -e "服务器地址            : ${red_font_prefix} ${get_ip} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        echo -e "服务器地址            : ${red_font_prefix} $(get_ip) ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "服务器端口            : ${red_font_prefix} ${shadowsocksport} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "      密码            : ${red_font_prefix} ${shadowsockspwd} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "      加密            : ${red_font_prefix} ${shadowsockscipher} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
@@ -1381,7 +1382,7 @@ install_completed_libev(){
         ${SHADOWSOCKS_LIBEV_INIT} start
         echo > ${HUMAN_CONFIG}
         echo -e "Congratulations, ${Green_font_prefix}Shadowsocks-libev${Font_color_suffix} server install completed!" >> ${HUMAN_CONFIG}
-        echo -e "服务器地址            : ${red_font_prefix} ${get_ip} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        echo -e "服务器地址            : ${red_font_prefix} $(get_ip) ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "服务器端口            : ${red_font_prefix} ${shadowsocksport} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "      密码            : ${red_font_prefix} ${shadowsockspwd} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "      加密            : ${red_font_prefix} ${shadowsockscipher} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
@@ -1396,10 +1397,10 @@ install_completed_libev(){
 qr_generate_libev(){
     if [ "$(command -v qrencode)" ]; then
         if [[ ${plugin_num} == "2" ]]; then
-            local tmp=$(echo -n "${shadowsockscipher}:${shadowsockspwd}@${get_ip}:${listen_port}" | base64 -w0)
+            local tmp=$(echo -n "${shadowsockscipher}:${shadowsockspwd}@$(get_ip):${listen_port}" | base64 -w0)
             local qr_code="ss://${tmp}"
         else
-            local tmp=$(echo -n "${shadowsockscipher}:${shadowsockspwd}@${get_ip}:${shadowsocksport}" | base64 -w0)
+            local tmp=$(echo -n "${shadowsockscipher}:${shadowsockspwd}@$(get_ip):${shadowsocksport}" | base64 -w0)
             local qr_code="ss://${tmp}"
         fi
         echo

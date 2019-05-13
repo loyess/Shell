@@ -484,23 +484,13 @@ install_prepare_libev_v2ray(){
                 
                 # Is the test domain correct.
                 ping ${domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}' | head -n 1 > /dev/null 2>&1
-                if [[ $? -eq 0 ]]; then
-                    if test "$(ping ${domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}' | head -n 1)" = $(get_ip); then
-                        echo
-                        echo -e "${Red_font_prefix}  host = ${domain}${Font_color_suffix}"
-                        echo
-                    else
-                        echo
-                        echo -e "${Error} 请前往域名服务商解析本机ip地址至该域名，并重新尝试."
-                        echo
-                        
-                        let "flag++"
-                        
-                        continue
-                    fi
+                if [[ $? -eq 0 ]] && test "$(ping ${domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}' | head -n 1)" = $(get_ip); then
+                    echo
+                    echo -e "${Red_font_prefix}  host = ${domain}${Font_color_suffix}"
+                    echo
                 else
                     echo
-                    echo -e "${Error} 请前往域名服务商解析本机ip地址至该域名，并重新尝试."
+                    echo -e "${Error} 请确认该域名是否有解析过本机ip地址，如果没有，前往域名服务商解析本机ip地址至该域名，并重新尝试."
                     echo
                     
                     let "flag++"
@@ -545,15 +535,10 @@ install_prepare_libev_v2ray(){
                     echo -e "${Info} 开始生成域名 ${domain} 相关的证书 "
                     echo
                     ~/.acme.sh/acme.sh --issue -d ${domain}   --standalone
-                    if [ $? -ne 0 ]; then
-                        echo
-                        echo -e "${Error} 证书生成失败，请确定是否该域名解析过本机ip地址."
-                        echo
-                        ~/.acme.sh/acme.sh --uninstall > /dev/null 2>&1 && rm -rf ~/.acme.sh
-                        exit 1
-                    fi
+                    
                     cerpath="/root/.acme.sh/${domain}/fullchain.cer"
                     keypath="/root/.acme.sh/${domain}/${domain}.key"
+                    
                     echo
                     echo -e "${Info} ${domain} 证书生成完成. "
                     echo
@@ -1550,6 +1535,9 @@ uninstall_shadowsocks(){
         
         # kill v2ray-plugin 
         ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+        
+        # uninstall acme.sh
+        ~/.acme.sh/acme.sh --uninstall > /dev/null 2>&1 && rm -rf ~/.acme.sh
         
         rm -fr $(dirname ${SHADOWSOCKS_LIBEV_CONFIG})
         rm -f /usr/local/bin/ss-local

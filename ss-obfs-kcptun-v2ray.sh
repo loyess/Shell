@@ -459,7 +459,7 @@ install_prepare_libev_v2ray(){
         echo
         echo -e "${Red_font_prefix}  over = ${shadowsocklibev_v2ray}${Font_color_suffix}"
         echo  
-
+        local flag=1
         while true
             do
             if [[ ${libev_v2ray} == "1" ]]; then
@@ -467,26 +467,44 @@ install_prepare_libev_v2ray(){
                 echo
                 echo -e "${Tip} server_port已被重置为：port = ${shadowsocksport}"
                 echo 
-
+                
             elif [[ ${libev_v2ray} = "2" || ${libev_v2ray} = "3" ]]; then
                 shadowsocksport=443
+                if [[ ${flag} == 1 ]]; then
+                    echo
+                    echo -e "${Tip} server_port已被重置为：port = ${shadowsocksport}"
+                    echo 
+                else
+                    :
+                fi
+                
                 echo
-                echo -e "${Tip} server_port已被重置为：port = ${shadowsocksport}"
-                echo 
-                echo
-                read -e -p "请输入你的域名[${Red_font_prefix} 必须是已经成功解析过本机ip地址 ${Font_color_suffix}]：" domain
+                read -e -p "请输入你的域名 [ 注意：必须是已成功解析过本机ip地址的域名 ]：" domain
                 echo
                 
                 # Is the test domain correct.
-                ping ${domain} > /dev/null 2>&1
-                if [[ $? -eq 0 && test "$(ping ${domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}' | head -n 1)" = "$(get_ip)" ]]; then
-                    echo
-                    echo -e "${Red_font_prefix}  host = ${domain}${Font_color_suffix}"
-                    echo
+                ping ${domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}' | head -n 1 > /dev/null 2>&1
+                if [[ $? -eq 0 ]]; then
+                    if test "$(ping ${domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}' | head -n 1)" = $(get_ip); then
+                        echo
+                        echo -e "${Red_font_prefix}  host = ${domain}${Font_color_suffix}"
+                        echo
+                    else
+                        echo
+                        echo -e "${Error} 请前往域名服务商解析本机ip地址至该域名，并重新尝试."
+                        echo
+                        
+                        let "flag++"
+                        
+                        continue
+                    fi
                 else
                     echo
                     echo -e "${Error} 请前往域名服务商解析本机ip地址至该域名，并重新尝试."
                     echo
+                    
+                    let "flag++"
+                    
                     continue
                 fi
                 

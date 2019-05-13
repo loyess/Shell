@@ -113,9 +113,6 @@ tls
 )
 
 
-# domain Re
-DOMAIN_RE="^(?=^.{3,255}$)[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+$"
-
 
 # ipv4 and ipv6 Re
 IPV4_RE="^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$"
@@ -150,15 +147,6 @@ disable_selinux(){
     fi
 }
 
-is_domain(){
-    domain=$1
-    
-    if [ -n "$(echo $domain | grep -P $DOMAIN_RE)" ]; then
-        return 0
-    else
-        return 1
-    fi
-}
 
 is_ipv4_or_ipv6(){
     ip=$1
@@ -486,15 +474,16 @@ install_prepare_libev_v2ray(){
                 echo -e "${Tip} server_port已被重置为：port = ${shadowsocksport}"
                 echo 
                 echo
-                read -e -p "请输入你的域名：" domain
+                read -e -p "请输入你的域名[${Red_font_prefix} 必须是已经成功解析过本机ip地址 ${Font_color_suffix}]：" domain
                 echo
-                if is_domain ${domain}; then
+                ping_get_ip="ping ${domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}'"
+                if [[ $? -ne 0 && test ${ping_get_ip} == ${get_ip} ]]; then
                     echo
                     echo -e "${Red_font_prefix}  host = ${domain}${Font_color_suffix}"
                     echo
                 else
                     echo
-                    echo -e "${Error} 请输入正确合法的domain地址."
+                    echo -e "${Error} 请前往域名服务商解析本机ip地址至该域名，并重新尝试."
                     echo
                     continue
                 fi
@@ -537,8 +526,10 @@ install_prepare_libev_v2ray(){
                     echo
                     ~/.acme.sh/acme.sh --issue -d ${domain}   --standalone
                     if [ $? -ne 0 ]; then
+                        echo
                         echo -e "${Error} 证书生成失败，请确定是否该域名解析过本机ip地址."
-                        ~/.acme.sh/acme.sh --uninstall && rm -rf ~/.acme.sh
+                        echo
+                        ~/.acme.sh/acme.sh --uninstall > /dev/null 2>&1 && rm -rf ~/.acme.sh
                         exit 1
                     fi
                     cerpath="/root/.acme.sh/${domain}/fullchain.cer"
@@ -1301,7 +1292,7 @@ install_completed_libev(){
         ${SHADOWSOCKS_LIBEV_INIT} start
         echo > ${HUMAN_CONFIG}
         echo -e "Congratulations, ${Green_font_prefix}Shadowsocks-libev${Font_color_suffix} server install completed!" >> ${HUMAN_CONFIG}
-        echo -e "服务器地址            : ${red_font_prefix} $(get_ip) ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        echo -e "服务器地址            : ${red_font_prefix} ${get_ip} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "服务器端口            : ${red_font_prefix} ${shadowsocksport} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "      密码            : ${red_font_prefix} ${shadowsockspwd} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "      加密            : ${red_font_prefix} ${shadowsockscipher} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
@@ -1335,7 +1326,7 @@ install_completed_libev(){
         ${KCPTUN_INIT} start
         echo > ${HUMAN_CONFIG}
         echo -e "Congratulations, ${Green_font_prefix}Shadowsocks-libev${Font_color_suffix} server install completed!" >> ${HUMAN_CONFIG}
-        echo -e "服务器地址            : ${red_font_prefix} $(get_ip) ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        echo -e "服务器地址            : ${red_font_prefix} ${get_ip} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "服务器端口            : ${red_font_prefix} ${listen_port} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "      密码            : ${red_font_prefix} ${shadowsockspwd} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "      加密            : ${red_font_prefix} ${shadowsockscipher} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
@@ -1362,7 +1353,7 @@ install_completed_libev(){
         ${SHADOWSOCKS_LIBEV_INIT} start
         echo > ${HUMAN_CONFIG}
         echo -e "Congratulations, ${Green_font_prefix}Shadowsocks-libev${Font_color_suffix} server install completed!" >> ${HUMAN_CONFIG}
-        echo -e "服务器地址            : ${red_font_prefix} $(get_ip) ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        echo -e "服务器地址            : ${red_font_prefix} ${get_ip} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "服务器端口            : ${red_font_prefix} ${shadowsocksport} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "      密码            : ${red_font_prefix} ${shadowsockspwd} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "      加密            : ${red_font_prefix} ${shadowsockscipher} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
@@ -1389,7 +1380,7 @@ install_completed_libev(){
         ${SHADOWSOCKS_LIBEV_INIT} start
         echo > ${HUMAN_CONFIG}
         echo -e "Congratulations, ${Green_font_prefix}Shadowsocks-libev${Font_color_suffix} server install completed!" >> ${HUMAN_CONFIG}
-        echo -e "服务器地址            : ${red_font_prefix} $(get_ip) ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        echo -e "服务器地址            : ${red_font_prefix} ${get_ip} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "服务器端口            : ${red_font_prefix} ${shadowsocksport} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "      密码            : ${red_font_prefix} ${shadowsockspwd} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -e "      加密            : ${red_font_prefix} ${shadowsockscipher} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
@@ -1404,10 +1395,10 @@ install_completed_libev(){
 qr_generate_libev(){
     if [ "$(command -v qrencode)" ]; then
         if [[ ${plugin_num} == "2" ]]; then
-            local tmp=$(echo -n "${shadowsockscipher}:${shadowsockspwd}@$(get_ip):${listen_port}" | base64 -w0)
+            local tmp=$(echo -n "${shadowsockscipher}:${shadowsockspwd}@${get_ip}:${listen_port}" | base64 -w0)
             local qr_code="ss://${tmp}"
         else
-            local tmp=$(echo -n "${shadowsockscipher}:${shadowsockspwd}@$(get_ip):${shadowsocksport}" | base64 -w0)
+            local tmp=$(echo -n "${shadowsockscipher}:${shadowsockspwd}@${get_ip}:${shadowsocksport}" | base64 -w0)
             local qr_code="ss://${tmp}"
         fi
         echo

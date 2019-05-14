@@ -57,7 +57,7 @@ Shadowsocks-libev一键管理脚本 [v1.0.0]
 
 &nbsp;
 
-2. ss + v2ray-plugin 安装大概，大多参数默认就好， 另外，证书会经由 acme.sh 自动生成。
+2. ### ss + v2ray-plugin 安装大概，大多参数默认就好， 另外，证书会经由 acme.sh 自动生成。
 
 ~~~shell
 
@@ -110,7 +110,7 @@ Shadowsocks-libev一键管理脚本 [v1.0.0]
 
 &nbsp;
 
-3. ss + kcptun 安装大概，一路回车就好。
+3. ### ss + kcptun 安装大概，一路回车就好。
 
 ```shell
  

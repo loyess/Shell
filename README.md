@@ -7,7 +7,7 @@ chmod +x ss-obfs-kcptun-v2ray.sh
 ./ss-obfs-kcptun-v2ray.sh
 ```
 
-
+&nbsp;
 
 1. ### ss 安装部分，密码、端口随机获取，也可自己指定，端口尽量避开常用端口，以免被占用。
 
@@ -55,7 +55,7 @@ Shadowsocks-libev一键管理脚本 [v1.0.0]
   cipher = aes-256-gcm
 ```
 
-
+&nbsp;
 
 2. ss + v2ray-plugin 安装大概，大多参数默认就好， 另外，证书会经由 acme.sh 自动生成。
 
@@ -108,7 +108,7 @@ Shadowsocks-libev一键管理脚本 [v1.0.0]
 按任意键开始…或按Ctrl+C取消
 ~~~
 
-
+&nbsp;
 
 3. ss + kcptun 安装大概，一路回车就好。
 
@@ -199,7 +199,7 @@ Shadowsocks-libev一键管理脚本 [v1.0.0]
 按任意键开始…或按Ctrl+C取消
 ```
 
-
+&nbsp;
 
 4. ### ss + simple-obfs 安装大概，参数默认，一路回车就好。
 
@@ -221,7 +221,7 @@ Shadowsocks-libev一键管理脚本 [v1.0.0]
 按任意键开始…或按Ctrl+C取消
 ```
 
-
+&nbsp;
 
 5. ### 安装完毕，终端配置展示如下，以 ss + kcptun 为例：
 
@@ -255,9 +255,13 @@ Installed successfully.
 Enjoy it!
 ~~~
 
+&nbsp;
+
 本脚本改自于各路大神，水平马马虎虎，方便自用。
 
 另外，生成的 ss:// 链接，只能导入部分配置，剩下少部分需要手动复制粘贴。
+
+&nbsp;
 
 **相关下载：**
 

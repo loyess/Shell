@@ -223,7 +223,7 @@ Shadowsocks-libev一键管理脚本 [v1.0.0]
 
 
 
-##### 安装完毕，终端配置展示如下，以 ss + kcptun 为例：
+### 安装完毕，终端配置展示如下，以 ss + kcptun 为例：
 
 ~~~shell
 Congratulations, Shadowsocks-libev server install completed!

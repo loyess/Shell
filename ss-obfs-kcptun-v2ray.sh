@@ -1201,9 +1201,11 @@ install_mbedtls(){
         echo -e "${Info} 下载${MBEDTLS_FILE}..."
         download "${MBEDTLS_FILE}-gpl.tgz" "${MBEDTLS_URL}"
         echo -e "${Info} 解压${MBEDTLS_FILE}..."
-        tar xf ${MBEDTLS_FILE}-gpl.tgz && cd ${MBEDTLS_FILE}
+        tar xf ${MBEDTLS_FILE}-gpl.tgz
+        cd ${MBEDTLS_FILE}
         echo -e "${Info} 编译安装${MBEDTLS_FILE}..."
-        make SHARED=1 CFLAGS=-fPIC && make DESTDIR=/usr install
+        make SHARED=1 CFLAGS=-fPIC
+        make DESTDIR=/usr install
         if [ $? -ne 0 ]; then
             echo -e "${Error} ${MBEDTLS_FILE} 安装失败..."
             install_cleanup

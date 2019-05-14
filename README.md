@@ -7,52 +7,59 @@ chmod +x ss-obfs-kcptun-v2ray.sh
 ./ss-obfs-kcptun-v2ray.sh
 ```
 
+### 
 
+1. ### ss 安装部分，密码、端口随机获取，也可自己指定，端口尽量避开常用端口，以免被占用。
 
-1. ### ss + v2ray-plugin 安装大概，大多参数默认就好， 另外，证书会经由 acme.sh 自动生成。
+   ```shell
+   Shadowsocks-libev一键管理脚本 [v1.0.0]
+   
+   1. BBR
+   2. Install
+   3. Uninstall
+   
+    当前状态: 未安装
+   
+   请输入Shadowsocks-libev端口 [1-65535]
+   
+     port = 16893
+   
+   [注意] 如果选择v2ray-plugin 此参数将会被重置
+   
+   请输入Shadowsocks-libev密码
+   
+     password = 6I0LRJLE
+   
+   请选择Shadowsocks-libev加密方式
+   
+   1. rc4-md5
+   2. salsa20
+   3. chacha20
+   4. chacha20-ietf
+   5. aes-256-cfb
+   6. aes-192-cfb
+   7. aes-128-cfb
+   8. aes-256-ctr
+   9. aes-192-ctr
+   10. aes-128-ctr
+   11. bf-cfb
+   12. camellia-128-cfb
+   13. camellia-192-cfb
+   14. camellia-256-cfb
+   15. aes-256-gcm
+   16. aes-192-gcm
+   17. aes-128-gcm
+   18. xchacha20-ietf-poly1305
+   19. chacha20-ietf-poly1305
+   
+     cipher = aes-256-gcm
+   ```
+
+   ### 
+
+2. ### ss + v2ray-plugin 安装大概，大多参数默认就好， 另外，证书会经由 acme.sh 自动生成。
 
 ~~~shell
- Shadowsocks-libev一键管理脚本 [v1.0.0]
-
-1. BBR
-2. Install
-3. Uninstall
-
- 当前状态: 未安装
-
-请输入Shadowsocks-libev端口 [1-65535]
-
-  port = 16893
-
-[注意] 如果选择v2ray-plugin 此参数将会被重置
-
-请输入Shadowsocks-libev密码
-
-  password = 6I0LRJLE
-
-请选择Shadowsocks-libev加密方式
-
-1. rc4-md5
-2. salsa20
-3. chacha20
-4. chacha20-ietf
-5. aes-256-cfb
-6. aes-192-cfb
-7. aes-128-cfb
-8. aes-256-ctr
-9. aes-192-ctr
-10. aes-128-ctr
-11. bf-cfb
-12. camellia-128-cfb
-13. camellia-192-cfb
-14. camellia-256-cfb
-15. aes-256-gcm
-16. aes-192-gcm
-17. aes-128-gcm
-18. xchacha20-ietf-poly1305
-19. chacha20-ietf-poly1305
-
-  cipher = aes-256-gcm
 
 请选择要安装的SS-Plugin
 
@@ -106,48 +113,7 @@ chmod +x ss-obfs-kcptun-v2ray.sh
 2. ### ss + kcptun 安装大概，一路回车就好。
 
 ```shell
- Shadowsocks-libev一键管理脚本 [v1.0.0]
-
-1. BBR
-2. Install
-3. Uninstall
-
- 当前状态: 未安装
-
-请输入Shadowsocks-libev端口 [1-65535]
-
-  port = 18426
-
-[注意] 如果选择v2ray-plugin 此参数将会被重置
-
-请输入Shadowsocks-libev密码
-
-  password = k3cbYdXW
-
-请选择Shadowsocks-libev加密方式
-
-1. rc4-md5
-2. salsa20
-3. chacha20
-4. chacha20-ietf
-5. aes-256-cfb
-6. aes-192-cfb
-7. aes-128-cfb
-8. aes-256-ctr
-9. aes-192-ctr
-10. aes-128-ctr
-11. bf-cfb
-12. camellia-128-cfb
-13. camellia-192-cfb
-14. camellia-256-cfb
-15. aes-256-gcm
-16. aes-192-gcm
-17. aes-128-gcm
-18. xchacha20-ietf-poly1305
-19. chacha20-ietf-poly1305
-
-  cipher = aes-256-gcm
-
+ 
 请选择要安装的SS-Plugin
 
 1. v2ray
@@ -236,47 +202,6 @@ chmod +x ss-obfs-kcptun-v2ray.sh
 3. ### ss + simple-obfs 安装大概，参数默认，一路回车就好。
 
 ```shell
-Shadowsocks-libev一键管理脚本 [v1.0.0]
-
-1. BBR
-2. Install
-3. Uninstall
-
- 当前状态: 未安装
-
-请输入Shadowsocks-libev端口 [1-65535]
-
-  port = 17563
-
-[注意] 如果选择v2ray-plugin 此参数将会被重置
-
-请输入Shadowsocks-libev密码
-
-  password = PtGjBD3F
-
-请选择Shadowsocks-libev加密方式
-
-1. rc4-md5
-2. salsa20
-3. chacha20
-4. chacha20-ietf
-5. aes-256-cfb
-6. aes-192-cfb
-7. aes-128-cfb
-8. aes-256-ctr
-9. aes-192-ctr
-10. aes-128-ctr
-11. bf-cfb
-12. camellia-128-cfb
-13. camellia-192-cfb
-14. camellia-256-cfb
-15. aes-256-gcm
-16. aes-192-gcm
-17. aes-128-gcm
-18. xchacha20-ietf-poly1305
-19. chacha20-ietf-poly1305
-
-  cipher = aes-256-gcm
 
 请选择要安装的SS-Plugin
 
@@ -294,9 +219,9 @@ Shadowsocks-libev一键管理脚本 [v1.0.0]
 按任意键开始…或按Ctrl+C取消
 ```
 
-端口随机，密码随机，其它自己选，也可默认。
 
-安装完毕，终端配置展示如下，以 ss + kcptun 为例：
+
+##### 安装完毕，终端配置展示如下，以 ss + kcptun 为例：
 
 ~~~shell
 Congratulations, Shadowsocks-libev server install completed!
@@ -332,3 +257,13 @@ Enjoy it!
 
 另外，生成的 ss:// 链接，自能导入部分配置，剩下少部分需要手动复制粘贴。
 
+**相关下载：**
+
+- [shadowsocks-windows](<https://github.com/shadowsocks/shadowsocks-android/releases>) 
+- [shadowsocks-android](<https://github.com/shadowsocks/shadowsocks-android/releases>)
+- [v2ray-plugin](<https://github.com/shadowsocks/v2ray-plugin/releases>)
+- [v2ray-plugin-android](<https://github.com/shadowsocks/v2ray-plugin-android/releases>)
+- [kcptun](https://github.com/xtaci/kcptun/releases)
+- [kcptun-android](https://github.com/shadowsocks/kcptun-android/releases)
+- [simple-obfs(Deprecated)](https://github.com/shadowsocks/simple-obfs/releases)
+- [simple-obfs-android](https://github.com/shadowsocks/simple-obfs-android/releases)

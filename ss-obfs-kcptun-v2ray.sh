@@ -330,7 +330,7 @@ install_prepare_port() {
             echo
             echo -e "${Red_font_prefix}  port = ${shadowsocksport}${Font_color_suffix}"
             echo
-            echo -e "${Tip} 如果选择v2ray-plugin 此参数将会被重置"
+            echo -e "${Tip} 如果选择v2ray-plugin 此参数将会被重置为 80 或 443"
             echo 
             break
         fi

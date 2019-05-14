@@ -24,7 +24,7 @@ Shadowsocks-libev一键管理脚本 [v1.0.0]
 
   port = 16893
 
-[注意] 如果选择v2ray-plugin 此参数将会被重置
+[注意] 如果选择v2ray-plugin 此参数将会被重置为 80 或 443
 
 请输入Shadowsocks-libev密码
 
@@ -258,6 +258,8 @@ Enjoy it!
 &nbsp;
 
 本脚本改自于各路大神，水平马马虎虎，方便自用。
+
+v2ray-plugin 所要用到的域名，可以从 [freenom.com](https://www.freenom.com) 获取免费域名， 申请需要挂代理，代理是哪国ip 就填写哪国的资料，不然会导致无法申请。 
 
 另外，生成的 ss:// 链接，只能导入部分配置，剩下少部分需要手动复制粘贴。
 

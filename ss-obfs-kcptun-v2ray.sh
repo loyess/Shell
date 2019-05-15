@@ -1598,6 +1598,7 @@ uninstall_shadowsocks(){
         rm -f /usr/local/bin/ss-redir
         rm -f /usr/local/bin/ss-nat
         rm -f /usr/local/bin/v2ray-plugin
+        rm -f /usr/local/bin/gq-server
         rm -f /usr/local/bin/obfs-local
         rm -f /usr/local/bin/obfs-server
         rm -f /usr/local/lib/libshadowsocks-libev.a

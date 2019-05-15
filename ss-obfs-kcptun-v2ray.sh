@@ -297,6 +297,8 @@ get_ver(){
     [ -z ${kcptun_ver} ] && echo -e "${Error} 获取 kcptun 最新版本失败." && exit 1
     v2ray_plugin_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/v2ray-plugin/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
     [ -z ${v2ray_plugin_ver} ] && echo -e "${Error} 获取 v2ray-plugin 最新版本失败." && exit 1
+    goquiet_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/cbeuw/GoQuiet/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+    [ -z ${goquiet_ver} ] && echo -e "${Error} 获取 goquiet_ver 最新版本失败." && exit 1
 }
 
 get_char(){
@@ -314,7 +316,8 @@ gen_random_prot(){
 }
 
 gen_random_str(){
-    ran_str=$(head -c 100 /dev/urandom | tr -dc a-z0-9A-Z |head -c 8)
+    ran_str8=$(head -c 100 /dev/urandom | tr -dc a-z0-9A-Z |head -c 8)
+    ran_str16=$(head -c 100 /dev/urandom | tr -dc a-z0-9A-Z |head -c 16)
 }
 
 install_prepare_port() {
@@ -330,7 +333,7 @@ install_prepare_port() {
             echo
             echo -e "${Red_font_prefix}  port = ${shadowsocksport}${Font_color_suffix}"
             echo
-            echo -e "${Tip} 如果选择v2ray-plugin 此参数将会被重置为 80 或 443"
+            echo -e "${Tip} 如果选择v2ray-plugin 和 goquiet (unofficial) 此参数将会被重置为 80 或 443"
             echo 
             break
         fi
@@ -344,8 +347,8 @@ install_prepare_port() {
 install_prepare_password(){
     gen_random_str
     echo -e "\n请输入Shadowsocks-libev密码"
-    read -e -p "(默认: ${ran_str}):" shadowsockspwd
-    [ -z "${shadowsockspwd}" ] && shadowsockspwd=${ran_str}
+    read -e -p "(默认: ${ran_str8}):" shadowsockspwd
+    [ -z "${shadowsockspwd}" ] && shadowsockspwd=${ran_str8}
     echo
     echo -e "${Red_font_prefix}  password = ${shadowsockspwd}${Font_color_suffix}"
     echo
@@ -686,8 +689,8 @@ install_prepare_libev_kcptun(){
     # 设置 Kcptun 密码 key
     gen_random_str
     echo -e "请设置 Kcptun 密码(key)\n${Tip} 该参数必须两端一致，另外这里的密码是kcptun的密码，与Shadowsocks半毛钱关系都没有，别弄混淆了."
-    read -e -p "(默认: ${ran_str}):" key
-    [ -z "${key}" ] && key=${ran_str}
+    read -e -p "(默认: ${ran_str8}):" key
+    [ -z "${key}" ] && key=${ran_str8}
     echo
     echo -e "${Red_font_prefix}  key = ${key}${Font_color_suffix}"
     echo
@@ -893,6 +896,28 @@ install_prepare_libev_kcptun(){
     done 
 }
 
+install_prepare_libev_goquiet(){
+    gen_random_str
+    shadowsocksport=443
+    echo -e "请为GoQuiet输入重定向ip:port [留空以将其设置为bing.com的204.79.197.200：443]"
+    echo
+    read -e -p "(默认: 204.79.197.200:443):" gqwebaddr
+    [ -z "$gqwebaddr" ] && gqwebaddr="204.79.197.200:443"
+    echo
+    echo -e "${Red_font_prefix}  WebServerAddr = ${gqwebaddr}${Font_color_suffix}"
+    echo
+    echo -e "${Tip} server_port已被重置为：port = ${shadowsocksport}"
+    echo 
+    echo
+    echo -e "请为GoQuiet输入密钥 [留空以将其设置为16位随机字符串]"
+    echo
+    read -e -p "(默认: ${ran_str16}):" gqkey
+    [ -z "$gqkey" ] && gqkey=${ran_str16}
+    echo
+    echo -e "${Red_font_prefix}  Key = ${gqkey}${Font_color_suffix}"
+    echo
+}
+
 install_prepare(){
     install_prepare_port
     install_prepare_password
@@ -902,6 +927,7 @@ install_prepare(){
   ${Green_font_prefix}1.${Font_color_suffix} v2ray
   ${Green_font_prefix}2.${Font_color_suffix} kcptun
   ${Green_font_prefix}3.${Font_color_suffix} simple-obfs
+  ${Green_font_prefix}4.${Font_color_suffix} goquiet (unofficial)
   "
     echo && read -e -p "(默认: 不安装)：" plugin_num
     [[ -z "${plugin_num}" ]] && plugin_num="" && echo -e "\n${Tip} 当前未选择任何插件，仅安装Shadowsocks-libev."
@@ -911,6 +937,8 @@ install_prepare(){
         install_prepare_libev_kcptun
 	elif [[ ${plugin_num} == "3" ]]; then
 		install_prepare_libev_obfs
+    elif [[ ${plugin_num} == "4" ]]; then
+        install_prepare_libev_goquiet
     elif [[ ${plugin_num} == "" ]]; then
         :
     else
@@ -985,7 +1013,6 @@ download_files(){
     get_ver
     shadowsocks_libev_file="shadowsocks-libev-${libev_ver}"
     shadowsocks_libev_url="https://github.com/shadowsocks/shadowsocks-libev/releases/download/v${libev_ver}/shadowsocks-libev-${libev_ver}.tar.gz"
-
     download "${shadowsocks_libev_file}.tar.gz" "${shadowsocks_libev_url}"
     if check_sys packageManager yum; then
         download "${SHADOWSOCKS_LIBEV_INIT}" "${SHADOWSOCKS_LIBEV_CENTOS}"
@@ -999,7 +1026,6 @@ download_files(){
         v2ray_plugin_url="https://github.com/shadowsocks/v2ray-plugin/releases/download/v${v2ray_plugin_ver}/v2ray-plugin-linux-amd64-v${v2ray_plugin_ver}.tar.gz"
         download "${v2ray_plugin_file}.tar.gz" "${v2ray_plugin_url}"
         
-        
     elif [[ "${plugin_num}" == "2" ]]; then        
         # Download kcptun
         kcptun_file="kcptun-linux-amd64-${kcptun_ver}"
@@ -1011,6 +1037,12 @@ download_files(){
         elif check_sys packageManager apt; then
             download "${KCPTUN_INIT}" "${KCPTUN_DEBIAN}"
         fi
+        
+    elif [[ "${plugin_num}" == "4" ]]; then        
+        # Download kcptun
+        goquiet_file="gq-server-linux-amd64-${goquiet_ver}"
+        goquiet_url="https://github.com/cbeuw/GoQuiet/releases/download/v${goquiet_ver}/gq-server-linux-amd64-${goquiet_ver}"
+        download "${goquiet_file}" "${goquiet_url}"
     fi
 }
 
@@ -1132,6 +1164,22 @@ elif [[ ${plugin_num} == "3" ]]; then
     "plugin_opts":"obfs=${shadowsocklibev_obfs}"
 }
 EOF
+elif [[ ${plugin_num} == "4" ]]; then
+    cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
+{
+    "server":${server_value},
+    "server_port":${shadowsocksport},
+    "password":"${shadowsockspwd}",
+    "timeout":300,
+    "user":"nobody",
+    "method":"${shadowsockscipher}",
+    "fast_open":${fast_open},
+    "nameserver":"8.8.8.8",
+    "mode":"tcp_and_udp",
+    "plugin":"gq-server",
+    "plugin_opts":"WebServerAddr=${gqwebaddr};Key=${gqkey}"
+}
+EOF
 else
     cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
 {
@@ -1227,6 +1275,21 @@ install_v2ray_plugin(){
     else
         echo
         echo -e "${Error} v2ray-plugin安装失败."
+        echo
+        install_cleanup
+        exit 1
+    fi
+}
+
+install_goquiet(){
+    cd ${CUR_DIR}
+    chmod +x ${goquiet_file}
+    mv ${goquiet_file} /usr/local/bin/gq-server
+    if [ $? -eq 0 ]; then
+        echo -e "${Info} GoQuiet安装成功."
+    else
+        echo
+        echo -e "${Error} GoQuiet安装失败."
         echo
         install_cleanup
         exit 1
@@ -1355,6 +1418,33 @@ install_completed_libev(){
         echo -e "       请将 obfs-local.exe 和 libwinpthread-1.dll 两个文件解压至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
         echo >> ${HUMAN_CONFIG}
         fi
+    elif [ "${plugin_num}" == "4" ]; then
+        clear -x
+        ldconfig
+        ${SHADOWSOCKS_LIBEV_INIT} start
+        echo > ${HUMAN_CONFIG}
+        echo -e "Congratulations, ${Green_font_prefix}Shadowsocks-libev${Font_color_suffix} server install completed!" >> ${HUMAN_CONFIG}
+        echo -e "服务器地址            : ${red_font_prefix} $(get_ip) ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        echo -e "服务器端口            : ${red_font_prefix} ${shadowsocksport} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        echo -e "      密码            : ${red_font_prefix} ${shadowsockspwd} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        echo -e "      加密            : ${red_font_prefix} ${shadowsockscipher} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        if [ "$(command -v gq-server)" ]; then
+        echo -e "  插件程序            : ${red_font_prefix} gq-client ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        echo -e "  插件选项            : ${red_font_prefix} ServerName=www.bing.com;Key=${gqkey};TicketTimeHint=3600;Browser=chrome ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        if ${fast_open}; then
+            echo -e "  插件参数            : ${red_font_prefix} fast-open=${fast_open} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        else
+            echo -e "  插件参数            : ${red_font_prefix}  ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        fi
+        echo >> ${HUMAN_CONFIG}
+        echo >> ${HUMAN_CONFIG}
+        echo -e "Shadowsocks-libev配置路径：${SHADOWSOCKS_LIBEV_CONFIG}" >> ${HUMAN_CONFIG}
+        echo >> ${HUMAN_CONFIG}
+        echo >> ${HUMAN_CONFIG}
+        echo -e "${Tip} 插件程序下载：https://github.com/cbeuw/GoQuiet/releases 下载gq-client-windows-amd64-1.2.2.exe版本" >> ${HUMAN_CONFIG}
+        echo -e "       请将 gq-client-windows-amd64-1.2.2.exe 重命名为 gq-client 并移动至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
+        echo >> ${HUMAN_CONFIG}
+        fi
     else
         clear -x
         ldconfig
@@ -1430,35 +1520,20 @@ install_main(){
         echo "/usr/lib" > /etc/ld.so.conf.d/lib.conf
     fi
     ldconfig
-    if [ "${plugin_num}" == "1" ]; then
-        install_mbedtls
-        install_shadowsocks_libev
+    install_mbedtls
+    install_shadowsocks_libev
+    if [ "${plugin_num}" == "1" ]; then        
         install_v2ray_plugin
-        install_completed_libev
-        qr_generate_libev
-        view_config    
     elif [ "${plugin_num}" == "2" ]; then
-        install_mbedtls
-        install_shadowsocks_libev
         install_kcptun
-        install_completed_libev
-        qr_generate_libev
-        view_config
-        
     elif [ "${plugin_num}" == "3" ]; then
-        install_mbedtls
-        install_shadowsocks_libev
         install_simple_obfs
-        install_completed_libev
-        qr_generate_libev
-        view_config
-    else
-        install_mbedtls
-        install_shadowsocks_libev
-        install_completed_libev
-        qr_generate_libev
-        view_config
+    elif [ "${plugin_num}" == "4" ]; then
+        install_goquiet
     fi
+    install_completed_libev
+    qr_generate_libev
+    view_config
 
     echo
     echo "Installed successfully."
@@ -1561,6 +1636,7 @@ view_config(){
 install_cleanup(){
     cd ${CUR_DIR}
     rm -rf simple-obfs
+    rm -rf ${goquiet_file}
     rm -rf ${LIBSODIUM_FILE} ${LIBSODIUM_FILE}.tar.gz
     rm -rf ${MBEDTLS_FILE} ${MBEDTLS_FILE}-gpl.tgz
     rm -rf ${shadowsocks_libev_file} ${shadowsocks_libev_file}.tar.gz

@@ -298,7 +298,9 @@ get_ver(){
     v2ray_plugin_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/v2ray-plugin/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
     [ -z ${v2ray_plugin_ver} ] && echo -e "${Error} 获取 v2ray-plugin 最新版本失败." && exit 1
     goquiet_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/cbeuw/GoQuiet/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
-    [ -z ${goquiet_ver} ] && echo -e "${Error} 获取 goquiet_ver 最新版本失败." && exit 1
+    [ -z ${goquiet_ver} ] && echo -e "${Error} 获取 goquiet 最新版本失败." && exit 1
+    cloak_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/cbeuw/Cloak/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+    [ -z ${cloak_ver} ] && echo -e "${Error} 获取 cloak 最新版本失败." && exit 1
 }
 
 get_char(){
@@ -320,6 +322,11 @@ gen_random_str(){
     ran_str16=$(head -c 100 /dev/urandom | tr -dc a-z0-9A-Z |head -c 16)
 }
 
+gen_credentials(){
+    ckauid=$(ck-server -u)
+    IFS=, read ckpub ckpv <<< $(ck-server -k)
+}
+
 install_prepare_port() {
     while true
     do
@@ -333,7 +340,7 @@ install_prepare_port() {
             echo
             echo -e "${Red_font_prefix}  port = ${shadowsocksport}${Font_color_suffix}"
             echo
-            echo -e "${Tip} 如果选择v2ray-plugin 和 goquiet (unofficial) 此参数将会被重置为 80 或 443"
+            echo -e "${Tip} 如果选择v2ray-plugin 或 goquiet (unofficial) 或 cloak (based goquiet) 此参数将会被重置为 80 或 443"
             echo 
             break
         fi
@@ -899,8 +906,8 @@ install_prepare_libev_kcptun(){
 install_prepare_libev_goquiet(){
     gen_random_str
     shadowsocksport=443
-    echo -e "请为GoQuiet输入重定向ip:port [留空以将其设置为bing.com的204.79.197.200：443]"
     echo
+    echo -e "请为GoQuiet输入重定向ip:port [留空以将其设置为bing.com的204.79.197.200:443]"
     read -e -p "(默认: 204.79.197.200:443):" gqwebaddr
     [ -z "$gqwebaddr" ] && gqwebaddr="204.79.197.200:443"
     echo
@@ -918,6 +925,27 @@ install_prepare_libev_goquiet(){
     echo
 }
 
+install_prepare_libev_cloak(){
+    shadowsocksport=443
+    echo -e "请为Cloak输入重定向ip:port [留空以将其设置为bing.com的204.79.197.200:443]"
+    echo
+    read -e -p "(默认: 204.79.197.200:443):" ckwebaddr
+    [ -z "$ckwebaddr" ] && ckwebaddr="204.79.197.200:443"
+    echo
+    echo -e "${Red_font_prefix}  WebServerAddr = ${ckwebaddr}${Font_color_suffix}"
+    echo
+    echo -e "${Tip} server_port已被重置为：port = ${shadowsocksport}"
+    echo 
+    echo
+    echo -e "请为Cloak设置一个userinfo.db存放路径"
+    read -e -p "(默认: $HOME)" ckdbp
+    [ -z "$ckdbp" ] && ckdbp=$HOME
+    echo
+    echo -e "${Red_font_prefix}  DatabasePath = ${ckdbp}${Font_color_suffix}"
+    echo
+}
+
+
 install_prepare(){
     install_prepare_port
     install_prepare_password
@@ -928,6 +956,7 @@ install_prepare(){
   ${Green_font_prefix}2.${Font_color_suffix} kcptun
   ${Green_font_prefix}3.${Font_color_suffix} simple-obfs
   ${Green_font_prefix}4.${Font_color_suffix} goquiet (unofficial)
+  ${Green_font_prefix}5.${Font_color_suffix} cloak (based goquiet)
   "
     echo && read -e -p "(默认: 不安装)：" plugin_num
     [[ -z "${plugin_num}" ]] && plugin_num="" && echo -e "\n${Tip} 当前未选择任何插件，仅安装Shadowsocks-libev."
@@ -939,10 +968,12 @@ install_prepare(){
 		install_prepare_libev_obfs
     elif [[ ${plugin_num} == "4" ]]; then
         install_prepare_libev_goquiet
+    elif [[ ${plugin_num} == "5" ]]; then
+        install_prepare_libev_cloak
     elif [[ ${plugin_num} == "" ]]; then
         :
     else
-        echo -e "${Error} 请输入正确的数字 [1-4]" && exit 1
+        echo -e "${Error} 请输入正确的数字 [1-5]" && exit 1
 	fi
     
     echo
@@ -1039,10 +1070,16 @@ download_files(){
         fi
         
     elif [[ "${plugin_num}" == "4" ]]; then        
-        # Download kcptun
+        # Download goquiet
         goquiet_file="gq-server-linux-amd64-${goquiet_ver}"
         goquiet_url="https://github.com/cbeuw/GoQuiet/releases/download/v${goquiet_ver}/gq-server-linux-amd64-${goquiet_ver}"
         download "${goquiet_file}" "${goquiet_url}"
+        
+    elif [[ "${plugin_num}" == "5" ]]; then        
+        # Download cloak
+        cloak_file="ck-server-linux-amd64-${cloak_ver}"
+        cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${cloak_ver}/ck-server-linux-amd64-${cloak_ver}"
+        download "${cloak_file}" "${cloak_url}"
     fi
 }
 
@@ -1180,6 +1217,22 @@ elif [[ ${plugin_num} == "4" ]]; then
     "plugin_opts":"WebServerAddr=${gqwebaddr};Key=${gqkey}"
 }
 EOF
+elif [[ ${plugin_num} == "5" ]]; then
+    cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
+{
+    "server":${server_value},
+    "server_port":${shadowsocksport},
+    "password":"${shadowsockspwd}",
+    "timeout":300,
+    "user":"nobody",
+    "method":"${shadowsockscipher}",
+    "fast_open":${fast_open},
+    "nameserver":"8.8.8.8",
+    "mode":"tcp_and_udp",
+    "plugin":"ck-server",
+    "plugin_opts":"WebServerAddr=${ckwebaddr};PrivateKey=${ckpv};AdminUID=${ckauid};DatabasePath=${ckdbp}/userinfo.db;BackupDirPath=${ckdbp}"
+}
+EOF
 else
     cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
 {
@@ -1296,6 +1349,21 @@ install_goquiet(){
     fi
 }
 
+install_cloak(){
+    cd ${CUR_DIR}
+    chmod +x ${cloak_file}
+    mv ${cloak_file} /usr/local/bin/ck-server
+    if [ $? -eq 0 ]; then
+        echo -e "${Info} Cloak安装成功."
+    else
+        echo
+        echo -e "${Error} Cloak安装失败."
+        echo
+        install_cleanup
+        exit 1
+    fi
+}
+
 install_simple_obfs(){
     cd ${CUR_DIR}
     git clone https://github.com/shadowsocks/simple-obfs.git
@@ -1335,29 +1403,27 @@ install_completed_libev(){
     ${SHADOWSOCKS_LIBEV_INIT} start
     echo > ${HUMAN_CONFIG}
     echo -e "Congratulations, ${Green_font_prefix}Shadowsocks-libev${Font_color_suffix} server install completed!" >> ${HUMAN_CONFIG}
-    echo -e "服务器地址            : ${red_font_prefix} $(get_ip) ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-    
+    echo -e "服务器地址            : ${Red_font_prefix} $(get_ip) ${Font_color_suffix}" >> ${HUMAN_CONFIG}    
     if [ "$(command -v kcptun-server)" ]; then
-        echo -e "服务器端口            : ${red_font_prefix} ${listen_port} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        echo -e "服务器端口            : ${Red_font_prefix} ${listen_port} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
     else
-        echo -e "服务器端口            : ${red_font_prefix} ${shadowsocksport} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        echo -e "服务器端口            : ${Red_font_prefix} ${shadowsocksport} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
     fi
-    
-    echo -e "      密码            : ${red_font_prefix} ${shadowsockspwd} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-    echo -e "      加密            : ${red_font_prefix} ${shadowsockscipher} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+    echo -e "      密码            : ${Red_font_prefix} ${shadowsockspwd} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+    echo -e "      加密            : ${Red_font_prefix} ${shadowsockscipher} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
     
     if [ "${plugin_num}" == "1" ]; then
         if [ "$(command -v v2ray-plugin)" ]; then
-            echo -e "  插件程序            : ${red_font_prefix} v2ray-plugin ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+            echo -e "  插件程序            : ${Red_font_prefix} v2ray-plugin ${Font_color_suffix}" >> ${HUMAN_CONFIG}
             if [[ ${libev_v2ray} == "1" ]]; then
                 echo -e "  插件选项            :                                                      " >> ${HUMAN_CONFIG}
             elif [[ ${libev_v2ray} == "2" ]]; then
-                echo -e "  插件选项            : ${red_font_prefix} tls;host=${domain} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+                echo -e "  插件选项            : ${Red_font_prefix} tls;host=${domain} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
             elif [[ ${libev_v2ray} == "3" ]]; then
-                echo -e "  插件选项            : ${red_font_prefix} mode=quic;host=${domain} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+                echo -e "  插件选项            : ${Red_font_prefix} mode=quic;host=${domain} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
             fi
             if ${fast_open}; then
-                echo -e "  插件参数            : ${red_font_prefix} fast-open=${fast_open} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+                echo -e "  插件参数            : ${Red_font_prefix} fast-open=${fast_open} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
             else
                 echo -e "  插件参数            :                                                                     " >> ${HUMAN_CONFIG}
             fi
@@ -1373,9 +1439,9 @@ install_completed_libev(){
     elif [ "${plugin_num}" == "2" ]; then
         ${KCPTUN_INIT} start
         if [ "$(command -v kcptun-server)" ]; then
-            echo -e "  插件程序            : ${red_font_prefix} kcptun ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+            echo -e "  插件程序            : ${Red_font_prefix} kcptun ${Font_color_suffix}" >> ${HUMAN_CONFIG}
             echo -e "  插件选项            :                                                             " >> ${HUMAN_CONFIG}
-            echo -e "  插件参数            : ${red_font_prefix} -l %SS_LOCAL_HOST%:%SS_LOCAL_PORT% -r %SS_REMOTE_HOST%:%SS_REMOTE_PORT% --crypt ${crypt} --key ${key} --mtu ${MTU} --sndwnd ${sndwnd} --rcvwnd ${rcvwnd} --mode ${mode} --datashard ${datashard} --parityshard ${parityshard} --dscp ${DSCP}${Font_color_suffix}" >> ${HUMAN_CONFIG}
+            echo -e "  插件参数            : ${Red_font_prefix} -l %SS_LOCAL_HOST%:%SS_LOCAL_PORT% -r %SS_REMOTE_HOST%:%SS_REMOTE_PORT% --crypt ${crypt} --key ${key} --mtu ${MTU} --sndwnd ${sndwnd} --rcvwnd ${rcvwnd} --mode ${mode} --datashard ${datashard} --parityshard ${parityshard} --dscp ${DSCP}${Font_color_suffix}" >> ${HUMAN_CONFIG}
             echo  >> ${HUMAN_CONFIG}
             echo  >> ${HUMAN_CONFIG}
             echo -e "Mobile Terminal Params: crypt=${crypt};key=${key};mtu=${MTU};sndwnd=${sndwnd};rcvwnd=${rcvwnd};mode=${mode};datashard=${datashard};parityshard=${parityshard};dscp=${DSCP}" >> ${HUMAN_CONFIG}
@@ -1391,13 +1457,13 @@ install_completed_libev(){
         fi 
     elif [ "${plugin_num}" == "3" ]; then
         if [ "$(command -v obfs-server)" ]; then
-            echo -e "  插件程序            : ${red_font_prefix} obfs-local ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-            echo -e "  插件选项            : ${red_font_prefix} obfs=${shadowsocklibev_obfs} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+            echo -e "  插件程序            : ${Red_font_prefix} obfs-local ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+            echo -e "  插件选项            : ${Red_font_prefix} obfs=${shadowsocklibev_obfs} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
             
             if ${fast_open}; then
-                echo -e "  插件参数            : ${red_font_prefix} obfs-host=www.bing.com;fast-open=${fast_open} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+                echo -e "  插件参数            : ${Red_font_prefix} obfs-host=www.bing.com;fast-open=${fast_open} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
             else
-                echo -e "  插件参数            : ${red_font_prefix} obfs-host=www.bing.com ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+                echo -e "  插件参数            : ${Red_font_prefix} obfs-host=www.bing.com ${Font_color_suffix}" >> ${HUMAN_CONFIG}
             fi
             
             echo >> ${HUMAN_CONFIG}
@@ -1411,13 +1477,13 @@ install_completed_libev(){
         fi
     elif [ "${plugin_num}" == "4" ]; then
         if [ "$(command -v gq-server)" ]; then
-            echo -e "  插件程序            : ${red_font_prefix} gq-client ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-            echo -e "  插件选项            : ${red_font_prefix} ServerName=www.bing.com;Key=${gqkey};TicketTimeHint=3600;Browser=chrome ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+            echo -e "  插件程序            : ${Red_font_prefix} gq-client ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+            echo -e "  插件选项            : ${Red_font_prefix} ServerName=www.bing.com;Key=${gqkey};TicketTimeHint=3600;Browser=chrome ${Font_color_suffix}" >> ${HUMAN_CONFIG}
             
             if ${fast_open}; then
-                echo -e "  插件参数            : ${red_font_prefix} fast-open=${fast_open} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+                echo -e "  插件参数            : ${Red_font_prefix} fast-open=${fast_open} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
             else
-                echo -e "  插件参数            : ${red_font_prefix}  ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+                echo -e "  插件参数            : ${Red_font_prefix}  ${Font_color_suffix}" >> ${HUMAN_CONFIG}
             fi
             
             echo >> ${HUMAN_CONFIG}
@@ -1428,7 +1494,37 @@ install_completed_libev(){
             echo -e "${Tip} 插件程序下载：https://github.com/cbeuw/GoQuiet/releases 下载gq-client-windows-amd64-1.2.2.exe版本" >> ${HUMAN_CONFIG}
             echo -e "       请将 gq-client-windows-amd64-1.2.2.exe 重命名为 gq-client 并移动至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
-        fi  
+            echo -e "${Tip} 插件选项 ServerName 字段，域名用的是默认值，如果你前面填写的是其它的ip:port 这里请换成ip对应的域名。" >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+        fi 
+    elif [ "${plugin_num}" == "5" ]; then
+        if [ "$(command -v ck-server)" ]; then
+            echo -e "  插件程序            : ${Red_font_prefix} ck-client ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+            echo -e "  插件选项            : ${Red_font_prefix} UID=${ckauid};PublicKey=${ckpub};ServerName=www.bing.com;TicketTimeHint=3600;NumConn=4;MaskBrowser=chrome ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+            
+            if ${fast_open}; then
+                echo -e "  插件参数            : ${Red_font_prefix} fast-open=${fast_open} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+            else
+                echo -e "  插件参数            :                                      " >> ${HUMAN_CONFIG}
+            fi
+            
+            echo >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo -e "                Cloak公钥：${ckpub}" >> ${HUMAN_CONFIG}
+            echo -e "                Cloak私钥：${ckpv}" >> ${HUMAN_CONFIG}
+            echo -e "           Cloak AdminUID：${ckauid}" >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo -e "Shadowsocks-libev配置路径：${SHADOWSOCKS_LIBEV_CONFIG}" >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo -e "${Tip} 插件程序下载：https://github.com/cbeuw/Cloak/releases 下载ck-client-windows-amd64-1.1.1.exe版本" >> ${HUMAN_CONFIG}
+            echo -e "       请将 ck-client-windows-amd64-1.1.1.exe重命名为 ck-client 并移动至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo -e "${Tip} 插件选项 ServerName 字段，域名用的是默认值，如果你前面填写的是其它的ip:port 这里请换成ip对应的域名。" >> ${HUMAN_CONFIG}
+            echo -e "$      另外，你可以将插件选项的参数以json文件方式存储，然后ck-client -a -c <path-to-ckclient.json> 进入admin 模式，根据提示添加新用户。" >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+        fi
     fi
 }
 
@@ -1499,22 +1595,17 @@ install_main(){
         install_simple_obfs
     elif [ "${plugin_num}" == "4" ]; then
         install_goquiet
+    elif [ "${plugin_num}" == "5" ]; then
+        install_cloak
+        gen_credentials
+        
     fi
-    install_completed_libev
-    qr_generate_libev
-    view_config
-
-    echo
-    echo "Installed successfully."
-    echo "Enjoy it!"
-    echo
 }
 
 install_shadowsocks(){
     [[ -e '/usr/local/bin/ss-server' ]] && echo -e "${Info} Shadowsocks-libev 已经安装..." && exit 1
     disable_selinux
     install_prepare
-    config_shadowsocks
     install_dependencies
     download_files
     if check_sys packageManager yum; then
@@ -1522,6 +1613,15 @@ install_shadowsocks(){
     fi
     install_main
     install_cleanup
+    config_shadowsocks
+    install_completed_libev
+    qr_generate_libev
+    show_config
+
+    echo
+    echo "Installed successfully."
+    echo "Enjoy it!"
+    echo
 }
 
 uninstall_shadowsocks(){
@@ -1553,8 +1653,11 @@ uninstall_shadowsocks(){
             update-rc.d -f ${kcp_service_name} remove
         fi
         
-        # kill v2ray-plugin 
+        # kill v2ray-plugin 、obfs-server、gq-server ck-server
         ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+        ps -ef |grep -v grep | grep obfs-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+        ps -ef |grep -v grep | grep gq-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+        ps -ef |grep -v grep | grep ck-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
         
         # uninstall acme.sh
         ~/.acme.sh/acme.sh --uninstall > /dev/null 2>&1 && rm -rf ~/.acme.sh
@@ -1568,6 +1671,7 @@ uninstall_shadowsocks(){
         rm -f /usr/local/bin/ss-nat
         rm -f /usr/local/bin/v2ray-plugin
         rm -f /usr/local/bin/gq-server
+        rm -f /usr/local/bin/ck-server
         rm -f /usr/local/bin/obfs-local
         rm -f /usr/local/bin/obfs-server
         rm -f /usr/local/lib/libshadowsocks-libev.a
@@ -1595,7 +1699,7 @@ uninstall_shadowsocks(){
     fi
 }
 
-view_config(){
+show_config(){
     if [ -e $HUMAN_CONFIG ]; then
         cat $HUMAN_CONFIG
     else
@@ -1607,12 +1711,44 @@ install_cleanup(){
     cd ${CUR_DIR}
     rm -rf simple-obfs
     rm -rf ${goquiet_file}
+    rm -rf ${cloak_file}
     rm -rf ${LIBSODIUM_FILE} ${LIBSODIUM_FILE}.tar.gz
     rm -rf ${MBEDTLS_FILE} ${MBEDTLS_FILE}-gpl.tgz
     rm -rf ${shadowsocks_libev_file} ${shadowsocks_libev_file}.tar.gz
     rm -rf client_linux_amd64 server_linux_amd64 ${kcptun_file}.tar.gz 
     rm -rf v2ray-plugin_linux_amd64 ${v2ray_plugin_file}.tar.gz
 
+}
+
+star_shadowsocks(){
+    if [ "$(command -v ss-server)" ]; then
+        ${SHADOWSOCKS_LIBEV_INIT} start
+        if [ "$(command -v kcptun-server)" ]; then
+            ${KCPTUN_INIT} start
+        fi
+    else
+        echo
+        echo -e " ${Red_font_prefix} Shadowsocks-libev 未安装，请尝试安装后，再来执行此操作。${Font_color_suffix}"
+        echo
+    fi  
+}
+
+stop_shadowsocks(){
+    # kill v2ray-plugin 、obfs-server、gq-server ck-server
+    ps -ef |grep -v grep | grep ss-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+    ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+    ps -ef |grep -v grep | grep kcptun-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+    ps -ef |grep -v grep | grep obfs-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+    ps -ef |grep -v grep | grep gq-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+    ps -ef |grep -v grep | grep ck-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+    echo
+    echo -e "Stopping Shadowsocks-libev success"
+    echo
+}
+
+restar_shadowsocks(){
+    stop_shadowsocks
+    star_shadowsocks
 }
 
 # install status
@@ -1631,7 +1767,6 @@ install_status(){
 }
 
 
-
 action=$1
 
 # check supported
@@ -1645,8 +1780,18 @@ if [[ "${action}" == "install" ]]; then
 	install_shadowsocks
 elif [[ "${action}" == "uninstall" ]]; then
 	uninstall_shadowsocks
-elif [[ "${action}" == "config" ]]; then
-	view_config
+elif [[ "${action}" == "start" ]]; then
+    star_shadowsocks
+elif [[ "${action}" == "stop" ]]; then
+    stop_shadowsocks
+elif [[ "${action}" == "restart" ]]; then
+    restar_shadowsocks
+elif [[ "${action}" == "show" ]]; then
+	show_config
+elif [[ "${action}" == "help" ]]; then
+    echo
+	echo "Usage: ./$(basename $0) [install|uninstall|start|stop|restart|show|help]"
+    echo
 else
 	echo -e "  Shadowsocks-libev一键管理脚本 ${Red_font_prefix}[v${SHELL_VERSION}]${Font_color_suffix}
 

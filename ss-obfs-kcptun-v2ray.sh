@@ -942,7 +942,7 @@ install_prepare(){
     elif [[ ${plugin_num} == "" ]]; then
         :
     else
-        echo -e "${Error} 请输入正确的数字 [1-3]" && exit 1
+        echo -e "${Error} 请输入正确的数字 [1-4]" && exit 1
 	fi
     
     echo
@@ -1330,20 +1330,27 @@ install_simple_obfs(){
 }
 
 install_completed_libev(){
-    if [ "${plugin_num}" == "1" ]; then
-        clear -x
-        ldconfig
-        ${SHADOWSOCKS_LIBEV_INIT} start
-        echo > ${HUMAN_CONFIG}
-        echo -e "Congratulations, ${Green_font_prefix}Shadowsocks-libev${Font_color_suffix} server install completed!" >> ${HUMAN_CONFIG}
-        echo -e "服务器地址            : ${red_font_prefix} $(get_ip) ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+    clear -x
+    ldconfig
+    ${SHADOWSOCKS_LIBEV_INIT} start
+    echo > ${HUMAN_CONFIG}
+    echo -e "Congratulations, ${Green_font_prefix}Shadowsocks-libev${Font_color_suffix} server install completed!" >> ${HUMAN_CONFIG}
+    echo -e "服务器地址            : ${red_font_prefix} $(get_ip) ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+    
+    if [ "$(command -v kcptun-server)" ]; then
+        echo -e "服务器端口            : ${red_font_prefix} ${listen_port} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+    else
         echo -e "服务器端口            : ${red_font_prefix} ${shadowsocksport} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        echo -e "      密码            : ${red_font_prefix} ${shadowsockspwd} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        echo -e "      加密            : ${red_font_prefix} ${shadowsockscipher} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+    fi
+    
+    echo -e "      密码            : ${red_font_prefix} ${shadowsockspwd} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+    echo -e "      加密            : ${red_font_prefix} ${shadowsockscipher} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+    
+    if [ "${plugin_num}" == "1" ]; then
         if [ "$(command -v v2ray-plugin)" ]; then
             echo -e "  插件程序            : ${red_font_prefix} v2ray-plugin ${Font_color_suffix}" >> ${HUMAN_CONFIG}
             if [[ ${libev_v2ray} == "1" ]]; then
-                :
+                echo -e "  插件选项            :                                                      " >> ${HUMAN_CONFIG}
             elif [[ ${libev_v2ray} == "2" ]]; then
                 echo -e "  插件选项            : ${red_font_prefix} tls;host=${domain} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
             elif [[ ${libev_v2ray} == "3" ]]; then
@@ -1364,102 +1371,64 @@ install_completed_libev(){
             echo >> ${HUMAN_CONFIG}
         fi
     elif [ "${plugin_num}" == "2" ]; then
-        clear -x
-        ldconfig
-        ${SHADOWSOCKS_LIBEV_INIT} start
         ${KCPTUN_INIT} start
-        echo > ${HUMAN_CONFIG}
-        echo -e "Congratulations, ${Green_font_prefix}Shadowsocks-libev${Font_color_suffix} server install completed!" >> ${HUMAN_CONFIG}
-        echo -e "服务器地址            : ${red_font_prefix} $(get_ip) ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        echo -e "服务器端口            : ${red_font_prefix} ${listen_port} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        echo -e "      密码            : ${red_font_prefix} ${shadowsockspwd} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        echo -e "      加密            : ${red_font_prefix} ${shadowsockscipher} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         if [ "$(command -v kcptun-server)" ]; then
-        echo -e "  插件程序            : ${red_font_prefix} kcptun ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        echo -e "  插件选项            :                                                             " >> ${HUMAN_CONFIG}
-        echo -e "  插件参数            : ${red_font_prefix} -l %SS_LOCAL_HOST%:%SS_LOCAL_PORT% -r %SS_REMOTE_HOST%:%SS_REMOTE_PORT% --crypt ${crypt} --key ${key} --mtu ${MTU} --sndwnd ${sndwnd} --rcvwnd ${rcvwnd} --mode ${mode} --datashard ${datashard} --parityshard ${parityshard} --dscp ${DSCP}${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        echo  >> ${HUMAN_CONFIG}
-        echo  >> ${HUMAN_CONFIG}
-        echo -e "Mobile Terminal Params: crypt=${crypt};key=${key};mtu=${MTU};sndwnd=${sndwnd};rcvwnd=${rcvwnd};mode=${mode};datashard=${datashard};parityshard=${parityshard};dscp=${DSCP}" >> ${HUMAN_CONFIG}
-        echo >> ${HUMAN_CONFIG}
-        echo >> ${HUMAN_CONFIG}
-        echo -e "           Kcptun配置路径：${KCPTUN_CONFIG}" >> ${HUMAN_CONFIG}
-        echo -e "Shadowsocks-libev配置路径：${SHADOWSOCKS_LIBEV_CONFIG}" >> ${HUMAN_CONFIG}
-        echo >> ${HUMAN_CONFIG}
-        echo >> ${HUMAN_CONFIG}
-        echo -e "${Tip} 插件程序下载：https://github.com/xtaci/kcptun/releases 下载kcptun-windows-amd64 版本" >> ${HUMAN_CONFIG}
-        echo -e "       请解压将带client字样的文件重命名为 kcptun.exe 并移至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
-        echo >> ${HUMAN_CONFIG}
+            echo -e "  插件程序            : ${red_font_prefix} kcptun ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+            echo -e "  插件选项            :                                                             " >> ${HUMAN_CONFIG}
+            echo -e "  插件参数            : ${red_font_prefix} -l %SS_LOCAL_HOST%:%SS_LOCAL_PORT% -r %SS_REMOTE_HOST%:%SS_REMOTE_PORT% --crypt ${crypt} --key ${key} --mtu ${MTU} --sndwnd ${sndwnd} --rcvwnd ${rcvwnd} --mode ${mode} --datashard ${datashard} --parityshard ${parityshard} --dscp ${DSCP}${Font_color_suffix}" >> ${HUMAN_CONFIG}
+            echo  >> ${HUMAN_CONFIG}
+            echo  >> ${HUMAN_CONFIG}
+            echo -e "Mobile Terminal Params: crypt=${crypt};key=${key};mtu=${MTU};sndwnd=${sndwnd};rcvwnd=${rcvwnd};mode=${mode};datashard=${datashard};parityshard=${parityshard};dscp=${DSCP}" >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo -e "           Kcptun配置路径：${KCPTUN_CONFIG}" >> ${HUMAN_CONFIG}
+            echo -e "Shadowsocks-libev配置路径：${SHADOWSOCKS_LIBEV_CONFIG}" >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo -e "${Tip} 插件程序下载：https://github.com/xtaci/kcptun/releases 下载kcptun-windows-amd64 版本" >> ${HUMAN_CONFIG}
+            echo -e "       请解压将带client字样的文件重命名为 kcptun.exe 并移至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
         fi 
     elif [ "${plugin_num}" == "3" ]; then
-        clear -x
-        ldconfig
-        ${SHADOWSOCKS_LIBEV_INIT} start
-        echo > ${HUMAN_CONFIG}
-        echo -e "Congratulations, ${Green_font_prefix}Shadowsocks-libev${Font_color_suffix} server install completed!" >> ${HUMAN_CONFIG}
-        echo -e "服务器地址            : ${red_font_prefix} $(get_ip) ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        echo -e "服务器端口            : ${red_font_prefix} ${shadowsocksport} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        echo -e "      密码            : ${red_font_prefix} ${shadowsockspwd} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        echo -e "      加密            : ${red_font_prefix} ${shadowsockscipher} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         if [ "$(command -v obfs-server)" ]; then
-        echo -e "  插件程序            : ${red_font_prefix} obfs-local ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        echo -e "  插件选项            : ${red_font_prefix} obfs=${shadowsocklibev_obfs} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        if ${fast_open}; then
-            echo -e "  插件参数            : ${red_font_prefix} obfs-host=www.bing.com;fast-open=${fast_open} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        else
-            echo -e "  插件参数            : ${red_font_prefix} obfs-host=www.bing.com ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        fi
-        echo >> ${HUMAN_CONFIG}
-        echo >> ${HUMAN_CONFIG}
-        echo -e "Shadowsocks-libev配置路径：${SHADOWSOCKS_LIBEV_CONFIG}" >> ${HUMAN_CONFIG}
-        echo >> ${HUMAN_CONFIG}
-        echo >> ${HUMAN_CONFIG}
-        echo -e "${Tip} 插件程序下载：https://github.com/shadowsocks/simple-obfs/releases 下载obfs-local.zip 版本" >> ${HUMAN_CONFIG}
-        echo -e "       请将 obfs-local.exe 和 libwinpthread-1.dll 两个文件解压至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
-        echo >> ${HUMAN_CONFIG}
+            echo -e "  插件程序            : ${red_font_prefix} obfs-local ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+            echo -e "  插件选项            : ${red_font_prefix} obfs=${shadowsocklibev_obfs} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+            
+            if ${fast_open}; then
+                echo -e "  插件参数            : ${red_font_prefix} obfs-host=www.bing.com;fast-open=${fast_open} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+            else
+                echo -e "  插件参数            : ${red_font_prefix} obfs-host=www.bing.com ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+            fi
+            
+            echo >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo -e "Shadowsocks-libev配置路径：${SHADOWSOCKS_LIBEV_CONFIG}" >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo -e "${Tip} 插件程序下载：https://github.com/shadowsocks/simple-obfs/releases 下载obfs-local.zip 版本" >> ${HUMAN_CONFIG}
+            echo -e "       请将 obfs-local.exe 和 libwinpthread-1.dll 两个文件解压至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
         fi
     elif [ "${plugin_num}" == "4" ]; then
-        clear -x
-        ldconfig
-        ${SHADOWSOCKS_LIBEV_INIT} start
-        echo > ${HUMAN_CONFIG}
-        echo -e "Congratulations, ${Green_font_prefix}Shadowsocks-libev${Font_color_suffix} server install completed!" >> ${HUMAN_CONFIG}
-        echo -e "服务器地址            : ${red_font_prefix} $(get_ip) ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        echo -e "服务器端口            : ${red_font_prefix} ${shadowsocksport} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        echo -e "      密码            : ${red_font_prefix} ${shadowsockspwd} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        echo -e "      加密            : ${red_font_prefix} ${shadowsockscipher} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         if [ "$(command -v gq-server)" ]; then
-        echo -e "  插件程序            : ${red_font_prefix} gq-client ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        echo -e "  插件选项            : ${red_font_prefix} ServerName=www.bing.com;Key=${gqkey};TicketTimeHint=3600;Browser=chrome ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        if ${fast_open}; then
-            echo -e "  插件参数            : ${red_font_prefix} fast-open=${fast_open} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        else
-            echo -e "  插件参数            : ${red_font_prefix}  ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        fi
-        echo >> ${HUMAN_CONFIG}
-        echo >> ${HUMAN_CONFIG}
-        echo -e "Shadowsocks-libev配置路径：${SHADOWSOCKS_LIBEV_CONFIG}" >> ${HUMAN_CONFIG}
-        echo >> ${HUMAN_CONFIG}
-        echo >> ${HUMAN_CONFIG}
-        echo -e "${Tip} 插件程序下载：https://github.com/cbeuw/GoQuiet/releases 下载gq-client-windows-amd64-1.2.2.exe版本" >> ${HUMAN_CONFIG}
-        echo -e "       请将 gq-client-windows-amd64-1.2.2.exe 重命名为 gq-client 并移动至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
-        echo >> ${HUMAN_CONFIG}
-        fi
-    else
-        clear -x
-        ldconfig
-        ${SHADOWSOCKS_LIBEV_INIT} start
-        echo > ${HUMAN_CONFIG}
-        echo -e "Congratulations, ${Green_font_prefix}Shadowsocks-libev${Font_color_suffix} server install completed!" >> ${HUMAN_CONFIG}
-        echo -e "服务器地址            : ${red_font_prefix} $(get_ip) ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        echo -e "服务器端口            : ${red_font_prefix} ${shadowsocksport} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        echo -e "      密码            : ${red_font_prefix} ${shadowsockspwd} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        echo -e "      加密            : ${red_font_prefix} ${shadowsockscipher} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        echo >> ${HUMAN_CONFIG}
-        echo >> ${HUMAN_CONFIG}
-        echo -e "Shadowsocks-libev配置路径：${SHADOWSOCKS_LIBEV_CONFIG}" >> ${HUMAN_CONFIG}
-        echo >> ${HUMAN_CONFIG}
-        echo >> ${HUMAN_CONFIG}
+            echo -e "  插件程序            : ${red_font_prefix} gq-client ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+            echo -e "  插件选项            : ${red_font_prefix} ServerName=www.bing.com;Key=${gqkey};TicketTimeHint=3600;Browser=chrome ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+            
+            if ${fast_open}; then
+                echo -e "  插件参数            : ${red_font_prefix} fast-open=${fast_open} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+            else
+                echo -e "  插件参数            : ${red_font_prefix}  ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+            fi
+            
+            echo >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo -e "Shadowsocks-libev配置路径：${SHADOWSOCKS_LIBEV_CONFIG}" >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo -e "${Tip} 插件程序下载：https://github.com/cbeuw/GoQuiet/releases 下载gq-client-windows-amd64-1.2.2.exe版本" >> ${HUMAN_CONFIG}
+            echo -e "       请将 gq-client-windows-amd64-1.2.2.exe 重命名为 gq-client 并移动至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+        fi  
     fi
 }
 

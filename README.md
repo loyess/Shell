@@ -2,9 +2,16 @@
 
 #### 下载安装:
 ``` bash
-wget -N --no-check-certificate -c -t3 -T60 -O ss-obfs-kcptun-v2ray.sh https://git.io/fjWs7
-chmod +x ss-obfs-kcptun-v2ray.sh
-./ss-obfs-kcptun-v2ray.sh
+wget -N --no-check-certificate -c -t3 -T60 -O ss-plugins.sh https://git.io/fjlbl
+chmod +x ss-plugins.sh
+./ss-plugins.sh
+```
+
+&nbsp;
+
+```shell
+Usage: 
+	./ss-plugins.sh [install|uninstall|start|stop|restart|show|help]
 ```
 
 &nbsp;
@@ -275,3 +282,7 @@ v2ray-plugin 所要用到的域名，可以从 [freenom.com](https://www.freenom
 - [kcptun-android](https://github.com/shadowsocks/kcptun-android/releases)
 - [simple-obfs(Deprecated)](https://github.com/shadowsocks/simple-obfs/releases)
 - [simple-obfs-android](https://github.com/shadowsocks/simple-obfs-android/releases)
+- [GoQuiet (unofficial)](https://github.com/cbeuw/GoQuiet/releases)
+- [GoQuiet-android](https://github.com/cbeuw/GoQuiet-android/releases)
+- [Cloak (based goquiet)](https://github.com/cbeuw/Cloak/releases)
+- [Cloak-android](https://github.com/cbeuw/Cloak-android/releases)

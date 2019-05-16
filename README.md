@@ -1,4 +1,4 @@
-## ss-obfs-kcptun-v2ray.sh
+## ss-plugins.sh
 
 #### 下载安装:
 ``` bash

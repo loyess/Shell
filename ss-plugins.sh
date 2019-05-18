@@ -940,6 +940,9 @@ install_prepare_libev_cloak(){
     echo -e "请为Cloak设置一个userinfo.db存放路径"
     read -e -p "(默认: $HOME)" ckdbp
     [ -z "$ckdbp" ] && ckdbp=$HOME
+    if [ ! -e "${ckdbp}" ]; then
+        mkdir -p ${ckdbp}
+    fi
     echo
     echo -e "${Red_font_prefix}  DatabasePath = ${ckdbp}${Font_color_suffix}"
     echo

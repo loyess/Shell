@@ -494,7 +494,8 @@ install_prepare_libev_v2ray(){
                 
                 # Is the test domain correct.
                 ping ${domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}' | head -n 1 > /dev/null 2>&1
-                if [[ $? -eq 0 ]] && test "$(ping ${domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}' | head -n 1)" = $(get_ip); then
+                # if [[ $? -eq 0 ]] && test "$(ping ${domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}' | head -n 1)" = $(get_ip); then
+                if [[ $? -eq 0 ]]; then
                     echo
                     echo -e "${Red_font_prefix}  host = ${domain}${Font_color_suffix}"
                     echo
@@ -509,50 +510,82 @@ install_prepare_libev_v2ray(){
                 fi
                 
                 echo
-                echo -e "是否自动生成证书相关文件? [Y/n]\n" 
+                echo -e "是否自动生成证书相关文件(否，则手动添加证书所在路径)? [Y/n]\n" 
                 read -e -p "(默认: n):" yn
                 echo
                 [[ -z "${yn}" ]] && yn="n"
                 if [[ $yn == [Yy] ]]; then
-                    if [ ! "$(command -v socat)" ]; then
-                        echo -e "${Info} 开始安装socat 软件包."
-                        if check_sys packageManager yum; then
-                            yum install -y socat > /dev/null 2>&1
-                            if [ $? -ne 0 ]; then
-                                echo -e "${Error} 安装socat失败."
-                                exit 1
-                            fi
-                        elif check_sys packageManager apt; then
-                            apt-get -y update > /dev/null 2>&1
-                            apt-get -y install socat > /dev/null 2>&1
-                            if [ $? -ne 0 ]; then
-                                echo -e "${Error} 安装socat失败."
-                                exit 1
-                            fi
-                        fi
-                        echo -e "${Info} socat 安装完成."
-                    fi
                     if [ ! -e ~/.acme.sh/acme.sh ]; then
                         echo
-                        echo -e "${Info} 开始安装 acme.sh "
+                        echo -e "${Info} 开始安装实现了 acme 协议, 可以从 letsencrypt 生成免费的证书的 acme.sh "
                         echo
                         curl  https://get.acme.sh | sh
                         echo
                         echo -e "${Info} acme.sh 安装完成. "
                         echo
                     fi
-                    echo
-                    echo -e "${Info} 开始生成域名 ${domain} 相关的证书 "
-                    echo
-                    ~/.acme.sh/acme.sh --issue -d ${domain}   --standalone
-                    
-                    cerpath="/root/.acme.sh/${domain}/fullchain.cer"
-                    keypath="/root/.acme.sh/${domain}/${domain}.key"
                     
                     echo
-                    echo -e "${Info} ${domain} 证书生成完成. "
-                    echo
-                    
+                    echo -e "是否使用CloudFlare域API自动颁发证书(否，则由acme.sh假装一个webserver, 临时监听在80 端口, 完成验证，强制生成)? [Y/n]\n" 
+                    read -e -p "(默认: n):" yn
+                    [[ -z "${yn}" ]] && yn="n"
+                    if [[ $yn == [Yy] ]]; then
+                        echo
+                        read -e -p "请输入你的Cloudflare的Global API Key：" CF_Key
+                        echo
+                        echo -e "${Red_font_prefix}  CF_Key = ${CF_Key}${Font_color_suffix}"
+                        echo 
+                        read -e -p "请输入你的Cloudflare的账号Email：" CF_Email
+                        echo
+                        echo -e "${Red_font_prefix}  CF_Email = ${CF_Email}${Font_color_suffix}"
+                        echo
+                        
+                        echo
+                        echo -e "${Info} 开始生成域名 ${domain} 相关的证书 "
+                        echo
+                        export CF_Key=${CF_Key}
+                        export CF_Email=${CF_Email}
+                        ~/.acme.sh/acme.sh --issue --dns dns_cf -d ${domain}
+                        
+                        cerpath="/root/.acme.sh/${domain}/fullchain.cer"
+                        keypath="/root/.acme.sh/${domain}/${domain}.key"
+                        
+                        echo
+                        echo -e "${Info} ${domain} 证书生成完成. "
+                        echo
+                        
+                    else
+                        if [ ! "$(command -v socat)" ]; then
+                            echo -e "${Info} 开始安装强制生成时必要的socat 软件包."
+                            if check_sys packageManager yum; then
+                                yum install -y socat > /dev/null 2>&1
+                                if [ $? -ne 0 ]; then
+                                    echo -e "${Error} 安装socat失败."
+                                    exit 1
+                                fi
+                            elif check_sys packageManager apt; then
+                                apt-get -y update > /dev/null 2>&1
+                                apt-get -y install socat > /dev/null 2>&1
+                                if [ $? -ne 0 ]; then
+                                    echo -e "${Error} 安装socat失败."
+                                    exit 1
+                                fi
+                            fi
+                            echo -e "${Info} socat 安装完成."
+                        fi
+                        
+                        echo
+                        echo -e "${Info} 开始生成域名 ${domain} 相关的证书 "
+                        echo
+                        ~/.acme.sh/acme.sh --issue -d ${domain}   --standalone
+                        
+                        cerpath="/root/.acme.sh/${domain}/fullchain.cer"
+                        keypath="/root/.acme.sh/${domain}/${domain}.key"
+                        
+                        echo
+                        echo -e "${Info} ${domain} 证书生成完成. "
+                        echo
+                    fi  
                 else
                     echo
                     echo -e "${Tip} 接下来需要手动输入..."

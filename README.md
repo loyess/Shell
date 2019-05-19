@@ -16,221 +16,41 @@ Usage:
 
 &nbsp;
 
-1. ### ss 安装部分，密码、端口随机获取，也可自己指定，端口尽量避开常用端口，以免被占用。
+1. ### 主菜单
 
 ```shell
-Shadowsocks-libev一键管理脚本 [v1.0.0]
+  Shadowsocks-libev一键管理脚本 [v1.0.0]
 
-1. BBR
-2. Install
-3. Uninstall
+  1. BBR
+  2. Install
+  3. Uninstall
 
- 当前状态: 未安装
+ 当前状态: 已安装 并 已启动
 
-请输入Shadowsocks-libev端口 [1-65535]
-
-  port = 16893
-
-[注意] 如果选择v2ray-plugin 此参数将会被重置为 80 或 443
-
-请输入Shadowsocks-libev密码
-
-  password = 6I0LRJLE
-
-请选择Shadowsocks-libev加密方式
-
-1. rc4-md5
-2. salsa20
-3. chacha20
-4. chacha20-ietf
-5. aes-256-cfb
-6. aes-192-cfb
-7. aes-128-cfb
-8. aes-256-ctr
-9. aes-192-ctr
-10. aes-128-ctr
-11. bf-cfb
-12. camellia-128-cfb
-13. camellia-192-cfb
-14. camellia-256-cfb
-15. aes-256-gcm
-16. aes-192-gcm
-17. aes-128-gcm
-18. xchacha20-ietf-poly1305
-19. chacha20-ietf-poly1305
-
-  cipher = aes-256-gcm
+请输入数字 [1-3]：
 ```
 
 &nbsp;
 
-2. ### ss + v2ray-plugin 安装大概，大多参数默认就好， 另外，证书会经由 acme.sh 自动生成。
+2. ### 可选插件
 
 ~~~shell
 
 请选择要安装的SS-Plugin
 
-1. v2ray
-2. kcptun
-3. simple-obfs
-
-请为v2ray-plugin选择Transport mode
-
-1. http
-2. tls
-3. quic
-
-  over = tls
-
-[注意] server_port已被重置为：port = 443
-
-请输入你的域名 [ 注意：必须是已成功解析过本机ip地址的域名 ]：yourdomain.me
-
-  host = yourdomain.me
-
-是否自动生成证书相关文件? [Y/n]
+  1. v2ray
+  2. kcptun
+  3. simple-obfs
+  4. goquiet (unofficial)
+  5. cloak (based goquiet)
 
 
-
-[信息] 开始安装 acme.sh
-
-```
-·
-略
-·
-```
-
-[信息] acme.sh 安装完成.
-
-[信息] 开始生成域名 yourdomain.me 相关的证书
-
-```
-·
-略
-·
-```
-
-[信息] yourdomain.me 证书生成完成.
-
-按任意键开始…或按Ctrl+C取消
+(默认: 不安装)：
 ~~~
 
 &nbsp;
 
-3. ### ss + kcptun 安装大概，一路回车就好。
-
-```shell
- 
-请选择要安装的SS-Plugin
-
-1. v2ray
-2. kcptun
-3. simple-obfs
-
-请输入 Kcptun 服务端运行端口 [1-65535]
-[注意] 这个端口，就是 Kcptun 客户端要连接的端口.
-
-  port = 29900
-
-请输入需要加速的地址
-[注意] 可以输入IPv4 地址或者 IPv6 地址.
-
-  ip(target) = 127.0.0.1
-
-请输入需要加速的端口 [1-65535]
-[注意] 这里用来加速SS，那就输入前面填写过的SS的端口: 18426
-
-  port(target) = 18426
-
-请设置 Kcptun 密码(key)
-[注意] 该参数必须两端一致，另外这里的密码是kcptun的密码，与Shadowsocks半毛钱关系都没有，别弄混淆了.
-
-  key = 5HTag0ia
-
-请选择加密方式(crypt)
-[注意] 强加密对 CPU 要求较高，如果是在路由器上配置客户端，请尽量选择弱加密或者不加密。该参数必须两端一致
-
-1. aes
-2. aes-128
-3. aes-192
-4. salsa20
-5. blowfish
-6. twofish
-7. cast5
-8. 3des
-9. tea
-10. xtea
-11. xor
-12. sm4
-13. none
-
-  crypt = aes
-
-请选择加速模式(mode)
-[注意] 加速模式和发送窗口大小共同决定了流量的损耗大小. 未支持(手动模式 manual)”
-
-1. fast3
-2. fast2
-3. fast
-4. normal
-
-  mode = fast2
-
-请设置 UDP 数据包的 MTU (最大传输单元)值
-
-  MTU = 1350
-
-请设置发送窗口大小(sndwnd)
-[注意] 发送窗口过大会浪费过多流量
-
-  sndwnd = 1024
-
-请设置接收窗口大小(rcvwnd)
-
-  rcvwnd = 1024
-
-请设置前向纠错(datashard)
-[注意] 该参数必须两端一致
-
-  datashard = 10
-
-请设置前向纠错(parityshard)
-[注意] 该参数必须两端一致
-
-  parityshard = 3
-
-设置差分服务代码点(DSCP)
-
-  DSCP = 46
-
-按任意键开始…或按Ctrl+C取消
-```
-
-&nbsp;
-
-4. ### ss + simple-obfs 安装大概，参数默认，一路回车就好。
-
-```shell
-
-请选择要安装的SS-Plugin
-
-1. v2ray
-2. kcptun
-3. simple-obfs
-
-请为simple-obfs选择obfs
-
-1. http
-2. tls
-
-  obfs = http
-
-按任意键开始…或按Ctrl+C取消
-```
-
-&nbsp;
-
-5. ### 安装完毕，终端配置展示如下，以 ss + kcptun 为例：
+3. ### 安装完毕，终端配置展示如下，以 ss + kcptun 为例：
 
 ~~~shell
 Congratulations, Shadowsocks-libev server install completed!

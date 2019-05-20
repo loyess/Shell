@@ -247,11 +247,14 @@ config_firewall(){
         if [ $? -eq 0 ]; then
             iptables -L -n | grep -i ${shadowsocksport} > /dev/null 2>&1
             if [ $? -ne 0 ]; then
-                iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${shadowsocksport} -j ACCEPT
-                iptables -I INPUT -m state --state NEW -m udp -p udp --dport ${shadowsocksport} -j ACCEPT
+                if [[ ${plugin_num} == "2" ]]; then
+                    iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${listen_port} -j ACCEPT
+                    iptables -I INPUT -m state --state NEW -m udp -p udp --dport ${listen_port} -j ACCEPT
+                else
+                    iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${shadowsocksport} -j ACCEPT
+                    iptables -I INPUT -m state --state NEW -m udp -p udp --dport ${shadowsocksport} -j ACCEPT
+                fi
                 
-                iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${listen_port} -j ACCEPT
-                iptables -I INPUT -m state --state NEW -m udp -p udp --dport ${listen_port} -j ACCEPT                
                 /etc/init.d/iptables save
                 /etc/init.d/iptables restart
             else
@@ -263,11 +266,13 @@ config_firewall(){
     elif centosversion 7; then
         systemctl status firewalld > /dev/null 2>&1
         if [ $? -eq 0 ]; then
-            firewall-cmd --permanent --zone=public --add-port=${shadowsocksport}/tcp
-            firewall-cmd --permanent --zone=public --add-port=${shadowsocksport}/udp
-            
-            firewall-cmd --permanent --zone=public --add-port=${listen_port}/tcp
-            firewall-cmd --permanent --zone=public --add-port=${listen_port}/udp            
+            if [[ ${plugin_num} == "2" ]]; then
+                firewall-cmd --permanent --zone=public --add-port=${listen_port}/tcp
+                firewall-cmd --permanent --zone=public --add-port=${listen_port}/udp
+            else
+                firewall-cmd --permanent --zone=public --add-port=${shadowsocksport}/tcp
+                firewall-cmd --permanent --zone=public --add-port=${shadowsocksport}/udp
+            fi
             firewall-cmd --reload
         else
             echo -e "${Warning} firewalld看起来没有运行或没有安装，请在必要时手动启用端口 ${shadowsocksport}"
@@ -1121,76 +1126,22 @@ download_files(){
 
 config_shadowsocks(){
 
-if check_kernel_version && check_kernel_headers; then
-    fast_open="true"
-else
-    fast_open="false"
-fi
-
-local server_value="\"0.0.0.0\""
-if get_ipv6; then
-    server_value="[\"[::0]\",\"0.0.0.0\"]"
-fi
-
-if [ ! -d "$(dirname ${SHADOWSOCKS_LIBEV_CONFIG})" ]; then
-    mkdir -p $(dirname ${SHADOWSOCKS_LIBEV_CONFIG})
-fi
-
-if [[ ${plugin_num} == "1" ]]; then
-    if [[ ${libev_v2ray} == "1" ]]; then
-        cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
-{ 
-    "server":${server_value},
-    "server_port":${shadowsocksport},
-    "password":"${shadowsockspwd}",
-    "timeout":300,
-    "method":"${shadowsockscipher}",
-    "fast_open":${fast_open},
-    "user":"nobody",
-    "nameserver":"8.8.8.8",
-    "mode":"tcp_and_udp",
-    "plugin":"v2ray-plugin",
-    "plugin_opts":"server"
-}
-EOF
-    elif [[ ${libev_v2ray} == "2" ]]; then    
-        cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
-{ 
-    "server":${server_value},
-    "server_port":${shadowsocksport},
-    "password":"${shadowsockspwd}",
-    "timeout":300,
-    "method":"${shadowsockscipher}",
-    "fast_open":${fast_open},
-    "user":"nobody",
-    "nameserver":"8.8.8.8",
-    "mode":"tcp_and_udp",
-    "plugin":"v2ray-plugin",
-    "plugin_opts":"server;tls;host=${domain};cert=${cerpath};key=${keypath}"
-}
-EOF
-    elif [[ ${libev_v2ray} == "3" ]]; then
-        cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
-{ 
-    "server":${server_value},
-    "server_port":${shadowsocksport},
-    "password":"${shadowsockspwd}",
-    "timeout":300,
-    "method":"${shadowsockscipher}",
-    "fast_open":${fast_open},
-    "user":"nobody",
-    "nameserver":"8.8.8.8",
-    "mode":"tcp_only",
-    "plugin":"v2ray-plugin",
-    "plugin_opts":"server;mode=quic;host=${domain};cert=${cerpath};key=${keypath}"
-}
-EOF
+    if check_kernel_version && check_kernel_headers; then
+        fast_open="true"
+    else
+        fast_open="false"
     fi
-    
-elif [[ ${plugin_num} == "2" ]]; then
-    if [ ! -d "$(dirname ${KCPTUN_CONFIG})" ]; then
-        mkdir -p $(dirname ${KCPTUN_CONFIG})
+
+    local server_value="\"0.0.0.0\""
+    if get_ipv6; then
+        server_value="[\"[::0]\",\"0.0.0.0\"]"
     fi
+
+    if [ ! -d "$(dirname ${SHADOWSOCKS_LIBEV_CONFIG})" ]; then
+        mkdir -p $(dirname ${SHADOWSOCKS_LIBEV_CONFIG})
+    fi
+
+    # shadowsocklibev-libev config
     cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
 {
     "server":${server_value},
@@ -1205,7 +1156,12 @@ elif [[ ${plugin_num} == "2" ]]; then
 }
 EOF
 
-    cat > ${KCPTUN_CONFIG}<<-EOF
+    # kcptun config
+    if [[ ${plugin_num} == "2" ]]; then
+        if [ ! -d "$(dirname ${KCPTUN_CONFIG})" ]; then
+            mkdir -p $(dirname ${KCPTUN_CONFIG})
+        fi
+        cat > ${KCPTUN_CONFIG}<<-EOF
 {
     "listen": ":${listen_port}",
     "target": "${target_addr}:${target_port}",
@@ -1220,70 +1176,30 @@ EOF
     "dscp": ${DSCP}
 }
 EOF
- 
-elif [[ ${plugin_num} == "3" ]]; then
-    cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
-{
-    "server":${server_value},
-    "server_port":${shadowsocksport},
-    "password":"${shadowsockspwd}",
-    "timeout":300,
-    "user":"nobody",
-    "method":"${shadowsockscipher}",
-    "fast_open":${fast_open},
-    "nameserver":"8.8.8.8",
-    "mode":"tcp_and_udp",
-    "plugin":"obfs-server",
-    "plugin_opts":"obfs=${shadowsocklibev_obfs}"
-}
-EOF
-elif [[ ${plugin_num} == "4" ]]; then
-    cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
-{
-    "server":${server_value},
-    "server_port":${shadowsocksport},
-    "password":"${shadowsockspwd}",
-    "timeout":300,
-    "user":"nobody",
-    "method":"${shadowsockscipher}",
-    "fast_open":${fast_open},
-    "nameserver":"8.8.8.8",
-    "mode":"tcp_and_udp",
-    "plugin":"gq-server",
-    "plugin_opts":"WebServerAddr=${gqwebaddr};Key=${gqkey}"
-}
-EOF
-elif [[ ${plugin_num} == "5" ]]; then
-    cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
-{
-    "server":${server_value},
-    "server_port":${shadowsocksport},
-    "password":"${shadowsockspwd}",
-    "timeout":300,
-    "user":"nobody",
-    "method":"${shadowsockscipher}",
-    "fast_open":${fast_open},
-    "nameserver":"8.8.8.8",
-    "mode":"tcp_and_udp",
-    "plugin":"ck-server",
-    "plugin_opts":"WebServerAddr=${ckwebaddr};PrivateKey=${ckpv};AdminUID=${ckauid};DatabasePath=${ckdbp}/userinfo.db;BackupDirPath=${ckdbp}"
-}
-EOF
-else
-    cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
-{
-    "server":${server_value},
-    "server_port":${shadowsocksport},
-    "password":"${shadowsockspwd}",
-    "timeout":300,
-    "user":"nobody",
-    "method":"${shadowsockscipher}",
-    "fast_open":${fast_open},
-    "nameserver":"8.8.8.8",
-    "mode":"tcp_and_udp"
-}
-EOF
-fi
+    fi
+
+    # "mode":"tcp_and_udp" after add a ,
+    if [[ ${plugin_num} -ge "1" && ${plugin_num} -le "5" && ${plugin_num} -ne "2" ]]; then
+        sed 's/"mode.*/&,/g' -i ${SHADOWSOCKS_LIBEV_CONFIG}
+    fi
+
+    # write config of plugin
+    if [[ ${plugin_num} == "1" ]]; then
+        if [[ ${libev_v2ray} == "1" ]]; then
+            sed '/^}/i\    "plugin":"v2ray-plugin",\n    "plugin_opts":"server"' -i ${SHADOWSOCKS_LIBEV_CONFIG}
+        elif [[ ${libev_v2ray} == "2" ]]; then    
+           sed '/^}/i\    "plugin":"v2ray-plugin",\n    "plugin_opts":"'"server;tls;host=${domain};cert=${cerpath};key=${keypath}"'"' -i ${SHADOWSOCKS_LIBEV_CONFIG}
+        elif [[ ${libev_v2ray} == "3" ]]; then
+            sed 's/tcp_and_udp/tcp_only/' -i ${SHADOWSOCKS_LIBEV_CONFIG}
+            sed '/^}/i\    "plugin":"v2ray-plugin",\n    "plugin_opts":"'"server;mode=quic;host=${domain};cert=${cerpath};key=${keypath}"'"' -i ${SHADOWSOCKS_LIBEV_CONFIG}
+        fi
+    elif [[ ${plugin_num} == "3" ]]; then
+        sed '/^}/i\    "plugin":"obfs-server",\n    "plugin_opts":"'"obfs=${shadowsocklibev_obfs}"'"' -i ${SHADOWSOCKS_LIBEV_CONFIG}
+    elif [[ ${plugin_num} == "4" ]]; then
+        sed '/^}/i\    "plugin":"gq-server",\n    "plugin_opts":"'"WebServerAddr=${gqwebaddr};Key=${gqkey}"'"' -i ${SHADOWSOCKS_LIBEV_CONFIG}
+    elif [[ ${plugin_num} == "5" ]]; then
+        sed '/^}/i\    "plugin":"ck-server",\n    "plugin_opts":"'"WebServerAddr=${ckwebaddr};PrivateKey=${ckpv};AdminUID=${ckauid};DatabasePath=${ckdbp}/userinfo.db;BackupDirPath=${ckdbp}"'"' -i ${SHADOWSOCKS_LIBEV_CONFIG}
+    fi
 }
 
 install_libsodium(){    

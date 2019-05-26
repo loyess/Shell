@@ -1,7 +1,7 @@
 下载安装：
 
 ```shell
-wget -N --no-check-certificate -c -t3 -T60 -O ssrmu.sh https://git.io/fjRkJ
+wget -N --no-check-certificate -c -t3 -T60 -O ssrmu.sh https://git.io/fjRkw
 chmod +x ssrmu.sh
 ./ssrmu.sh
 ```

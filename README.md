@@ -96,7 +96,7 @@ v2ray-plugin 所要用到的域名，可以从 [freenom.com](https://www.freenom
 
 **相关下载：**
 
-- [shadowsocks-windows](<https://github.com/shadowsocks/shadowsocks-android/releases>) 
+- [shadowsocks-windows](<https://github.com/shadowsocks/shadowsocks-windows/releases>) 
 - [shadowsocks-android](<https://github.com/shadowsocks/shadowsocks-android/releases>)
 - [v2ray-plugin](<https://github.com/shadowsocks/v2ray-plugin/releases>)
 - [v2ray-plugin-android](<https://github.com/shadowsocks/v2ray-plugin-android/releases>)

@@ -47,6 +47,12 @@ KCPTUN_CENTOS="https://git.io/fjcLx"
 KCPTUN_DEBIAN="https://git.io/fjcLp"
 
 
+# cloak
+CK_DB_PATH="/etc/cloak/db"
+CK_CLIENT_CONFIG="/etc/cloak/ckclient.json"
+
+
+
 # shadowsocklibev-libev Ciphers
 SHADOWSOCKS_CIPHERS=(
 rc4-md5
@@ -129,6 +135,28 @@ Separator_1="——————————————————————�
 
 [[ $EUID -ne 0 ]] && echo -e "[${red}Error${Font_color_suffix}] This script must be run as root!" && exit 1
 
+usage() {
+	cat >&1 <<-EOF
+
+  请使用: ./$0 <option>
+
+    可使用的参数 <option> 包括:
+
+        install          安装
+        uninstall        卸载
+        start            启动
+        stop             关闭
+        restart          重启
+        status           查看状态
+        show             显示可视化配置
+        uid              添加一个New User (仅ss + cloak下可用)
+        help             查看脚本使用说明
+        
+	EOF
+
+	exit $1
+}
+
 install_check(){
     if check_sys packageManager yum || check_sys packageManager apt; then
         if centosversion 5; then
@@ -167,7 +195,7 @@ version_gt(){
 }
 
 check_pid(){
-	PID=`ps -ef |grep -v grep | grep ss-server |awk '{print $2}'`
+    PID=`ps -ef |grep -v grep | grep ss-server |awk '{print $2}'`
 }
 
 check_sys(){
@@ -630,45 +658,6 @@ install_prepare_libev_v2ray(){
         done
 }
 
-install_prepare_libev_obfs(){
-    if autoconf_version || centosversion 6; then
-        while true
-        do
-        echo -e "请为simple-obfs选择obfs\n"
-        for ((i=1;i<=${#OBFUSCATION_WRAPPER[@]};i++ )); do
-            hint="${OBFUSCATION_WRAPPER[$i-1]}"
-            echo -e "${Green_font_prefix}  ${i}.${Font_color_suffix} ${hint}"
-        done
-        echo
-        read -e -p "(默认: ${OBFUSCATION_WRAPPER[0]}):" libev_obfs
-        [ -z "$libev_obfs" ] && libev_obfs=1
-        expr ${libev_obfs} + 1 &>/dev/null
-        if [ $? -ne 0 ]; then
-            echo
-            echo -e "${Error} 请输入一个数字"
-            echo
-            continue
-        fi
-        if [[ "$libev_obfs" -lt 1 || "$libev_obfs" -gt ${#OBFUSCATION_WRAPPER[@]} ]]; then
-            echo
-            echo -e "${Error} 请输入一个数字在 [1-${#OBFUSCATION_WRAPPER[@]}] 之间"
-            echo
-            continue
-        fi
-        shadowsocklibev_obfs=${OBFUSCATION_WRAPPER[$libev_obfs-1]}
-        echo
-        echo -e "${Red_font_prefix}  obfs = ${shadowsocklibev_obfs}${Font_color_suffix}"
-        echo
-        break
-        done
-    else
-        echo
-        echo -e "${Info} autoconf 版本小于 2.67，Shadowsocks-libev 插件 simple-obfs 的安装将被跳过."
-        echo
-        
-    fi
-}
-
 install_prepare_libev_kcptun(){ 
     # 设置 Kcptun 服务器监听端口 listen_port
     while true
@@ -941,6 +930,45 @@ install_prepare_libev_kcptun(){
     done 
 }
 
+install_prepare_libev_obfs(){
+    if autoconf_version || centosversion 6; then
+        while true
+        do
+        echo -e "请为simple-obfs选择obfs\n"
+        for ((i=1;i<=${#OBFUSCATION_WRAPPER[@]};i++ )); do
+            hint="${OBFUSCATION_WRAPPER[$i-1]}"
+            echo -e "${Green_font_prefix}  ${i}.${Font_color_suffix} ${hint}"
+        done
+        echo
+        read -e -p "(默认: ${OBFUSCATION_WRAPPER[0]}):" libev_obfs
+        [ -z "$libev_obfs" ] && libev_obfs=1
+        expr ${libev_obfs} + 1 &>/dev/null
+        if [ $? -ne 0 ]; then
+            echo
+            echo -e "${Error} 请输入一个数字"
+            echo
+            continue
+        fi
+        if [[ "$libev_obfs" -lt 1 || "$libev_obfs" -gt ${#OBFUSCATION_WRAPPER[@]} ]]; then
+            echo
+            echo -e "${Error} 请输入一个数字在 [1-${#OBFUSCATION_WRAPPER[@]}] 之间"
+            echo
+            continue
+        fi
+        shadowsocklibev_obfs=${OBFUSCATION_WRAPPER[$libev_obfs-1]}
+        echo
+        echo -e "${Red_font_prefix}  obfs = ${shadowsocklibev_obfs}${Font_color_suffix}"
+        echo
+        break
+        done
+    else
+        echo
+        echo -e "${Info} autoconf 版本小于 2.67，Shadowsocks-libev 插件 simple-obfs 的安装将被跳过."
+        echo
+        
+    fi
+}
+
 install_prepare_libev_goquiet(){
     gen_random_str
     shadowsocksport=443
@@ -976,10 +1004,10 @@ install_prepare_libev_cloak(){
     echo 
     echo
     echo -e "请为Cloak设置一个userinfo.db存放路径"
-    read -e -p "(默认: $HOME)" ckdbp
-    [ -z "$ckdbp" ] && ckdbp=$HOME
+    read -e -p "(默认: $CK_DB_PATH)" ckdbp
+    [ -z "$ckdbp" ] && ckdbp=$CK_DB_PATH
     if [ ! -e "${ckdbp}" ]; then
-        mkdir -p ${ckdbp}
+        mkdir -p "${ckdbp}/db-backup"
     fi
     echo
     echo -e "${Red_font_prefix}  DatabasePath = ${ckdbp}${Font_color_suffix}"
@@ -1005,8 +1033,8 @@ install_prepare(){
         install_prepare_libev_v2ray
     elif [[ ${plugin_num} == "2" ]]; then
         install_prepare_libev_kcptun
-	elif [[ ${plugin_num} == "3" ]]; then
-		install_prepare_libev_obfs
+    elif [[ ${plugin_num} == "3" ]]; then
+        install_prepare_libev_obfs
     elif [[ ${plugin_num} == "4" ]]; then
         install_prepare_libev_goquiet
     elif [[ ${plugin_num} == "5" ]]; then
@@ -1015,7 +1043,7 @@ install_prepare(){
         :
     else
         echo -e "${Error} 请输入正确的数字 [1-5]" && exit 1
-	fi
+    fi
     
     echo
     echo "按任意键开始…或按Ctrl+C取消"
@@ -1117,10 +1145,11 @@ download_files(){
         download "${goquiet_file}" "${goquiet_url}"
         
     elif [[ "${plugin_num}" == "5" ]]; then        
-        # Download cloak
+        # Download cloak server
         cloak_file="ck-server-linux-amd64-${cloak_ver}"
         cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${cloak_ver}/ck-server-linux-amd64-${cloak_ver}"
         download "${cloak_file}" "${cloak_url}"
+        
     fi
 }
 
@@ -1198,7 +1227,7 @@ EOF
     elif [[ ${plugin_num} == "4" ]]; then
         sed '/^}/i\    "plugin":"gq-server",\n    "plugin_opts":"'"WebServerAddr=${gqwebaddr};Key=${gqkey}"'"' -i ${SHADOWSOCKS_LIBEV_CONFIG}
     elif [[ ${plugin_num} == "5" ]]; then
-        sed '/^}/i\    "plugin":"ck-server",\n    "plugin_opts":"'"WebServerAddr=${ckwebaddr};PrivateKey=${ckpv};AdminUID=${ckauid};DatabasePath=${ckdbp}/userinfo.db;BackupDirPath=${ckdbp}"'"' -i ${SHADOWSOCKS_LIBEV_CONFIG}
+        sed '/^}/i\    "plugin":"ck-server",\n    "plugin_opts":"'"WebServerAddr=${ckwebaddr};PrivateKey=${ckpv};AdminUID=${ckauid};DatabasePath=${ckdbp}/userinfo.db;BackupDirPath=${ckdbp}/db-backup"'"' -i ${SHADOWSOCKS_LIBEV_CONFIG}
     fi
 }
 
@@ -1286,34 +1315,31 @@ install_v2ray_plugin(){
     fi
 }
 
-install_goquiet(){
+install_kcptun(){
     cd ${CUR_DIR}
-    chmod +x ${goquiet_file}
-    mv ${goquiet_file} /usr/local/bin/gq-server
+    tar zxf ${kcptun_file}.tar.gz
+    if [ ! -d "$(dirname ${KCPTUN_INSTALL_DIR})" ]; then
+        mkdir -p $(dirname ${KCPTUN_INSTALL_DIR})
+    fi
+    mv server_linux_amd64 ${KCPTUN_INSTALL_DIR}
     if [ $? -eq 0 ]; then
-        echo -e "${Info} GoQuiet安装成功."
+        chmod +x ${KCPTUN_INIT}
+        local service_name=$(basename ${KCPTUN_INIT})
+        if check_sys packageManager yum; then
+            chkconfig --add ${service_name}
+            chkconfig ${service_name} on
+        elif check_sys packageManager apt; then
+            update-rc.d -f ${service_name} defaults
+        fi
+        echo -e "${Info} kcptun安装成功."
     else
         echo
-        echo -e "${Error} GoQuiet安装失败."
+        echo -e "${Error} kcptun安装失败."
         echo
         install_cleanup
         exit 1
     fi
-}
-
-install_cloak(){
-    cd ${CUR_DIR}
-    chmod +x ${cloak_file}
-    mv ${cloak_file} /usr/local/bin/ck-server
-    if [ $? -eq 0 ]; then
-        echo -e "${Info} Cloak安装成功."
-    else
-        echo
-        echo -e "${Error} Cloak安装失败."
-        echo
-        install_cleanup
-        exit 1
-    fi
+    [ -f ${KCPTUN_INSTALL_DIR} ] && ln -s ${KCPTUN_INSTALL_DIR} /usr/bin
 }
 
 install_simple_obfs(){
@@ -1347,6 +1373,36 @@ install_simple_obfs(){
     [ -f /usr/local/bin/obfs-server ] && ln -s /usr/local/bin/obfs-server /usr/bin
     echo -e "${Info} simple-obfs-${simple_obfs_ver} 安装成功."
 
+}
+
+install_goquiet(){
+    cd ${CUR_DIR}
+    chmod +x ${goquiet_file}
+    mv ${goquiet_file} /usr/local/bin/gq-server
+    if [ $? -eq 0 ]; then
+        echo -e "${Info} GoQuiet安装成功."
+    else
+        echo
+        echo -e "${Error} GoQuiet安装失败."
+        echo
+        install_cleanup
+        exit 1
+    fi
+}
+
+install_cloak(){
+    cd ${CUR_DIR}
+    chmod +x ${cloak_file}
+    mv ${cloak_file} /usr/local/bin/ck-server
+    if [ $? -eq 0 ]; then
+        echo -e "${Info} Cloak安装成功."
+    else
+        echo
+        echo -e "${Error} Cloak安装失败."
+        echo
+        install_cleanup
+        exit 1
+    fi
 }
 
 install_completed_libev(){
@@ -1386,7 +1442,6 @@ install_completed_libev(){
             echo >> ${HUMAN_CONFIG}
             echo -e "${Tip} 插件程序下载：https://github.com/shadowsocks/v2ray-plugin/releases 下载v2ray-plugin-windows-amd64 版本" >> ${HUMAN_CONFIG}
             echo -e "       请解压将插件重命名为 v2ray-plugin.exe 并移动至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
         fi
     elif [ "${plugin_num}" == "2" ]; then
         ${KCPTUN_INIT} start
@@ -1405,7 +1460,6 @@ install_completed_libev(){
             echo >> ${HUMAN_CONFIG}
             echo -e "${Tip} 插件程序下载：https://github.com/xtaci/kcptun/releases 下载kcptun-windows-amd64 版本" >> ${HUMAN_CONFIG}
             echo -e "       请解压将带client字样的文件重命名为 kcptun.exe 并移至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
         fi 
     elif [ "${plugin_num}" == "3" ]; then
         if [ "$(command -v obfs-server)" ]; then
@@ -1425,7 +1479,6 @@ install_completed_libev(){
             echo >> ${HUMAN_CONFIG}
             echo -e "${Tip} 插件程序下载：https://github.com/shadowsocks/simple-obfs/releases 下载obfs-local.zip 版本" >> ${HUMAN_CONFIG}
             echo -e "       请将 obfs-local.exe 和 libwinpthread-1.dll 两个文件解压至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
         fi
     elif [ "${plugin_num}" == "4" ]; then
         if [ "$(command -v gq-server)" ]; then
@@ -1447,7 +1500,6 @@ install_completed_libev(){
             echo -e "       请将 gq-client-windows-amd64-1.2.2.exe 重命名为 gq-client 并移动至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo -e "${Tip} 插件选项 ServerName 字段，域名用的是默认值，如果你前面填写的是其它的ip:port 这里请换成ip对应的域名。" >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
         fi 
     elif [ "${plugin_num}" == "5" ]; then
         if [ "$(command -v ck-server)" ]; then
@@ -1475,7 +1527,6 @@ install_completed_libev(){
             echo >> ${HUMAN_CONFIG}
             echo -e "${Tip} 插件选项 ServerName 字段，域名用的是默认值，如果你前面填写的是其它的ip:port 这里请换成ip对应的域名。" >> ${HUMAN_CONFIG}
             echo -e "$      另外，你可以将插件选项的参数以json文件方式存储，然后ck-client -a -c <path-to-ckclient.json> 进入admin 模式，根据提示添加新用户。" >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
         fi
     fi
 }
@@ -1489,40 +1540,13 @@ qr_generate_libev(){
             local tmp=$(echo -n "${shadowsockscipher}:${shadowsockspwd}@$(get_ip):${shadowsocksport}" | base64 -w0)
             local qr_code="ss://${tmp}"
         fi
-        echo
+        echo  >> ${HUMAN_CONFIG}
         echo "Your QR Code: (For Shadowsocks Windows, OSX, Android and iOS clients)" >> ${HUMAN_CONFIG}
         echo -e "${Green_font_prefix} ${qr_code} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
         echo -n "${qr_code}" | qrencode -s8 -o ${CUR_DIR}/shadowsocks_libev_qr.png
         echo "Your QR Code has been saved as a PNG file path:" >> ${HUMAN_CONFIG}
         echo -e "${Green_font_prefix} ${CUR_DIR}/shadowsocks_libev_qr.png ${Font_color_suffix}" >> ${HUMAN_CONFIG}
     fi
-}
-
-install_kcptun(){
-    cd ${CUR_DIR}
-    tar zxf ${kcptun_file}.tar.gz
-    if [ ! -d "$(dirname ${KCPTUN_INSTALL_DIR})" ]; then
-        mkdir -p $(dirname ${KCPTUN_INSTALL_DIR})
-    fi
-    mv server_linux_amd64 ${KCPTUN_INSTALL_DIR}
-    if [ $? -eq 0 ]; then
-        chmod +x ${KCPTUN_INIT}
-        local service_name=$(basename ${KCPTUN_INIT})
-        if check_sys packageManager yum; then
-            chkconfig --add ${service_name}
-            chkconfig ${service_name} on
-        elif check_sys packageManager apt; then
-            update-rc.d -f ${service_name} defaults
-        fi
-        echo -e "${Info} kcptun安装成功."
-    else
-        echo
-        echo -e "${Error} kcptun安装失败."
-        echo
-        install_cleanup
-        exit 1
-    fi
-    [ -f ${KCPTUN_INSTALL_DIR} ] && ln -s ${KCPTUN_INSTALL_DIR} /usr/bin
 }
 
 install_bbr(){
@@ -1554,7 +1578,7 @@ install_main(){
     fi
 }
 
-install_shadowsocks(){
+install_step_full(){
     [[ -e '/usr/local/bin/ss-server' ]] && echo -e "${Info} Shadowsocks-libev 已经安装..." && exit 1
     disable_selinux
     install_prepare
@@ -1568,7 +1592,7 @@ install_shadowsocks(){
     config_shadowsocks
     install_completed_libev
     qr_generate_libev
-    show_config
+    config_show
 
     echo
     echo "Installed successfully."
@@ -1576,7 +1600,146 @@ install_shadowsocks(){
     echo
 }
 
-uninstall_shadowsocks(){
+install_cleanup(){
+    cd ${CUR_DIR}
+    rm -rf simple-obfs
+    rm -rf ${goquiet_file}
+    rm -rf ${cloak_file}
+    rm -rf ${LIBSODIUM_FILE} ${LIBSODIUM_FILE}.tar.gz
+    rm -rf ${MBEDTLS_FILE} ${MBEDTLS_FILE}-gpl.tgz
+    rm -rf ${shadowsocks_libev_file} ${shadowsocks_libev_file}.tar.gz
+    rm -rf client_linux_amd64 server_linux_amd64 ${kcptun_file}.tar.gz 
+    rm -rf v2ray-plugin_linux_amd64 ${v2ray_plugin_file}.tar.gz
+
+}
+
+do_start(){
+    if [ "$(command -v ss-server)" ]; then
+        ${SHADOWSOCKS_LIBEV_INIT} start
+        if [ "$(command -v kcptun-server)" ]; then
+            ${KCPTUN_INIT} start
+        fi
+    else
+        echo
+        echo -e " ${Red_font_prefix} Shadowsocks-libev 未安装，请尝试安装后，再来执行此操作。${Font_color_suffix}"
+        echo
+    fi  
+}
+
+do_stop(){
+    # kill v2ray-plugin 、obfs-server、gq-server ck-server
+    ps -ef |grep -v grep | grep ss-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+    ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+    ps -ef |grep -v grep | grep kcptun-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+    ps -ef |grep -v grep | grep obfs-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+    ps -ef |grep -v grep | grep gq-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+    ps -ef |grep -v grep | grep ck-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+    echo
+    echo -e "Stopping Shadowsocks-libev success"
+    echo
+}
+
+do_restart(){
+    do_stop
+    do_start
+}
+
+# install status
+do_status(){
+    if [[ -e '/usr/local/bin/ss-server' ]]; then
+        check_pid
+        if [[ ! -z "${PID}" ]]; then
+            echo -e " 当前状态: ${Green_font_prefix}已安装${Font_color_suffix} 并 ${Green_font_prefix}已启动${Font_color_suffix}"
+        else
+            echo -e " 当前状态: ${Green_font_prefix}已安装${Font_color_suffix} 但 ${Red_font_prefix}未启动${Font_color_suffix}"
+        fi
+    else
+        echo -e " 当前状态: ${Red_font_prefix}未安装${Font_color_suffix}"
+    fi
+}
+
+config_show(){
+    if [ -e $HUMAN_CONFIG ]; then
+        cat $HUMAN_CONFIG
+    else
+        echo "The visual configuration was not found..."
+    fi
+}
+
+add_a_new_uid(){
+    if [[ -e '/usr/local/bin/ck-server' ]]; then
+    
+        if [[ ! -e '/usr/local/bin/ck-client' ]]; then
+            get_ver
+            # Download cloak client
+            local cloak_file="ck-client-linux-amd64-${cloak_ver}"
+            local cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${cloak_ver}/ck-client-linux-amd64-${cloak_ver}"
+            download "${cloak_file}" "${cloak_url}"
+            
+            # install ck-client
+            cd ${CUR_DIR}
+            chmod +x ${cloak_file}
+            mv ${cloak_file} /usr/local/bin/ck-client
+        fi
+        
+        # get parameter from ss config.json
+        local new_uid=$(ck-server -u)
+        local ip=$(get_ip)
+        local port=443
+        local admin_uid=$(cat ${HUMAN_CONFIG} | grep -o -P "Cloak AdminUID：.*" | sed 's/Cloak AdminUID：//g')
+        local public_key=$(cat ${HUMAN_CONFIG} | grep -o -P "Cloak公钥：.*" | sed 's/Cloak公钥：//g')
+        
+        
+        # write ck-client config
+        if [ ! -d "$(dirname ${CK_CLIENT_CONFIG})" ]; then
+            mkdir -p $(dirname ${CK_CLIENT_CONFIG})
+        fi
+        cat > ${CK_CLIENT_CONFIG}<<-EOF
+{
+    "UID":"${admin_uid}",
+    "PublicKey":"${public_key}",
+    "ServerName":"www.bing.com",
+    "TicketTimeHint":3600,
+    "NumConn":4,
+    "MaskBrowser":"chrome"
+}
+EOF
+        # show about info
+        echo
+        echo -e "    ${Green_font_prefix}New UID${Font_color_suffix}：${Red_font_prefix}${new_uid}${Font_color_suffix}"
+        echo
+        echo -e "    ${Green_font_prefix}IP PORT${Font_color_suffix}：${Red_font_prefix}${ip}:${port}${Font_color_suffix}"
+        echo -e "  ${Green_font_prefix}Admin UID${Font_color_suffix}：${Red_font_prefix}${admin_uid}${Font_color_suffix}"
+        echo
+        echo -e "
+  添加新user步骤：
+        1. ck-server -u 生成一个New 的 UID
+        2. ck-client -a -c <path-to-ckclient.json> 进入admin 模式。
+        3. 输入，服务器ip:port 和 AdminUID ，选择4 ，新建一个用户。
+        4. 根据提示输入如下：
+            1. Newly generated UID
+            2. SessionsCap              # 用户可以拥有的最大并发会话数(填写 4)
+            3. UpRate                   # 上行速度 (单位：bytes/s)
+            4. DownRate                 # 下行速度 (单位：bytes/s)
+            5. UpCredit                 # 上行限制 (单位：bytes)
+            6. DownCredit               # 下行限制 (单位：bytes)
+            7. ExpiryTime               # user账号的有效期，unix时间格式(10位时间戳)
+        5. 将你的 公钥 和 新生成的UID 给这个新用户。
+    
+    ${Tip} 脚本从第3步开始...
+    "
+        
+        # Enter admin mode
+        ck-client -a -c ${CK_CLIENT_CONFIG}
+    else
+        echo
+        echo -e "  ${Red_font_prefix}仅支持 ss + cloak 下使用，请确认是否是以该组合形式运行...${Font_color_suffix}"
+        echo
+        exit 1
+    fi
+}
+
+do_uninstall(){
     printf "你确定要卸载Shadowsocks-libev吗? [y/n]\n"
     read -e -p "(默认: n):" answer
     [ -z ${answer} ] && answer="n"
@@ -1624,6 +1787,8 @@ uninstall_shadowsocks(){
         rm -f /usr/local/bin/v2ray-plugin
         rm -f /usr/local/bin/gq-server
         rm -f /usr/local/bin/ck-server
+        rm -f /usr/local/bin/ck-client
+        rm -fr /etc/cloak
         rm -f /usr/local/bin/obfs-local
         rm -f /usr/local/bin/obfs-server
         rm -f /usr/local/lib/libshadowsocks-libev.a
@@ -1651,120 +1816,56 @@ uninstall_shadowsocks(){
     fi
 }
 
-show_config(){
-    if [ -e $HUMAN_CONFIG ]; then
-        cat $HUMAN_CONFIG
-    else
-        echo "The visual configuration was not found..."
+
+do_install(){
+    # check supported
+    if ! install_check; then
+        echo -e "[${red}Error${plain}] Your OS is not supported to run it!"
+        echo "Please change to CentOS 6+/Debian 7+/Ubuntu 12+ and try again."
+        exit 1
     fi
-}
+    
+    echo -e " Shadowsocks-libev一键管理脚本 ${Red_font_prefix}[v${SHELL_VERSION}]${Font_color_suffix}
 
-install_cleanup(){
-    cd ${CUR_DIR}
-    rm -rf simple-obfs
-    rm -rf ${goquiet_file}
-    rm -rf ${cloak_file}
-    rm -rf ${LIBSODIUM_FILE} ${LIBSODIUM_FILE}.tar.gz
-    rm -rf ${MBEDTLS_FILE} ${MBEDTLS_FILE}-gpl.tgz
-    rm -rf ${shadowsocks_libev_file} ${shadowsocks_libev_file}.tar.gz
-    rm -rf client_linux_amd64 server_linux_amd64 ${kcptun_file}.tar.gz 
-    rm -rf v2ray-plugin_linux_amd64 ${v2ray_plugin_file}.tar.gz
-
-}
-
-star_shadowsocks(){
-    if [ "$(command -v ss-server)" ]; then
-        ${SHADOWSOCKS_LIBEV_INIT} start
-        if [ "$(command -v kcptun-server)" ]; then
-            ${KCPTUN_INIT} start
-        fi
-    else
-        echo
-        echo -e " ${Red_font_prefix} Shadowsocks-libev 未安装，请尝试安装后，再来执行此操作。${Font_color_suffix}"
-        echo
-    fi  
-}
-
-stop_shadowsocks(){
-    # kill v2ray-plugin 、obfs-server、gq-server ck-server
-    ps -ef |grep -v grep | grep ss-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
-    ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
-    ps -ef |grep -v grep | grep kcptun-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
-    ps -ef |grep -v grep | grep obfs-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
-    ps -ef |grep -v grep | grep gq-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
-    ps -ef |grep -v grep | grep ck-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
-    echo
-    echo -e "Stopping Shadowsocks-libev success"
-    echo
-}
-
-restar_shadowsocks(){
-    stop_shadowsocks
-    star_shadowsocks
-}
-
-# install status
-install_status(){
-	if [[ -e '/usr/local/bin/ss-server' ]]; then
-		check_pid
-		if [[ ! -z "${PID}" ]]; then
-			echo -e " 当前状态: ${Green_font_prefix}已安装${Font_color_suffix} 并 ${Green_font_prefix}已启动${Font_color_suffix}"
-		else
-			echo -e " 当前状态: ${Green_font_prefix}已安装${Font_color_suffix} 但 ${Red_font_prefix}未启动${Font_color_suffix}"
-		fi
-		cd "${ssr_folder}"
-	else
-		echo -e " 当前状态: ${Red_font_prefix}未安装${Font_color_suffix}"
-	fi
+    ${Green_font_prefix}1.${Font_color_suffix} BBR
+    ${Green_font_prefix}2.${Font_color_suffix} Install
+    ${Green_font_prefix}3.${Font_color_suffix} Uninstall
+     "
+    do_status
+    echo && read -e -p "请输入数字 [1-3]：" menu_num
+    case "${menu_num}" in
+        1)
+            install_bbr
+            ;;
+        2)
+            install_step_full
+            ;;
+        3)
+            do_uninstall
+            ;;
+        *)
+            echo -e "${Error} 请输入正确的数字 [1-3]"
+            ;;
+    esac
 }
 
 
-action=$1
 
-# check supported
-if ! install_check; then
-    echo -e "[${red}Error${plain}] Your OS is not supported to run it!"
-    echo "Please change to CentOS 6+/Debian 7+/Ubuntu 12+ and try again."
-    exit 1
-fi
-
-if [[ "${action}" == "install" ]]; then
-	install_shadowsocks
-elif [[ "${action}" == "uninstall" ]]; then
-	uninstall_shadowsocks
-elif [[ "${action}" == "start" ]]; then
-    star_shadowsocks
-elif [[ "${action}" == "stop" ]]; then
-    stop_shadowsocks
-elif [[ "${action}" == "restart" ]]; then
-    restar_shadowsocks
-elif [[ "${action}" == "show" ]]; then
-	show_config
-elif [[ "${action}" == "help" ]]; then
-    echo
-	echo "Usage: ./$(basename $0) [install|uninstall|start|stop|restart|show|help]"
-    echo
-else
-	echo -e "  Shadowsocks-libev一键管理脚本 ${Red_font_prefix}[v${SHELL_VERSION}]${Font_color_suffix}
-
-  ${Green_font_prefix}1.${Font_color_suffix} BBR
-  ${Green_font_prefix}2.${Font_color_suffix} Install
-  ${Green_font_prefix}3.${Font_color_suffix} Uninstall
- "
-	install_status
-	echo && read -e -p "请输入数字 [1-3]：" menu_num
-case "${menu_num}" in
-    1)
-	install_bbr
-	;;
-	2)
-	install_shadowsocks
-	;;
-	3)
-	uninstall_shadowsocks
-	;;
-	*)
-	echo -e "${Error} 请输入正确的数字 [1-3]"
-	;;
+action=${1:-"install"}
+case ${action} in
+    install|uninstall|start|stop|restart|status)
+        do_${action}
+        ;;
+    uid)
+        add_a_new_${action}
+        ;;
+    show)
+        config_${action}
+        ;;
+    help)
+        usage 0
+        ;;
+    *)
+        usage 1
+        ;;
 esac
-fi

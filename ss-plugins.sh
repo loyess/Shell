@@ -125,20 +125,20 @@ IPV4_RE="^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-
 IPV6_RE="^\s*((([0-9A-Fa-f]{1,4}:){7}(([0-9A-Fa-f]{1,4})|:))|(([0-9A-Fa-f]{1,4}:){6}(:|((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})|(:[0-9A-Fa-f]{1,4})))|(([0-9A-Fa-f]{1,4}:){5}((:((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(([0-9A-Fa-f]{1,4}:){4}(:[0-9A-Fa-f]{1,4}){0,1}((:((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(([0-9A-Fa-f]{1,4}:){3}(:[0-9A-Fa-f]{1,4}){0,2}((:((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(([0-9A-Fa-f]{1,4}:){2}(:[0-9A-Fa-f]{1,4}){0,3}((:((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(([0-9A-Fa-f]{1,4}:)(:[0-9A-Fa-f]{1,4}){0,4}((:((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(:(:[0-9A-Fa-f]{1,4}){0,5}((:((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})))(%.+)?\s*$"
 
 
-Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Yellow_font_prefix="\033[0;33m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && Font_color_suffix="\033[0m"
-Info="${Green_font_prefix}[信息]${Font_color_suffix}"
-Error="${Red_font_prefix}[错误]${Font_color_suffix}"
-Tip="${Green_font_prefix}[注意]${Font_color_suffix}"
-Warning="${Yellow_font_prefix}[警告]${Font_color_suffix}"
+Green="\033[32m" && Red="\033[31m" && Yellow="\033[0;33m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && suffix="\033[0m"
+Info="${Green}[信息]${suffix}"
+Error="${Red}[错误]${suffix}"
+Tip="${Green}[注意]${suffix}"
+Warning="${Yellow}[警告]${suffix}"
 Separator_1="——————————————————————————————"
 
 
-[[ $EUID -ne 0 ]] && echo -e "[${red}Error${Font_color_suffix}] This script must be run as root!" && exit 1
+[[ $EUID -ne 0 ]] && echo -e "[${red}Error${suffix}] This script must be run as root!" && exit 1
 
 usage() {
 	cat >&1 <<-EOF
 
-  请使用: ./$0 <option>
+  请使用: ./$0 [option] [uid]
 
     可使用的参数 <option> 包括:
 
@@ -150,6 +150,7 @@ usage() {
         status           查看状态
         show             显示可视化配置
         uid              添加一个New User (仅ss + cloak下可用)
+        url              生成一个New SS URL (仅ss + cloak下可用)
         help             查看脚本使用说明
         
 	EOF
@@ -286,7 +287,7 @@ config_firewall(){
                 /etc/init.d/iptables save
                 /etc/init.d/iptables restart
             else
-                echo -e "${Info} 端口 ${Green_font_prefix}${shadowsocksport}${Font_color_suffix} 已经启用"
+                echo -e "${Info} 端口 ${Green}${shadowsocksport}${suffix} 已经启用"
             fi
         else
             echo -e "${Warning} iptables看起来没有运行或没有安装，请在必要时手动启用端口 ${shadowsocksport}"
@@ -346,6 +347,14 @@ get_char(){
     stty $SAVEDSTTY
 }
 
+get_str_base64_encode(){
+    echo -n $1 | base64 -w0
+}
+
+get_str_replace(){
+    echo -n $1 | sed 's/:/%3a/g;s/;/%3b/g;s/=/%3d/g;s/\//%2f/g'
+}
+
 gen_random_prot(){
     ran_prot=$(shuf -i 9000-19999 -n 1)
 }
@@ -356,31 +365,40 @@ gen_random_str(){
 }
 
 gen_credentials(){
-    ckauid=$(ck-server -u)
-    IFS=, read ckpub ckpv <<< $(ck-server -k)
+    while true
+    do
+        ckauid=$(ck-server -u)
+        IFS=, read ckpub ckpv <<< $(ck-server -k)
+        
+        # filter "+" from ckauid and ckpub
+        if [[ $(echo ${ckauid} | grep "+") || $(echo ${ckpub} | grep "+") ]]; then
+            continue
+        fi
+        break
+    done
 }
 
 install_prepare_port() {
     while true
     do
-    gen_random_prot
-    echo -e "\n请输入Shadowsocks-libev端口 [1-65535]"
-    read -e -p "(默认: ${ran_prot}):" shadowsocksport
-    [ -z "${shadowsocksport}" ] && shadowsocksport=${ran_prot}
-    expr ${shadowsocksport} + 1 &>/dev/null
-    if [ $? -eq 0 ]; then
-        if [ ${shadowsocksport} -ge 1 ] && [ ${shadowsocksport} -le 65535 ] && [ ${shadowsocksport:0:1} != 0 ]; then
-            echo
-            echo -e "${Red_font_prefix}  port = ${shadowsocksport}${Font_color_suffix}"
-            echo
-            echo -e "${Tip} 如果选择v2ray-plugin 或 goquiet (unofficial) 或 cloak (based goquiet) 此参数将会被重置为 80 或 443"
-            echo 
-            break
+        gen_random_prot
+        echo -e "\n请输入Shadowsocks-libev端口 [1-65535]"
+        read -e -p "(默认: ${ran_prot}):" shadowsocksport
+        [ -z "${shadowsocksport}" ] && shadowsocksport=${ran_prot}
+        expr ${shadowsocksport} + 1 &>/dev/null
+        if [ $? -eq 0 ]; then
+            if [ ${shadowsocksport} -ge 1 ] && [ ${shadowsocksport} -le 65535 ] && [ ${shadowsocksport:0:1} != 0 ]; then
+                echo
+                echo -e "${Red}  port = ${shadowsocksport}${suffix}"
+                echo
+                echo -e "${Tip} 如果选择v2ray-plugin 或 goquiet (unofficial) 或 cloak (based goquiet) 此参数将会被重置为 80 或 443"
+                echo 
+                break
+            fi
         fi
-    fi
-    echo
-    echo -e "${Error} 请输入一个正确的数 [1-65535]"
-    echo
+        echo
+        echo -e "${Error} 请输入一个正确的数 [1-65535]"
+        echo
     done
 }
 
@@ -390,45 +408,46 @@ install_prepare_password(){
     read -e -p "(默认: ${ran_str8}):" shadowsockspwd
     [ -z "${shadowsockspwd}" ] && shadowsockspwd=${ran_str8}
     echo
-    echo -e "${Red_font_prefix}  password = ${shadowsockspwd}${Font_color_suffix}"
+    echo -e "${Red}  password = ${shadowsockspwd}${suffix}"
     echo
 }
 
 install_prepare_cipher(){
     while true
     do
-    echo -e "\n请选择Shadowsocks-libev加密方式"
+        echo -e "\n请选择Shadowsocks-libev加密方式"
 
-    for ((i=1;i<=${#SHADOWSOCKS_CIPHERS[@]};i++ )); do
-        hint="${SHADOWSOCKS_CIPHERS[$i-1]}"
-        if [[ ${i} -le 9 ]]; then
-            echo -e "${Green_font_prefix}  ${i}.${Font_color_suffix} ${hint}"
-        else
-            echo -e "${Green_font_prefix} ${i}.${Font_color_suffix} ${hint}"
+        for ((i=1;i<=${#SHADOWSOCKS_CIPHERS[@]};i++ )); do
+            hint="${SHADOWSOCKS_CIPHERS[$i-1]}"
+            if [[ ${i} -le 9 ]]; then
+                echo -e "${Green}  ${i}.${suffix} ${hint}"
+            else
+                echo -e "${Green} ${i}.${suffix} ${hint}"
+            fi
+        done
+        
+        echo
+        read -e -p "(默认: ${SHADOWSOCKS_CIPHERS[14]}):" pick
+        [ -z "$pick" ] && pick=15
+        expr ${pick} + 1 &>/dev/null
+        if [ $? -ne 0 ]; then
+            echo
+            echo -e "${Error} 请输入一个数字."
+            echo
+            continue
         fi
-    done
-    echo
-    read -e -p "(默认: ${SHADOWSOCKS_CIPHERS[14]}):" pick
-    [ -z "$pick" ] && pick=15
-    expr ${pick} + 1 &>/dev/null
-    if [ $? -ne 0 ]; then
-        echo
-        echo -e "${Error} 请输入一个数字."
-        echo
-        continue
-    fi
-    if [[ "$pick" -lt 1 || "$pick" -gt ${#SHADOWSOCKS_CIPHERS[@]} ]]; then
-        echo
-        echo -e "${Error} 请输入一个数字在 [1-${#SHADOWSOCKS_CIPHERS[@]}] 之间."
-        echo
-        continue
-    fi
-    shadowsockscipher=${SHADOWSOCKS_CIPHERS[$pick-1]}
+        if [[ "$pick" -lt 1 || "$pick" -gt ${#SHADOWSOCKS_CIPHERS[@]} ]]; then
+            echo
+            echo -e "${Error} 请输入一个数字在 [1-${#SHADOWSOCKS_CIPHERS[@]}] 之间."
+            echo
+            continue
+        fi
+        shadowsockscipher=${SHADOWSOCKS_CIPHERS[$pick-1]}
 
-    echo
-    echo -e "${Red_font_prefix}  cipher = ${shadowsockscipher}${Font_color_suffix}"
-    echo
-    break
+        echo
+        echo -e "${Red}  cipher = ${shadowsockscipher}${suffix}"
+        echo
+        break
     done
 }
 
@@ -476,11 +495,11 @@ centosversion(){
 
 install_prepare_libev_v2ray(){
     while true
-        do
+    do
         echo -e "请为v2ray-plugin选择Transport mode\n"
         for ((i=1;i<=${#V2RAY_PLUGIN_TRANSPORT_MODE[@]};i++ )); do
             hint="${V2RAY_PLUGIN_TRANSPORT_MODE[$i-1]}"
-            echo -e "${Green_font_prefix}  ${i}.${Font_color_suffix} ${hint}"
+            echo -e "${Green}  ${i}.${suffix} ${hint}"
         done
         echo
         read -e -p "(默认: ${V2RAY_PLUGIN_TRANSPORT_MODE[0]}):" libev_v2ray
@@ -500,11 +519,11 @@ install_prepare_libev_v2ray(){
         fi
         shadowsocklibev_v2ray=${V2RAY_PLUGIN_TRANSPORT_MODE[$libev_v2ray-1]}
         echo
-        echo -e "${Red_font_prefix}  over = ${shadowsocklibev_v2ray}${Font_color_suffix}"
+        echo -e "${Red}  over = ${shadowsocklibev_v2ray}${suffix}"
         echo  
         local flag=1
         while true
-            do
+        do
             if [[ ${libev_v2ray} == "1" ]]; then
                 shadowsocksport=80
                 echo
@@ -530,7 +549,7 @@ install_prepare_libev_v2ray(){
                 # if [[ $? -eq 0 ]] && test "$(ping ${domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}' | head -n 1)" = $(get_ip); then
                 if [[ $? -eq 0 ]]; then
                     echo
-                    echo -e "${Red_font_prefix}  host = ${domain}${Font_color_suffix}"
+                    echo -e "${Red}  host = ${domain}${suffix}"
                     echo
                 else
                     echo
@@ -566,11 +585,11 @@ install_prepare_libev_v2ray(){
                         echo
                         read -e -p "请输入你的Cloudflare的Global API Key：" CF_Key
                         echo
-                        echo -e "${Red_font_prefix}  CF_Key = ${CF_Key}${Font_color_suffix}"
+                        echo -e "${Red}  CF_Key = ${CF_Key}${suffix}"
                         echo 
                         read -e -p "请输入你的Cloudflare的账号Email：" CF_Email
                         echo
-                        echo -e "${Red_font_prefix}  CF_Email = ${CF_Email}${Font_color_suffix}"
+                        echo -e "${Red}  CF_Email = ${CF_Email}${suffix}"
                         echo
                         
                         echo
@@ -627,7 +646,7 @@ install_prepare_libev_v2ray(){
                     echo
                     if [[ -n "${cerpath}" && -f "${cerpath}" ]]; then
                         echo
-                        echo -e "${Red_font_prefix}  cert = ${cerpath}${Font_color_suffix}"
+                        echo -e "${Red}  cert = ${cerpath}${suffix}"
                         echo
                     else
                         echo
@@ -641,7 +660,7 @@ install_prepare_libev_v2ray(){
                     echo
                     if [[ -n "${cerpath}" && -f "${cerpath}" ]]; then
                         echo
-                        echo -e "${Red_font_prefix}  key = ${keypath}${Font_color_suffix}"
+                        echo -e "${Red}  key = ${keypath}${suffix}"
                         echo
                     else
                         echo
@@ -652,72 +671,72 @@ install_prepare_libev_v2ray(){
                 fi
             fi
             break
-            done 
+        done 
                 
         break
-        done
+    done
 }
 
 install_prepare_libev_kcptun(){ 
     # 设置 Kcptun 服务器监听端口 listen_port
     while true
     do
-    echo -e "请输入 Kcptun 服务端运行端口 [1-65535]\n${Tip} 这个端口，就是 Kcptun 客户端要连接的端口."
-    read -e -p "(默认: 29900):" listen_port
-    [ -z "${listen_port}" ] && listen_port=29900
-    expr ${listen_port} + 1 &>/dev/null
-    if [ $? -eq 0 ]; then
-        if [ ${listen_port} -ge 1 ] && [ ${listen_port} -le 65535 ] && [ ${listen_port:0:1} != 0 ]; then
-            echo
-            echo -e "${Red_font_prefix}  port = ${listen_port}${Font_color_suffix}"
-            echo
-            break
+        echo -e "请输入 Kcptun 服务端运行端口 [1-65535]\n${Tip} 这个端口，就是 Kcptun 客户端要连接的端口."
+        read -e -p "(默认: 29900):" listen_port
+        [ -z "${listen_port}" ] && listen_port=29900
+        expr ${listen_port} + 1 &>/dev/null
+        if [ $? -eq 0 ]; then
+            if [ ${listen_port} -ge 1 ] && [ ${listen_port} -le 65535 ] && [ ${listen_port:0:1} != 0 ]; then
+                echo
+                echo -e "${Red}  port = ${listen_port}${suffix}"
+                echo
+                break
+            fi
         fi
-    fi
-    echo
-    echo -e "${Error} 请输入一个正确的数 [1-65535]"
-    echo
-    continue
+        echo
+        echo -e "${Error} 请输入一个正确的数 [1-65535]"
+        echo
+        continue
     done
     
     # 设置需要 Kcptun 加速的目标服务器地址 target_addr
     while true
     do
-    echo -e "请输入需要加速的地址\n${Tip} 可以输入IPv4 地址或者 IPv6 地址."
-    read -e -p "(默认: 127.0.0.1):" target_addr
-    [ -z "${target_addr}" ] && target_addr=127.0.0.1
-    if is_ipv4_or_ipv6 ${target_addr}; then
-        echo
-        echo -e "${Red_font_prefix}  ip(target) = ${target_addr}${Font_color_suffix}"
-        echo
-        break
-    else
-        echo
-        echo -e "${Error} 请输入正确合法的IP地址."
-        echo
-        continue
-    fi
+        echo -e "请输入需要加速的地址\n${Tip} 可以输入IPv4 地址或者 IPv6 地址."
+        read -e -p "(默认: 127.0.0.1):" target_addr
+        [ -z "${target_addr}" ] && target_addr=127.0.0.1
+        if is_ipv4_or_ipv6 ${target_addr}; then
+            echo
+            echo -e "${Red}  ip(target) = ${target_addr}${suffix}"
+            echo
+            break
+        else
+            echo
+            echo -e "${Error} 请输入正确合法的IP地址."
+            echo
+            continue
+        fi
     done
     
     # 设置需要 Kcptun 加速的目标服务器端口 target_port
     while true
     do
-    echo -e "请输入需要加速的端口 [1-65535]\n${Tip} 这里用来加速SS，那就输入前面填写过的SS的端口: ${Red_font_prefix}${shadowsocksport}${Font_color_suffix}"
-    read -e -p "(默认: ${shadowsocksport}):" target_port
-    [ -z "${target_port}" ] && target_port=${shadowsocksport}
-    expr ${target_port} + 1 &>/dev/null
-    if [ $? -eq 0 ]; then
-        if [ ${target_port} -ge 1 ] && [ ${target_port} -le 65535 ] && [ ${target_port:0:1} != 0 ]; then
-            echo
-            echo -e "${Red_font_prefix}  port(target) = ${target_port}${Font_color_suffix}"
-            echo
-            break
+        echo -e "请输入需要加速的端口 [1-65535]\n${Tip} 这里用来加速SS，那就输入前面填写过的SS的端口: ${Red}${shadowsocksport}${suffix}"
+        read -e -p "(默认: ${shadowsocksport}):" target_port
+        [ -z "${target_port}" ] && target_port=${shadowsocksport}
+        expr ${target_port} + 1 &>/dev/null
+        if [ $? -eq 0 ]; then
+            if [ ${target_port} -ge 1 ] && [ ${target_port} -le 65535 ] && [ ${target_port:0:1} != 0 ]; then
+                echo
+                echo -e "${Red}  port(target) = ${target_port}${suffix}"
+                echo
+                break
+            fi
         fi
-    fi
-    echo
-    echo -e "${Error} 请输入一个正确的数 [1-65535]"
-    echo
-    continue
+        echo
+        echo -e "${Error} 请输入一个正确的数 [1-65535]"
+        echo
+        continue
     done
     
     # 设置 Kcptun 密码 key
@@ -726,207 +745,209 @@ install_prepare_libev_kcptun(){
     read -e -p "(默认: ${ran_str8}):" key
     [ -z "${key}" ] && key=${ran_str8}
     echo
-    echo -e "${Red_font_prefix}  key = ${key}${Font_color_suffix}"
+    echo -e "${Red}  key = ${key}${suffix}"
     echo
     
     # 设置 Kcptun 加密方式 crypt
     while true
     do
-    echo -e "请选择加密方式(crypt)\n${Tip} 强加密对 CPU 要求较高，如果是在路由器上配置客户端，请尽量选择弱加密或者不加密。该参数必须两端一致"
+        echo -e "请选择加密方式(crypt)\n${Tip} 强加密对 CPU 要求较高，如果是在路由器上配置客户端，请尽量选择弱加密或者不加密。该参数必须两端一致"
 
-    for ((i=1;i<=${#KCPTUN_CRYPT[@]};i++ )); do
-        hint="${KCPTUN_CRYPT[$i-1]}"
-        if [[ ${i} -le 9 ]]; then
-            echo -e "${Green_font_prefix}  ${i}.${Font_color_suffix} ${hint}"
-        else
-            echo -e "${Green_font_prefix} ${i}.${Font_color_suffix} ${hint}"
+        for ((i=1;i<=${#KCPTUN_CRYPT[@]};i++ )); do
+            hint="${KCPTUN_CRYPT[$i-1]}"
+            if [[ ${i} -le 9 ]]; then
+                echo -e "${Green}  ${i}.${suffix} ${hint}"
+            else
+                echo -e "${Green} ${i}.${suffix} ${hint}"
+            fi
+        done
+        
+        echo
+        read -e -p "(默认: ${KCPTUN_CRYPT[0]}):" crypt
+        [ -z "$crypt" ] && crypt=1
+        expr ${crypt} + 1 &>/dev/null
+        if [ $? -ne 0 ]; then
+            echo
+            echo -e "${Error} 请输入一个数字."
+            echo
+            continue
         fi
-    done
-    echo
-    read -e -p "(默认: ${KCPTUN_CRYPT[0]}):" crypt
-    [ -z "$crypt" ] && crypt=1
-    expr ${crypt} + 1 &>/dev/null
-    if [ $? -ne 0 ]; then
-        echo
-        echo -e "${Error} 请输入一个数字."
-        echo
-        continue
-    fi
-    if [[ "$crypt" -lt 1 || "$crypt" -gt ${#KCPTUN_CRYPT[@]} ]]; then
-        echo
-        echo -e "${Error} 请输入一个数字在 [1-${#KCPTUN_CRYPT[@]}] 之间."
-        echo
-        continue
-    fi
-    crypt=${KCPTUN_CRYPT[$crypt-1]}
+        if [[ "$crypt" -lt 1 || "$crypt" -gt ${#KCPTUN_CRYPT[@]} ]]; then
+            echo
+            echo -e "${Error} 请输入一个数字在 [1-${#KCPTUN_CRYPT[@]}] 之间."
+            echo
+            continue
+        fi
+        crypt=${KCPTUN_CRYPT[$crypt-1]}
 
-    echo
-    echo -e "${Red_font_prefix}  crypt = ${crypt}${Font_color_suffix}"
-    echo
-    break
+        echo
+        echo -e "${Red}  crypt = ${crypt}${suffix}"
+        echo
+        break
     done
     
     # 设置 Kcptun 加速模式 mode
     while true
     do
-    echo -e "请选择加速模式(mode)\n${Tip} 加速模式和发送窗口大小共同决定了流量的损耗大小. ${Red_font_prefix}未支持(手动模式 manual)${Font_color_suffix}”"
+        echo -e "请选择加速模式(mode)\n${Tip} 加速模式和发送窗口大小共同决定了流量的损耗大小. ${Red}未支持(手动模式 manual)${suffix}”"
 
-    for ((i=1;i<=${#KCPTUN_MODE[@]};i++ )); do
-        hint="${KCPTUN_MODE[$i-1]}"
-        if [[ ${i} -le 9 ]]; then
-            echo -e "${Green_font_prefix}  ${i}.${Font_color_suffix} ${hint}"
-        else
-            echo -e "${Green_font_prefix} ${i}.${Font_color_suffix} ${hint}"
+        for ((i=1;i<=${#KCPTUN_MODE[@]};i++ )); do
+            hint="${KCPTUN_MODE[$i-1]}"
+            if [[ ${i} -le 9 ]]; then
+                echo -e "${Green}  ${i}.${suffix} ${hint}"
+            else
+                echo -e "${Green} ${i}.${suffix} ${hint}"
+            fi
+        done
+        
+        echo
+        read -e -p "(默认: ${KCPTUN_MODE[1]}):" mode
+        [ -z "$mode" ] && mode=2
+        expr ${mode} + 1 &>/dev/null
+        if [ $? -ne 0 ]; then
+            echo
+            echo -e "${Error} 请输入一个数字."
+            echo
+            continue
         fi
-    done
-    echo
-    read -e -p "(默认: ${KCPTUN_MODE[1]}):" mode
-    [ -z "$mode" ] && mode=2
-    expr ${mode} + 1 &>/dev/null
-    if [ $? -ne 0 ]; then
-        echo
-        echo -e "${Error} 请输入一个数字."
-        echo
-        continue
-    fi
-    if [[ "$mode" -lt 1 || "$mode" -gt ${#KCPTUN_MODE[@]} ]]; then
-        echo
-        echo -e "${Error} 请输入一个数字在 [1-${#KCPTUN_MODE[@]}] 之间."
-        echo
-        continue
-    fi
-    mode=${KCPTUN_MODE[$mode-1]}
+        if [[ "$mode" -lt 1 || "$mode" -gt ${#KCPTUN_MODE[@]} ]]; then
+            echo
+            echo -e "${Error} 请输入一个数字在 [1-${#KCPTUN_MODE[@]}] 之间."
+            echo
+            continue
+        fi
+        mode=${KCPTUN_MODE[$mode-1]}
 
-    echo
-    echo -e "${Red_font_prefix}  mode = ${mode}${Font_color_suffix}"
-    echo
-    break
+        echo
+        echo -e "${Red}  mode = ${mode}${suffix}"
+        echo
+        break
     done
     
     # 设置 UDP 数据包的 MTU (最大传输单元)值
     while true
     do
-    echo -e "请设置 UDP 数据包的 MTU (最大传输单元)值"
-    read -e -p "(默认: 1350):" MTU
-    [ -z "${MTU}" ] && MTU=1350
-    expr ${MTU} + 1 &>/dev/null
-    if [ $? -eq 0 ]; then
-        if [ ${MTU} -ge 1 ] && [ ${MTU:0:1} != 0 ]; then
-            echo
-            echo -e "${Red_font_prefix}  MTU = ${MTU}${Font_color_suffix}"
-            echo
-            break
+        echo -e "请设置 UDP 数据包的 MTU (最大传输单元)值"
+        read -e -p "(默认: 1350):" MTU
+        [ -z "${MTU}" ] && MTU=1350
+        expr ${MTU} + 1 &>/dev/null
+        if [ $? -eq 0 ]; then
+            if [ ${MTU} -ge 1 ] && [ ${MTU:0:1} != 0 ]; then
+                echo
+                echo -e "${Red}  MTU = ${MTU}${suffix}"
+                echo
+                break
+            fi
         fi
-    fi
-    echo
-    echo -e "${Error} 请输入一个大于0的数."
-    echo
-    continue
+        echo
+        echo -e "${Error} 请输入一个大于0的数."
+        echo
+        continue
     done
     
     # 设置发送窗口大小 sndwnd
     while true
     do
-    echo -e "请设置发送窗口大小(sndwnd)\n${Tip} 发送窗口过大会浪费过多流量"
-    read -e -p "(默认: 1024):" sndwnd
-    [ -z "${sndwnd}" ] && sndwnd=1024
-    expr ${sndwnd} + 1 &>/dev/null
-    if [ $? -eq 0 ]; then
-        if [ ${sndwnd} -ge 1 ] && [ ${sndwnd:0:1} != 0 ]; then
-            echo
-            echo -e "${Red_font_prefix}  sndwnd = ${sndwnd}${Font_color_suffix}"
-            echo
-            break
+        echo -e "请设置发送窗口大小(sndwnd)\n${Tip} 发送窗口过大会浪费过多流量"
+        read -e -p "(默认: 1024):" sndwnd
+        [ -z "${sndwnd}" ] && sndwnd=1024
+        expr ${sndwnd} + 1 &>/dev/null
+        if [ $? -eq 0 ]; then
+            if [ ${sndwnd} -ge 1 ] && [ ${sndwnd:0:1} != 0 ]; then
+                echo
+                echo -e "${Red}  sndwnd = ${sndwnd}${suffix}"
+                echo
+                break
+            fi
         fi
-    fi
-    echo
-    echo -e "${Error} 请输入一个大于0的数."
-    echo
-    continue
+        echo
+        echo -e "${Error} 请输入一个大于0的数."
+        echo
+        continue
     done
     
     # 设置接收窗口大小 rcvwnd
     while true
     do
-    echo -e "请设置接收窗口大小(rcvwnd)"
-    read -e -p "(默认: 1024):" rcvwnd
-    [ -z "${rcvwnd}" ] && rcvwnd=1024
-    expr ${rcvwnd} + 1 &>/dev/null
-    if [ $? -eq 0 ]; then
-        if [ ${rcvwnd} -ge 1 ] && [ ${rcvwnd:0:1} != 0 ]; then
-            echo
-            echo -e "${Red_font_prefix}  rcvwnd = ${rcvwnd}${Font_color_suffix}"
-            echo
-            break
+        echo -e "请设置接收窗口大小(rcvwnd)"
+        read -e -p "(默认: 1024):" rcvwnd
+        [ -z "${rcvwnd}" ] && rcvwnd=1024
+        expr ${rcvwnd} + 1 &>/dev/null
+        if [ $? -eq 0 ]; then
+            if [ ${rcvwnd} -ge 1 ] && [ ${rcvwnd:0:1} != 0 ]; then
+                echo
+                echo -e "${Red}  rcvwnd = ${rcvwnd}${suffix}"
+                echo
+                break
+            fi
         fi
-    fi
-    echo
-    echo -e "${Error} 请输入一个大于0的数."
-    echo
-    continue
+        echo
+        echo -e "${Error} 请输入一个大于0的数."
+        echo
+        continue
     done
 
     # 设置前向纠错 datashard
     while true
     do
-    echo -e "请设置前向纠错(datashard) \n${Tip} 该参数必须两端一致"
-    read -e -p "(默认: 10):" datashard
-    [ -z "${datashard}" ] && datashard=10
-    expr ${datashard} + 1 &>/dev/null
-    if [ $? -eq 0 ]; then
-        if [ ${datashard} -ge 1 ] && [ ${datashard:0:1} != 0 ]; then
-            echo
-            echo -e "${Red_font_prefix}  datashard = ${datashard}${Font_color_suffix}"
-            echo
-            break
+        echo -e "请设置前向纠错(datashard) \n${Tip} 该参数必须两端一致"
+        read -e -p "(默认: 10):" datashard
+        [ -z "${datashard}" ] && datashard=10
+        expr ${datashard} + 1 &>/dev/null
+        if [ $? -eq 0 ]; then
+            if [ ${datashard} -ge 1 ] && [ ${datashard:0:1} != 0 ]; then
+                echo
+                echo -e "${Red}  datashard = ${datashard}${suffix}"
+                echo
+                break
+            fi
         fi
-    fi
-    echo
-    echo -e "${Error} 请输入一个大于0的数."
-    echo
-    continue
+        echo
+        echo -e "${Error} 请输入一个大于0的数."
+        echo
+        continue
     done
     
     # 设置前向纠错 parityshard
     while true
     do
-    echo -e "请设置前向纠错(parityshard) \n${Tip} 该参数必须两端一致"
-    read -e -p "(默认: 3):" parityshard
-    [ -z "${parityshard}" ] && parityshard=3
-    expr ${parityshard} + 1 &>/dev/null
-    if [ $? -eq 0 ]; then
-        if [ ${parityshard} -ge 1 ] && [ ${parityshard:0:1} != 0 ]; then
-            echo
-            echo -e "${Red_font_prefix}  parityshard = ${parityshard}${Font_color_suffix}"
-            echo
-            break
+        echo -e "请设置前向纠错(parityshard) \n${Tip} 该参数必须两端一致"
+        read -e -p "(默认: 3):" parityshard
+        [ -z "${parityshard}" ] && parityshard=3
+        expr ${parityshard} + 1 &>/dev/null
+        if [ $? -eq 0 ]; then
+            if [ ${parityshard} -ge 1 ] && [ ${parityshard:0:1} != 0 ]; then
+                echo
+                echo -e "${Red}  parityshard = ${parityshard}${suffix}"
+                echo
+                break
+            fi
         fi
-    fi
-    echo
-    echo -e "${Error} 请输入一个大于0的数."
-    echo
-    continue
+        echo
+        echo -e "${Error} 请输入一个大于0的数."
+        echo
+        continue
     done
     
     # 设置差分服务代码点 DSCP
     while true
     do
-    echo -e "设置差分服务代码点(DSCP)"
-    read -e -p "(默认: 46):" DSCP
-    [ -z "${DSCP}" ] && DSCP=46
-    expr ${DSCP} + 1 &>/dev/null
-    if [ $? -eq 0 ]; then
-        if [ ${DSCP} -ge 1 ] && [ ${DSCP:0:1} != 0 ]; then
-            echo
-            echo -e "${Red_font_prefix}  DSCP = ${DSCP}${Font_color_suffix}"
-            echo
-            break
+        echo -e "设置差分服务代码点(DSCP)"
+        read -e -p "(默认: 46):" DSCP
+        [ -z "${DSCP}" ] && DSCP=46
+        expr ${DSCP} + 1 &>/dev/null
+        if [ $? -eq 0 ]; then
+            if [ ${DSCP} -ge 1 ] && [ ${DSCP:0:1} != 0 ]; then
+                echo
+                echo -e "${Red}  DSCP = ${DSCP}${suffix}"
+                echo
+                break
+            fi
         fi
-    fi
-    echo
-    echo -e "${Error} 请输入一个大于0的数."
-    echo
-    continue
+        echo
+        echo -e "${Error} 请输入一个大于0的数."
+        echo
+        continue
     done 
 }
 
@@ -934,32 +955,32 @@ install_prepare_libev_obfs(){
     if autoconf_version || centosversion 6; then
         while true
         do
-        echo -e "请为simple-obfs选择obfs\n"
-        for ((i=1;i<=${#OBFUSCATION_WRAPPER[@]};i++ )); do
-            hint="${OBFUSCATION_WRAPPER[$i-1]}"
-            echo -e "${Green_font_prefix}  ${i}.${Font_color_suffix} ${hint}"
-        done
-        echo
-        read -e -p "(默认: ${OBFUSCATION_WRAPPER[0]}):" libev_obfs
-        [ -z "$libev_obfs" ] && libev_obfs=1
-        expr ${libev_obfs} + 1 &>/dev/null
-        if [ $? -ne 0 ]; then
+            echo -e "请为simple-obfs选择obfs\n"
+            for ((i=1;i<=${#OBFUSCATION_WRAPPER[@]};i++ )); do
+                hint="${OBFUSCATION_WRAPPER[$i-1]}"
+                echo -e "${Green}  ${i}.${suffix} ${hint}"
+            done
             echo
-            echo -e "${Error} 请输入一个数字"
+            read -e -p "(默认: ${OBFUSCATION_WRAPPER[0]}):" libev_obfs
+            [ -z "$libev_obfs" ] && libev_obfs=1
+            expr ${libev_obfs} + 1 &>/dev/null
+            if [ $? -ne 0 ]; then
+                echo
+                echo -e "${Error} 请输入一个数字"
+                echo
+                continue
+            fi
+            if [[ "$libev_obfs" -lt 1 || "$libev_obfs" -gt ${#OBFUSCATION_WRAPPER[@]} ]]; then
+                echo
+                echo -e "${Error} 请输入一个数字在 [1-${#OBFUSCATION_WRAPPER[@]}] 之间"
+                echo
+                continue
+            fi
+            shadowsocklibev_obfs=${OBFUSCATION_WRAPPER[$libev_obfs-1]}
             echo
-            continue
-        fi
-        if [[ "$libev_obfs" -lt 1 || "$libev_obfs" -gt ${#OBFUSCATION_WRAPPER[@]} ]]; then
+            echo -e "${Red}  obfs = ${shadowsocklibev_obfs}${suffix}"
             echo
-            echo -e "${Error} 请输入一个数字在 [1-${#OBFUSCATION_WRAPPER[@]}] 之间"
-            echo
-            continue
-        fi
-        shadowsocklibev_obfs=${OBFUSCATION_WRAPPER[$libev_obfs-1]}
-        echo
-        echo -e "${Red_font_prefix}  obfs = ${shadowsocklibev_obfs}${Font_color_suffix}"
-        echo
-        break
+            break
         done
     else
         echo
@@ -977,7 +998,7 @@ install_prepare_libev_goquiet(){
     read -e -p "(默认: 204.79.197.200:443):" gqwebaddr
     [ -z "$gqwebaddr" ] && gqwebaddr="204.79.197.200:443"
     echo
-    echo -e "${Red_font_prefix}  WebServerAddr = ${gqwebaddr}${Font_color_suffix}"
+    echo -e "${Red}  WebServerAddr = ${gqwebaddr}${suffix}"
     echo
     echo -e "${Tip} server_port已被重置为：port = ${shadowsocksport}"
     echo 
@@ -987,7 +1008,7 @@ install_prepare_libev_goquiet(){
     read -e -p "(默认: ${ran_str16}):" gqkey
     [ -z "$gqkey" ] && gqkey=${ran_str16}
     echo
-    echo -e "${Red_font_prefix}  Key = ${gqkey}${Font_color_suffix}"
+    echo -e "${Red}  Key = ${gqkey}${suffix}"
     echo
 }
 
@@ -998,7 +1019,7 @@ install_prepare_libev_cloak(){
     read -e -p "(默认: 204.79.197.200:443):" ckwebaddr
     [ -z "$ckwebaddr" ] && ckwebaddr="204.79.197.200:443"
     echo
-    echo -e "${Red_font_prefix}  WebServerAddr = ${ckwebaddr}${Font_color_suffix}"
+    echo -e "${Red}  WebServerAddr = ${ckwebaddr}${suffix}"
     echo
     echo -e "${Tip} server_port已被重置为：port = ${shadowsocksport}"
     echo 
@@ -1010,7 +1031,7 @@ install_prepare_libev_cloak(){
         mkdir -p "${ckdbp}/db-backup"
     fi
     echo
-    echo -e "${Red_font_prefix}  DatabasePath = ${ckdbp}${Font_color_suffix}"
+    echo -e "${Red}  DatabasePath = ${ckdbp}${suffix}"
     echo
 }
 
@@ -1021,11 +1042,11 @@ install_prepare(){
     install_prepare_cipher
     echo -e "请选择要安装的SS-Plugin
     
-  ${Green_font_prefix}1.${Font_color_suffix} v2ray
-  ${Green_font_prefix}2.${Font_color_suffix} kcptun
-  ${Green_font_prefix}3.${Font_color_suffix} simple-obfs
-  ${Green_font_prefix}4.${Font_color_suffix} goquiet (unofficial)
-  ${Green_font_prefix}5.${Font_color_suffix} cloak (based goquiet)
+  ${Green}1.${suffix} v2ray
+  ${Green}2.${suffix} kcptun
+  ${Green}3.${suffix} simple-obfs
+  ${Green}4.${suffix} goquiet (unofficial)
+  ${Green}5.${suffix} cloak (based goquiet)
   "
     echo && read -e -p "(默认: 不安装)：" plugin_num
     [[ -z "${plugin_num}" ]] && plugin_num="" && echo -e "\n${Tip} 当前未选择任何插件，仅安装Shadowsocks-libev."
@@ -1057,7 +1078,7 @@ error_detect_depends(){
     echo -e "${Info} 开始安装依赖包 ${depend}"
     ${command} > /dev/null 2>&1
     if [ $? -ne 0 ]; then
-        echo -e "${Error} 依赖包${red}${depend}${Font_color_suffix}安装失败，请检查. "
+        echo -e "${Error} 依赖包${red}${depend}${suffix}安装失败，请检查. "
         echo "Checking the error message and run the script again."
         exit 1
     fi
@@ -1228,6 +1249,21 @@ EOF
         sed '/^}/i\    "plugin":"gq-server",\n    "plugin_opts":"'"WebServerAddr=${gqwebaddr};Key=${gqkey}"'"' -i ${SHADOWSOCKS_LIBEV_CONFIG}
     elif [[ ${plugin_num} == "5" ]]; then
         sed '/^}/i\    "plugin":"ck-server",\n    "plugin_opts":"'"WebServerAddr=${ckwebaddr};PrivateKey=${ckpv};AdminUID=${ckauid};DatabasePath=${ckdbp}/userinfo.db;BackupDirPath=${ckdbp}/db-backup"'"' -i ${SHADOWSOCKS_LIBEV_CONFIG}
+        
+        # write ck-client config
+        if [ ! -d "$(dirname ${CK_CLIENT_CONFIG})" ]; then
+            mkdir -p $(dirname ${CK_CLIENT_CONFIG})
+        fi
+        cat > ${CK_CLIENT_CONFIG}<<-EOF
+{
+    "UID":"${ckauid}",
+    "PublicKey":"${ckpub}",
+    "ServerName":"www.bing.com",
+    "TicketTimeHint":3600,
+    "NumConn":4,
+    "MaskBrowser":"chrome"
+}
+EOF
     fi
 }
 
@@ -1405,147 +1441,194 @@ install_cloak(){
     fi
 }
 
-install_completed_libev(){
-    clear -x
-    ldconfig
-    ${SHADOWSOCKS_LIBEV_INIT} start
-    echo > ${HUMAN_CONFIG}
-    echo -e "Congratulations, ${Green_font_prefix}Shadowsocks-libev${Font_color_suffix} server install completed!" >> ${HUMAN_CONFIG}
-    echo -e "服务器地址            : ${Red_font_prefix} $(get_ip) ${Font_color_suffix}" >> ${HUMAN_CONFIG}    
-    if [ "$(command -v kcptun-server)" ]; then
-        echo -e "服务器端口            : ${Red_font_prefix} ${listen_port} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-    else
-        echo -e "服务器端口            : ${Red_font_prefix} ${shadowsocksport} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-    fi
-    echo -e "      密码            : ${Red_font_prefix} ${shadowsockspwd} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-    echo -e "      加密            : ${Red_font_prefix} ${shadowsockscipher} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+qr_generate_libev(){
+    local link_head="ss://"
+    local cipher_pwd=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}")
+    local ip_port_plugin="@$(get_ip):${shadowsocksport}/?plugin=${plugin_client_name}"
     
-    if [ "${plugin_num}" == "1" ]; then
-        if [ "$(command -v v2ray-plugin)" ]; then
-            echo -e "  插件程序            : ${Red_font_prefix} v2ray-plugin ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-            if [[ ${libev_v2ray} == "1" ]]; then
-                echo -e "  插件选项            :                                                      " >> ${HUMAN_CONFIG}
-            elif [[ ${libev_v2ray} == "2" ]]; then
-                echo -e "  插件选项            : ${Red_font_prefix} tls;host=${domain} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-            elif [[ ${libev_v2ray} == "3" ]]; then
-                echo -e "  插件选项            : ${Red_font_prefix} mode=quic;host=${domain} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-            fi
-            if ${fast_open}; then
-                echo -e "  插件参数            : ${Red_font_prefix} fast-open=${fast_open} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-            else
-                echo -e "  插件参数            :                                                                     " >> ${HUMAN_CONFIG}
-            fi
-            echo >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
-            echo -e "Shadowsocks-libev配置路径：${SHADOWSOCKS_LIBEV_CONFIG}" >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
-            echo -e "${Tip} 插件程序下载：https://github.com/shadowsocks/v2ray-plugin/releases 下载v2ray-plugin-windows-amd64 版本" >> ${HUMAN_CONFIG}
-            echo -e "       请解压将插件重命名为 v2ray-plugin.exe 并移动至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
+    if [[ ${plugin_num} == "1" ]]; then
+        if [[ ${libev_v2ray} == "1" ]]; then
+            local plugin_opts=""
+            ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
+            
+        elif [[ ${libev_v2ray} == "2" ]]; then
+            local plugin_opts=$(get_str_replace ";tls;host=${domain}")
+            ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
+            
+        elif [[ ${libev_v2ray} == "3" ]]; then
+            local plugin_opts=$(get_str_replace ";mode=quic;host=${domain}")
+            ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
         fi
-    elif [ "${plugin_num}" == "2" ]; then
-        ${KCPTUN_INIT} start
-        if [ "$(command -v kcptun-server)" ]; then
-            echo -e "  插件程序            : ${Red_font_prefix} kcptun ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-            echo -e "  插件选项            :                                                             " >> ${HUMAN_CONFIG}
-            echo -e "  插件参数            : ${Red_font_prefix} -l %SS_LOCAL_HOST%:%SS_LOCAL_PORT% -r %SS_REMOTE_HOST%:%SS_REMOTE_PORT% --crypt ${crypt} --key ${key} --mtu ${MTU} --sndwnd ${sndwnd} --rcvwnd ${rcvwnd} --mode ${mode} --datashard ${datashard} --parityshard ${parityshard} --dscp ${DSCP}${Font_color_suffix}" >> ${HUMAN_CONFIG}
-            echo  >> ${HUMAN_CONFIG}
-            echo  >> ${HUMAN_CONFIG}
-            echo -e "Mobile Terminal Params: crypt=${crypt};key=${key};mtu=${MTU};sndwnd=${sndwnd};rcvwnd=${rcvwnd};mode=${mode};datashard=${datashard};parityshard=${parityshard};dscp=${DSCP}" >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
-            echo -e "           Kcptun配置路径：${KCPTUN_CONFIG}" >> ${HUMAN_CONFIG}
-            echo -e "Shadowsocks-libev配置路径：${SHADOWSOCKS_LIBEV_CONFIG}" >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
-            echo -e "${Tip} 插件程序下载：https://github.com/xtaci/kcptun/releases 下载kcptun-windows-amd64 版本" >> ${HUMAN_CONFIG}
-            echo -e "       请解压将带client字样的文件重命名为 kcptun.exe 并移至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
-        fi 
-    elif [ "${plugin_num}" == "3" ]; then
-        if [ "$(command -v obfs-server)" ]; then
-            echo -e "  插件程序            : ${Red_font_prefix} obfs-local ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-            echo -e "  插件选项            : ${Red_font_prefix} obfs=${shadowsocklibev_obfs} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-            
-            if ${fast_open}; then
-                echo -e "  插件参数            : ${Red_font_prefix} obfs-host=www.bing.com;fast-open=${fast_open} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-            else
-                echo -e "  插件参数            : ${Red_font_prefix} obfs-host=www.bing.com ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-            fi
-            
-            echo >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
-            echo -e "Shadowsocks-libev配置路径：${SHADOWSOCKS_LIBEV_CONFIG}" >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
-            echo -e "${Tip} 插件程序下载：https://github.com/shadowsocks/simple-obfs/releases 下载obfs-local.zip 版本" >> ${HUMAN_CONFIG}
-            echo -e "       请将 obfs-local.exe 和 libwinpthread-1.dll 两个文件解压至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
-        fi
-    elif [ "${plugin_num}" == "4" ]; then
-        if [ "$(command -v gq-server)" ]; then
-            echo -e "  插件程序            : ${Red_font_prefix} gq-client ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-            echo -e "  插件选项            : ${Red_font_prefix} ServerName=www.bing.com;Key=${gqkey};TicketTimeHint=3600;Browser=chrome ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-            
-            if ${fast_open}; then
-                echo -e "  插件参数            : ${Red_font_prefix} fast-open=${fast_open} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-            else
-                echo -e "  插件参数            : ${Red_font_prefix}  ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-            fi
-            
-            echo >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
-            echo -e "Shadowsocks-libev配置路径：${SHADOWSOCKS_LIBEV_CONFIG}" >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
-            echo -e "${Tip} 插件程序下载：https://github.com/cbeuw/GoQuiet/releases 下载gq-client-windows-amd64-1.2.2.exe版本" >> ${HUMAN_CONFIG}
-            echo -e "       请将 gq-client-windows-amd64-1.2.2.exe 重命名为 gq-client 并移动至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
-            echo -e "${Tip} 插件选项 ServerName 字段，域名用的是默认值，如果你前面填写的是其它的ip:port 这里请换成ip对应的域名。" >> ${HUMAN_CONFIG}
-        fi 
-    elif [ "${plugin_num}" == "5" ]; then
-        if [ "$(command -v ck-server)" ]; then
-            echo -e "  插件程序            : ${Red_font_prefix} ck-client ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-            echo -e "  插件选项            : ${Red_font_prefix} UID=${ckauid};PublicKey=${ckpub};ServerName=www.bing.com;TicketTimeHint=3600;NumConn=4;MaskBrowser=chrome ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-            
-            if ${fast_open}; then
-                echo -e "  插件参数            : ${Red_font_prefix} fast-open=${fast_open} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-            else
-                echo -e "  插件参数            :                                      " >> ${HUMAN_CONFIG}
-            fi
-            
-            echo >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
-            echo -e "                Cloak公钥：${ckpub}" >> ${HUMAN_CONFIG}
-            echo -e "                Cloak私钥：${ckpv}" >> ${HUMAN_CONFIG}
-            echo -e "           Cloak AdminUID：${ckauid}" >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
-            echo -e "Shadowsocks-libev配置路径：${SHADOWSOCKS_LIBEV_CONFIG}" >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
-            echo -e "${Tip} 插件程序下载：https://github.com/cbeuw/Cloak/releases 下载ck-client-windows-amd64-1.1.1.exe版本" >> ${HUMAN_CONFIG}
-            echo -e "       请将 ck-client-windows-amd64-1.1.1.exe重命名为 ck-client 并移动至 SS-Windows 客户端-安装目录的${Red_font_prefix}根目录${Font_color_suffix}." >> ${HUMAN_CONFIG}
-            echo >> ${HUMAN_CONFIG}
-            echo -e "${Tip} 插件选项 ServerName 字段，域名用的是默认值，如果你前面填写的是其它的ip:port 这里请换成ip对应的域名。" >> ${HUMAN_CONFIG}
-            echo -e "$      另外，你可以将插件选项的参数以json文件方式存储，然后ck-client -a -c <path-to-ckclient.json> 进入admin 模式，根据提示添加新用户。" >> ${HUMAN_CONFIG}
-        fi
+        
+    elif [[ ${plugin_num} == "2" ]]; then
+        local plugin_opts=$(get_str_replace ";crypt=${crypt};key=${key};mtu=${MTU};sndwnd=${sndwnd};rcvwnd=${rcvwnd};mode=${mode};datashard=${datashard};parityshard=${parityshard};dscp=${DSCP}")
+        ip_port_plugin="@$(get_ip):${listen_port}/?plugin=${plugin_client_name}"
+        ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
+        
+    elif [[ ${plugin_num} == "3" ]]; then
+        local plugin_opts=$(get_str_replace ";obfs=${shadowsocklibev_obfs}")
+        ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
+        
+    elif [[ ${plugin_num} == "4" ]]; then
+        local plugin_opts=$(get_str_replace ";ServerName=www.bing.com;Key=${gqkey};TicketTimeHint=3600;Browser=chrome")
+        ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
+        
+    elif [[ ${plugin_num} == "5" ]]; then
+        local plugin_opts=$(get_str_replace ";UID=${ckauid};PublicKey=${ckpub};ServerName=www.bing.com;TicketTimeHint=3600;NumConn=4;MaskBrowser=chrome")
+        ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
+        
+    else
+        local tmp=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}@$(get_ip):${shadowsocksport}")
+        ss_link="ss://${tmp}"
+    fi
+    
+    if [ "$(command -v qrencode)" ]; then
+        # generate qr code
+        echo -n "${ss_link}" | qrencode -s8 -o ${CUR_DIR}/shadowsocks_libev_qr.png
+        
+        # qr code path
+        qr_code="${CUR_DIR}/shadowsocks_libev_qr.png"
     fi
 }
 
-qr_generate_libev(){
-    if [ "$(command -v qrencode)" ]; then
-        if [[ ${plugin_num} == "2" ]]; then
-            local tmp=$(echo -n "${shadowsockscipher}:${shadowsockspwd}@$(get_ip):${listen_port}" | base64 -w0)
-            local qr_code="ss://${tmp}"
-        else
-            local tmp=$(echo -n "${shadowsockscipher}:${shadowsockspwd}@$(get_ip):${shadowsocksport}" | base64 -w0)
-            local qr_code="ss://${tmp}"
+install_completed_libev(){
+    ldconfig
+    ${SHADOWSOCKS_LIBEV_INIT} start
+    
+    clear -x
+    echo >> ${HUMAN_CONFIG}
+    echo -e " Shadowsocks的配置信息：" >> ${HUMAN_CONFIG}
+    echo >> ${HUMAN_CONFIG}
+    echo -e " 地址     : ${Red}$(get_ip)${suffix}" >> ${HUMAN_CONFIG}    
+    if [ "$(command -v kcptun-server)" ]; then
+        echo -e " 端口     : ${Red}${listen_port}${suffix}" >> ${HUMAN_CONFIG}
+    else
+        echo -e " 端口     : ${Red}${shadowsocksport}${suffix}" >> ${HUMAN_CONFIG}
+    fi
+    echo -e " 密码     : ${Red}${shadowsockspwd}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
+    
+    if [ "${plugin_num}" == "1" ]; then
+        if [ "$(command -v v2ray-plugin)" ]; then
+            echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
+            if [[ ${libev_v2ray} == "1" ]]; then
+                echo -e " 插件选项 :                                                      " >> ${HUMAN_CONFIG}
+            elif [[ ${libev_v2ray} == "2" ]]; then
+                echo -e " 插件选项 : ${Red}tls;host=${domain}${suffix}" >> ${HUMAN_CONFIG}
+            elif [[ ${libev_v2ray} == "3" ]]; then
+                echo -e " 插件选项 : ${Red}mode=quic;host=${domain}${suffix}" >> ${HUMAN_CONFIG}
+            fi
+            if ${fast_open}; then
+                echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
+            else
+                echo -e " 插件参数 :                                                                     " >> ${HUMAN_CONFIG}
+            fi
+            echo >> ${HUMAN_CONFIG}
+            echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
+            echo -e " SS二维码 : ${Green}${qr_code}${suffix}" >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
+            echo -e "        插件程序下载：https://github.com/shadowsocks/v2ray-plugin/releases 下载 windows-amd64 版本" >> ${HUMAN_CONFIG}
+            echo -e "        请解压将插件重命名为 ${plugin_client_name}.exe 并移动至 SS-Windows 客户端-安装目录的${Red}根目录${suffix}." >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
         fi
+        
+    elif [ "${plugin_num}" == "2" ]; then
+        ${KCPTUN_INIT} start
+        if [ "$(command -v kcptun-server)" ]; then
+            echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
+            echo -e " 插件选项 :                                                             " >> ${HUMAN_CONFIG}
+            echo -e " 插件参数 : ${Red}-l %SS_LOCAL_HOST%:%SS_LOCAL_PORT% -r %SS_REMOTE_HOST%:%SS_REMOTE_PORT% --crypt ${crypt} --key ${key} --mtu ${MTU} --sndwnd ${sndwnd} --rcvwnd ${rcvwnd} --mode ${mode} --datashard ${datashard} --parityshard ${parityshard} --dscp ${DSCP}${suffix}" >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo -e " 手机参数 : crypt=${crypt};key=${key};mtu=${MTU};sndwnd=${sndwnd};rcvwnd=${rcvwnd};mode=${mode};datashard=${datashard};parityshard=${parityshard};dscp=${DSCP}" >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
+            echo -e " SS二维码 : ${Green}${qr_code}${suffix}" >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
+            echo -e "        插件程序下载：https://github.com/xtaci/kcptun/releases 下载 windows-amd64 版本." >> ${HUMAN_CONFIG}
+            echo -e "        请解压将带client字样的文件重命名为 ${plugin_client_name}.exe 并移至 SS-Windows 客户端-安装目录的${Red}根目录${suffix}." >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+        fi 
+        
+    elif [ "${plugin_num}" == "3" ]; then
+        if [ "$(command -v obfs-server)" ]; then
+            echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
+            echo -e " 插件选项 : ${Red}obfs=${shadowsocklibev_obfs}${suffix}" >> ${HUMAN_CONFIG}
+            
+            if ${fast_open}; then
+                echo -e " 插件参数 : ${Red}obfs-host=www.bing.com;fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
+            else
+                echo -e " 插件参数 : ${Red}obfs-host=www.bing.com${suffix}" >> ${HUMAN_CONFIG}
+            fi
+            echo >> ${HUMAN_CONFIG}
+            echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
+            echo -e " SS二维码 : ${Green}${qr_code}${suffix}" >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
+            echo -e "        插件程序下载：https://github.com/shadowsocks/simple-obfs/releases 下载obfs-local.zip 版本." >> ${HUMAN_CONFIG}
+            echo -e "        请将 ${plugin_client_name}.exe 和 libwinpthread-1.dll 两个文件解压至 SS-Windows 客户端-安装目录的${Red}根目录${suffix}." >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+        fi
+        
+    elif [ "${plugin_num}" == "4" ]; then
+        if [ "$(command -v gq-server)" ]; then
+            echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
+            echo -e " 插件选项 : ${Red}ServerName=www.bing.com;Key=${gqkey};TicketTimeHint=3600;Browser=chrome${suffix}" >> ${HUMAN_CONFIG}
+            
+            if ${fast_open}; then
+                echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
+            else
+                echo -e " 插件参数 : ${Red}${suffix}" >> ${HUMAN_CONFIG}
+            fi
+            echo >> ${HUMAN_CONFIG}
+            echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
+            echo -e " SS二维码 : ${Green}${qr_code}${suffix}" >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
+            echo -e "        插件程序下载：https://github.com/cbeuw/GoQuiet/releases 下载windows-amd64版本" >> ${HUMAN_CONFIG}
+            echo -e "        请解压将带client字样的文件重命名为 ${plugin_client_name}.exe 并移动至 SS-Windows 客户端-安装目录的${Red}根目录${suffix}." >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo -e " ${Tip} 插件选项 ServerName 字段，域名用的是默认值，如果你前面填写的是其它的ip:port 这里请换成ip对应的域名." >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+        fi 
+        
+    elif [ "${plugin_num}" == "5" ]; then
+        if [ "$(command -v ck-server)" ]; then
+            echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
+            echo -e " 插件选项 : ${Red}UID=${ckauid};PublicKey=${ckpub};ServerName=www.bing.com;TicketTimeHint=3600;NumConn=4;MaskBrowser=chrome${suffix}" >> ${HUMAN_CONFIG}
+            if ${fast_open}; then
+                echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
+            else
+                echo -e " 插件参数 :                                      " >> ${HUMAN_CONFIG}
+            fi
+            echo >> ${HUMAN_CONFIG}
+            echo -e " AdminUID : ${ckauid}" >> ${HUMAN_CONFIG}
+            echo -e " CK  公钥 : ${ckpub}" >> ${HUMAN_CONFIG}
+            echo -e " CK  私钥 : ${ckpv}" >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
+            echo -e " SS二维码 : ${Green}${qr_code}${suffix}" >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
+            echo -e "        插件程序下载：https://github.com/cbeuw/Cloak/releases 下载windows-amd64版本" >> ${HUMAN_CONFIG}
+            echo -e "        请解压将带client字样的文件重命名为 ${plugin_client_name}.exe 并移动至 SS-Windows 客户端-安装目录的${Red}根目录${suffix}." >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+            echo -e " ${Tip} 插件选项 ServerName 字段，域名用的是默认值，如果你前面填写的是其它的ip:port 这里请换成ip对应的域名." >> ${HUMAN_CONFIG}
+            echo -e "        另外，你可以使用 ck-client -a -c <path-to-ckclient.json> 进入admin 模式，根据提示添加新用户." >> ${HUMAN_CONFIG}
+            echo >> ${HUMAN_CONFIG}
+        fi
+        
+    else
         echo  >> ${HUMAN_CONFIG}
-        echo "Your QR Code: (For Shadowsocks Windows, OSX, Android and iOS clients)" >> ${HUMAN_CONFIG}
-        echo -e "${Green_font_prefix} ${qr_code} ${Font_color_suffix}" >> ${HUMAN_CONFIG}
-        echo -n "${qr_code}" | qrencode -s8 -o ${CUR_DIR}/shadowsocks_libev_qr.png
-        echo "Your QR Code has been saved as a PNG file path:" >> ${HUMAN_CONFIG}
-        echo -e "${Green_font_prefix} ${CUR_DIR}/shadowsocks_libev_qr.png ${Font_color_suffix}" >> ${HUMAN_CONFIG}
+        echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
+        echo -e " SS二维码 : ${Green}${qr_code}${suffix}" >> ${HUMAN_CONFIG}
+        echo >> ${HUMAN_CONFIG}
     fi
 }
 
@@ -1563,17 +1646,22 @@ install_main(){
     ldconfig
     install_mbedtls
     install_shadowsocks_libev
-    if [ "${plugin_num}" == "1" ]; then        
+    if [ "${plugin_num}" == "1" ]; then
         install_v2ray_plugin
+        plugin_client_name="v2ray"
     elif [ "${plugin_num}" == "2" ]; then
         install_kcptun
+        plugin_client_name="kcptun"
     elif [ "${plugin_num}" == "3" ]; then
         install_simple_obfs
+        plugin_client_name="obfs-local"
     elif [ "${plugin_num}" == "4" ]; then
         install_goquiet
+        plugin_client_name="gq-client"
     elif [ "${plugin_num}" == "5" ]; then
         install_cloak
         gen_credentials
+        plugin_client_name="ck-client"
         
     fi
 }
@@ -1590,14 +1678,9 @@ install_step_full(){
     install_main
     install_cleanup
     config_shadowsocks
-    install_completed_libev
     qr_generate_libev
+    install_completed_libev
     config_show
-
-    echo
-    echo "Installed successfully."
-    echo "Enjoy it!"
-    echo
 }
 
 install_cleanup(){
@@ -1621,7 +1704,7 @@ do_start(){
         fi
     else
         echo
-        echo -e " ${Red_font_prefix} Shadowsocks-libev 未安装，请尝试安装后，再来执行此操作。${Font_color_suffix}"
+        echo -e " ${Red} Shadowsocks-libev 未安装，请尝试安装后，再来执行此操作。${suffix}"
         echo
     fi  
 }
@@ -1649,12 +1732,12 @@ do_status(){
     if [[ -e '/usr/local/bin/ss-server' ]]; then
         check_pid
         if [[ ! -z "${PID}" ]]; then
-            echo -e " 当前状态: ${Green_font_prefix}已安装${Font_color_suffix} 并 ${Green_font_prefix}已启动${Font_color_suffix}"
+            echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
         else
-            echo -e " 当前状态: ${Green_font_prefix}已安装${Font_color_suffix} 但 ${Red_font_prefix}未启动${Font_color_suffix}"
+            echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
         fi
     else
-        echo -e " 当前状态: ${Red_font_prefix}未安装${Font_color_suffix}"
+        echo -e " 当前状态: ${Red}未安装${suffix}"
     fi
 }
 
@@ -1683,57 +1766,73 @@ add_a_new_uid(){
         fi
         
         # get parameter from ss config.json
-        local new_uid=$(ck-server -u)
+        gen_credentials
+        local new_uid=${ckauid}
         local ip=$(get_ip)
         local port=443
-        local admin_uid=$(cat ${HUMAN_CONFIG} | grep -o -P "Cloak AdminUID：.*" | sed 's/Cloak AdminUID：//g')
-        local public_key=$(cat ${HUMAN_CONFIG} | grep -o -P "Cloak公钥：.*" | sed 's/Cloak公钥：//g')
-        
-        
-        # write ck-client config
-        if [ ! -d "$(dirname ${CK_CLIENT_CONFIG})" ]; then
-            mkdir -p $(dirname ${CK_CLIENT_CONFIG})
-        fi
-        cat > ${CK_CLIENT_CONFIG}<<-EOF
-{
-    "UID":"${admin_uid}",
-    "PublicKey":"${public_key}",
-    "ServerName":"www.bing.com",
-    "TicketTimeHint":3600,
-    "NumConn":4,
-    "MaskBrowser":"chrome"
-}
-EOF
+        local admin_uid=$(cat ${SHADOWSOCKS_LIBEV_CONFIG} | grep -o -P "AdminUID=.*?;" | sed 's/AdminUID=//g;s/;//g')
+
         # show about info
         echo
-        echo -e "    ${Green_font_prefix}New UID${Font_color_suffix}：${Red_font_prefix}${new_uid}${Font_color_suffix}"
+        echo -e " ${Green}UID  (新)${suffix}：${Red}${new_uid}${suffix}"
         echo
-        echo -e "    ${Green_font_prefix}IP PORT${Font_color_suffix}：${Red_font_prefix}${ip}:${port}${Font_color_suffix}"
-        echo -e "  ${Green_font_prefix}Admin UID${Font_color_suffix}：${Red_font_prefix}${admin_uid}${Font_color_suffix}"
+        echo -e " ${Green}IP (端口)${suffix}：${Red}${ip}:${port}${suffix}"
+        echo -e " ${Green}UID(管理)${suffix}：${Red}${admin_uid}${suffix}"
         echo
         echo -e "
-  添加新user步骤：
-        1. ck-server -u 生成一个New 的 UID
-        2. ck-client -a -c <path-to-ckclient.json> 进入admin 模式。
-        3. 输入，服务器ip:port 和 AdminUID ，选择4 ，新建一个用户。
-        4. 根据提示输入如下：
-            1. Newly generated UID
-            2. SessionsCap              # 用户可以拥有的最大并发会话数(填写 4)
-            3. UpRate                   # 上行速度 (单位：bytes/s)
-            4. DownRate                 # 下行速度 (单位：bytes/s)
-            5. UpCredit                 # 上行限制 (单位：bytes)
-            6. DownCredit               # 下行限制 (单位：bytes)
-            7. ExpiryTime               # user账号的有效期，unix时间格式(10位时间戳)
-        5. 将你的 公钥 和 新生成的UID 给这个新用户。
+ 添加新用户：
+    1. ck-server -u 生成一个New 的 UID
+    2. ck-client -a -c <path-to-ckclient.json> 进入admin 模式。
+    3. 输入，服务器ip:port 和 AdminUID ，选择4 ，新建一个用户。
+    4. 根据提示输入如下：
+        1. Newly generated UID      # 输入上方新生成的 UID
+        2. SessionsCap              # 用户可以拥有的最大并发会话数(填写 4)
+        3. UpRate                   # 上行速度 (单位：bytes/s)
+        4. DownRate                 # 下行速度 (单位：bytes/s)
+        5. UpCredit                 # 上行限制 (单位：bytes)
+        6. DownCredit               # 下行限制 (单位：bytes)
+        7. ExpiryTime               # user账号的有效期，unix时间格式(10位时间戳)
+    5. 将你的 公钥 和 新生成的UID 给这个新用户。
     
-    ${Tip} 脚本从第3步开始...
-    "
+ ${Tip} 下方输入从第3步开始，根据提示输入，退出请按 Ctrl + C ..."
         
         # Enter admin mode
         ck-client -a -c ${CK_CLIENT_CONFIG}
     else
         echo
-        echo -e "  ${Red_font_prefix}仅支持 ss + cloak 下使用，请确认是否是以该组合形式运行...${Font_color_suffix}"
+        echo -e " ${Error} 仅支持 ss + cloak 下使用，请确认是否是以该组合形式运行..."
+        echo
+        exit 1
+    fi
+}
+
+get_new_ck_ssurl(){
+    local ckauid=$1
+    if [[ -n ${ckauid} ]]; then
+        if [[ -e '/usr/local/bin/ck-client' ]]; then
+            local shadowsockscipher=$(cat ${SHADOWSOCKS_LIBEV_CONFIG} | grep -o -P "method\":\".*?\"" | sed 's/method\":\"//g;s/\"//g')
+            local shadowsockspwd=$(cat ${SHADOWSOCKS_LIBEV_CONFIG} | grep -o -P "password\":\".*?\"" | sed 's/password\":\"//g;s/\"//g')
+            local shadowsocksport=$(cat ${SHADOWSOCKS_LIBEV_CONFIG} | grep -o -P "server_port\":.*?\," | sed 's/server_port\"://g;s/\,//g')
+            local ckpub=$(cat ${CK_CLIENT_CONFIG} | grep -o -P "PublicKey\":\".*?\"" | sed 's/PublicKey\":\"//g;s/\"//g')
+            
+            local link_head="ss://"
+            local cipher_pwd=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}")
+            local ip_port_plugin="@$(get_ip):${shadowsocksport}/?plugin=ck-client"
+            local plugin_opts=$(get_str_replace ";UID=${ckauid};PublicKey=${ckpub};ServerName=www.bing.com;TicketTimeHint=3600;NumConn=4;MaskBrowser=chrome")
+
+            local ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
+            
+            echo
+            echo -e " ${Green}生成的新用户SS链接：${suffix}"
+            echo -e "    ${Red}${ss_link}${suffix}"
+            echo
+        fi
+    else
+        echo -e "
+ Usage:
+    ./${0} url <new add user uid>"
+        echo
+        echo -e " ${Error} 仅支持 ss + cloak 下使用，请确认是否是以该组合形式运行，并且，使用 ./${0} uid 添加过新用户..."
         echo
         exit 1
     fi
@@ -1825,11 +1924,11 @@ do_install(){
         exit 1
     fi
     
-    echo -e " Shadowsocks-libev一键管理脚本 ${Red_font_prefix}[v${SHELL_VERSION}]${Font_color_suffix}
+    echo -e " Shadowsocks-libev一键管理脚本 ${Red}[v${SHELL_VERSION}]${suffix}
 
-    ${Green_font_prefix}1.${Font_color_suffix} BBR
-    ${Green_font_prefix}2.${Font_color_suffix} Install
-    ${Green_font_prefix}3.${Font_color_suffix} Uninstall
+    ${Green}1.${suffix} BBR
+    ${Green}2.${suffix} Install
+    ${Green}3.${suffix} Uninstall
      "
     do_status
     echo && read -e -p "请输入数字 [1-3]：" menu_num
@@ -1858,6 +1957,9 @@ case ${action} in
         ;;
     uid)
         add_a_new_${action}
+        ;;
+    url)
+        get_new_ck_ss${action} "${2}"
         ;;
     show)
         config_${action}

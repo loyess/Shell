@@ -11,7 +11,7 @@ chmod +x ss-plugins.sh
 
 ```shell
 Usage: 
-./ss-plugins.sh [install|uninstall|start|stop|restart|status|show|uid|url|help] [new uid]
+./ss-plugins.sh [install|uninstall|start|stop|restart|status|show|uid|url|scan|help] [new_uid|ss_url]
 ```
 
 &nbsp;
@@ -66,7 +66,7 @@ Usage:
  手机参数 : crypt=aes;key=0EP4edcP;mtu=1350;sndwnd=1024;rcvwnd=1024;mode=fast2;datashard=10;parityshard=3;dscp=46
 
  SS  链接 : ss://YWVzLTI1Ni1nY206YmMxeFFrajM=@66.66.66.66:6666/?plugin=kcptun%3bcrypt%3daes%3bkey%3d0EP4edcP%3bmtu%3d1350%3bsndwnd%3d1024%3brcvwnd%3d1024%3bmode%3dfast2%3bdatashard%3d10%3bparityshard%3d3%3bdscp%3d46
- SS二维码 : /root/shadowsocks_libev_qr.png
+ SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >
 
 
  [注意] SS链接不支持插件参数导入，请手动填写。使用kcptun插件时，该链接只支持手机导入.

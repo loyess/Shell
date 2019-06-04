@@ -151,6 +151,7 @@ usage() {
         show             显示可视化配置
         uid              添加一个New User (仅ss + cloak下可用)
         url              生成一个New SS URL (仅ss + cloak下可用)
+        scan             根据生成的ss:// 链接，在当前终端上，手动生成一个可供扫描的二维码
         help             查看脚本使用说明
         
 	EOF
@@ -360,7 +361,7 @@ gen_random_prot(){
 }
 
 gen_random_str(){
-    ran_str8=$(head -c 100 /dev/urandom | tr -dc a-z0-9A-Z |head -c 8)
+    ran_str8=$(head -c 100 /dev/urandom | tr -dc a-z0-9A-Z |head -c 12)
     ran_str16=$(head -c 100 /dev/urandom | tr -dc a-z0-9A-Z |head -c 16)
 }
 
@@ -1482,18 +1483,11 @@ qr_generate_libev(){
         ss_link="ss://${tmp}"
     fi
     
-    if [ "$(command -v qrencode)" ]; then
-        # generate qr code
-        echo -n "${ss_link}" | qrencode -s8 -o ${CUR_DIR}/shadowsocks_libev_qr.png
-        
-        # qr code path
-        qr_code="${CUR_DIR}/shadowsocks_libev_qr.png"
-    fi
 }
 
 install_completed_libev(){
     ldconfig
-    ${SHADOWSOCKS_LIBEV_INIT} start
+    ${SHADOWSOCKS_LIBEV_INIT} start > /dev/null 2>&1
     
     clear -x
     echo >> ${HUMAN_CONFIG}
@@ -1525,7 +1519,7 @@ install_completed_libev(){
             fi
             echo >> ${HUMAN_CONFIG}
             echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
-            echo -e " SS二维码 : ${Green}${qr_code}${suffix}" >> ${HUMAN_CONFIG}
+            echo -e " SS二维码 : ./${0} scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
@@ -1535,7 +1529,7 @@ install_completed_libev(){
         fi
         
     elif [ "${plugin_num}" == "2" ]; then
-        ${KCPTUN_INIT} start
+        ${KCPTUN_INIT} start  > /dev/null 2>&1
         if [ "$(command -v kcptun-server)" ]; then
             echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
             echo -e " 插件选项 :                                                             " >> ${HUMAN_CONFIG}
@@ -1544,7 +1538,7 @@ install_completed_libev(){
             echo -e " 手机参数 : crypt=${crypt};key=${key};mtu=${MTU};sndwnd=${sndwnd};rcvwnd=${rcvwnd};mode=${mode};datashard=${datashard};parityshard=${parityshard};dscp=${DSCP}" >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
-            echo -e " SS二维码 : ${Green}${qr_code}${suffix}" >> ${HUMAN_CONFIG}
+            echo -e " SS二维码 : ./${0} scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
@@ -1565,7 +1559,7 @@ install_completed_libev(){
             fi
             echo >> ${HUMAN_CONFIG}
             echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
-            echo -e " SS二维码 : ${Green}${qr_code}${suffix}" >> ${HUMAN_CONFIG}
+            echo -e " SS二维码 : ./${0} scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
@@ -1586,7 +1580,7 @@ install_completed_libev(){
             fi
             echo >> ${HUMAN_CONFIG}
             echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
-            echo -e " SS二维码 : ${Green}${qr_code}${suffix}" >> ${HUMAN_CONFIG}
+            echo -e " SS二维码 : ./${0} scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
@@ -1612,7 +1606,7 @@ install_completed_libev(){
             echo -e " CK  私钥 : ${ckpv}" >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
-            echo -e " SS二维码 : ${Green}${qr_code}${suffix}" >> ${HUMAN_CONFIG}
+            echo -e " SS二维码 : ./${0} scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
@@ -1627,7 +1621,7 @@ install_completed_libev(){
     else
         echo  >> ${HUMAN_CONFIG}
         echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
-        echo -e " SS二维码 : ${Green}${qr_code}${suffix}" >> ${HUMAN_CONFIG}
+        echo -e " SS二维码 : ./${0} scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
         echo >> ${HUMAN_CONFIG}
     fi
 }
@@ -1718,7 +1712,7 @@ do_stop(){
     ps -ef |grep -v grep | grep gq-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
     ps -ef |grep -v grep | grep ck-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
     echo
-    echo -e "Stopping Shadowsocks-libev success"
+    echo -e " Stopping Shadowsocks-libev success"
     echo
 }
 
@@ -1743,9 +1737,38 @@ do_status(){
 
 config_show(){
     if [ -e $HUMAN_CONFIG ]; then
+        clear -x
         cat $HUMAN_CONFIG
     else
         echo "The visual configuration was not found..."
+    fi
+}
+
+gen_qr_code_manual(){
+    local ss_url=$1
+    
+    if [[ $(echo "${ss_url}" | grep "^ss://") ]]; then
+        if [ "$(command -v qrencode)" ]; then
+            echo
+            echo -e "生成二维码如下："
+            echo
+            qrencode -m 2 -l L -t ANSIUTF8 -k "${ss_url}"
+            echo
+            echo -e " ${Tip} 扫码后请仔细检查配置是否正确，如若存在差异请自行手动调整..."
+            echo
+        else
+            echo
+            echo -e " ${Error} 手动生成二维码失败，请确认qrencode是否正常安装..."
+            echo
+        fi
+    else
+        echo -e "
+ Usage:
+    ./${0} scan <a ss url>"
+        echo
+        echo -e " ${Error} 仅支持生成ss:// 开头的链接，请确认使用方式和要生成的链接是否正确..."
+        echo
+        exit 1
     fi
 }
 
@@ -1846,7 +1869,7 @@ do_uninstall(){
         # check Shadowsocks-libev status
         ${SHADOWSOCKS_LIBEV_INIT} status > /dev/null 2>&1
         if [ $? -eq 0 ]; then
-            ${SHADOWSOCKS_LIBEV_INIT} stop
+            ${SHADOWSOCKS_LIBEV_INIT} stop > /dev/null 2>&1
         fi
         local ss_service_name=$(basename ${SHADOWSOCKS_LIBEV_INIT})
         if check_sys packageManager yum; then
@@ -1858,7 +1881,7 @@ do_uninstall(){
         # check kcptun status
         ${KCPTUN_INIT} status > /dev/null 2>&1
         if [ $? -eq 0 ]; then
-            ${KCPTUN_INIT} stop
+            ${KCPTUN_INIT} stop > /dev/null 2>&1
         fi
         local kcp_service_name=$(basename ${KCPTUN_INIT})
         if check_sys packageManager yum; then
@@ -1887,7 +1910,7 @@ do_uninstall(){
         rm -f /usr/local/bin/gq-server
         rm -f /usr/local/bin/ck-server
         rm -f /usr/local/bin/ck-client
-        rm -fr /etc/cloak
+        rm -fr $(dirname ${CK_CLIENT_CONFIG}) > /dev/null 2>&1
         rm -f /usr/local/bin/obfs-local
         rm -f /usr/local/bin/obfs-server
         rm -f /usr/local/lib/libshadowsocks-libev.a
@@ -1903,8 +1926,9 @@ do_uninstall(){
         rm -f /usr/local/share/man/man8/shadowsocks-libev.8
         rm -fr /usr/local/share/doc/shadowsocks-libev
         rm -f ${SHADOWSOCKS_LIBEV_INIT}
-        rm -fr $(dirname ${KCPTUN_INSTALL_DIR})
-        rm -fr $(dirname ${KCPTUN_CONFIG})
+        rm -fr $(dirname ${KCPTUN_INSTALL_DIR}) > /dev/null 2>&1
+        rm -fr $(dirname ${KCPTUN_CONFIG}) > /dev/null 2>&1
+        rm -fr ${KCPTUN_LOG_DIR}
         rm -f ${KCPTUN_INIT}
 
         echo -e "${Info} Shadowsocks-libev 卸载成功..."
@@ -1960,6 +1984,9 @@ case ${action} in
         ;;
     url)
         get_new_ck_ss${action} "${2}"
+        ;;
+    scan)
+        gen_qr_code_manual "${2}"
         ;;
     show)
         config_${action}

@@ -84,12 +84,7 @@ Service_caddy(){
 install_caddy(){
 	check_root
 	if [[ -e ${caddy_file} ]]; then
-		echo && echo -e "${Error_font_prefix}[信息]${Font_suffix} 检测到 Caddy 已安装，是否继续安装(覆盖更新)？[y/N]"
-		read -e -p "(默认: n):" yn
-		[[ -z ${yn} ]] && yn="n"
-		if [[ ${yn} == [Nn] ]]; then
-			echo && echo "已取消..." && exit 1
-		fi
+		echo && echo -e "${Error_font_prefix}[信息]${Font_suffix} 检测到 Caddy 已安装，如需重新安装请先卸载 !" && echo && exit 1
 	fi
 	Download_caddy
 	Service_caddy
@@ -101,26 +96,20 @@ install_caddy(){
 }
 uninstall_caddy(){
 	check_installed_status
-	echo && echo "确定要卸载 Caddy ? [y/N]"
-	read -e -p "(默认: n):" unyn
-	[[ -z ${unyn} ]] && unyn="n"
-	if [[ ${unyn} == [Yy] ]]; then
-		PID=`ps -ef |grep "caddy" |grep -v "grep" |grep -v "init.d" |grep -v "service" |grep -v "caddy_install" |awk '{print $2}'`
-		[[ ! -z ${PID} ]] && kill -9 ${PID}
-		if [[ ${release} = "centos" ]]; then
-			chkconfig --del caddy
-		else
-			update-rc.d -f caddy remove
-		fi
-		[[ -s /tmp/caddy.log ]] && rm -rf /tmp/caddy.log
-		rm -rf ${caddy_file}
-		rm -rf ${caddy_conf_file}
-		rm -rf /etc/init.d/caddy
-		[[ ! -e ${caddy_file} ]] && echo && echo -e "${Info_font_prefix}[信息]${Font_suffix} Caddy 卸载完成 !" && echo && exit 1
-		echo && echo -e "${Error_font_prefix}[错误]${Font_suffix} Caddy 卸载失败 !" && echo
-	else
-		echo && echo "卸载已取消..." && echo
-	fi
+    PID=`ps -ef |grep "caddy" |grep -v "grep" |grep -v "init.d" |grep -v "service" |grep -v "caddy_install" |awk '{print $2}'`
+    [[ ! -z ${PID} ]] && kill -9 ${PID}
+    if [[ ${release} = "centos" ]]; then
+        chkconfig --del caddy
+    else
+        update-rc.d -f caddy remove
+    fi
+    [[ -s /tmp/caddy.log ]] && rm -rf /tmp/caddy.log
+    rm -rf ${caddy_file}
+    rm -rf ${caddy_conf_file}
+    rm -rf /etc/init.d/caddy
+    [[ ! -e ${caddy_file} ]] && echo && echo -e "${Info_font_prefix}[信息]${Font_suffix} Caddy 卸载完成 !" && echo && exit 1
+    echo && echo -e "${Error_font_prefix}[错误]${Font_suffix} Caddy 卸载失败 !" && echo
+
 }
 check_sys
 action=$1

@@ -52,6 +52,10 @@ CK_DB_PATH="/etc/cloak/db"
 CK_CLIENT_CONFIG="/etc/cloak/ckclient.json"
 
 
+# caddy config
+CADDY_CONF_FILE="/usr/local/caddy/Caddyfile"
+
+
 
 # shadowsocklibev-libev Ciphers
 SHADOWSOCKS_CIPHERS=(
@@ -97,9 +101,11 @@ none
 
 # v2ray-plugin Transport mode
 V2RAY_PLUGIN_TRANSPORT_MODE=(
-http
-tls
-quic
+ws+http
+ws+tls+[cdn]
+quic+tls
+ws+tls+web
+ws+tls+web+cdn
 )
 
 
@@ -379,6 +385,7 @@ gen_credentials(){
     done
 }
 
+
 install_prepare_port() {
     while true
     do
@@ -392,7 +399,7 @@ install_prepare_port() {
                 echo
                 echo -e "${Red}  port = ${shadowsocksport}${suffix}"
                 echo
-                echo -e "${Tip} 如果选择v2ray-plugin 或 goquiet (unofficial) 或 cloak (based goquiet) 此参数将会被重置为 80 或 443"
+                echo -e "${Tip} 如果插件选择v2ray(1|2|3)、goquiet、cloak时，此端口会被重置为 80 或 443，且插件选择${Red}v2ray(4|5)${suffix}时，该端口不能是443"
                 echo 
                 break
             fi
@@ -497,7 +504,7 @@ centosversion(){
 install_prepare_libev_v2ray(){
     while true
     do
-        echo -e "请为v2ray-plugin选择Transport mode\n"
+        echo -e "请为v2ray-plugin选择 Transport mode\n"
         for ((i=1;i<=${#V2RAY_PLUGIN_TRANSPORT_MODE[@]};i++ )); do
             hint="${V2RAY_PLUGIN_TRANSPORT_MODE[$i-1]}"
             echo -e "${Green}  ${i}.${suffix} ${hint}"
@@ -542,11 +549,12 @@ install_prepare_libev_v2ray(){
                 fi
                 
                 echo
-                read -e -p "请输入你的域名 [ 注意：必须是已成功解析过本机ip地址的域名 ]：" domain
+                echo -e "${Tip} 必须是已成功被 Cloudflare 解析过本机ip地址的域名"
+                read -e -p "请输入你的域名：" domain
                 echo
                 
                 # Is the test domain correct.
-                ping ${domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}' | head -n 1 > /dev/null 2>&1
+                ping ${domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}' | head -n 1 | grep -P ${IPV4_RE} > /dev/null 2>&1
                 # if [[ $? -eq 0 ]] && test "$(ping ${domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}' | head -n 1)" = $(get_ip); then
                 if [[ $? -eq 0 ]]; then
                     echo
@@ -554,7 +562,8 @@ install_prepare_libev_v2ray(){
                     echo
                 else
                     echo
-                    echo -e "${Error} 请确认该域名是否有解析过本机ip地址，如果没有，前往域名服务商解析本机ip地址至该域名，并重新尝试."
+                    echo -e "${Error} 请确认该域名是否有交给 Cloudflare 托管，并解析过本机ip地址"
+                    echo -e "         如果没有，前往域名服务商将域名DNS服务器更改为 Cloudflare 的DNS服务器，并在 Cloudflare 上解析本机ip地址至该域名，并重新尝试."
                     echo
                     
                     let "flag++"
@@ -575,6 +584,10 @@ install_prepare_libev_v2ray(){
                         curl  https://get.acme.sh | sh
                         echo
                         echo -e "${Info} acme.sh 安装完成. "
+                        echo
+                    else
+                        echo
+                        echo -e "${Info} 证书生成工具 acme.sh 已经安装，自动进入下一步... "
                         echo
                     fi
                     
@@ -670,6 +683,105 @@ install_prepare_libev_v2ray(){
                         continue
                     fi
                 fi
+                
+            elif [[ ${libev_v2ray} = "4" ]]; then
+                while true
+                do
+                    echo
+                    echo -e "${Tip} 必须是已成功解析过本机ip地址的域名"
+                    read -e -p "请输入你的域名：" domain
+                    echo
+                    
+                    # Is the test domain correct.
+                    ping ${domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}' | head -n 1 | grep -P ${IPV4_RE} > /dev/null 2>&1
+                    if [[ $? -eq 0 ]] && test "$(ping ${domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}' | head -n 1 )" = $(get_ip); then
+                    #if [[ $? -eq 0 ]]; then
+                        echo
+                        echo -e "${Red}  host = ${domain}${suffix}"
+                        echo
+                        break
+                    else
+                        echo
+                        echo -e "${Error} 请确认该域名是否有解析过本机ip地址，如果没有，前往域名服务商解析本机ip地址至该域名，并重新尝试."
+                        echo
+                        continue
+                    fi
+                done
+                    
+                    echo 
+                    read -e -p "请输入供于域名证书生成所需的 Email：" email
+                    echo
+                    echo -e "${Red}  email = ${email}${suffix}"
+                    echo
+                    
+                    echo
+                    read -e -p "请输入你的WebSocket分流路径(默认：/v2ray)：" path
+                    echo
+                    [ -z "${path}" ] && path="/v2ray"
+                    echo
+                    echo -e "${Red}  path = ${path}${suffix}"
+                    echo
+                    
+                    echo
+                    echo -e "${Tip} 该站点建议满足(位于海外、支持HTTPS协议、会用来传输大流量... )的条件，默认站点，随意找的，不建议使用"
+                    read -e -p "请输入你需要镜像到的站点(默认：https://www.bostonusa.com)：" mirror_site
+                    echo
+                    [ -z "${mirror_site}" ] && mirror_site="https://www.bostonusa.com"
+                    echo
+                    echo -e "${Red}  mirror_site = ${mirror_site}${suffix}"
+                    echo 
+
+            elif [[ ${libev_v2ray} = "5" ]]; then
+                while true
+                do
+                    echo
+                    echo -e "${Tip} 必须是已成功被 Cloudflare 解析过本机ip地址的域名"
+                    read -e -p "请输入你的域名：" domain
+                    echo
+                    
+                    # Is the test domain correct.
+                    ping ${domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}' | head -n 1 | grep -P ${IPV4_RE} > /dev/null 2>&1
+                    # if [[ $? -eq 0 ]] && test "$(ping ${domain} -c 1 | sed '1{s/[^(]*(//;s/).*//;q}' | head -n 1)" = $(get_ip); then
+                    if [[ $? -eq 0 ]]; then
+                        echo
+                        echo -e "${Red}  host = ${domain}${suffix}"
+                        echo
+                        break
+                    else
+                        echo
+                        echo -e "${Error} 请确认该域名是否有交给 Cloudflare 托管，并解析过本机ip地址"
+                        echo -e "         如果没有，前往域名服务商将域名DNS服务器更改为 Cloudflare 的DNS服务器，并在 Cloudflare 上解析本机ip地址至该域名，并重新尝试."
+                        echo
+                        continue
+                    fi
+                done
+                    
+                    echo
+                    read -e -p "请输入你的WebSocket分流路径(默认：/v2ray)：" path
+                    echo
+                    [ -z "${path}" ] && path="/v2ray"
+                    echo
+                    echo -e "${Red}  path = ${path}${suffix}"
+                    echo 
+
+                    echo
+                    echo -e "${Tip} 该站点建议满足(位于海外、支持HTTPS协议、会用来传输大流量... )的条件，默认站点，随意找的，不建议使用"
+                    read -e -p "请输入你需要镜像到的站点(默认：https://www.bostonusa.com)：" mirror_site
+                    echo
+                    [ -z "${mirror_site}" ] && mirror_site="https://www.bostonusa.com"
+                    echo
+                    echo -e "${Red}  mirror_site = ${mirror_site}${suffix}"
+                    echo 
+                    
+                    echo
+                    read -e -p "请输入你的Cloudflare的Global API Key：" CF_Key
+                    echo
+                    echo -e "${Red}  cloudflare_api_key = ${CF_Key}${suffix}"
+                    echo 
+                    read -e -p "请输入你的Cloudflare的账号Email：" CF_Email
+                    echo
+                    echo -e "${Red}  cloudflare_email = ${CF_Email}${suffix}"
+                    echo
             fi
             break
         done 
@@ -1243,6 +1355,45 @@ EOF
         elif [[ ${libev_v2ray} == "3" ]]; then
             sed 's/tcp_and_udp/tcp_only/' -i ${SHADOWSOCKS_LIBEV_CONFIG}
             sed '/^}/i\    "plugin":"v2ray-plugin",\n    "plugin_opts":"'"server;mode=quic;host=${domain};cert=${cerpath};key=${keypath}"'"' -i ${SHADOWSOCKS_LIBEV_CONFIG}
+        elif [[ ${libev_v2ray} == "4" ]]; then
+            sed '/^}/i\    "plugin":"v2ray-plugin",\n    "plugin_opts":"'"server;path=${path};loglevel=none"'"' -i ${SHADOWSOCKS_LIBEV_CONFIG}
+            
+            # write caddy confing
+            cat > ${CADDY_CONF_FILE}<<-EOF
+${domain}:443 {
+    gzip
+    tls ${email}
+    timeouts none
+    proxy ${path} localhost:${shadowsocksport} {
+        websocket
+        header_upstream -Origin
+    }
+    proxy / ${mirror_site} {
+        except ${path}
+    }
+}
+EOF
+            
+        elif [[ ${libev_v2ray} == "5" ]]; then
+            sed '/^}/i\    "plugin":"v2ray-plugin",\n    "plugin_opts":"'"server;path=${path};loglevel=none"'"' -i ${SHADOWSOCKS_LIBEV_CONFIG}
+            
+            # write caddy confing
+            cat > ${CADDY_CONF_FILE}<<-EOF
+${domain}:443 {
+    gzip
+    tls {
+        dns cloudflare
+    }
+    timeouts none
+    proxy ${path} localhost:${shadowsocksport} {
+        websocket
+        header_upstream -Origin
+    }
+    proxy / ${mirror_site} {
+        except ${path}
+    }
+}
+EOF
         fi
     elif [[ ${plugin_num} == "3" ]]; then
         sed '/^}/i\    "plugin":"obfs-server",\n    "plugin_opts":"'"obfs=${shadowsocklibev_obfs}"'"' -i ${SHADOWSOCKS_LIBEV_CONFIG}
@@ -1350,6 +1501,13 @@ install_v2ray_plugin(){
         install_cleanup
         exit 1
     fi
+        
+    
+    if [[ ${libev_v2ray} == "4" ]]; then
+        wget -qO- https://git.io/fjuAR | bash -s install
+    elif [[ ${libev_v2ray} == "5" ]]; then
+        wget -qO- https://git.io/fjuAR | bash -s install tls.dns.cloudflare
+    fi
 }
 
 install_kcptun(){
@@ -1377,6 +1535,7 @@ install_kcptun(){
         exit 1
     fi
     [ -f ${KCPTUN_INSTALL_DIR} ] && ln -s ${KCPTUN_INSTALL_DIR} /usr/bin
+    
 }
 
 install_simple_obfs(){
@@ -1459,6 +1618,10 @@ qr_generate_libev(){
         elif [[ ${libev_v2ray} == "3" ]]; then
             local plugin_opts=$(get_str_replace ";mode=quic;host=${domain}")
             ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
+        elif [[ (${libev_v2ray} == "4") || (${libev_v2ray} == "5") ]]; then
+            local plugin_opts=$(get_str_replace ";tls;host=${domain};path=${path};loglevel=none")
+            ip_port_plugin="@$(get_ip):443/?plugin=${plugin_client_name}"
+            ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
         fi
         
     elif [[ ${plugin_num} == "2" ]]; then
@@ -1496,6 +1659,8 @@ install_completed_libev(){
     echo -e " 地址     : ${Red}$(get_ip)${suffix}" >> ${HUMAN_CONFIG}    
     if [ "$(command -v kcptun-server)" ]; then
         echo -e " 端口     : ${Red}${listen_port}${suffix}" >> ${HUMAN_CONFIG}
+    elif [[ ${libev_v2ray} == "4" || ${libev_v2ray} == "5" ]]; then
+        echo -e " 端口     : ${Red}443${suffix}" >> ${HUMAN_CONFIG}
     else
         echo -e " 端口     : ${Red}${shadowsocksport}${suffix}" >> ${HUMAN_CONFIG}
     fi
@@ -1511,6 +1676,11 @@ install_completed_libev(){
                 echo -e " 插件选项 : ${Red}tls;host=${domain}${suffix}" >> ${HUMAN_CONFIG}
             elif [[ ${libev_v2ray} == "3" ]]; then
                 echo -e " 插件选项 : ${Red}mode=quic;host=${domain}${suffix}" >> ${HUMAN_CONFIG}
+            elif [[ ${libev_v2ray} == "4" || ${libev_v2ray} == "5" ]]; then
+                export CLOUDFLARE_EMAIL="${CF_Email}"
+                export CLOUDFLARE_API_KEY="${CF_Key}"
+                /etc/init.d/caddy start > /dev/null 2>&1
+                echo -e " 插件选项 : ${Red}tls;host=${domain};path=${path};loglevel=none${suffix}" >> ${HUMAN_CONFIG}
             fi
             if ${fast_open}; then
                 echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
@@ -1695,6 +1865,8 @@ do_start(){
         ${SHADOWSOCKS_LIBEV_INIT} start
         if [ "$(command -v kcptun-server)" ]; then
             ${KCPTUN_INIT} start
+        elif [ "$(command -v caddy)" ]; then
+            /etc/init.d/caddy start
         fi
     else
         echo
@@ -1711,6 +1883,7 @@ do_stop(){
     ps -ef |grep -v grep | grep obfs-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
     ps -ef |grep -v grep | grep gq-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
     ps -ef |grep -v grep | grep ck-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+    ps -ef |grep -v grep | grep caddy |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
     echo
     echo -e " Stopping Shadowsocks-libev success"
     echo
@@ -1897,7 +2070,10 @@ do_uninstall(){
         ps -ef |grep -v grep | grep ck-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
         
         # uninstall acme.sh
-        ~/.acme.sh/acme.sh --uninstall > /dev/null 2>&1 && rm -rf ~/.acme.sh
+        # ~/.acme.sh/acme.sh --uninstall > /dev/null 2>&1 && rm -rf ~/.acme.sh
+        
+        # uninstall caddy
+        wget -qO- https://git.io/fjuAR | bash -s uninstall > /dev/null 2>&1
         
         rm -fr $(dirname ${SHADOWSOCKS_LIBEV_CONFIG})
         rm -f /usr/local/bin/ss-local

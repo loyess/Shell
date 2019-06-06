@@ -32,20 +32,30 @@ Usage:
 
 &nbsp;
 
-2. ### 可选插件
+2. ### 可选插件与插件可选项
 
 ~~~shell
-
-请选择要安装的SS-Plugin
-
   1. v2ray
+        1. ws+http
+        2. ws+tls+[cdn]
+        3. quic+tls
+        4. ws+tls+web
+        5. ws+tls+web+cdn
   2. kcptun
   3. simple-obfs
+        1. http
+        2. tls
   4. goquiet (unofficial)
   5. cloak (based goquiet)
 
-
-(默认: 不安装)：
+注意：kcptun仅用于加速。
+	 simple-obfs已被弃用，但不影响使用。
+	 cloak是goquiet的升级版，增加了同端口，多用用户。
+	 v2ray插件，带tls的都需要域名，cdn此处仅支持cloudflare，wdb则用了caddy。
+	 
+注意：使用v2ray插件的选项5时，请将CloudFlare后台Crypto页面里的SSL设置，改为 Full 或 Full (strict) 模       式（前者不验证服务器证书，后者则会）。
+	 否则，在浏览器打开你的域名会提示 ”重定向的次数过多“ 的错误！！！
+	 
 ~~~
 
 &nbsp;

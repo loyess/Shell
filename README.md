@@ -48,13 +48,16 @@ Usage:
   4. goquiet (unofficial)
   5. cloak (based goquiet)
 
-注意：kcptun仅用于加速。
-	 simple-obfs已被弃用，但不影响使用。
-	 cloak是goquiet的升级版，增加了同端口，多用用户。
-	 v2ray插件，带tls的都需要域名，cdn此处仅支持cloudflare，wdb则用了caddy。
+
+注意：
+     kcptun仅用于加速。
+     simple-obfs已被弃用，但不影响使用。
+     cloak是goquiet的升级版，增加了同端口，多用用户。
+     v2ray插件，带tls的都需要域名，cdn此处仅支持cloudflare，wdb则用了caddy。
 	 
-注意：使用v2ray插件的选项5时，请将CloudFlare后台Crypto页面里的SSL设置，改为 Full 或 Full (strict) 模       式（前者不验证服务器证书，后者则会）。
-	 否则，在浏览器打开你的域名会提示 ”重定向的次数过多“ 的错误！！！
+注意：
+     使用v2ray插件的选项5时，请将CloudFlare后台Crypto页面里的SSL设置，改为 Full 或 Full (strict) 模式（前者不验证服务器证书，后者则会）。
+     否则，在浏览器打开你的域名会提示 ”重定向的次数过多“ 的错误！！！
 	 
 ~~~
 

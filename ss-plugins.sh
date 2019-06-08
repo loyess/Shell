@@ -1659,7 +1659,7 @@ install_completed_libev(){
             fi
             echo >> ${HUMAN_CONFIG}
             echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
-            echo -e " SS二维码 : ./${0} scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
+            echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
@@ -1678,7 +1678,7 @@ install_completed_libev(){
             echo -e " 手机参数 : crypt=${crypt};key=${key};mtu=${MTU};sndwnd=${sndwnd};rcvwnd=${rcvwnd};mode=${mode};datashard=${datashard};parityshard=${parityshard};dscp=${DSCP}" >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
-            echo -e " SS二维码 : ./${0} scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
+            echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
@@ -1699,7 +1699,7 @@ install_completed_libev(){
             fi
             echo >> ${HUMAN_CONFIG}
             echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
-            echo -e " SS二维码 : ./${0} scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
+            echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
@@ -1720,7 +1720,7 @@ install_completed_libev(){
             fi
             echo >> ${HUMAN_CONFIG}
             echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
-            echo -e " SS二维码 : ./${0} scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
+            echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
@@ -1746,7 +1746,7 @@ install_completed_libev(){
             echo -e " CK  私钥 : ${ckpv}" >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
-            echo -e " SS二维码 : ./${0} scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
+            echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo >> ${HUMAN_CONFIG}
             echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
@@ -1761,7 +1761,7 @@ install_completed_libev(){
     else
         echo  >> ${HUMAN_CONFIG}
         echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
-        echo -e " SS二维码 : ./${0} scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
+        echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
         echo >> ${HUMAN_CONFIG}
     fi
 }
@@ -1907,7 +1907,7 @@ gen_qr_code_manual(){
     else
         echo -e "
  Usage:
-    ./${0} scan <a ss url>"
+    ./ss-plugins.sh scan <a ss url>"
         echo
         echo -e " ${Error} 仅支持生成ss:// 开头的链接，请确认使用方式和要生成的链接是否正确..."
         echo
@@ -1996,9 +1996,9 @@ get_new_ck_ssurl(){
     else
         echo -e "
  Usage:
-    ./${0} url <new add user uid>"
+    ./ss-plugins.sh url <new add user uid>"
         echo
-        echo -e " ${Error} 仅支持 ss + cloak 下使用，请确认是否是以该组合形式运行，并且，使用 ./${0} uid 添加过新用户..."
+        echo -e " ${Error} 仅支持 ss + cloak 下使用，请确认是否是以该组合形式运行，并且，使用 ./ss-plugins.sh uid 添加过新用户..."
         echo
         exit 1
     fi

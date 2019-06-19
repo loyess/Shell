@@ -134,6 +134,7 @@ IPV6_RE="^\s*((([0-9A-Fa-f]{1,4}:){7}(([0-9A-Fa-f]{1,4})|:))|(([0-9A-Fa-f]{1,4}:
 Green="\033[32m" && Red="\033[31m" && Yellow="\033[0;33m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && suffix="\033[0m"
 Info="${Green}[信息]${suffix}"
 Error="${Red}[错误]${suffix}"
+Point="${Red}[提示]${suffix}"
 Tip="${Green}[注意]${suffix}"
 Warning="${Yellow}[警告]${suffix}"
 Separator_1="——————————————————————————————"
@@ -150,6 +151,7 @@ usage() {
 
         install          安装
         uninstall        卸载
+        update           升级
         start            启动
         stop             关闭
         restart          重启
@@ -275,6 +277,18 @@ check_kernel_headers(){
         fi
     fi
     return 1
+}
+
+check_ss_libev_version(){
+    if [[ -e '/usr/local/bin/ss-server' ]]; then
+        curr_ver=$(ss-server -v | grep shadowsocks-libev | cut -d\  -f2)
+        latest_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/shadowsocks-libev/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        if version_gt ${latest_ver} ${curr_ver}; then
+            return 0
+        else
+            return 1
+        fi
+    fi
 }
 
 config_firewall(){
@@ -1024,42 +1038,52 @@ install_prepare_libev_kcptun(){
 }
 
 install_prepare_libev_obfs(){
-    if autoconf_version || centosversion 6; then
-        while true
-        do
-            echo -e "请为simple-obfs选择obfs\n"
-            for ((i=1;i<=${#OBFUSCATION_WRAPPER[@]};i++ )); do
-                hint="${OBFUSCATION_WRAPPER[$i-1]}"
-                echo -e "${Green}  ${i}.${suffix} ${hint}"
-            done
-            echo
-            read -e -p "(默认: ${OBFUSCATION_WRAPPER[0]}):" libev_obfs
-            [ -z "$libev_obfs" ] && libev_obfs=1
-            expr ${libev_obfs} + 1 &>/dev/null
-            if [ $? -ne 0 ]; then
-                echo
-                echo -e "${Error} 请输入一个数字"
-                echo
-                continue
-            fi
-            if [[ "$libev_obfs" -lt 1 || "$libev_obfs" -gt ${#OBFUSCATION_WRAPPER[@]} ]]; then
-                echo
-                echo -e "${Error} 请输入一个数字在 [1-${#OBFUSCATION_WRAPPER[@]}] 之间"
-                echo
-                continue
-            fi
-            shadowsocklibev_obfs=${OBFUSCATION_WRAPPER[$libev_obfs-1]}
-            echo
-            echo -e "${Red}  obfs = ${shadowsocklibev_obfs}${suffix}"
-            echo
-            break
-        done
-    else
+    if ! autoconf_version || centosversion 6; then
         echo
-        echo -e "${Info} autoconf 版本小于 2.67，Shadowsocks-libev 插件 simple-obfs 的安装将被跳过."
+        echo -e "${Info} autoconf 版本小于 2.67，Shadowsocks-libev 插件 simple-obfs 的安装将被终止."
         echo
-        
+        exit 1
     fi
+    
+    while true
+    do
+        echo -e "请为simple-obfs选择obfs\n"
+        for ((i=1;i<=${#OBFUSCATION_WRAPPER[@]};i++ )); do
+            hint="${OBFUSCATION_WRAPPER[$i-1]}"
+            echo -e "${Green}  ${i}.${suffix} ${hint}"
+        done
+        echo
+        read -e -p "(默认: ${OBFUSCATION_WRAPPER[0]}):" libev_obfs
+        [ -z "$libev_obfs" ] && libev_obfs=1
+        expr ${libev_obfs} + 1 &>/dev/null
+        if [ $? -ne 0 ]; then
+            echo
+            echo -e "${Error} 请输入一个数字"
+            echo
+            continue
+        fi
+        if [[ "$libev_obfs" -lt 1 || "$libev_obfs" -gt ${#OBFUSCATION_WRAPPER[@]} ]]; then
+            echo
+            echo -e "${Error} 请输入一个数字在 [1-${#OBFUSCATION_WRAPPER[@]}] 之间"
+            echo
+            continue
+        fi
+        shadowsocklibev_obfs=${OBFUSCATION_WRAPPER[$libev_obfs-1]}
+        echo
+        echo -e "${Red}  obfs = ${shadowsocklibev_obfs}${suffix}"
+        echo
+        break
+    done
+    
+    echo
+    echo -e "请为simple-obfs输入用于混淆的域名"
+    echo
+    read -e -p "(默认: www.bing.com):" domain
+    [ -z "$domain" ] && domain="www.bing.com"
+    echo
+    echo -e "${Red}  obfs-host = ${domain}${suffix}"
+    echo
+
 }
 
 install_prepare_libev_goquiet(){
@@ -1074,6 +1098,14 @@ install_prepare_libev_goquiet(){
     echo
     echo -e "${Tip} server_port已被重置为：port = ${shadowsocksport}"
     echo 
+    echo
+    echo -e "请为GoQuiet输入重定向ip:port相对应的域名"
+    echo
+    read -e -p "(默认: www.bing.com):" domain
+    [ -z "$domain" ] && domain="www.bing.com"
+    echo
+    echo -e "${Red}  ServerName = ${domain}${suffix}"
+    echo
     echo
     echo -e "请为GoQuiet输入密钥 [留空以将其设置为16位随机字符串]"
     echo
@@ -1095,6 +1127,14 @@ install_prepare_libev_cloak(){
     echo
     echo -e "${Tip} server_port已被重置为：port = ${shadowsocksport}"
     echo 
+    echo
+    echo -e "请为Cloak输入重定向ip:port相对应的域名"
+    echo
+    read -e -p "(默认: www.bing.com):" domain
+    [ -z "$domain" ] && domain="www.bing.com"
+    echo
+    echo -e "${Red}  ServerName = ${domain}${suffix}"
+    echo
     echo
     echo -e "请为Cloak设置一个userinfo.db存放路径"
     read -e -p "(默认: $CK_DB_PATH)" ckdbp
@@ -1369,7 +1409,7 @@ EOF
 {
     "UID":"${ckauid}",
     "PublicKey":"${ckpub}",
-    "ServerName":"www.bing.com",
+    "ServerName":"${domain}",
     "TicketTimeHint":3600,
     "NumConn":4,
     "MaskBrowser":"chrome"
@@ -1595,11 +1635,11 @@ qr_generate_libev(){
         ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
         
     elif [[ ${plugin_num} == "4" ]]; then
-        local plugin_opts=$(get_str_replace ";ServerName=www.bing.com;Key=${gqkey};TicketTimeHint=3600;Browser=chrome")
+        local plugin_opts=$(get_str_replace ";ServerName=${domain};Key=${gqkey};TicketTimeHint=3600;Browser=chrome")
         ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
         
     elif [[ ${plugin_num} == "5" ]]; then
-        local plugin_opts=$(get_str_replace ";UID=${ckauid};PublicKey=${ckpub};ServerName=www.bing.com;TicketTimeHint=3600;NumConn=4;MaskBrowser=chrome")
+        local plugin_opts=$(get_str_replace ";UID=${ckauid};PublicKey=${ckpub};ServerName=${domain};TicketTimeHint=3600;NumConn=4;MaskBrowser=chrome")
         ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
         
     else
@@ -1693,9 +1733,9 @@ install_completed_libev(){
             echo -e " 插件选项 : ${Red}obfs=${shadowsocklibev_obfs}${suffix}" >> ${HUMAN_CONFIG}
             
             if ${fast_open}; then
-                echo -e " 插件参数 : ${Red}obfs-host=www.bing.com;fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
+                echo -e " 插件参数 : ${Red}obfs-host=${domain};fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
             else
-                echo -e " 插件参数 : ${Red}obfs-host=www.bing.com${suffix}" >> ${HUMAN_CONFIG}
+                echo -e " 插件参数 : ${Red}obfs-host=${domain}${suffix}" >> ${HUMAN_CONFIG}
             fi
             echo >> ${HUMAN_CONFIG}
             echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
@@ -1711,7 +1751,7 @@ install_completed_libev(){
     elif [ "${plugin_num}" == "4" ]; then
         if [ "$(command -v gq-server)" ]; then
             echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
-            echo -e " 插件选项 : ${Red}ServerName=www.bing.com;Key=${gqkey};TicketTimeHint=3600;Browser=chrome${suffix}" >> ${HUMAN_CONFIG}
+            echo -e " 插件选项 : ${Red}ServerName=${domain};Key=${gqkey};TicketTimeHint=3600;Browser=chrome${suffix}" >> ${HUMAN_CONFIG}
             
             if ${fast_open}; then
                 echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
@@ -1734,7 +1774,7 @@ install_completed_libev(){
     elif [ "${plugin_num}" == "5" ]; then
         if [ "$(command -v ck-server)" ]; then
             echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
-            echo -e " 插件选项 : ${Red}UID=${ckauid};PublicKey=${ckpub};ServerName=www.bing.com;TicketTimeHint=3600;NumConn=4;MaskBrowser=chrome${suffix}" >> ${HUMAN_CONFIG}
+            echo -e " 插件选项 : ${Red}UID=${ckauid};PublicKey=${ckpub};ServerName=${domain};TicketTimeHint=3600;NumConn=4;MaskBrowser=chrome${suffix}" >> ${HUMAN_CONFIG}
             if ${fast_open}; then
                 echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
             else
@@ -1770,6 +1810,9 @@ install_bbr(){
     download ${BBR_SHELL_FILE} ${BBR_SCRIPT_URL}
     chmod +x ${BBR_SHELL_FILE}
     ./$(basename ${BBR_SHELL_FILE})
+    rm -f ${BBR_SHELL_FILE}
+    rm -f $(dirname ${BBR_SHELL_FILE})/install_bbr.log
+    
 }
 
 install_main(){
@@ -1960,7 +2003,9 @@ add_a_new_uid(){
         7. ExpiryTime               # user账号的有效期，unix时间格式(10位时间戳)
     5. 将你的 公钥 和 新生成的UID 给这个新用户。
     
- ${Tip} 下方输入从第3步开始，根据提示输入，退出请按 Ctrl + C ..."
+ ${Tip} 下方输入从第3步开始，根据提示输入，退出请按 Ctrl + C ...
+ 
+ "
         
         # Enter admin mode
         ck-client -a -c ${CK_CLIENT_CONFIG}
@@ -1980,11 +2025,12 @@ get_new_ck_ssurl(){
             local shadowsockspwd=$(cat ${SHADOWSOCKS_LIBEV_CONFIG} | grep -o -P "password\":\".*?\"" | sed 's/password\":\"//g;s/\"//g')
             local shadowsocksport=$(cat ${SHADOWSOCKS_LIBEV_CONFIG} | grep -o -P "server_port\":.*?\," | sed 's/server_port\"://g;s/\,//g')
             local ckpub=$(cat ${CK_CLIENT_CONFIG} | grep -o -P "PublicKey\":\".*?\"" | sed 's/PublicKey\":\"//g;s/\"//g')
+            local ckservername=$(cat /etc/cloak/ckclient.json | grep -o -P "ServerName\":\".*?\"" | sed 's/ServerName\":\"//g;s/\"//g')
             
             local link_head="ss://"
             local cipher_pwd=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}")
             local ip_port_plugin="@$(get_ip):${shadowsocksport}/?plugin=ck-client"
-            local plugin_opts=$(get_str_replace ";UID=${ckauid};PublicKey=${ckpub};ServerName=www.bing.com;TicketTimeHint=3600;NumConn=4;MaskBrowser=chrome")
+            local plugin_opts=$(get_str_replace ";UID=${ckauid};PublicKey=${ckpub};ServerName=${ckservername};TicketTimeHint=3600;NumConn=4;MaskBrowser=chrome")
 
             local ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
             
@@ -1998,10 +2044,31 @@ get_new_ck_ssurl(){
  Usage:
     ./ss-plugins.sh url <new add user uid>"
         echo
-        echo -e " ${Error} 仅支持 ss + cloak 下使用，请确认是否是以该组合形式运行，并且，使用 ./ss-plugins.sh uid 添加过新用户..."
+        echo -e " ${Error} 仅支持 ss + cloak 下使用，请确认是否是以该组合形式运行，并且，使用 ./ss-plugins.sh url 添加过新用户..."
         echo
         exit 1
     fi
+}
+
+do_update(){
+    if [[ -e '/usr/local/bin/ss-server' ]]; then
+        if check_ss_libev_version; then
+            do_stop > /dev/null 2>&1
+            download_files
+            install_shadowsocks_libev
+            install_cleanup
+            do_restart > /dev/null 2>&1
+            echo
+            echo -e "${Point} shadowsocklibev-libev升级为 ${latest_ver}最新版本，并已重启运行..."
+            echo
+        else
+            echo
+            echo -e "${Point} shadowsocklibev-libev当前已是最新版本 ${curr_ver}，不需要更新..."
+            echo
+            exit 1
+        fi
+    fi
+    
 }
 
 do_uninstall(){
@@ -2122,7 +2189,7 @@ do_install(){
 
 action=${1:-"install"}
 case ${action} in
-    install|uninstall|start|stop|restart|status)
+    install|uninstall|update|start|stop|restart|status)
         do_${action}
         ;;
     uid)

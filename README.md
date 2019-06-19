@@ -11,7 +11,7 @@ chmod +x ss-plugins.sh
 
 ```shell
 Usage: 
-./ss-plugins.sh [install|uninstall|start|stop|restart|status|show|uid|url|scan|help] [new_uid|ss_url]
+./ss-plugins.sh [install|uninstall|update|start|stop|restart|status|show|uid|url|scan|help] [new_uid|ss_url]
 ```
 
 &nbsp;

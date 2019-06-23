@@ -16,6 +16,27 @@ Usage:
 
 &nbsp;
 
+```shell
+相关目录：
+
+    SS-libev安装目录：/usr/local/bin
+    SS-libev配置文件：/etc/shadowsocks-libev/config.json
+
+    kcptun安装目录：/usr/local/kcptun
+    kcptun配置文件：/etc/kcptun/config.json
+
+    caddy安装目录：/usr/local/caddy
+    caddy配置文件: /usr/local/caddy/Caddyfile
+    caddy生成证书目录：~/.caddy/acme/acme-v02.api.letsencrypt.org/sites/xxx.xxx(域名)/
+
+    acme.sh安装目录：~/.acme.sh
+    acme.sh生成证书目录：~/.acme.sh/xxx.xxx(域名)/
+
+    其它插件可执行二进制文件目录：/usr/local/bin
+```
+
+&nbsp;
+
 1. ### 主菜单
 
 ```shell

@@ -14,7 +14,7 @@ SHELL_VERSION="2.0.0"
 CUR_DIR=$( pwd )
 
 
-BASE_URL="https://github.com/loyess/Shell/raw/master"
+BASE_URL="https://github.com/loyess/Shell/raw/test"
 
 
 # bbr

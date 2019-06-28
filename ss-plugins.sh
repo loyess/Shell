@@ -31,7 +31,7 @@ SHADOWSOCKS_LIBEV_INSTALL_PATH="/usr/local/bin"
 SHADOWSOCKS_LIBEV_INIT="/etc/init.d/shadowsocks-libev"
 SHADOWSOCKS_LIBEV_CONFIG="/etc/shadowsocks-libev/config.json"
 SHADOWSOCKS_LIBEV_CENTOS="${BASE_URL}/service/shadowsocks_libev_centos.sh"
-SHADOWSOCKS_LIBEV_DEBIAN="${BASE_URL}/service/shadowsocks-libev-debian.sh"
+SHADOWSOCKS_LIBEV_DEBIAN="${BASE_URL}/service/shadowsocks-libev_debian.sh"
 
 
 # shadowsocklibev-libev dependencies

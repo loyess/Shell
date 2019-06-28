@@ -58,7 +58,7 @@ ss_kcptun_link(){
 ss_obfs_http_link(){
     local link_head="ss://"
     local cipher_pwd=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}")
-    local ip_port_plugin="@$(get_ip):${listen_port}/?plugin=${plugin_client_name}"    
+    local ip_port_plugin="@$(get_ip):${shadowsocksport}/?plugin=${plugin_client_name}"    
     local plugin_opts=$(get_str_replace ";obfs=${shadowsocklibev_obfs}")
     ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
 }
@@ -66,7 +66,7 @@ ss_obfs_http_link(){
 ss_obfs_tls_link(){
     local link_head="ss://"
     local cipher_pwd=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}")
-    local ip_port_plugin="@$(get_ip):${listen_port}/?plugin=${plugin_client_name}"    
+    local ip_port_plugin="@$(get_ip):${shadowsocksport}/?plugin=${plugin_client_name}"    
     local plugin_opts=$(get_str_replace ";obfs=${shadowsocklibev_obfs}")
     ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
 }
@@ -75,7 +75,7 @@ ss_obfs_tls_link(){
 ss_goquiet_link(){
     local link_head="ss://"
     local cipher_pwd=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}")
-    local ip_port_plugin="@$(get_ip):${listen_port}/?plugin=${plugin_client_name}"    
+    local ip_port_plugin="@$(get_ip):${shadowsocksport}/?plugin=${plugin_client_name}"    
     local plugin_opts=$(get_str_replace ";ServerName=${domain};Key=${gqkey};TicketTimeHint=3600;Browser=chrome")
     ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
 }
@@ -84,7 +84,7 @@ ss_goquiet_link(){
 ss_cloak_link(){
     local link_head="ss://"
     local cipher_pwd=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}")
-    local ip_port_plugin="@$(get_ip):${listen_port}/?plugin=${plugin_client_name}"    
+    local ip_port_plugin="@$(get_ip):${shadowsocksport}/?plugin=${plugin_client_name}"    
     local plugin_opts=$(get_str_replace ";UID=${ckauid};PublicKey=${ckpub};ServerName=${domain};TicketTimeHint=3600;NumConn=4;MaskBrowser=chrome")
     ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
 }

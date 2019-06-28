@@ -4,7 +4,7 @@ export PATH
 
 
 
-base_url="https://github.com/loyess/Shell/tree/test"
+base_url="https://github.com/loyess/Shell/raw/test"
 
 
 source <(curl -sL ${base_url}/utils/constants.sh)

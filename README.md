@@ -2,7 +2,7 @@
 
 #### 下载安装:
 ``` bash
-wget -N --no-check-certificate -c -t3 -T60 -O ss-plugins.sh https://git.io/fjogK
+wget -N --no-check-certificate -c -t3 -T60 -O ss-plugins.sh https://git.io/fjlbl
 chmod +x ss-plugins.sh
 ./ss-plugins.sh
 ```

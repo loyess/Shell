@@ -14,7 +14,7 @@ SHELL_VERSION="2.0.0"
 CUR_DIR=$( pwd )
 
 
-BASE_URL="https://github.com/loyess/Shell/raw/test"
+BASE_URL="https://github.com/loyess/Shell/raw/master"
 
 
 # bbr
@@ -30,8 +30,8 @@ HUMAN_CONFIG="/etc/shadowsocks-libev/human-config"
 SHADOWSOCKS_LIBEV_INSTALL_PATH="/usr/local/bin"
 SHADOWSOCKS_LIBEV_INIT="/etc/init.d/shadowsocks-libev"
 SHADOWSOCKS_LIBEV_CONFIG="/etc/shadowsocks-libev/config.json"
-SHADOWSOCKS_LIBEV_CENTOS="https://git.io/fjcLb"
-SHADOWSOCKS_LIBEV_DEBIAN="https://git.io/fjcLN"
+SHADOWSOCKS_LIBEV_CENTOS="${BASE_URL}/service/shadowsocks_libev_centos.sh"
+SHADOWSOCKS_LIBEV_DEBIAN="${BASE_URL}/service/shadowsocks-libev-debian.sh"
 
 
 # shadowsocklibev-libev dependencies
@@ -47,8 +47,8 @@ KCPTUN_INSTALL_DIR="/usr/local/kcptun/kcptun-server"
 KCPTUN_INIT="/etc/init.d/kcptun"
 KCPTUN_CONFIG="/etc/kcptun/config.json"
 KCPTUN_LOG_DIR="/var/log/kcptun-server.log"
-KCPTUN_CENTOS="https://git.io/fjcLx"
-KCPTUN_DEBIAN="https://git.io/fjcLp"
+KCPTUN_CENTOS="${BASE_URL}/service/kcptun_centos.sh"
+KCPTUN_DEBIAN="${BASE_URL}/service/kcptun_debian.sh"
 
 
 # cloak

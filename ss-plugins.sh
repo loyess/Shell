@@ -15,6 +15,7 @@ CUR_DIR=$( pwd )
 
 
 BASE_URL="https://github.com/loyess/Shell/raw/master"
+# BASE_URL="https://github.com/loyess/Shell/raw/test"
 
 
 # bbr
@@ -149,7 +150,7 @@ Separator_1="——————————————————————�
 usage() {
 	cat >&1 <<-EOF
 
-  请使用: ./$0 [option] [uid]
+  请使用: ./ss-plugins.sh [option] [args]
 
     可使用的参数 <option> 包括:
 
@@ -831,15 +832,25 @@ install_step_all(){
 
 install_cleanup(){
     cd ${CUR_DIR}
-    rm -rf simple-obfs
-    rm -rf ${goquiet_file}
-    rm -rf ${cloak_file}
+    # ss-libev
     rm -rf ${LIBSODIUM_FILE} ${LIBSODIUM_FILE}.tar.gz
     rm -rf ${MBEDTLS_FILE} ${MBEDTLS_FILE}-gpl.tgz
     rm -rf ${shadowsocks_libev_file} ${shadowsocks_libev_file}.tar.gz
-    rm -rf client_linux_amd64 server_linux_amd64 ${kcptun_file}.tar.gz 
+    
+    # v2ray-plugin
     rm -rf v2ray-plugin_linux_amd64 ${v2ray_plugin_file}.tar.gz
-
+    
+    # kcptun
+    rm -rf client_linux_amd64 server_linux_amd64 ${kcptun_file}.tar.gz
+    
+    # simple-obfs
+    rm -rf simple-obfs
+    
+    # goquiet
+    rm -rf ${goquiet_file}
+    
+    # cloak
+    rm -rf ${cloak_file}
 }
 
 do_start(){
@@ -919,7 +930,7 @@ gen_qr_code(){
     else
         echo -e "
  Usage:
-    ./ss-plugins.sh scan <a ss url>"
+    ./ss-plugins.sh scan <a ss link>"
         echo
         echo -e " ${Error} 仅支持生成ss:// 开头的链接，请确认使用方式和要生成的链接是否正确..."
         echo
@@ -1081,6 +1092,7 @@ do_uninstall(){
         # uninstall caddy
         wget -qO- https://git.io/fjuAR | bash -s uninstall > /dev/null 2>&1
         
+        # uninstall ss-libev
         rm -fr $(dirname ${SHADOWSOCKS_LIBEV_CONFIG})
         rm -f /usr/local/bin/ss-local
         rm -f /usr/local/bin/ss-tunnel
@@ -1088,13 +1100,6 @@ do_uninstall(){
         rm -f /usr/local/bin/ss-manager
         rm -f /usr/local/bin/ss-redir
         rm -f /usr/local/bin/ss-nat
-        rm -f /usr/local/bin/v2ray-plugin
-        rm -f /usr/local/bin/gq-server
-        rm -f /usr/local/bin/ck-server
-        rm -f /usr/local/bin/ck-client
-        rm -fr $(dirname ${CK_CLIENT_CONFIG}) > /dev/null 2>&1
-        rm -f /usr/local/bin/obfs-local
-        rm -f /usr/local/bin/obfs-server
         rm -f /usr/local/lib/libshadowsocks-libev.a
         rm -f /usr/local/lib/libshadowsocks-libev.la
         rm -f /usr/local/include/shadowsocks.h
@@ -1108,11 +1113,27 @@ do_uninstall(){
         rm -f /usr/local/share/man/man8/shadowsocks-libev.8
         rm -fr /usr/local/share/doc/shadowsocks-libev
         rm -f ${SHADOWSOCKS_LIBEV_INIT}
+        
+        # uninstall v2ray-plugin
+        rm -f /usr/local/bin/v2ray-plugin
+        
+        # uninstall kcptun
         rm -fr $(dirname ${KCPTUN_INSTALL_DIR}) > /dev/null 2>&1
         rm -fr $(dirname ${KCPTUN_CONFIG}) > /dev/null 2>&1
         rm -fr ${KCPTUN_LOG_DIR}
         rm -f ${KCPTUN_INIT}
-
+        
+        # uninstall simple-obfs
+        rm -f /usr/local/bin/obfs-local
+        rm -f /usr/local/bin/obfs-server
+        
+        # uninstall goquiet
+        rm -f /usr/local/bin/gq-server
+        
+        # uninstall cloak
+        rm -f /usr/local/bin/ck-server
+        rm -f /usr/local/bin/ck-client
+        rm -fr $(dirname ${CK_CLIENT_CONFIG}) > /dev/null 2>&1
         echo -e "${Info} Shadowsocks-libev 卸载成功..."
     else
         echo

@@ -2,7 +2,7 @@
 
 #### 下载安装:
 ``` bash
-wget -N --no-check-certificate -c -t3 -T60 -O ss-plugins.sh https://git.io/fjogK
+wget -N --no-check-certificate -c -t3 -T60 -O ss-plugins.sh https://git.io/fjlbl
 chmod +x ss-plugins.sh
 ./ss-plugins.sh
 ```
@@ -11,7 +11,7 @@ chmod +x ss-plugins.sh
 
 ```shell
 Usage: 
-./ss-plugins.sh [install|uninstall|update|start|stop|restart|status|show|uid|url|scan|help] [new_uid|ss_url]
+./ss-plugins.sh [install|uninstall|update|start|stop|restart|status|show|uid|link|scan|help] [new_uid|ss_link]
 ```
 
 &nbsp;

@@ -100,11 +100,11 @@ Usage:
  加密     : aes-256-gcm
  插件程序 : kcptun
  插件选项 :
- 插件参数 : -l %SS_LOCAL_HOST%:%SS_LOCAL_PORT% -r %SS_REMOTE_HOST%:%SS_REMOTE_PORT% --crypt aes --key 0EP4edcP --mtu 1350 --sndwnd 1024 --rcvwnd 1024 --mode fast2 --datashard 10 --parityshard 3 --dscp 46
+ 插件参数 : -l %SS_LOCAL_HOST%:%SS_LOCAL_PORT% -r %SS_REMOTE_HOST%:%SS_REMOTE_PORT% --crypt aes --key 0EP4edcP --mtu 1350 --sndwnd 1024 --rcvwnd 1024 --mode fast2 --datashard 10 --parityshard 3 --dscp 46 --nocomp true
 
- 手机参数 : crypt=aes;key=0EP4edcP;mtu=1350;sndwnd=1024;rcvwnd=1024;mode=fast2;datashard=10;parityshard=3;dscp=46
+ 手机参数 : crypt=aes;key=0EP4edcP;mtu=1350;sndwnd=1024;rcvwnd=1024;mode=fast2;datashard=10;parityshard=3;dscp=46;nocomp=true
 
- SS  链接 : ss://YWVzLTI1Ni1nY206YmMxeFFrajM=@66.66.66.66:6666/?plugin=kcptun%3bcrypt%3daes%3bkey%3d0EP4edcP%3bmtu%3d1350%3bsndwnd%3d1024%3brcvwnd%3d1024%3bmode%3dfast2%3bdatashard%3d10%3bparityshard%3d3%3bdscp%3d46
+ SS  链接 : ss://YWVzLTI1Ni1nY206YmMxeFFrajM=@66.66.66.66:6666/?plugin=kcptun%3bcrypt%3daes%3bkey%3d0EP4edcP%3bmtu%3d1350%3bsndwnd%3d1024%3brcvwnd%3d1024%3bmode%3dfast2%3bdatashard%3d10%3bparityshard%3d3%3bdscp%3d46%3bnocomp%3dtrue
  SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >
 
 
@@ -127,7 +127,8 @@ v2ray-plugin 所要用到的域名，可以从 [freenom.com](https://www.freenom
 
 **相关下载：**
 
-- [shadowsocks-windows](<https://github.com/shadowsocks/shadowsocks-windows/releases>) 
+- [shadowsocks-libev](https://github.com/shadowsocks/shadowsocks-libev)
+- [shadowsocks-windows](<https://github.com/shadowsocks/shadowsocks-windows/releases>)
 - [shadowsocks-android](<https://github.com/shadowsocks/shadowsocks-android/releases>)
 - [v2ray-plugin](<https://github.com/shadowsocks/v2ray-plugin/releases>)
 - [v2ray-plugin-android](<https://github.com/shadowsocks/v2ray-plugin-android/releases>)

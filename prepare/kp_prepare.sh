@@ -270,4 +270,31 @@ install_prepare_libev_kcptun(){
         echo
         continue
     done 
+    
+    # 设置是否关闭数据压缩 nocomp
+    while true
+    do
+        echo -e "设置是否关闭数据压缩(nocomp)"
+		read -p "(默认: 否) [y/n]: " yn
+        [ -z "${yn}" ] && yn="N"
+        case "${yn:0:1}" in
+            y|Y)
+                nocomp='true'
+                ;;
+            n|N)
+                nocomp='false'
+                ;;
+            *)
+                echo
+                echo -e "${Error} 输入有误，请重新输入!"
+                echo
+                continue
+                ;;
+        esac
+        
+        echo
+        echo -e "${Red}  nocomp = ${nocomp}${suffix}"
+        echo
+		break
+	done
 }

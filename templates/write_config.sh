@@ -157,7 +157,8 @@ kcptun_config_standalone(){
 		"rcvwnd": ${rcvwnd},
 		"datashard": ${datashard},
 		"parityshard": ${parityshard},
-		"dscp": ${DSCP}
+		"dscp": ${DSCP},
+        "nocomp": ${nocomp}
 	}
 	EOF
 }

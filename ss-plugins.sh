@@ -817,7 +817,8 @@ install_step_all(){
     config_ss
     gen_ss_links
     install_completed
-    config_show
+    source <(curl -sL ${BASE_URL}/utils/view_config.sh)
+    show_config
 }
 
 install_cleanup(){

@@ -1056,8 +1056,8 @@ case ${action} in
         gen_qr_code "${2}"
         ;;
     show)
-        source <(curl -sL ${BASE_URL}/utils/cat_config.sh)
-        view_config.sh
+        source <(curl -sL ${BASE_URL}/utils/view_config.sh)
+        show_config
         ;;
     help)
         usage 0

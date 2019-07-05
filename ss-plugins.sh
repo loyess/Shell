@@ -20,7 +20,6 @@ BASE_URL="https://github.com/loyess/Shell/raw/master"
 
 # bbr
 BBR_SCRIPT_URL="https://git.io/vbUk0"
-BBR_SHELL_FILE="$CUR_DIR/bbr.sh"
 
 
 # Humanization config PATH
@@ -728,15 +727,6 @@ install_completed(){
     fi
 }
 
-install_bbr(){
-    download ${BBR_SHELL_FILE} ${BBR_SCRIPT_URL}
-    chmod +x ${BBR_SHELL_FILE}
-    ./$(basename ${BBR_SHELL_FILE})
-    rm -f ${BBR_SHELL_FILE}
-    rm -f $(dirname ${BBR_SHELL_FILE})/install_bbr.log
-    
-}
-
 install_prepare(){
     source <(curl -sL ${BASE_URL}/prepare/ss_libev_prepare.sh)
     install_prepare_port
@@ -901,135 +891,6 @@ do_status(){
     fi
 }
 
-config_show(){
-    if [ -e $HUMAN_CONFIG ]; then
-        clear -x
-        cat $HUMAN_CONFIG
-    else
-        echo "The visual configuration was not found..."
-    fi
-}
-
-gen_qr_code(){
-    local ss_url=$1
-    
-    if [[ $(echo "${ss_url}" | grep "^ss://") ]]; then
-        if [ "$(command -v qrencode)" ]; then
-            echo
-            echo -e "生成二维码如下："
-            echo
-            qrencode -m 2 -l L -t ANSIUTF8 -k "${ss_url}"
-            echo
-            echo -e " ${Tip} 扫码后请仔细检查配置是否正确，如若存在差异请自行手动调整..."
-            echo
-        else
-            echo
-            echo -e " ${Error} 手动生成二维码失败，请确认qrencode是否正常安装..."
-            echo
-        fi
-    else
-        echo -e "
- Usage:
-    ./ss-plugins.sh scan <a ss link>"
-        echo
-        echo -e " ${Error} 仅支持生成ss:// 开头的链接，请确认使用方式和要生成的链接是否正确..."
-        echo
-        exit 1
-    fi
-}
-
-add_a_new_uid(){
-    if [[ -e '/usr/local/bin/ck-server' ]]; then
-    
-        if [[ ! -e '/usr/local/bin/ck-client' ]]; then
-            get_ver
-            # Download cloak client
-            local cloak_file="ck-client-linux-amd64-${cloak_ver}"
-            local cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${cloak_ver}/ck-client-linux-amd64-${cloak_ver}"
-            download "${cloak_file}" "${cloak_url}"
-            
-            # install ck-client
-            cd ${CUR_DIR}
-            chmod +x ${cloak_file}
-            mv ${cloak_file} /usr/local/bin/ck-client
-        fi
-        
-        # get parameter from ss config.json
-        gen_credentials
-        local new_uid=${ckauid}
-        local ip=$(get_ip)
-        local port=443
-        local admin_uid=$(cat ${SHADOWSOCKS_LIBEV_CONFIG} | grep -o -P "AdminUID=.*?;" | sed 's/AdminUID=//g;s/;//g')
-
-        # show about info
-        echo
-        echo -e " ${Green}UID  (新)${suffix}：${Red}${new_uid}${suffix}"
-        echo
-        echo -e " ${Green}IP (端口)${suffix}：${Red}${ip}:${port}${suffix}"
-        echo -e " ${Green}UID(管理)${suffix}：${Red}${admin_uid}${suffix}"
-        echo
-        echo -e "
- 添加新用户：
-    1. ck-server -u 生成一个New 的 UID
-    2. ck-client -a -c <path-to-ckclient.json> 进入admin 模式。
-    3. 输入，服务器ip:port 和 AdminUID ，选择4 ，新建一个用户。
-    4. 根据提示输入如下：
-        1. Newly generated UID      # 输入上方新生成的 UID
-        2. SessionsCap              # 用户可以拥有的最大并发会话数(填写 4)
-        3. UpRate                   # 上行速度 (单位：bytes/s)
-        4. DownRate                 # 下行速度 (单位：bytes/s)
-        5. UpCredit                 # 上行限制 (单位：bytes)
-        6. DownCredit               # 下行限制 (单位：bytes)
-        7. ExpiryTime               # user账号的有效期，unix时间格式(10位时间戳)
-    5. 将你的 公钥 和 新生成的UID 给这个新用户。
-    
- ${Tip} 下方输入从第3步开始，根据提示输入，退出请按 Ctrl + C ...
- 
- "
-        
-        # Enter admin mode
-        ck-client -a -c ${CK_CLIENT_CONFIG}
-    else
-        echo
-        echo -e " ${Error} 仅支持 ss + cloak 下使用，请确认是否是以该组合形式运行..."
-        echo
-        exit 1
-    fi
-}
-
-get_new_ck_sslink(){
-    local ckauid=$1
-    if [[ -n ${ckauid} ]]; then
-        if [[ -e '/usr/local/bin/ck-client' ]]; then
-            local shadowsockscipher=$(cat ${SHADOWSOCKS_LIBEV_CONFIG} | grep -o -P "method\":\".*?\"" | sed 's/method\":\"//g;s/\"//g')
-            local shadowsockspwd=$(cat ${SHADOWSOCKS_LIBEV_CONFIG} | grep -o -P "password\":\".*?\"" | sed 's/password\":\"//g;s/\"//g')
-            local shadowsocksport=$(cat ${SHADOWSOCKS_LIBEV_CONFIG} | grep -o -P "server_port\":.*?\," | sed 's/server_port\"://g;s/\,//g')
-            local ckpub=$(cat ${CK_CLIENT_CONFIG} | grep -o -P "PublicKey\":\".*?\"" | sed 's/PublicKey\":\"//g;s/\"//g')
-            local ckservername=$(cat /etc/cloak/ckclient.json | grep -o -P "ServerName\":\".*?\"" | sed 's/ServerName\":\"//g;s/\"//g')
-            
-            local link_head="ss://"
-            local cipher_pwd=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}")
-            local ip_port_plugin="@$(get_ip):${shadowsocksport}/?plugin=ck-client"
-            local plugin_opts=$(get_str_replace ";UID=${ckauid};PublicKey=${ckpub};ServerName=${ckservername};TicketTimeHint=3600;NumConn=4;MaskBrowser=chrome")
-
-            local ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
-            
-            echo
-            echo -e " ${Green}生成的新用户SS链接：${suffix}"
-            echo -e "    ${Red}${ss_link}${suffix}"
-            echo
-        fi
-    else
-        echo -e "
- Usage:
-    ./ss-plugins.sh link <new add user uid>"
-        echo
-        echo -e " ${Error} 仅支持 ss + cloak 下使用，请确认是否是以该组合形式运行，并且，使用 ./ss-plugins.sh uid 添加过新用户..."
-        echo
-        exit 1
-    fi
-}
-
 do_update(){
     if [[ -e '/usr/local/bin/ss-server' ]]; then
         if check_ss_libev_version; then
@@ -1161,7 +1022,7 @@ do_install(){
     echo && read -e -p "请输入数字 [1-3]：" menu_num
     case "${menu_num}" in
         1)
-            install_bbr
+            source <(curl -sL ${BBR_SCRIPT_URL})
             ;;
         2)
             install_step_all
@@ -1183,16 +1044,20 @@ case ${action} in
         do_${action}
         ;;
     uid)
-        add_a_new_${action}
+        source <(curl -sL ${BASE_URL}/utils/ck_user_manager.sh)
+        add_a_new_uid
         ;;
     link)
-        get_new_ck_ss${action} "${2}"
+        source <(curl -sL ${BASE_URL}/utils/ck_sslink.sh)
+        get_new_ck_sslink "${2}"
         ;;
     scan)
+        source <(curl -sL ${BASE_URL}/utils/qr_code.sh)
         gen_qr_code "${2}"
         ;;
     show)
-        config_${action}
+        source <(curl -sL ${BASE_URL}/utils/cat_config.sh)
+        view_config.sh
         ;;
     help)
         usage 0

@@ -73,7 +73,7 @@ Usage:
 注意：
     kcptun仅用于加速。
     simple-obfs已被弃用，但不影响使用。
-    cloak是goquiet的升级版，增加了同端口，多用用户。
+    cloak是goquiet的升级版，增加了同端口，多用户。
     v2ray插件，带tls的都需要域名，cdn此处仅支持cloudflare，web则用了caddy。
 	
     使用v2ray插件的选项3时，请在CloudFlare后台Network页面，找到QUIC BETA设置项，点击Join the Waitlist 进行申请

@@ -897,6 +897,7 @@ do_update(){
         if check_ss_libev_version; then
             do_stop > /dev/null 2>&1
             download_files
+            source <(curl -sL ${BASE_URL}/tools/shadowsocks_libev_install.sh)
             install_shadowsocks_libev
             install_cleanup
             do_restart > /dev/null 2>&1

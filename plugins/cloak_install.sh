@@ -3,7 +3,19 @@ install_cloak(){
     chmod +x ${cloak_file}
     mv ${cloak_file} /usr/local/bin/ck-server
     if [ $? -eq 0 ]; then
-        echo -e "${Info} Cloak安装成功."
+        if [ "${ck_install_ver}" == "n" ] || [ "${ck_install_ver}" == "N" ]; then
+            echo -e "${Info} Cloak安装成功."
+        else
+            chmod +x ${CLOAK_INIT}
+            local service_name=$(basename ${CLOAK_INIT})
+            if check_sys packageManager yum; then
+                chkconfig --add ${service_name}
+                chkconfig ${service_name} on
+            elif check_sys packageManager apt; then
+                update-rc.d -f ${service_name} defaults
+            fi
+            echo -e "${Info} Cloak安装成功."
+        fi
     else
         echo
         echo -e "${Error} Cloak安装失败."

@@ -13,9 +13,62 @@ SHELL_VERSION="2.0.0"
 # current path
 CUR_DIR=$( pwd )
 
+usage() {
+	cat >&1 <<-EOF
 
-BASE_URL="https://github.com/loyess/Shell/raw/master"
-# BASE_URL="https://github.com/loyess/Shell/raw/test"
+  请使用: ./ss-plugins.sh [install-methods] [options] [args]
+    <install-methods> 包括：
+        -o|-O, nline     在线安装（默认）
+        -l|-L, Local     git clone 本地安装
+        -h|-H, help      打印帮助信息并退出
+    
+    可使用的参数 <option> 包括:
+
+        install          安装
+        uninstall        卸载
+        update           升级
+        start            启动
+        stop             关闭
+        restart          重启
+        status           查看状态
+        show             显示可视化配置
+        uid              添加一个新用户 (仅ss + cloak下可用)
+        link             生成一个新的SS:// 链接 (仅ss + cloak下可用)
+        scan             根据生成的ss:// 链接，在当前终端上，手动生成一个可供扫描的二维码
+        
+	EOF
+
+	exit $1
+}
+
+
+# install methods
+methods=${1:-"Online"}
+
+if [ ${methods} == "-O" ] || [ ${methods} == "-o" ]; then
+    methods="Online"
+elif [ ${methods} == "-L" ] || [ ${methods} == "-l" ]; then
+    methods="Local"
+elif [ ${methods} == "-H" ] || [ ${methods} == "-h" ]; then
+    methods="help"
+fi
+
+case ${methods} in 
+    Online)
+        # BASE_URL="https://github.com/loyess/Shell/raw/test"
+        BASE_URL="https://github.com/loyess/Shell/raw/master"
+        ;;
+    Local)
+        BASE_URL="."
+        ;;
+    help)
+        usage 0
+        ;;
+    *)
+        usage 1
+        ;;
+esac
+
 
 
 # bbr
@@ -30,7 +83,7 @@ HUMAN_CONFIG="/etc/shadowsocks-libev/human-config"
 SHADOWSOCKS_LIBEV_INSTALL_PATH="/usr/local/bin"
 SHADOWSOCKS_LIBEV_INIT="/etc/init.d/shadowsocks-libev"
 SHADOWSOCKS_LIBEV_CONFIG="/etc/shadowsocks-libev/config.json"
-SHADOWSOCKS_LIBEV_CENTOS="${BASE_URL}/service/shadowsocks_libev_centos.sh"
+SHADOWSOCKS_LIBEV_CENTOS="${BASE_URL}/service/shadowsocks-libev_centos.sh"
 SHADOWSOCKS_LIBEV_DEBIAN="${BASE_URL}/service/shadowsocks-libev_debian.sh"
 
 
@@ -52,8 +105,12 @@ KCPTUN_DEBIAN="${BASE_URL}/service/kcptun_debian.sh"
 
 
 # cloak
+CLOAK_INIT="/etc/init.d/cloak"
+CLOAK_CENTOS="${BASE_URL}/service/cloak_centos.sh"
+CLOAK_DEBIAN="${BASE_URL}/service/cloak_debian.sh"
 CK_DB_PATH="/etc/cloak/db"
 CK_CLIENT_CONFIG="/etc/cloak/ckclient.json"
+CK_SERVER_CONFIG="/etc/cloak/ckserver.json"
 
 
 # caddy
@@ -134,6 +191,7 @@ IPV4_RE="^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-
 IPV6_RE="^\s*((([0-9A-Fa-f]{1,4}:){7}(([0-9A-Fa-f]{1,4})|:))|(([0-9A-Fa-f]{1,4}:){6}(:|((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})|(:[0-9A-Fa-f]{1,4})))|(([0-9A-Fa-f]{1,4}:){5}((:((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(([0-9A-Fa-f]{1,4}:){4}(:[0-9A-Fa-f]{1,4}){0,1}((:((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(([0-9A-Fa-f]{1,4}:){3}(:[0-9A-Fa-f]{1,4}){0,2}((:((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(([0-9A-Fa-f]{1,4}:){2}(:[0-9A-Fa-f]{1,4}){0,3}((:((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(([0-9A-Fa-f]{1,4}:)(:[0-9A-Fa-f]{1,4}){0,4}((:((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(:(:[0-9A-Fa-f]{1,4}){0,5}((:((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})))(%.+)?\s*$"
 
 
+# Font color and background color
 Green="\033[32m" && Red="\033[31m" && Yellow="\033[0;33m" && Green_background_prefix="\033[42;37m" && Red_background_prefix="\033[41;37m" && suffix="\033[0m"
 Info="${Green}[信息]${suffix}"
 Error="${Red}[错误]${suffix}"
@@ -144,32 +202,11 @@ Separator_1="——————————————————————�
 
 
 
-[[ $EUID -ne 0 ]] && echo -e "[${red}Error${suffix}] This script must be run as root!" && exit 1
 
-usage() {
-	cat >&1 <<-EOF
 
-  请使用: ./ss-plugins.sh [option] [args]
 
-    可使用的参数 <option> 包括:
+[[ $EUID -ne 0 ]] && echo -e "[${Red}Error${suffix}] This script must be run as root!" && exit 1
 
-        install          安装
-        uninstall        卸载
-        update           升级
-        start            启动
-        stop             关闭
-        restart          重启
-        status           查看状态
-        show             显示可视化配置
-        uid              添加一个新用户 (仅ss + cloak下可用)
-        link             生成一个新的SS:// 链接 (仅ss + cloak下可用)
-        scan             根据生成的ss:// 链接，在当前终端上，手动生成一个可供扫描的二维码
-        help             查看脚本使用说明
-        
-	EOF
-
-	exit $1
-}
 
 disable_selinux(){
     if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
@@ -447,9 +484,19 @@ download_files(){
     shadowsocks_libev_url="https://github.com/shadowsocks/shadowsocks-libev/releases/download/v${libev_ver}/shadowsocks-libev-${libev_ver}.tar.gz"
     download "${shadowsocks_libev_file}.tar.gz" "${shadowsocks_libev_url}"
     if check_sys packageManager yum; then
-        download "${SHADOWSOCKS_LIBEV_INIT}" "${SHADOWSOCKS_LIBEV_CENTOS}"
+        if [[ ${methods} == "Online" ]]; then
+            download "${SHADOWSOCKS_LIBEV_INIT}" "${SHADOWSOCKS_LIBEV_CENTOS}"
+        else
+            cp ./service/shadowsocks-libev_centos.sh "$(dirname ${SHADOWSOCKS_LIBEV_INIT})"
+            mv "$(dirname ${SHADOWSOCKS_LIBEV_INIT})/shadowsocks-libev_centos.sh" "${SHADOWSOCKS_LIBEV_INIT}"    
+        fi        
     elif check_sys packageManager apt; then
-        download "${SHADOWSOCKS_LIBEV_INIT}" "${SHADOWSOCKS_LIBEV_DEBIAN}"
+        if [[ ${methods} == "Online" ]]; then
+            download "${SHADOWSOCKS_LIBEV_INIT}" "${SHADOWSOCKS_LIBEV_DEBIAN}"
+        else
+            cp ./service/shadowsocks-libev_debian.sh "$(dirname ${SHADOWSOCKS_LIBEV_INIT})"
+            mv "$(dirname ${SHADOWSOCKS_LIBEV_INIT})/shadowsocks-libev_debian.sh" "${SHADOWSOCKS_LIBEV_INIT}"
+        fi        
     fi
     
     if [[ "${plugin_num}" == "1" ]]; then        
@@ -465,9 +512,21 @@ download_files(){
         download "${kcptun_file}.tar.gz" "${kcptun_url}"
         
         if check_sys packageManager yum; then
-            download "${KCPTUN_INIT}" "${KCPTUN_CENTOS}"
+            if [[ ${methods} == "Online" ]]; then
+                download "${KCPTUN_INIT}" "${KCPTUN_CENTOS}"
+            else
+                cp ./service/kcptun_centos.sh "$(dirname ${KCPTUN_INIT})"
+                mv "$(dirname ${KCPTUN_INIT})/kcptun_centos.sh" "${KCPTUN_INIT}"
+            fi
+            
         elif check_sys packageManager apt; then
-            download "${KCPTUN_INIT}" "${KCPTUN_DEBIAN}"
+            if [[ ${methods} == "Online" ]]; then
+                download "${KCPTUN_INIT}" "${KCPTUN_DEBIAN}"
+            else
+                cp ./service/kcptun_debian.sh "$(dirname ${KCPTUN_INIT})"
+                mv "$(dirname ${KCPTUN_INIT})/kcptun_debian.sh" "${KCPTUN_INIT}"
+            fi
+            
         fi
         
     elif [[ "${plugin_num}" == "4" ]]; then        
@@ -476,12 +535,35 @@ download_files(){
         goquiet_url="https://github.com/cbeuw/GoQuiet/releases/download/v${goquiet_ver}/gq-server-linux-amd64-${goquiet_ver}"
         download "${goquiet_file}" "${goquiet_url}"
         
-    elif [[ "${plugin_num}" == "5" ]]; then        
-        # Download cloak server
-        cloak_file="ck-server-linux-amd64-${cloak_ver}"
-        cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${cloak_ver}/ck-server-linux-amd64-${cloak_ver}"
-        download "${cloak_file}" "${cloak_url}"
-        
+    elif [[ "${plugin_num}" == "5" ]]; then
+        if [ "${ck_install_ver}" == "n" ] || [ "${ck_install_ver}" == "N" ]; then
+            cloak_ver="1.1.2"
+            # Download cloak server
+            cloak_file="ck-server-linux-amd64-${cloak_ver}"
+            cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${cloak_ver}/ck-server-linux-amd64-${cloak_ver}"
+            download "${cloak_file}" "${cloak_url}"
+        else
+            # Download cloak server
+            cloak_file="ck-server-linux-amd64-${cloak_ver}"
+            cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${cloak_ver}/ck-server-linux-amd64-${cloak_ver}"
+            download "${cloak_file}" "${cloak_url}"
+            
+            if check_sys packageManager yum; then
+                if [[ ${methods} == "Online" ]]; then
+                    download "${CLOAK_INIT}" "${CLOAK_CENTOS}"
+                else
+                    cp ./service/cloak_centos.sh "$(dirname ${CLOAK_INIT})"
+                    mv "$(dirname ${CLOAK_INIT})/cloak_centos.sh" "${CLOAK_INIT}"
+                fi
+            elif check_sys packageManager apt; then
+                if [[ ${methods} == "Online" ]]; then
+                    download "${CLOAK_INIT}" "${CLOAK_DEBIAN}"
+                else
+                    cp ./service/cloak_debian.sh "$(dirname ${CLOAK_INIT})"
+                    mv "$(dirname ${CLOAK_INIT})/cloak_debian.sh" "${CLOAK_INIT}"
+                fi
+            fi
+        fi
     fi
 }
 
@@ -491,7 +573,7 @@ error_detect_depends(){
     echo -e "${Info} 开始安装依赖包 ${depend}"
     ${command} > /dev/null 2>&1
     if [ $? -ne 0 ]; then
-        echo -e "${Error} 依赖包${red}${depend}${suffix}安装失败，请检查. "
+        echo -e "${Error} 依赖包${Red}${depend}${suffix}安装失败，请检查. "
         echo "Checking the error message and run the script again."
         exit 1
     fi
@@ -605,7 +687,12 @@ config_ss(){
     fi
 
     # start wriet config
-    source <(curl -sL ${BASE_URL}/templates/write_config.sh)
+    if [[ ${methods} == "Online" ]]; then
+        source <(curl -sL ${BASE_URL}/templates/write_config.sh)
+    else
+        source ${BASE_URL}/templates/write_config.sh
+    fi
+    
     
     if [[ ${plugin_num} == "1" ]]; then
         if [[ ${libev_v2ray} == "1" ]]; then
@@ -637,19 +724,33 @@ config_ss(){
     elif [[ ${plugin_num} == "4" ]]; then
         ss_goquiet_config
     elif [[ ${plugin_num} == "5" ]]; then
-        ss_cloak_server_config
-        
-        if [ ! -d "$(dirname ${CK_CLIENT_CONFIG})" ]; then
-            mkdir -p $(dirname ${CK_CLIENT_CONFIG})
+        if [ "${ck_install_ver}" == "n" ] || [ "${ck_install_ver}" == "N" ]; then
+            ss_cloak_server_config
+            
+            if [ ! -d "$(dirname ${CK_CLIENT_CONFIG})" ]; then
+                mkdir -p $(dirname ${CK_CLIENT_CONFIG})
+            fi
+            cloak_client_config
+        else
+            if [ ! -d "$(dirname ${CK_SERVER_CONFIG})" ]; then
+                mkdir -p $(dirname ${CK_SERVER_CONFIG})
+            fi
+            
+            ss_config_standalone
+            cloak_server_config
         fi
-        ss_cloak_client_config
     else
         ss_config_standalone
     fi
 }
 
 gen_ss_links(){
-    source <(curl -sL ${BASE_URL}/templates/group_sslink.sh)
+    if [[ ${methods} == "Online" ]]; then
+        source <(curl -sL ${BASE_URL}/templates/group_sslink.sh)
+    else
+        source ${BASE_URL}/templates/group_sslink.sh
+    fi
+    
     if [[ ${plugin_num} == "1" ]]; then
         if [[ ${libev_v2ray} == "1" ]]; then
             ss_v2ray_ws_http_link
@@ -673,7 +774,11 @@ gen_ss_links(){
     elif [[ ${plugin_num} == "4" ]]; then
         ss_goquiet_link
     elif [[ ${plugin_num} == "5" ]]; then
-        ss_cloak_link
+        if [ "${ck_install_ver}" == "n" ] || [ "${ck_install_ver}" == "N" ]; then
+            ss_cloak_link
+        else
+            ss_cloak_link_new
+        fi
     else
         ss_link
     fi
@@ -683,7 +788,12 @@ install_completed(){
     ldconfig
     ${SHADOWSOCKS_LIBEV_INIT} start > /dev/null 2>&1
     
-    source <(curl -sL ${BASE_URL}/templates/show_config.sh)
+    if [[ ${methods} == "Online" ]]; then
+        source <(curl -sL ${BASE_URL}/templates/show_config.sh)
+    else
+        source ${BASE_URL}/templates/show_config.sh
+    fi
+    
     clear -x
     if [[ ${plugin_num} == "1" ]]; then
         if [[ ${libev_v2ray} == "1" ]]; then
@@ -721,14 +831,26 @@ install_completed(){
     elif [[ ${plugin_num} == "4" ]]; then
         ss_goquiet_show
     elif [[ ${plugin_num} == "5" ]]; then
-        ss_cloak_show
+        if [ "${ck_install_ver}" == "n" ] || [ "${ck_install_ver}" == "N" ]; then
+            ss_cloak_show
+        else
+            # start cloak
+            ${CLOAK_INIT} start  > /dev/null 2>&1
+            
+            ss_cloak_show_new
+        fi
     else
         ss_show
     fi
 }
 
 install_prepare(){
-    source <(curl -sL ${BASE_URL}/prepare/ss_libev_prepare.sh)
+    if [[ ${methods} == "Online" ]]; then
+        source <(curl -sL ${BASE_URL}/prepare/ss_libev_prepare.sh)
+    else
+        source ${BASE_URL}/prepare/ss_libev_prepare.sh
+    fi
+    
     install_prepare_port
     install_prepare_password
     install_prepare_cipher
@@ -743,19 +865,44 @@ install_prepare(){
     echo && read -e -p "(默认: 不安装)：" plugin_num
     [[ -z "${plugin_num}" ]] && plugin_num="" && echo -e "\n${Tip} 当前未选择任何插件，仅安装Shadowsocks-libev."
     if [[ ${plugin_num} == "1" ]]; then
-        source <(curl -sL ${BASE_URL}/prepare/v2p_prepare.sh)
+        if [[ ${methods} == "Online" ]]; then
+            source <(curl -sL ${BASE_URL}/prepare/v2p_prepare.sh)
+        else
+            source ${BASE_URL}/prepare/v2p_prepare.sh
+        fi
+        
         install_prepare_libev_v2ray
     elif [[ ${plugin_num} == "2" ]]; then
-        source <(curl -sL ${BASE_URL}/prepare/kp_prepare.sh)
+        if [[ ${methods} == "Online" ]]; then
+            source <(curl -sL ${BASE_URL}/prepare/kp_prepare.sh)
+        else
+            source ${BASE_URL}/prepare/kp_prepare.sh
+        fi
+        
         install_prepare_libev_kcptun
     elif [[ ${plugin_num} == "3" ]]; then
-        source <(curl -sL ${BASE_URL}/prepare/obfs_prepare.sh)
+        if [[ ${methods} == "Online" ]]; then
+            source <(curl -sL ${BASE_URL}/prepare/obfs_prepare.sh)
+        else
+            source ${BASE_URL}/prepare/obfs_prepare.sh
+        fi
+        
         install_prepare_libev_obfs
     elif [[ ${plugin_num} == "4" ]]; then
-        source <(curl -sL ${BASE_URL}/prepare/gq_prepare.sh)
+        if [[ ${methods} == "Online" ]]; then
+            source <(curl -sL ${BASE_URL}/prepare/gq_prepare.sh)
+        else
+            source ${BASE_URL}/prepare/gq_prepare.sh
+        fi
+        
         install_prepare_libev_goquiet
     elif [[ ${plugin_num} == "5" ]]; then
-        source <(curl -sL ${BASE_URL}/prepare/ck_prepare.sh)
+        if [[ ${methods} == "Online" ]]; then
+            source <(curl -sL ${BASE_URL}/prepare/ck_prepare.sh)
+        else
+            source ${BASE_URL}/prepare/ck_prepare.sh
+        fi
+        
         install_prepare_libev_cloak
     elif [[ ${plugin_num} == "" ]]; then
         :
@@ -776,26 +923,63 @@ install_main(){
     fi
     ldconfig
     install_mbedtls
-    source <(curl -sL ${BASE_URL}/tools/shadowsocks_libev_install.sh)
+    
+    if [[ ${methods} == "Online" ]]; then
+        source <(curl -sL ${BASE_URL}/tools/shadowsocks_libev_install.sh)
+    else
+        cd ${CUR_DIR}
+        source ${BASE_URL}/tools/shadowsocks_libev_install.sh
+    fi
+    
     install_shadowsocks_libev
     if [ "${plugin_num}" == "1" ]; then
-        source <(curl -sL ${BASE_URL}/plugins/v2ray_plugin_install.sh)
+        if [[ ${methods} == "Online" ]]; then
+            source <(curl -sL ${BASE_URL}/plugins/v2ray_plugin_install.sh)
+        else
+            cd ${CUR_DIR}
+            source ${BASE_URL}/plugins/v2ray_plugin_install.sh
+        fi
+        
         install_v2ray_plugin
         plugin_client_name="v2ray"
     elif [ "${plugin_num}" == "2" ]; then
-        source <(curl -sL ${BASE_URL}/plugins/kcptun_install.sh)
+        if [[ ${methods} == "Online" ]]; then
+            source <(curl -sL ${BASE_URL}/plugins/kcptun_install.sh)
+        else
+            cd ${CUR_DIR}
+            source ${BASE_URL}/plugins/kcptun_install.sh
+        fi
+        
         install_kcptun
         plugin_client_name="kcptun"
     elif [ "${plugin_num}" == "3" ]; then
-        source <(curl -sL ${BASE_URL}/plugins/simple_obfs_install.sh)
+        if [[ ${methods} == "Online" ]]; then
+            source <(curl -sL ${BASE_URL}/plugins/simple_obfs_install.sh)
+        else
+            cd ${CUR_DIR}
+            source ${BASE_URL}/plugins/simple_obfs_install.sh
+        fi
+        
         install_simple_obfs
         plugin_client_name="obfs-local"
     elif [ "${plugin_num}" == "4" ]; then
-        source <(curl -sL ${BASE_URL}/plugins/goquiet_install.sh)
+        if [[ ${methods} == "Online" ]]; then
+            source <(curl -sL ${BASE_URL}/plugins/goquiet_install.sh)
+        else
+            cd ${CUR_DIR}
+            source ${BASE_URL}/plugins/goquiet_install.sh
+        fi
+        
         install_goquiet
         plugin_client_name="gq-client"
     elif [ "${plugin_num}" == "5" ]; then
-        source <(curl -sL ${BASE_URL}/plugins/cloak_install.sh)
+        if [[ ${methods} == "Online" ]]; then
+            source <(curl -sL ${BASE_URL}/plugins/cloak_install.sh)
+        else
+            cd ${CUR_DIR}
+            source ${BASE_URL}/plugins/cloak_install.sh
+        fi 
+       
         install_cloak
         gen_credentials
         plugin_client_name="ck-client"
@@ -817,7 +1001,13 @@ install_step_all(){
     config_ss
     gen_ss_links
     install_completed
-    source <(curl -sL ${BASE_URL}/utils/view_config.sh)
+    
+    if [[ ${methods} == "Online" ]]; then
+        source <(curl -sL ${BASE_URL}/utils/view_config.sh)
+    else
+        source ${BASE_URL}/utils/view_config.sh
+    fi
+    
     show_config
 }
 
@@ -849,6 +1039,8 @@ do_start(){
         ${SHADOWSOCKS_LIBEV_INIT} start
         if [ "$(command -v kcptun-server)" ]; then
             ${KCPTUN_INIT} start
+        elif [[ -e "${CLOAK_INIT}" ]]; then
+            /etc/init.d/cloak start
         elif [ "$(command -v caddy)" ]; then
             /etc/init.d/caddy start
         fi
@@ -868,9 +1060,22 @@ do_stop(){
     ps -ef |grep -v grep | grep gq-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
     ps -ef |grep -v grep | grep ck-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
     ps -ef |grep -v grep | grep caddy |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
-    echo
-    echo -e " Stopping Shadowsocks-libev success"
-    echo
+
+    echo -e "Stopping Shadowsocks-libev success"
+    
+    if [ "$(command -v v2ray-plugin)" ]; then
+        echo -e "Stopping v2ray-plugin success"
+    elif [ "$(command -v kcptun-server)" ]; then
+        echo -e "Stopping kcptun-server success"
+    elif [ "$(command -v obfs-server)" ]; then
+        echo -e "Stopping obfs-server success"
+    elif [ "$(command -v gq-server)" ]; then
+        echo -e "Stopping gq-server success"
+    elif [ "$(command -v ck-server)" ]; then
+        echo -e "Stopping ck-server success"
+    elif [ "$(command -v caddy)" ]; then
+        echo -e "Stopping caddy success"
+    fi
 }
 
 do_restart(){
@@ -897,7 +1102,13 @@ do_update(){
         if check_ss_libev_version; then
             do_stop > /dev/null 2>&1
             download_files
-            source <(curl -sL ${BASE_URL}/tools/shadowsocks_libev_install.sh)
+            
+            if [[ ${methods} == "Online" ]]; then
+                source <(curl -sL ${BASE_URL}/tools/shadowsocks_libev_install.sh)
+            else
+                source ${BASE_URL}/tools/shadowsocks_libev_install.sh
+            fi
+            
             install_shadowsocks_libev
             install_cleanup
             do_restart > /dev/null 2>&1
@@ -941,6 +1152,18 @@ do_uninstall(){
             chkconfig --del ${kcp_service_name}
         elif check_sys packageManager apt; then
             update-rc.d -f ${kcp_service_name} remove
+        fi
+        
+        # check cloak status
+        ${CLOAK_INIT} status > /dev/null 2>&1
+        if [ $? -eq 0 ]; then
+            ${CLOAK_INIT} stop > /dev/null 2>&1
+        fi
+        local ck_service_name=$(basename ${CLOAK_INIT})
+        if check_sys packageManager yum; then
+            chkconfig --del ${ck_service_name}
+        elif check_sys packageManager apt; then
+            update-rc.d -f ${ck_service_name} remove
         fi
         
         # kill v2ray-plugin 、obfs-server、gq-server ck-server
@@ -996,6 +1219,7 @@ do_uninstall(){
         # uninstall cloak
         rm -f /usr/local/bin/ck-server
         rm -f /usr/local/bin/ck-client
+        rm -f ${CLOAK_INIT}
         rm -fr $(dirname ${CK_CLIENT_CONFIG}) > /dev/null 2>&1
         echo -e "${Info} Shadowsocks-libev 卸载成功..."
     else
@@ -1009,7 +1233,7 @@ do_uninstall(){
 do_install(){
     # check supported
     if ! install_check; then
-        echo -e "[${red}Error${plain}] Your OS is not supported to run it!"
+        echo -e "[${Red}Error${suffix}] Your OS is not supported to run it!"
         echo "Please change to CentOS 6+/Debian 7+/Ubuntu 12+ and try again."
         exit 1
     fi
@@ -1040,25 +1264,68 @@ do_install(){
 
 
 
-action=${1:-"install"}
+# install and tools
+action=${2:-"install"}
+
 case ${action} in
     install|uninstall|update|start|stop|restart|status)
         do_${action}
         ;;
     uid)
-        source <(curl -sL ${BASE_URL}/utils/ck_user_manager.sh)
-        add_a_new_uid
+        if [ "$(command -v ck-server)" ]; then
+            ck-v=$(ck-server -v | grep ck-server | cut -d\  -f2)
+        fi
+        
+        if [[ ${ck-v} == "1.1.2" ]]; then
+            if [[ ${methods} == "Online" ]]; then
+                source <(curl -sL ${BASE_URL}/utils/ck_user_manager.sh)
+            else
+                source ${BASE_URL}/utils/ck_user_manager.sh
+            fi
+            
+            add_a_new_uid
+        else
+            echo
+            echo -e "${Tip}: 当前cloak是最新版本，请使用ck-client -s <IP of the server> -l <A local port> -a <AdminUID> -c <path-to-ckclient.json>"
+            echo -e "$       进入Admin模式，然后通过Cloak-panel面板添加新用户.>"
+            echo
+        fi
         ;;
     link)
-        source <(curl -sL ${BASE_URL}/utils/ck_sslink.sh)
-        get_new_ck_sslink "${2}"
+        if [ "$(command -v ck-server)" ]; then
+            ck-v=$(ck-server -v | grep ck-server | cut -d\  -f2)
+        fi
+        
+        if [[ ${ck-v} == "1.1.2" ]]; then
+            if [[ ${methods} == "Online" ]]; then
+                source <(curl -sL ${BASE_URL}/utils/ck_sslink.sh)
+            else
+                source ${BASE_URL}/utils/ck_sslink.sh
+            fi
+
+            get_new_ck_sslink "${3}"
+        else
+            echo
+            echo -e "${Tip}: 当前cloak是最新版本，该功能暂时不支持最新版本！"
+            echo
+        fi
         ;;
     scan)
-        source <(curl -sL ${BASE_URL}/utils/qr_code.sh)
-        gen_qr_code "${2}"
+        if [[ ${methods} == "Online" ]]; then
+            source <(curl -sL ${BASE_URL}/utils/qr_code.sh)
+        else
+            source ${BASE_URL}/utils/qr_code.sh
+        fi
+        
+        gen_qr_code "${3}"
         ;;
     show)
-        source <(curl -sL ${BASE_URL}/utils/view_config.sh)
+        if [[ ${methods} == "Online" ]]; then
+            source <(curl -sL ${BASE_URL}/utils/view_config.sh)
+        else
+            source ${BASE_URL}/utils/view_config.sh
+        fi
+        
         show_config
         ;;
     help)
@@ -1067,4 +1334,5 @@ case ${action} in
     *)
         usage 1
         ;;
+        
 esac

@@ -238,7 +238,7 @@ ss_cloak_server_config(){
 	EOF
 }
 
-ss_cloak_client_config(){
+cloak_client_config(){
 	cat > ${CK_CLIENT_CONFIG}<<-EOF
 	{
 		"UID":"${ckauid}",
@@ -247,6 +247,20 @@ ss_cloak_client_config(){
 		"TicketTimeHint":3600,
 		"NumConn":4,
 		"MaskBrowser":"chrome"
+	}
+	EOF
+}
+
+cloak_server_config(){
+	cat > ${CK_SERVER_CONFIG}<<-EOF
+	{
+		"ProxyBook":{
+		"shadowsocks":"127.0.0.1:${shadowsocksport}"
+		},
+		"RedirAddr":"${ckwebaddr}",
+		"PrivateKey":"${ckpv}",
+		"AdminUID":"${ckauid}",
+		"DatabasePath":"${ckdbp}/userinfo.db"
 	}
 	EOF
 }

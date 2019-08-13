@@ -25,7 +25,7 @@ get_new_ck_sslink(){
  Usage:
     ./ss-plugins.sh -O link <new add user uid>"
         echo
-        echo -e " ${Error} 仅支持 ss + cloak 下使用，请确认是否是以该组合形式运行，并且，使用 ./ss-plugins.sh uid 添加过新用户..."
+        echo -e " ${Error} 仅支持 ss + cloak-v1.1.2版本下使用，请确认是否是以该组合形式运行，并且，使用 ./ss-plugins.sh -O uid 添加过新用户..."
         echo
         exit 1
     fi

@@ -17,13 +17,13 @@ usage() {
 	cat >&1 <<-EOF
 
   请使用: ./ss-plugins.sh [install-methods] [options] [args]
-    <install-methods> 包括：
-        -o|-O, nline     在线安装（默认）
+  
+    $1 选项包括：
+        -o|-O, Online     在线安装（默认）
         -l|-L, Local     git clone 本地安装
         -h|-H, help      打印帮助信息并退出
     
-    可使用的参数 <option> 包括:
-
+    $2 选项包括:
         install          安装
         uninstall        卸载
         update           升级
@@ -48,7 +48,12 @@ methods=${1:-"Online"}
 if [ ${methods} == "-O" ] || [ ${methods} == "-o" ]; then
     methods="Online"
 elif [ ${methods} == "-L" ] || [ ${methods} == "-l" ]; then
-    methods="Local"
+    fds=$(ls -d */ | sed 's/\///g')
+    if [ ${#fds[n]} -eq 51 ]; then
+        methods="Local"
+    else
+        methods="help"
+    fi
 elif [ ${methods} == "-H" ] || [ ${methods} == "-h" ]; then
     methods="help"
 fi
@@ -1273,41 +1278,47 @@ case ${action} in
         ;;
     uid)
         if [ "$(command -v ck-server)" ]; then
-            ck-v=$(ck-server -v | grep ck-server | cut -d\  -f2)
+            ck_v=$(ck-server -v | grep ck-server | cut -d\  -f2)
+            
+            if [[ ${ck_v} == "1.1.2" ]]; then
+                if [[ ${methods} == "Online" ]]; then
+                    source <(curl -sL ${BASE_URL}/utils/ck_user_manager.sh)
+                else
+                    source ${BASE_URL}/utils/ck_user_manager.sh
+                fi
+                
+                add_a_new_uid
+            else
+                echo
+                echo -e "${Tip}: 当前cloak是最新版本，请使用ck-client -s <IP of the server> -l <A local port> -a <AdminUID> -c <path-to-ckclient.json>"
+                echo -e "$       进入Admin模式，然后通过Cloak-panel面板添加新用户.>"
+                echo
+            fi
+        else
+            echo -e " ${Error} 仅支持 ss + cloak-v1.1.2版本下使用，请确认是否是以该组合形式运行..."
         fi
         
-        if [[ ${ck-v} == "1.1.2" ]]; then
-            if [[ ${methods} == "Online" ]]; then
-                source <(curl -sL ${BASE_URL}/utils/ck_user_manager.sh)
-            else
-                source ${BASE_URL}/utils/ck_user_manager.sh
-            fi
-            
-            add_a_new_uid
-        else
-            echo
-            echo -e "${Tip}: 当前cloak是最新版本，请使用ck-client -s <IP of the server> -l <A local port> -a <AdminUID> -c <path-to-ckclient.json>"
-            echo -e "$       进入Admin模式，然后通过Cloak-panel面板添加新用户.>"
-            echo
-        fi
+
         ;;
     link)
         if [ "$(command -v ck-server)" ]; then
-            ck-v=$(ck-server -v | grep ck-server | cut -d\  -f2)
-        fi
-        
-        if [[ ${ck-v} == "1.1.2" ]]; then
-            if [[ ${methods} == "Online" ]]; then
-                source <(curl -sL ${BASE_URL}/utils/ck_sslink.sh)
-            else
-                source ${BASE_URL}/utils/ck_sslink.sh
-            fi
+            ck_v=$(ck-server -v | grep ck-server | cut -d\  -f2)
+            
+            if [[ ${ck_v} == "1.1.2" ]]; then
+                if [[ ${methods} == "Online" ]]; then
+                    source <(curl -sL ${BASE_URL}/utils/ck_sslink.sh)
+                else
+                    source ${BASE_URL}/utils/ck_sslink.sh
+                fi
 
-            get_new_ck_sslink "${3}"
+                get_new_ck_sslink "${3}"
+            else
+                echo
+                echo -e "${Tip}: 当前cloak是最新版本，该功能暂时不支持最新版本！"
+                echo
+            fi
         else
-            echo
-            echo -e "${Tip}: 当前cloak是最新版本，该功能暂时不支持最新版本！"
-            echo
+            echo -e " ${Error} 仅支持 ss + cloak-v1.1.2版本下使用，请确认是否是以该组合形式运行..."
         fi
         ;;
     scan)

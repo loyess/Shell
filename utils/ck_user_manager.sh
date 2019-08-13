@@ -51,7 +51,7 @@ add_a_new_uid(){
         ck-client -a -c ${CK_CLIENT_CONFIG}
     else
         echo
-        echo -e " ${Error} 仅支持 ss + cloak 下使用，请确认是否是以该组合形式运行..."
+        echo -e " ${Error} 仅支持 ss + cloak-v1.1.2版本下使用，请确认是否是以该组合形式运行..."
         echo
         exit 1
     fi

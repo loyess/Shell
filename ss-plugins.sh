@@ -37,6 +37,8 @@ usage() {
         scan             用ss://链接在当前终端上生成一个可供扫描的二维码
     
   [注意] “选项2”中的uid和link选项仅在cloak-v1.1.2版本中使用，使用“选项2”时必须指定“选项1”是Online还是Local安装.
+  
+  
 	EOF
 
 	exit $1

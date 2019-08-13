@@ -1291,7 +1291,7 @@ case ${action} in
             else
                 echo
                 echo -e "${Tip}: 当前cloak是最新版本，请使用ck-client -s <IP of the server> -l <A local port> -a <AdminUID> -c <path-to-ckclient.json>"
-                echo -e "$       进入Admin模式，然后通过Cloak-panel面板添加新用户.>"
+                echo -e "        进入Admin模式，然后通过Cloak-panel面板添加新用户.>"
                 echo
             fi
         else

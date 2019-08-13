@@ -18,12 +18,12 @@ usage() {
 
   请使用: ./ss-plugins.sh [install-methods] [options] [args]
   
-    $1 选项包括：
+    选项<install-methods>包括：
         -o|-O, Online     在线安装（默认）
         -l|-L, Local     git clone 本地安装
         -h|-H, help      打印帮助信息并退出
     
-    $2 选项包括:
+    选项<options>包括:
         install          安装
         uninstall        卸载
         update           升级

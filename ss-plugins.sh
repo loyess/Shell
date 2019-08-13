@@ -16,14 +16,14 @@ CUR_DIR=$( pwd )
 usage() {
 	cat >&1 <<-EOF
 
-  请使用: ./ss-plugins.sh [install-methods] [options] [args]
+  请使用: ./ss-plugins.sh [options1...] [options2...] [args...]
   
-    选项<install-methods>包括：
-        -o|-O, Online     在线安装（默认）
+    选项<options1>包括：
+        -o|-O, Online    在线安装（默认）
         -l|-L, Local     git clone 本地安装
         -h|-H, help      打印帮助信息并退出
     
-    选项<options>包括:
+    选项<options2>包括:
         install          安装
         uninstall        卸载
         update           升级
@@ -32,10 +32,11 @@ usage() {
         restart          重启
         status           查看状态
         show             显示可视化配置
-        uid              添加一个新用户 (仅ss + cloak下可用)
-        link             生成一个新的SS:// 链接 (仅ss + cloak下可用)
-        scan             根据生成的ss:// 链接，在当前终端上，手动生成一个可供扫描的二维码
-        
+        uid              为cloak添加一个新的uid用户
+        link             用新添加的uid生成一个新的SS://链接
+        scan             用ss://链接在当前终端上生成一个可供扫描的二维码
+    
+  [注意] “选项2”中的uid和link选项仅在cloak-v1.1.2版本中使用，使用“选项2”时必须指定“选项1”是Online还是Local安装.
 	EOF
 
 	exit $1

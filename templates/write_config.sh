@@ -251,16 +251,31 @@ cloak_client_config(){
 	EOF
 }
 
-cloak_server_config(){
+cloak2_server_config(){
 	cat > ${CK_SERVER_CONFIG}<<-EOF
 	{
 		"ProxyBook":{
 		"shadowsocks":"127.0.0.1:${shadowsocksport}"
 		},
+		"BypassUID":[],
 		"RedirAddr":"${ckwebaddr}",
 		"PrivateKey":"${ckpv}",
 		"AdminUID":"${ckauid}",
 		"DatabasePath":"${ckdbp}/userinfo.db"
+	}
+	EOF
+}
+
+cloak2_client_config(){
+	cat > ${CK_CLIENT_CONFIG}<<-EOF
+	{
+		"ProxyMethod":"shadowsocks",
+		"EncryptionMethod":"plain",
+		"UID":"${ckauid}",
+		"PublicKey":"${ckpub}",
+		"ServerName":"${domain}",
+		"NumConn":4,
+		"BrowserSig":"chrome"
 	}
 	EOF
 }

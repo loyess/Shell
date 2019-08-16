@@ -599,14 +599,14 @@ install_dependencies(){
         echo -e "${Info} EPEL存储库检查完成."
 
         yum_depends=(
-            gettext gcc pcre pcre-devel autoconf libtool automake make asciidoc xmlto c-ares-devel libev-devel zlib-devel openssl-devel git wget qrencode
+            gettext gcc pcre pcre-devel autoconf libtool automake make asciidoc xmlto c-ares-devel libev-devel zlib-devel openssl-devel git wget qrencode jq
         )
         for depend in ${yum_depends[@]}; do
             error_detect_depends "yum -y install ${depend}"
         done
     elif check_sys packageManager apt; then
         apt_depends=(
-            gettext gcc build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libc-ares-dev automake libssl-dev git wget qrencode
+            gettext gcc build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libc-ares-dev automake libssl-dev git wget qrencode jq
         )
 
         apt-get -y update
@@ -745,7 +745,8 @@ config_ss(){
             fi
             
             ss_config_standalone
-            cloak_server_config
+            cloak2_server_config
+            cloak2_client_config
         fi
     else
         ss_config_standalone
@@ -1214,8 +1215,8 @@ do_uninstall(){
         # uninstall kcptun
         rm -fr $(dirname ${KCPTUN_INSTALL_DIR}) > /dev/null 2>&1
         rm -fr $(dirname ${KCPTUN_CONFIG}) > /dev/null 2>&1
-        rm -fr ${KCPTUN_LOG_DIR}
-        rm -f ${KCPTUN_INIT}
+        rm -fr ${KCPTUN_LOG_DIR} > /dev/null 2>&1
+        rm -f ${KCPTUN_INIT} > /dev/null 2>&1
         
         # uninstall simple-obfs
         rm -f /usr/local/bin/obfs-local
@@ -1281,47 +1282,48 @@ case ${action} in
         ;;
     uid)
         if [ "$(command -v ck-server)" ]; then
+            if [[ ${methods} == "Online" ]]; then
+                source <(curl -sL ${BASE_URL}/utils/ck_user_manager.sh)
+            else
+                source ${BASE_URL}/utils/ck_user_manager.sh
+            fi
+            
+            # Get version num by local cloak 
             ck_v=$(ck-server -v | grep ck-server | cut -d\  -f2)
             
             if [[ ${ck_v} == "1.1.2" ]]; then
-                if [[ ${methods} == "Online" ]]; then
-                    source <(curl -sL ${BASE_URL}/utils/ck_user_manager.sh)
-                else
-                    source ${BASE_URL}/utils/ck_user_manager.sh
-                fi
-                
                 add_a_new_uid
             else
-                echo
-                echo -e "${Tip}: 当前cloak是最新版本，请使用ck-client -s <IP of the server> -l <A local port> -a <AdminUID> -c <path-to-ckclient.json>"
-                echo -e "        进入Admin模式，然后通过Cloak-panel面板添加新用户.>"
-                echo
+                ck2_users_manager
+                
+                sleep 0.5
+                
+                is_the_api_open "stop"
             fi
         else
-            echo -e " ${Error} 仅支持 ss + cloak-v1.1.2版本下使用，请确认是否是以该组合形式运行..."
+            echo -e " ${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行..."
         fi
         
 
         ;;
     link)
         if [ "$(command -v ck-server)" ]; then
+            if [[ ${methods} == "Online" ]]; then
+                source <(curl -sL ${BASE_URL}/utils/ck_sslink.sh)
+            else
+                source ${BASE_URL}/utils/ck_sslink.sh
+            fi
+            
+            # Get version num by local cloak 
             ck_v=$(ck-server -v | grep ck-server | cut -d\  -f2)
             
             if [[ ${ck_v} == "1.1.2" ]]; then
-                if [[ ${methods} == "Online" ]]; then
-                    source <(curl -sL ${BASE_URL}/utils/ck_sslink.sh)
-                else
-                    source ${BASE_URL}/utils/ck_sslink.sh
-                fi
-
-                get_new_ck_sslink "${3}"
+                get_link_of_ck "${3}"
             else
-                echo
-                echo -e "${Tip}: 当前cloak是最新版本，该功能暂时不支持最新版本！"
-                echo
+                get_link_of_ck2 "${3}"
             fi
         else
-            echo -e " ${Error} 仅支持 ss + cloak-v1.1.2版本下使用，请确认是否是以该组合形式运行..."
+            echo -e " ${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行..."
         fi
         ;;
     scan)

@@ -115,6 +115,32 @@ Usage:
 
 &nbsp;
 
+4. ### 简略安装步骤-动图预览
+
+**ss + v2ray-plugin**
+
+![01-v2ray-plugin](other/Images/01-v2ray-plugin.gif)
+
+**ss + kcptun**
+
+![02-kcptun](other/Images/02-kcptun.gif)
+
+**ss + simple-obfs**
+
+![03-simple-obfs](other/Images/03-simple-obfs.gif)
+
+**ss + goquiet**
+
+![04-goguiet](other/Images/04-goguiet.gif)
+
+**ss + cloak**
+
+![05-cloak](other/Images/05-cloak.gif)
+
+**ss + cloak2 用户管理**
+
+![06-cloak-user-management](other/Images/06-cloak-user-management.gif)
+
 本脚本改自于各路大神，水平马马虎虎，方便自用。
 
 这里只对 linux-amd64 处理器架构做了支持，其它的就不要尝试了，推荐Ubuntu 18.04 LTS。

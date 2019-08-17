@@ -274,7 +274,7 @@ ss_cloak_show_new(){
     echo -e "        请解压将带client字样的文件重命名为 ${plugin_client_name}.exe 并移动至 SS-Windows 客户端-安装目录的${Red}根目录${suffix}." >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " ${Tip} 插件选项 ServerName 字段，域名用的是默认值，如果你前面填写的是其它的ip:port 这里请换成ip对应的域名." >> ${HUMAN_CONFIG}
-    echo -e "        另外，你可以使用 ck-client -s <IP of the server> -l <A local port> -a <AdminUID> -c <path-to-ckclient.json> "
+    echo -e "        另外，你可以使用 ck-client -s <IP of the server> -l <A local port> -a <AdminUID> -c <path-to-ckclient.json> " >> ${HUMAN_CONFIG}
     echo -e "        进入admin 模式，然后通过Cloak-panel面板添加新用户." >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
 }

@@ -618,7 +618,7 @@ install_dependencies(){
 
 install_libsodium(){    
     if [ ! -f /usr/lib/libsodium.a ]; then
-        cd ${cur_dir}
+        cd ${CUR_DIR}
         echo -e "${Info} 下载${LIBSODIUM_FILE}..."
         download "${LIBSODIUM_FILE}.tar.gz" "${LIBSODIUM_URL}"
         echo -e "${Info} 解压${LIBSODIUM_FILE}..."
@@ -638,7 +638,7 @@ install_libsodium(){
 
 install_mbedtls(){
     if [ ! -f /usr/lib/libmbedtls.a ]; then
-        cd ${cur_dir}
+        cd ${CUR_DIR}
         echo -e "${Info} 下载${MBEDTLS_FILE}..."
         download "${MBEDTLS_FILE}-gpl.tgz" "${MBEDTLS_URL}"
         echo -e "${Info} 解压${MBEDTLS_FILE}..."

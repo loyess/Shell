@@ -545,6 +545,7 @@ download_files(){
         
     elif [[ "${plugin_num}" == "5" ]]; then
         # Download cloak server
+        cloak_ver="2.0.2"
         cloak_file="ck-server-linux-amd64-${cloak_ver}"
         cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${cloak_ver}/ck-server-linux-amd64-${cloak_ver}"
         download "${cloak_file}" "${cloak_url}"

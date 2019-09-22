@@ -81,14 +81,6 @@ ss_goquiet_link(){
 }
 
 # ss + cloak link
-ss_cloak_link(){
-    local link_head="ss://"
-    local cipher_pwd=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}")
-    local ip_port_plugin="@$(get_ip):${shadowsocksport}/?plugin=${plugin_client_name}"    
-    local plugin_opts=$(get_str_replace ";UID=${ckauid};PublicKey=${ckpub};ServerName=${domain};TicketTimeHint=3600;NumConn=4;MaskBrowser=chrome")
-    ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
-}
-
 ss_cloak_link_new(){
     local link_head="ss://"
     local cipher_pwd=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}")

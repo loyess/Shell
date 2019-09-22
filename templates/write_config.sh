@@ -220,37 +220,6 @@ ss_goquiet_config(){
 }
 
 # ss + cloak config
-ss_cloak_server_config(){
-	cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
-	{
-		"server":${server_value},
-		"server_port":${shadowsocksport},
-		"password":"${shadowsockspwd}",
-		"timeout":300,
-		"user":"nobody",
-		"method":"${shadowsockscipher}",
-		"fast_open":${fast_open},
-		"nameserver":"8.8.8.8",
-		"mode":"tcp_and_udp",
-		"plugin":"ck-server",
-		"plugin_opts":"WebServerAddr=${ckwebaddr};PrivateKey=${ckpv};AdminUID=${ckauid};DatabasePath=${ckdbp}/userinfo.db;BackupDirPath=${ckdbp}/db-backup"
-	}
-	EOF
-}
-
-cloak_client_config(){
-	cat > ${CK_CLIENT_CONFIG}<<-EOF
-	{
-		"UID":"${ckauid}",
-		"PublicKey":"${ckpub}",
-		"ServerName":"${domain}",
-		"TicketTimeHint":3600,
-		"NumConn":4,
-		"MaskBrowser":"chrome"
-	}
-	EOF
-}
-
 cloak2_server_config(){
 	cat > ${CK_SERVER_CONFIG}<<-EOF
 	{

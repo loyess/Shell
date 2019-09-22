@@ -544,34 +544,27 @@ download_files(){
         download "${goquiet_file}" "${goquiet_url}"
         
     elif [[ "${plugin_num}" == "5" ]]; then
-        if [ "${ck_install_ver}" == "n" ] || [ "${ck_install_ver}" == "N" ]; then
-            cloak_ver="1.1.2"
-            # Download cloak server
-            cloak_file="ck-server-linux-amd64-${cloak_ver}"
-            cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${cloak_ver}/ck-server-linux-amd64-${cloak_ver}"
-            download "${cloak_file}" "${cloak_url}"
-        else
-            # Download cloak server
-            cloak_file="ck-server-linux-amd64-${cloak_ver}"
-            cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${cloak_ver}/ck-server-linux-amd64-${cloak_ver}"
-            download "${cloak_file}" "${cloak_url}"
-            
-            if check_sys packageManager yum; then
-                if [[ ${methods} == "Online" ]]; then
-                    download "${CLOAK_INIT}" "${CLOAK_CENTOS}"
-                else
-                    cp ./service/cloak_centos.sh "$(dirname ${CLOAK_INIT})"
-                    mv "$(dirname ${CLOAK_INIT})/cloak_centos.sh" "${CLOAK_INIT}"
-                fi
-            elif check_sys packageManager apt; then
-                if [[ ${methods} == "Online" ]]; then
-                    download "${CLOAK_INIT}" "${CLOAK_DEBIAN}"
-                else
-                    cp ./service/cloak_debian.sh "$(dirname ${CLOAK_INIT})"
-                    mv "$(dirname ${CLOAK_INIT})/cloak_debian.sh" "${CLOAK_INIT}"
-                fi
+        # Download cloak server
+        cloak_file="ck-server-linux-amd64-${cloak_ver}"
+        cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${cloak_ver}/ck-server-linux-amd64-${cloak_ver}"
+        download "${cloak_file}" "${cloak_url}"
+        
+        if check_sys packageManager yum; then
+            if [[ ${methods} == "Online" ]]; then
+                download "${CLOAK_INIT}" "${CLOAK_CENTOS}"
+            else
+                cp ./service/cloak_centos.sh "$(dirname ${CLOAK_INIT})"
+                mv "$(dirname ${CLOAK_INIT})/cloak_centos.sh" "${CLOAK_INIT}"
+            fi
+        elif check_sys packageManager apt; then
+            if [[ ${methods} == "Online" ]]; then
+                download "${CLOAK_INIT}" "${CLOAK_DEBIAN}"
+            else
+                cp ./service/cloak_debian.sh "$(dirname ${CLOAK_INIT})"
+                mv "$(dirname ${CLOAK_INIT})/cloak_debian.sh" "${CLOAK_INIT}"
             fi
         fi
+
     fi
 }
 
@@ -732,22 +725,13 @@ config_ss(){
     elif [[ ${plugin_num} == "4" ]]; then
         ss_goquiet_config
     elif [[ ${plugin_num} == "5" ]]; then
-        if [ "${ck_install_ver}" == "n" ] || [ "${ck_install_ver}" == "N" ]; then
-            ss_cloak_server_config
-            
-            if [ ! -d "$(dirname ${CK_CLIENT_CONFIG})" ]; then
-                mkdir -p $(dirname ${CK_CLIENT_CONFIG})
-            fi
-            cloak_client_config
-        else
-            if [ ! -d "$(dirname ${CK_SERVER_CONFIG})" ]; then
-                mkdir -p $(dirname ${CK_SERVER_CONFIG})
-            fi
-            
-            ss_config_standalone
-            cloak2_server_config
-            cloak2_client_config
+        if [ ! -d "$(dirname ${CK_SERVER_CONFIG})" ]; then
+            mkdir -p $(dirname ${CK_SERVER_CONFIG})
         fi
+        
+        ss_config_standalone
+        cloak2_server_config
+        cloak2_client_config
     else
         ss_config_standalone
     fi
@@ -783,11 +767,7 @@ gen_ss_links(){
     elif [[ ${plugin_num} == "4" ]]; then
         ss_goquiet_link
     elif [[ ${plugin_num} == "5" ]]; then
-        if [ "${ck_install_ver}" == "n" ] || [ "${ck_install_ver}" == "N" ]; then
-            ss_cloak_link
-        else
-            ss_cloak_link_new
-        fi
+        ss_cloak_link_new
     else
         ss_link
     fi
@@ -840,14 +820,10 @@ install_completed(){
     elif [[ ${plugin_num} == "4" ]]; then
         ss_goquiet_show
     elif [[ ${plugin_num} == "5" ]]; then
-        if [ "${ck_install_ver}" == "n" ] || [ "${ck_install_ver}" == "N" ]; then
-            ss_cloak_show
-        else
-            # start cloak
-            ${CLOAK_INIT} start  > /dev/null 2>&1
-            
-            ss_cloak_show_new
-        fi
+        # start cloak
+        ${CLOAK_INIT} start  > /dev/null 2>&1
+        
+        ss_cloak_show_new
     else
         ss_show
     fi
@@ -1287,24 +1263,14 @@ case ${action} in
             else
                 source ${BASE_URL}/utils/ck_user_manager.sh
             fi
+           
+            ck2_users_manager
+            sleep 0.5
             
-            # Get version num by local cloak 
-            ck_v=$(ck-server -v | grep ck-server | cut -d\  -f2)
-            
-            if [[ ${ck_v} == "1.1.2" ]]; then
-                add_a_new_uid
-            else
-                ck2_users_manager
-                
-                sleep 0.5
-                
-                is_the_api_open "stop"
-            fi
+            is_the_api_open "stop"
         else
             echo -e " ${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行..."
         fi
-        
-
         ;;
     link)
         if [ "$(command -v ck-server)" ]; then
@@ -1314,14 +1280,7 @@ case ${action} in
                 source ${BASE_URL}/utils/ck_sslink.sh
             fi
             
-            # Get version num by local cloak 
-            ck_v=$(ck-server -v | grep ck-server | cut -d\  -f2)
-            
-            if [[ ${ck_v} == "1.1.2" ]]; then
-                get_link_of_ck "${3}"
-            else
-                get_link_of_ck2 "${3}"
-            fi
+            get_link_of_ck2 "${3}"
         else
             echo -e " ${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行..."
         fi

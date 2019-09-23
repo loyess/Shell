@@ -15,6 +15,16 @@ CUR_DIR=$( pwd )
 
 
 
+# base url
+if [ -e plugins ] && [ -e prepare ] && [ -e service ] && [ -e templates ] && [ -e tools ] && [ -e utils ]; then
+    methods="Local"
+    BASE_URL="."
+else
+    methods="Online"
+    BASE_URL="https://github.com/loyess/Shell/raw/master"
+fi
+
+
 # bbr
 BBR_SCRIPT_URL="https://git.io/vbUk0"
 
@@ -180,16 +190,6 @@ usage() {
 	EOF
 
 	exit $1
-}
-
-base_url(){
-    if [ -e plugins ] && [ -e prepare ] && [ -e service ] && [ -e templates ] && [ -e tools ] && [ -e utils ]; then
-        methods="Local"
-        BASE_URL="."
-    else
-        methods="Online"
-        BASE_URL="https://github.com/loyess/Shell/raw/master"
-    fi
 }
 
 disable_selinux(){
@@ -1238,9 +1238,6 @@ do_install(){
 }
 
 
-
-# set base url
-base_url
 
 # install and tools
 action=${1:-"install"}

@@ -10,8 +10,23 @@ chmod +x ss-plugins.sh
 &nbsp;
 
 ```shell
-Usage: 
-./ss-plugins.sh [-O|-L|-H] [install|uninstall|update|start|stop|restart|status|show|uid|link|scan] [new_uid|ss_link]
+Usage: ./ss-plugins.sh [options...] [args...]
+
+    选项<options>包括:
+        install          安装
+        uninstall        卸载
+        update           升级
+        start            启动
+        stop             关闭
+        restart          重启
+        status           查看状态
+        show             显示可视化配置
+        uid              为cloak添加一个新的uid用户
+        link             用新添加的uid生成一个新的SS://链接
+        scan             用ss://链接在当前终端上生成一个可供扫描的二维码
+        help             打印帮助信息并退出
+    
+  [注意] uid和link选项仅在搭配安装cloak的情况下使用.
 ```
 
 &nbsp;
@@ -89,7 +104,13 @@ Usage:
 
 &nbsp;
 
-3. ### 安装完毕，终端配置展示如下，以 ss + kcptun 为例：
+3. ### 简略安装步骤-动图预览，以 ss + v2ray-plugin 为例：
+
+![01-v2ray-plugin](other/Images/01-v2ray-plugin.gif)
+
+&nbsp;
+
+4. ### 安装完毕，终端配置展示如下，以 ss + kcptun 为例：
 
 ~~~shell
  Shadowsocks的配置信息：
@@ -114,32 +135,6 @@ Usage:
 ~~~
 
 &nbsp;
-
-4. ### 简略安装步骤-动图预览
-
-**ss + v2ray-plugin**
-
-![01-v2ray-plugin](other/Images/01-v2ray-plugin.gif)
-
-**ss + kcptun**
-
-![02-kcptun](other/Images/02-kcptun.gif)
-
-**ss + simple-obfs**
-
-![03-simple-obfs](other/Images/03-simple-obfs.gif)
-
-**ss + goquiet**
-
-![04-goguiet](other/Images/04-goguiet.gif)
-
-**ss + cloak**
-
-![05-cloak](other/Images/05-cloak.gif)
-
-**ss + cloak2 用户管理**
-
-![06-cloak-user-management](other/Images/06-cloak-user-management.gif)
 
 本脚本改自于各路大神，水平马马虎虎，方便自用。
 

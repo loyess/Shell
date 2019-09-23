@@ -183,8 +183,7 @@ usage() {
 }
 
 base_url(){
-    fds=$(ls -d */ | sed 's/\///g')
-    if [ ${#fds[n]} -eq 51 ]; then
+    if [ -e plugins ] && [ -e prepare ] && [ -e service ] && [ -e templates ] && [ -e tools ] && [ -e utils ]; then
         methods="Local"
         BASE_URL="."
     else

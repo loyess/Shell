@@ -225,7 +225,7 @@ ss_cloak_show_new(){
     echo -e " Shadowsocks的配置信息：" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " 地址     : ${Red}$(get_ip)${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " 端口     : ${Red}$443${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 端口     : ${Red}443${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 密码     : ${Red}${shadowsockspwd}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}

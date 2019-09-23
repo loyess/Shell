@@ -316,6 +316,19 @@ check_ss_libev_version(){
     fi
 }
 
+check_script_version(){
+	SHELL_VERSION_NEW=$(wget --no-check-certificate -qO- -t1 -T3 "https://git.io/fjlbl"|grep 'SHELL_VERSION="'|awk -F "=" '{print $NF}'|sed 's/\"//g'|head -1)
+	[[ -z ${SHELL_VERSION_NEW} ]] && echo -e "${Error} 无法链接到 Github !" && exit 0
+	if version_gt ${SHELL_VERSION_NEW} ${SHELL_VERSION}; then
+        echo
+        echo -e "${Green}当前脚本版本为：${SHELL_VERSION} 检测到有新版本可更新...${suffix}"
+        echo -e "按任意键开始…或按Ctrl+C取消"
+        char=`get_char`
+        wget -N --no-check-certificate -O ss-plugins.sh "https://git.io/fjlbl" && chmod +x ss-plugins.sh
+        echo -e "脚本已更新为最新版本[ ${SHELL_VERSION_NEW} ] !(注意：因为更新方式为直接覆盖当前运行的脚本，所以可能下面会提示一些报错，无视即可)" && exit 0
+    fi
+}
+
 get_ip(){
     local IP=$( ip addr | egrep -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | egrep -v "^192\.168|^172\.1[6-9]\.|^172\.2[0-9]\.|^172\.3[0-2]\.|^10\.|^127\.|^255\.|^0\." | head -n 1 )
     [ -z ${IP} ] && IP=$( wget -qO- -t1 -T2 ipv4.icanhazip.com )
@@ -1232,6 +1245,9 @@ base_url
 
 # install and tools
 action=${1:-"install"}
+
+# check script version and update
+check_script_version
 
 case ${action} in
     install|uninstall|update|start|stop|restart|status)

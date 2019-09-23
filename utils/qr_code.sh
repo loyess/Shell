@@ -18,7 +18,7 @@ gen_qr_code(){
     else
         echo -e "
  Usage:
-    ./ss-plugins.sh -O scan <a ss link>"
+    ./ss-plugins.sh scan <a ss link>"
         echo
         echo -e " ${Error} 仅支持生成ss:// 开头的链接，请确认使用方式和要生成的链接是否正确..."
         echo

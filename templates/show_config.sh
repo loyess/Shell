@@ -9,7 +9,7 @@ ss_show(){
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo  >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " SS二维码 : ./ss-plugins.sh -O scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
+    echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
 }
 
@@ -27,7 +27,7 @@ ss_v2ray_ws_http_show(){
     echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " SS二维码 : ./ss-plugins.sh -O scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
+    echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
@@ -49,7 +49,7 @@ ss_v2ray_ws_tls_cdn_show(){
     echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " SS二维码 : ./ss-plugins.sh -O scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
+    echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
@@ -71,7 +71,7 @@ ss_v2ray_quic_tls_cdn_show(){
     echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " SS二维码 : ./ss-plugins.sh -O scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
+    echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
@@ -93,7 +93,7 @@ ss_v2ray_ws_tls_web_show(){
     echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " SS二维码 : ./ss-plugins.sh -O scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
+    echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
@@ -115,7 +115,7 @@ ss_v2ray_ws_tls_web_cdn_show(){
     echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " SS二维码 : ./ss-plugins.sh -O scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
+    echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
@@ -140,7 +140,7 @@ ss_kcptun_show(){
     echo -e " 手机参数 : crypt=${crypt};key=${key};mtu=${MTU};sndwnd=${rcvwnd};rcvwnd=${sndwnd};mode=${mode};datashard=${datashard};parityshard=${parityshard};dscp=${DSCP};nocomp=${nocomp}" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " SS二维码 : ./ss-plugins.sh -O scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
+    echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
@@ -163,7 +163,7 @@ ss_obfs_http_show(){
     echo -e " 插件参数 : ${Red}obfs-host=${domain};fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " SS二维码 : ./ss-plugins.sh -O scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
+    echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
@@ -185,7 +185,7 @@ ss_obfs_tls_show(){
     echo -e " 插件参数 : ${Red}obfs-host=${domain};fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " SS二维码 : ./ss-plugins.sh -O scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
+    echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
@@ -208,7 +208,7 @@ ss_goquiet_show(){
     echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " SS二维码 : ./ss-plugins.sh -O scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
+    echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
@@ -237,7 +237,7 @@ ss_cloak_show_new(){
     echo -e " CK  私钥 : ${ckpv}" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " SS二维码 : ./ss-plugins.sh -O scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
+    echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}

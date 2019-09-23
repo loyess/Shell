@@ -13,70 +13,6 @@ SHELL_VERSION="2.0.0"
 # current path
 CUR_DIR=$( pwd )
 
-usage() {
-	cat >&1 <<-EOF
-
-  请使用: ./ss-plugins.sh [options1...] [options2...] [args...]
-  
-    选项<options1>包括：
-        -o|-O, Online    在线安装（默认）
-        -l|-L, Local     git clone 本地安装
-        -h|-H, help      打印帮助信息并退出
-    
-    选项<options2>包括:
-        install          安装
-        uninstall        卸载
-        update           升级
-        start            启动
-        stop             关闭
-        restart          重启
-        status           查看状态
-        show             显示可视化配置
-        uid              为cloak添加一个新的uid用户
-        link             用新添加的uid生成一个新的SS://链接
-        scan             用ss://链接在当前终端上生成一个可供扫描的二维码
-    
-  [注意] “选项2”中的uid和link选项仅在cloak-v1.1.2版本中使用，使用“选项2”时必须指定“选项1”是Online还是Local安装.
-  
-  
-	EOF
-
-	exit $1
-}
-
-
-# install methods
-methods=${1:-"Online"}
-
-if [ ${methods} == "-O" ] || [ ${methods} == "-o" ]; then
-    methods="Online"
-elif [ ${methods} == "-L" ] || [ ${methods} == "-l" ]; then
-    fds=$(ls -d */ | sed 's/\///g')
-    if [ ${#fds[n]} -eq 51 ]; then
-        methods="Local"
-    else
-        methods="help"
-    fi
-elif [ ${methods} == "-H" ] || [ ${methods} == "-h" ]; then
-    methods="help"
-fi
-
-case ${methods} in 
-    Online)
-        # BASE_URL="https://github.com/loyess/Shell/raw/test"
-        BASE_URL="https://github.com/loyess/Shell/raw/master"
-        ;;
-    Local)
-        BASE_URL="."
-        ;;
-    help)
-        usage 0
-        ;;
-    *)
-        usage 1
-        ;;
-esac
-
 
 
 # bbr
@@ -218,6 +154,44 @@ Separator_1="——————————————————————�
 
 [[ $EUID -ne 0 ]] && echo -e "[${Red}Error${suffix}] This script must be run as root!" && exit 1
 
+
+usage() {
+	cat >&1 <<-EOF
+
+  请使用: ./ss-plugins.sh [options...] [args...]
+    
+    选项<options>包括:
+        install          安装
+        uninstall        卸载
+        update           升级
+        start            启动
+        stop             关闭
+        restart          重启
+        status           查看状态
+        show             显示可视化配置
+        uid              为cloak添加一个新的uid用户
+        link             用新添加的uid生成一个新的SS://链接
+        scan             用ss://链接在当前终端上生成一个可供扫描的二维码
+        help             打印帮助信息并退出
+    
+  [注意] uid和link选项仅在搭配安装cloak的情况下使用.
+  
+  
+	EOF
+
+	exit $1
+}
+
+base_url(){
+    fds=$(ls -d */ | sed 's/\///g')
+    if [ ${#fds[n]} -eq 51 ]; then
+        methods="Local"
+        BASE_URL="."
+    else
+        methods="Online"
+        BASE_URL="https://github.com/loyess/Shell/raw/master"
+    fi
+}
 
 disable_selinux(){
     if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
@@ -1227,7 +1201,7 @@ do_install(){
         exit 1
     fi
     
-    echo -e " Shadowsocks-libev一键管理脚本 ${Red}[v${SHELL_VERSION}]${suffix}
+    echo -e " Shadowsocks-libev一键管理脚本 ${Red}[v${SHELL_VERSION} ${methods}]${suffix}
 
     ${Green}1.${suffix} BBR
     ${Green}2.${suffix} Install
@@ -1253,8 +1227,11 @@ do_install(){
 
 
 
+# set base url
+base_url
+
 # install and tools
-action=${2:-"install"}
+action=${1:-"install"}
 
 case ${action} in
     install|uninstall|update|start|stop|restart|status)
@@ -1284,7 +1261,7 @@ case ${action} in
                 source ${BASE_URL}/utils/ck_sslink.sh
             fi
             
-            get_link_of_ck2 "${3}"
+            get_link_of_ck2 "${2}"
         else
             echo -e " ${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行..."
         fi
@@ -1296,7 +1273,7 @@ case ${action} in
             source ${BASE_URL}/utils/qr_code.sh
         fi
         
-        gen_qr_code "${3}"
+        gen_qr_code "${2}"
         ;;
     show)
         if [[ ${methods} == "Online" ]]; then

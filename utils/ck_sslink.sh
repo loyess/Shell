@@ -9,7 +9,7 @@ get_link_of_ck2(){
         local link_head="ss://"
         local cipher_pwd=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}")
         local ip_port_plugin="@$(get_ip):443/?plugin=ck-client"    
-        local plugin_opts=$(get_str_replace ";ProxyMethod=shadowsocks;EncryptionMethod=plain;UID=${ckauid};PublicKey=${ckpub};ServerName=${ckservername};NumConn=4;BrowserSig=chrome")
+        local plugin_opts=$(get_str_replace ";Transport=direct;ProxyMethod=shadowsocks;EncryptionMethod=plain;UID=${ckauid};PublicKey=${ckpub};ServerName=${ckservername};NumConn=4;BrowserSig=chrome;StreamTimeout=300")
         local ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
         
         echo

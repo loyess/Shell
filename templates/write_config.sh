@@ -224,13 +224,15 @@ cloak2_server_config(){
 	cat > ${CK_SERVER_CONFIG}<<-EOF
 	{
 		"ProxyBook":{
-		"shadowsocks":"127.0.0.1:${shadowsocksport}"
+		"shadowsocks":["tcp","127.0.0.1:${shadowsocksport}"]
 		},
+		"BindAddr":[":443",":80"],
 		"BypassUID":[],
 		"RedirAddr":"${ckwebaddr}",
 		"PrivateKey":"${ckpv}",
 		"AdminUID":"${ckauid}",
-		"DatabasePath":"${ckdbp}/userinfo.db"
+		"DatabasePath":"${ckdbp}/userinfo.db",
+		"StreamTimeout":300
 	}
 	EOF
 }
@@ -238,13 +240,15 @@ cloak2_server_config(){
 cloak2_client_config(){
 	cat > ${CK_CLIENT_CONFIG}<<-EOF
 	{
+		"Transport":"direct",
 		"ProxyMethod":"shadowsocks",
 		"EncryptionMethod":"plain",
 		"UID":"${ckauid}",
 		"PublicKey":"${ckpub}",
 		"ServerName":"${domain}",
 		"NumConn":4,
-		"BrowserSig":"chrome"
+		"BrowserSig":"chrome",
+		"StreamTimeout":300
 	}
 	EOF
 }

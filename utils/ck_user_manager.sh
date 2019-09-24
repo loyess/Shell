@@ -133,7 +133,7 @@ ck2_users_manager(){
     if [[ ! -e '/usr/local/bin/ck-client' ]]; then
         get_ver
         # Download cloak client
-        cloak_ver="2.0.2"
+        cloak_ver="2.1.1"
         local cloak_file="ck-client-linux-amd64-${cloak_ver}"
         local cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${cloak_ver}/ck-client-linux-amd64-${cloak_ver}"
         download "${cloak_file}" "${cloak_url}"

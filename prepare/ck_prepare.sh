@@ -1,15 +1,14 @@
 install_prepare_libev_cloak(){
-    echo -e "请为Cloak输入重定向ip:port [留空以将其设置为bing.com的204.79.197.200:443]"
     echo
-    read -e -p "(默认: 204.79.197.200:443):" ckwebaddr
-    [ -z "$ckwebaddr" ] && ckwebaddr="204.79.197.200:443"
+    echo -e "请为Cloak输入重定向ip [留空以将其设置为bing.com的204.79.197.200]"
+    read -e -p "(默认: 204.79.197.200):" ckwebaddr
+    [ -z "$ckwebaddr" ] && ckwebaddr="204.79.197.200"
     echo
     echo -e "${Red}  RedirAddr = ${ckwebaddr}${suffix}"
     echo 
     
     echo
-    echo -e "请为Cloak输入重定向ip:port相对应的域名"
-    echo
+    echo -e "请为Cloak输入重定向ip相对应的域名"
     read -e -p "(默认: www.bing.com):" domain
     [ -z "$domain" ] && domain="www.bing.com"
     echo

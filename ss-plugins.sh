@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.0.1"
+SHELL_VERSION="2.0.2"
 # ====================
 
 
@@ -1239,11 +1239,11 @@ do_install(){
 
 
 
-# install and tools
-action=${1:-"install"}
-
 # check script version and update
 check_script_version
+
+# install and tools
+action=${1:-"install"}
 
 case ${action} in
     install|uninstall|update|start|stop|restart|status)

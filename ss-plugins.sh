@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.0.2"
+SHELL_VERSION="2.0.3"
 # ====================
 
 
@@ -71,6 +71,7 @@ CK_SERVER_CONFIG="/etc/cloak/ckserver.json"
 
 
 # caddy
+CADDY_FILE="/usr/local/caddy/caddy"
 CADDY_CONF_FILE="/usr/local/caddy/Caddyfile"
 CADDY_INSTALL_SCRIPT_URL="https://git.io/fjuAR"
 
@@ -1016,7 +1017,7 @@ do_start(){
             ${KCPTUN_INIT} start
         elif [[ -e "${CLOAK_INIT}" ]]; then
             /etc/init.d/cloak start
-        elif [ "$(command -v caddy)" ]; then
+        elif [ -e "${CADDY_FILE}" ]; then
             /etc/init.d/caddy start
         fi
     else

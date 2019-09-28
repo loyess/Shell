@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.0.3"
+SHELL_VERSION="2.0.4"
 # ====================
 
 
@@ -26,7 +26,8 @@ fi
 
 
 # bbr
-BBR_SCRIPT_URL="https://git.io/vbUk0"
+TEDDYSUN_BBR_SCRIPT_URL="https://git.io/vbUk0"
+CHIAKGE_BBR_SCRIPT_URL="https://git.io/vxJ1I"
 
 
 # Humanization config PATH
@@ -327,6 +328,26 @@ check_script_version(){
         wget -N --no-check-certificate -O ss-plugins.sh "https://git.io/fjlbl" && chmod +x ss-plugins.sh
         echo -e "脚本已更新为最新版本[ ${SHELL_VERSION_NEW} ] !(注意：因为更新方式为直接覆盖当前运行的脚本，所以可能下面会提示一些报错，无视即可)" && exit 0
     fi
+}
+
+choose_script_bbr(){
+    echo
+    echo -e "请选择BBR的安装脚本"
+    echo
+    echo -e "    ${Green}1.${suffix} 秋水逸冰-BBR"
+    echo -e "    ${Green}2.${suffix} BBR|BBR魔改|BBRplus|Lotserver版本"
+    echo && read -e -p "请输入数字 [1-2]：" bbr_menu_num
+    case "${bbr_menu_num}" in
+        1)
+            source <(curl -sL ${TEDDYSUN_BBR_SCRIPT_URL})
+            ;;
+        2)
+            source <(curl -sL ${CHIAKGE_BBR_SCRIPT_URL})
+            ;;
+        *)
+            echo -e "${Error} 请输入正确的数字 [1-2]"
+            ;;
+    esac
 }
 
 get_ip(){
@@ -1205,7 +1226,6 @@ do_uninstall(){
     fi
 }
 
-
 do_install(){
     # check supported
     if ! install_check; then
@@ -1223,8 +1243,8 @@ do_install(){
     do_status
     echo && read -e -p "请输入数字 [1-3]：" menu_num
     case "${menu_num}" in
-        1)
-            source <(curl -sL ${BBR_SCRIPT_URL})
+        1)   
+            choose_script_bbr
             ;;
         2)
             install_step_all

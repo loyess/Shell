@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.0.5"
+SHELL_VERSION="2.0.6"
 # ====================
 
 
@@ -1036,9 +1036,13 @@ do_start(){
         ${SHADOWSOCKS_LIBEV_INIT} start
         if [ "$(command -v kcptun-server)" ]; then
             ${KCPTUN_INIT} start
-        elif [[ -e "${CLOAK_INIT}" ]]; then
+        fi
+        
+        if [[ -e "${CLOAK_INIT}" ]]; then
             /etc/init.d/cloak start
-        elif [ -e "${CADDY_FILE}" ]; then
+        fi
+        
+        if [ -e "${CADDY_FILE}" ]; then
             /etc/init.d/caddy start
         fi
     else
@@ -1062,15 +1066,25 @@ do_stop(){
     
     if [ "$(command -v v2ray-plugin)" ]; then
         echo -e "Stopping v2ray-plugin success"
-    elif [ "$(command -v kcptun-server)" ]; then
+    fi
+    
+    if [ "$(command -v kcptun-server)" ]; then
         echo -e "Stopping kcptun-server success"
-    elif [ "$(command -v obfs-server)" ]; then
+    fi
+    
+    if [ "$(command -v obfs-server)" ]; then
         echo -e "Stopping obfs-server success"
-    elif [ "$(command -v gq-server)" ]; then
+    fi
+    
+    if [ "$(command -v gq-server)" ]; then
         echo -e "Stopping gq-server success"
-    elif [ "$(command -v ck-server)" ]; then
+    fi
+    
+    if [ "$(command -v ck-server)" ]; then
         echo -e "Stopping ck-server success"
-    elif [ -e "${CADDY_FILE}" ]; then
+    fi
+    
+    if [ -e "${CADDY_FILE}" ]; then
         echo -e "Stopping caddy success"
     fi
 }

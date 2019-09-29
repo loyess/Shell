@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.0.4"
+SHELL_VERSION="2.0.5"
 # ====================
 
 
@@ -1070,7 +1070,7 @@ do_stop(){
         echo -e "Stopping gq-server success"
     elif [ "$(command -v ck-server)" ]; then
         echo -e "Stopping ck-server success"
-    elif [ "$(command -v caddy)" ]; then
+    elif [ -e "${CADDY_FILE}" ]; then
         echo -e "Stopping caddy success"
     fi
 }

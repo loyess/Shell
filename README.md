@@ -136,6 +136,10 @@ Usage: ./ss-plugins.sh [options...] [args...]
 
 &nbsp;
 
+![Stargazers over time](https://starchart.cc/loyess/Shell.svg)
+
+&nbsp;
+
 本脚本改自于各路大神，水平马马虎虎，方便自用。
 
 这里只对 linux-amd64 处理器架构做了支持，其它的就不要尝试了，推荐Ubuntu 18.04 LTS。

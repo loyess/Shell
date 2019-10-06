@@ -195,7 +195,7 @@ usage() {
 }
 
 disable_selinux(){
-    if [ -s /etc/selinux/config ] && grep 'SELINUX=enforcing' /etc/selinux/config; then
+    if [ -s /etc/selinux/config ] && grep -q 'SELINUX=enforcing' /etc/selinux/config; then
         sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
         setenforce 0
     fi
@@ -232,6 +232,12 @@ version_gt(){
 
 check_pid(){
     PID=`ps -ef |grep -v grep | grep ss-server |awk '{print $2}'`
+    V2_PID=`ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}'`
+    KP_PID=`ps -ef |grep -v grep | grep kcptun-server |awk '{print $2}'`
+    OBFS_PID=`ps -ef |grep -v grep | grep obfs-server |awk '{print $2}'`
+    GQ_PID=`ps -ef |grep -v grep | grep gq-server |awk '{print $2}'`
+    CK_PID=`ps -ef |grep -v grep | grep ck-server |awk '{print $2}'`
+    CADDY_PID=`ps -ef |grep -v grep | grep caddy |awk '{print $2}'`
 }
 
 check_sys(){
@@ -1034,8 +1040,23 @@ install_cleanup(){
 do_start(){
     if [ "$(command -v ss-server)" ]; then
         ${SHADOWSOCKS_LIBEV_INIT} start
+        
+        sleep 0.5
+        check_pid
+        if [[ ! -z "${V2_PID}" ]]; then
+            echo "Starting v2ray-plugin success"
+        fi
+        
         if [ "$(command -v kcptun-server)" ]; then
             ${KCPTUN_INIT} start
+        fi
+        
+        if [[ ! -z "${OBFS_PID}" ]]; then
+            echo "Starting simple-obfs success"
+        fi
+        
+        if [[ ! -z "${GQ_PID}" ]]; then
+            echo "Starting goquiet success"
         fi
         
         if [[ -e "${CLOAK_INIT}" ]]; then
@@ -1096,15 +1117,77 @@ do_restart(){
 
 # install status
 do_status(){
-    if [[ -e '/usr/local/bin/ss-server' ]]; then
-        check_pid
-        if [[ ! -z "${PID}" ]]; then
-            echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+    local mark=$1
+    if [[ ${mark} == "menu" ]]; then
+        if [[ -e '/usr/local/bin/ss-server' ]]; then
+            check_pid
+            if [[ ! -z "${PID}" ]]; then
+                echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+            else
+                echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+            fi
         else
-            echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+            echo -e " 当前状态: ${Red}未安装${suffix}"
         fi
     else
-        echo -e " 当前状态: ${Red}未安装${suffix}"
+        if [[ -e '/usr/local/bin/ss-server' ]]; then
+            check_pid
+            if [[ ! -z "${PID}" ]]; then
+                echo -e "shadowsocklibev-libev (pid ${PID}) is already running..."
+            else
+                echo -e "shadowsocklibev-libev is already installed but not running..."
+            fi
+            
+            if [ "$(command -v v2ray-plugin)" ]; then
+                if [[ ! -z "${V2_PID}" ]]; then
+                    echo -e "v2ray-plugin (pid ${V2_PID}) is already running..."
+                else
+                    echo -e "v2ray-plugin is already installed but not running..."
+                fi
+            fi
+            
+            if [ "$(command -v kcptun-server)" ]; then
+                if [[ ! -z "${KP_PID}" ]]; then
+                    echo -e "kcptun (pid ${KP_PID}) is already running..."
+                else
+                    echo -e "kcptun is already installed but not running..."
+                fi
+            fi
+            
+            if [ "$(command -v obfs-server)" ]; then
+                if [[ ! -z "${OBFS_PID}" ]]; then
+                    echo -e "simple-obfs (pid ${OBFS_PID}) is already running..."
+                else
+                    echo -e "simple-obfs is already installed but not running..."
+                fi
+            fi
+            
+            if [ "$(command -v gq-server)" ]; then
+                if [[ ! -z "${GQ_PID}" ]]; then
+                    echo -e "goquiet (pid ${GQ_PID}) is already running..."
+                else
+                    echo -e "goquiet is already installed but not running..."
+                fi
+            fi
+            
+            if [ "$(command -v ck-server)" ]; then
+                if [[ ! -z "${CK_PID}" ]]; then
+                    echo -e "cloak (pid ${CK_PID}) is already running..."
+                else
+                    echo -e "cloak is already installed but not running..."
+                fi
+            fi
+            
+            if [ -e "${CADDY_FILE}" ]; then
+                if [[ ! -z "${CADDY_PID}" ]]; then
+                    echo -e "caddy (pid ${CADDY_PID}) is already running..."
+                else
+                    echo -e "caddy is already installed but not running..."
+                fi
+            fi
+        else
+            echo -e "shadowsocklibev-libev and related plugins are not installed..."
+        fi
     fi
 }
 
@@ -1254,7 +1337,7 @@ do_install(){
     ${Green}2.${suffix} Install
     ${Green}3.${suffix} Uninstall
      "
-    do_status
+    do_status "menu"
     echo && read -e -p "请输入数字 [1-3]：" menu_num
     case "${menu_num}" in
         1)   
@@ -1281,8 +1364,11 @@ check_script_version
 action=${1:-"install"}
 
 case ${action} in
-    install|uninstall|update|start|stop|restart|status)
+    install|uninstall|update|start|stop|restart)
         do_${action}
+        ;;
+    status)
+        do_${action} "status"
         ;;
     uid)
         if [ "$(command -v ck-server)" ]; then

@@ -84,8 +84,8 @@ install_prepare_libev_kcptun(){
         done
         
         echo
-        read -e -p "(默认: ${KCPTUN_CRYPT[0]}):" crypt
-        [ -z "$crypt" ] && crypt=1
+        read -e -p "(默认: ${KCPTUN_CRYPT[12]}):" crypt
+        [ -z "$crypt" ] && crypt=13
         expr ${crypt} + 1 &>/dev/null
         if [ $? -ne 0 ]; then
             echo

@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.0.6"
+SHELL_VERSION="2.0.7"
 # ====================
 
 
@@ -701,9 +701,9 @@ config_ss(){
 
     # start wriet config
     if [[ ${methods} == "Online" ]]; then
-        source <(curl -sL ${BASE_URL}/templates/write_config.sh)
+        source <(curl -sL ${BASE_URL}/templates/config_file_templates.sh)
     else
-        source ${BASE_URL}/templates/write_config.sh
+        source ${BASE_URL}/templates/config_file_templates.sh
     fi
     
     
@@ -751,9 +751,9 @@ config_ss(){
 
 gen_ss_links(){
     if [[ ${methods} == "Online" ]]; then
-        source <(curl -sL ${BASE_URL}/templates/group_sslink.sh)
+        source <(curl -sL ${BASE_URL}/templates/sip002_url_templates.sh)
     else
-        source ${BASE_URL}/templates/group_sslink.sh
+        source ${BASE_URL}/templates/sip002_url_templates.sh
     fi
     
     if [[ ${plugin_num} == "1" ]]; then
@@ -790,9 +790,9 @@ install_completed(){
     ${SHADOWSOCKS_LIBEV_INIT} start > /dev/null 2>&1
     
     if [[ ${methods} == "Online" ]]; then
-        source <(curl -sL ${BASE_URL}/templates/show_config.sh)
+        source <(curl -sL ${BASE_URL}/templates/terminal_config_templates.sh)
     else
-        source ${BASE_URL}/templates/show_config.sh
+        source ${BASE_URL}/templates/terminal_config_templates.sh
     fi
     
     clear -x
@@ -843,9 +843,9 @@ install_completed(){
 
 install_prepare(){
     if [[ ${methods} == "Online" ]]; then
-        source <(curl -sL ${BASE_URL}/prepare/ss_libev_prepare.sh)
+        source <(curl -sL ${BASE_URL}/prepare/shadowsocks_libev_prepare.sh)
     else
-        source ${BASE_URL}/prepare/ss_libev_prepare.sh
+        source ${BASE_URL}/prepare/shadowsocks_libev_prepare.sh
     fi
     
     install_prepare_port
@@ -863,41 +863,41 @@ install_prepare(){
     [[ -z "${plugin_num}" ]] && plugin_num="" && echo -e "\n${Tip} 当前未选择任何插件，仅安装Shadowsocks-libev."
     if [[ ${plugin_num} == "1" ]]; then
         if [[ ${methods} == "Online" ]]; then
-            source <(curl -sL ${BASE_URL}/prepare/v2p_prepare.sh)
+            source <(curl -sL ${BASE_URL}/prepare/v2ray_plugin_prepare.sh)
         else
-            source ${BASE_URL}/prepare/v2p_prepare.sh
+            source ${BASE_URL}/prepare/v2ray_plugin_prepare.sh
         fi
         
         install_prepare_libev_v2ray
     elif [[ ${plugin_num} == "2" ]]; then
         if [[ ${methods} == "Online" ]]; then
-            source <(curl -sL ${BASE_URL}/prepare/kp_prepare.sh)
+            source <(curl -sL ${BASE_URL}/prepare/kcptun_prepare.sh)
         else
-            source ${BASE_URL}/prepare/kp_prepare.sh
+            source ${BASE_URL}/prepare/kcptun_prepare.sh
         fi
         
         install_prepare_libev_kcptun
     elif [[ ${plugin_num} == "3" ]]; then
         if [[ ${methods} == "Online" ]]; then
-            source <(curl -sL ${BASE_URL}/prepare/obfs_prepare.sh)
+            source <(curl -sL ${BASE_URL}/prepare/simple_obfs_prepare.sh)
         else
-            source ${BASE_URL}/prepare/obfs_prepare.sh
+            source ${BASE_URL}/prepare/simple_obfs_prepare.sh
         fi
         
         install_prepare_libev_obfs
     elif [[ ${plugin_num} == "4" ]]; then
         if [[ ${methods} == "Online" ]]; then
-            source <(curl -sL ${BASE_URL}/prepare/gq_prepare.sh)
+            source <(curl -sL ${BASE_URL}/prepare/goquiet_prepare.sh)
         else
-            source ${BASE_URL}/prepare/gq_prepare.sh
+            source ${BASE_URL}/prepare/goquiet_prepare.sh
         fi
         
         install_prepare_libev_goquiet
     elif [[ ${plugin_num} == "5" ]]; then
         if [[ ${methods} == "Online" ]]; then
-            source <(curl -sL ${BASE_URL}/prepare/ck_prepare.sh)
+            source <(curl -sL ${BASE_URL}/prepare/cloak_prepare.sh)
         else
-            source ${BASE_URL}/prepare/ck_prepare.sh
+            source ${BASE_URL}/prepare/cloak_prepare.sh
         fi
         
         install_prepare_libev_cloak

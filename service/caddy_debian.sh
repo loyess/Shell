@@ -1,85 +1,124 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 ### BEGIN INIT INFO
-# Provides:          Caddy
-# Required-Start:    $network $local_fs $remote_fs
-# Required-Stop:     $network $local_fs $remote_fs
+# Provides:          caddy
+# Required-Start:    $network $syslog
+# Required-Stop:     $network
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: The HTTP/2 web server with automatic HTTPS
-# Description:       Start or stop the Caddy server
+# Short-Description: A Stable & Secure Tunnel Based On KCP with N:M Multiplexing
+# Description:       Start or stop the  caddy server
 ### END INIT INFO
 
-NAME="Caddy"
-NAME_BIN="caddy"
-BIN="/usr/local/caddy/caddy"
-if [ -f "/usr/local/caddy/Caddyfile" ]; then
-	CONF="/usr/local/caddy/Caddyfile"
-elif [ -f "/etc/caddy/Caddyfile" ]; then
-	CONF="/etc/caddy/Caddyfile"
-fi
-Info_font_prefix="\033[32m" && Error_font_prefix="\033[31m" && Info_background_prefix="\033[42;37m" && Error_background_prefix="\033[41;37m" && Font_suffix="\033[0m"
-RETVAL=0
 
-check_running(){
-	PID=`ps -ef |grep "${NAME_BIN}" |grep -v "grep" |grep -v "init.d" |grep -v "service" |awk '{print $2}'`
-	if [[ ! -z ${PID} ]]; then
-		return 0
-	else
-		return 1
-	fi
+if [ -f /usr/local/caddy/caddy ]; then
+    DAEMON=/usr/local/caddy/caddy
+fi
+
+NAME=caddy
+CONF=/usr/local/caddy/Caddyfile
+PID_DIR=/var/run
+PID_FILE=$PID_DIR/$NAME.pid
+RET_VAL=0
+
+[ -x $DAEMON ] || exit 0
+
+check_pid(){
+	get_pid=`ps -ef |grep -v grep |grep -v "init.d" |grep -v "service" |grep $NAME |awk '{print $2}'`
 }
-do_start(){
-	check_running
-	if [[ $? -eq 0 ]]; then
-		echo -e "${Info_font_prefix}[信息]${Font_suffix} $NAME (PID ${PID}) 正在运行..." && exit 0
-	else
-		ulimit -n 51200
-		nohup "$BIN" --conf="$CONF" -agree >> /tmp/caddy.log 2>&1 &
-		sleep 2s
-		check_running
-		if [[ $? -eq 0 ]]; then
-			echo -e "${Info_font_prefix}[信息]${Font_suffix} $NAME 启动成功 !"
-		else
-			echo -e "${Error_font_prefix}[错误]${Font_suffix} $NAME 启动失败 !"
-		fi
-	fi
+
+check_pid
+if [ -z $get_pid ]; then
+    if [ -e $PID_FILE ]; then
+        rm -f $PID_FILE
+    fi
+fi
+
+if [ ! -d $PID_DIR ]; then
+    mkdir -p $PID_DIR
+    if [ $? -ne 0 ]; then
+        echo "Creating PID directory $PID_DIR failed"
+        exit 1
+    fi
+fi
+
+if [ ! -f $CONF ]; then
+    echo "$NAME config file $CONF not found"
+    exit 1
+fi
+
+
+check_running() {
+    if [ -e $PID_FILE ]; then
+        if [ -r $PID_FILE ]; then
+            read PID < $PID_FILE
+            if [ -d "/proc/$PID" ]; then
+                return 0
+            else
+                rm -f $PID_FILE
+                return 1
+            fi
+        fi
+    else
+        return 2
+    fi
 }
-do_stop(){
-	check_running
-	if [[ $? -eq 0 ]]; then
-		kill -9 ${PID}
-		RETVAL=$?
-		if [[ $RETVAL -eq 0 ]]; then
-			echo -e "${Info_font_prefix}[信息]${Font_suffix} $NAME 停止成功 !"
-		else
-			echo -e "${Error_font_prefix}[错误]${Font_suffix}$NAME 停止失败 !"
-		fi
-	else
-		echo -e "${Info_font_prefix}[信息]${Font_suffix} $NAME 未运行 !"
-		RETVAL=1
-	fi
+
+do_status() {
+    check_running
+    case $? in
+        0)
+        echo "$NAME (pid $PID) is running..."
+        ;;
+        1|2)
+        echo "$NAME is stopped"
+        RET_VAL=1
+        ;;
+    esac
 }
-do_status(){
-	check_running
-	if [[ $? -eq 0 ]]; then
-		echo -e "${Info_font_prefix}[信息]${Font_suffix} $NAME (PID ${PID}) 正在运行..."
-	else
-		echo -e "${Info_font_prefix}[信息]${Font_suffix} $NAME 未运行 !"
-		RETVAL=1
-	fi
+
+do_start() {
+    if check_running; then
+        echo "$NAME (pid $PID) is already running..."
+        return 0
+    fi
+    ulimit -n 51200
+    nohup "$DAEMON" --conf="$CONF" -agree >> /tmp/caddy.log 2>&1 &
+    check_pid
+    echo $get_pid > $PID_FILE
+    if check_running; then
+        echo "Starting $NAME success"
+    else
+        echo "Starting $NAME failed"
+        RET_VAL=1
+    fi
 }
-do_restart(){
-	do_stop
-	do_start
+
+do_stop() {
+    if check_running; then
+        kill -9 $PID
+        rm -f $PID_FILE
+        echo "Stopping $NAME success"
+    else
+        echo "$NAME is stopped"
+        RET_VAL=1
+    fi
 }
+
+do_restart() {
+    do_stop
+    sleep 0.5
+    do_start
+}
+
 case "$1" in
-	start|stop|restart|status)
-	do_$1
-	;;
-	*)
-	echo "使用方法: $0 { start | stop | restart | status }"
-	RETVAL=1
-	;;
+    start|stop|restart|status)
+    do_$1
+    ;;
+    *)
+    echo "Usage: $0 { start | stop | restart | status }"
+    RET_VAL=1
+    ;;
 esac
-exit $RETVAL
+
+exit $RET_VAL

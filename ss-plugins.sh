@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.0.7"
+SHELL_VERSION="2.0.8"
 # ====================
 
 
@@ -1237,27 +1237,31 @@ do_uninstall(){
         fi
         
         # check kcptun status
-        ${KCPTUN_INIT} status > /dev/null 2>&1
-        if [ $? -eq 0 ]; then
-            ${KCPTUN_INIT} stop > /dev/null 2>&1
-        fi
-        local kcp_service_name=$(basename ${KCPTUN_INIT})
-        if check_sys packageManager yum; then
-            chkconfig --del ${kcp_service_name}
-        elif check_sys packageManager apt; then
-            update-rc.d -f ${kcp_service_name} remove
+        if [ -e ${KCPTUN_INIT} ]; then
+            ${KCPTUN_INIT} status > /dev/null 2>&1
+            if [ $? -eq 0 ]; then
+                ${KCPTUN_INIT} stop > /dev/null 2>&1
+            fi
+            local kcp_service_name=$(basename ${KCPTUN_INIT})
+            if check_sys packageManager yum; then
+                chkconfig --del ${kcp_service_name}
+            elif check_sys packageManager apt; then
+                update-rc.d -f ${kcp_service_name} remove
+            fi
         fi
         
         # check cloak status
-        ${CLOAK_INIT} status > /dev/null 2>&1
-        if [ $? -eq 0 ]; then
-            ${CLOAK_INIT} stop > /dev/null 2>&1
-        fi
-        local ck_service_name=$(basename ${CLOAK_INIT})
-        if check_sys packageManager yum; then
-            chkconfig --del ${ck_service_name}
-        elif check_sys packageManager apt; then
-            update-rc.d -f ${ck_service_name} remove
+        if [ -e ${CLOAK_INIT} ]; then
+            ${CLOAK_INIT} status > /dev/null 2>&1
+            if [ $? -eq 0 ]; then
+                ${CLOAK_INIT} stop > /dev/null 2>&1
+            fi
+            local ck_service_name=$(basename ${CLOAK_INIT})
+            if check_sys packageManager yum; then
+                chkconfig --del ${ck_service_name}
+            elif check_sys packageManager apt; then
+                update-rc.d -f ${ck_service_name} remove
+            fi
         fi
         
         # kill v2ray-plugin 、obfs-server、gq-server ck-server
@@ -1315,6 +1319,10 @@ do_uninstall(){
         rm -f /usr/local/bin/ck-client
         rm -f ${CLOAK_INIT}
         rm -fr $(dirname ${CK_CLIENT_CONFIG}) > /dev/null 2>&1
+        
+        # uninstall ipcalc-0.41
+        rm -rf /usr/local/bin/ipcalc-0.41
+        
         echo -e "${Info} Shadowsocks-libev 卸载成功..."
     else
         echo

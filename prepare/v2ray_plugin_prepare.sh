@@ -223,7 +223,23 @@ get_input_ws_path_and_mirror_site(){
     echo 
 }
 
+print_error_info(){
+    local text=$1
+    
+    echo
+    echo -e "${Error} ${text}"
+    echo
+}
+
+error_info_text(){
+    TEXT1="该域名没有被域名服务器解析，请解析后再次尝试."
+    TEXT2="该域名在域名服务器处解析的不是本机IP，请确认后再次尝试."
+    TEXT3="该域名是否有解析过本机ip地址，如果没有，前往域名服务商解析本机ip地址至该域名，并重新尝试."
+    TEXT4="该域名是否由Cloudflare托管并成功解析过本机ip地址，请确认后再次尝试."
+}
+
 install_prepare_libev_v2ray(){
+    error_info_text
     transport_mode_menu
     
  
@@ -237,25 +253,19 @@ install_prepare_libev_v2ray(){
         do    
             get_input_domain "请输入你的域名"
             
-            if get_domain_ip ${domain}; then
-                if is_default_nameservers ${domain_ip}; then
-                    acme_get_certificate_by_force
-                    
-                    break
-                elif is_cdn_nameservers ${domain_ip}; then
-                    acme_get_certificate_by_api
-                    
-                    break
-                else
-                    echo
-                    echo -e "${Error} 该域名在域名服务器处解析的不是本机IP，请确认后再次尝试."
-                    echo
-                    continue
-                fi
+            if ! get_domain_ip ${domain}; then
+                print_error_info ${TEXT1}
+                continue
+            fi
+            
+            if is_default_nameservers ${domain_ip}; then
+                acme_get_certificate_by_force
+                break
+            elif is_cdn_nameservers ${domain_ip}; then
+                acme_get_certificate_by_api
+                break
             else
-                echo
-                echo -e "${Error} 该域名没有被域名服务器解析，请解析后再次尝试."
-                echo
+                print_error_info ${TEXT2}
                 continue
             fi
         done 
@@ -264,22 +274,17 @@ install_prepare_libev_v2ray(){
         do
             get_input_domain "请输入你的域名(必须成功解析过本机ip)"
             
-            if get_domain_ip ${domain}; then
-                if is_default_nameservers ${domain_ip}; then
-                    get_input_email_for_caddy
-                    get_input_ws_path_and_mirror_site
-                    
-                    break
-                else
-                    echo
-                    echo -e "${Error} 该域名是否有解析过本机ip地址，如果没有，前往域名服务商解析本机ip地址至该域名，并重新尝试."
-                    echo
-                    continue
-                fi
+            if ! get_domain_ip ${domain}; then
+                print_error_info ${TEXT3}
+                continue
+            fi
+            
+            if is_default_nameservers ${domain_ip}; then
+                get_input_email_for_caddy
+                get_input_ws_path_and_mirror_site
+                break
             else
-                echo
-                echo -e "${Error} 该域名是否有解析过本机ip地址，如果没有，前往域名服务商解析本机ip地址至该域名，并重新尝试."
-                echo
+                print_error_info ${TEXT3}
                 continue
             fi
         done
@@ -288,22 +293,17 @@ install_prepare_libev_v2ray(){
         do
             get_input_domain "请输入你的域名(必须是交由Cloudflare域名服务器托管且成功解析过本机ip)"
             
-            if get_domain_ip ${domain}; then
-                if is_cdn_nameservers ${domain_ip}; then
-                    get_input_api_info
-                    get_input_ws_path_and_mirror_site
-                
-                    break
-                else
-                    echo
-                    echo -e "${Error} 该域名是否由Cloudflare托管并成功解析过本机ip地址，请确认后再次尝试."
-                    echo
-                    continue
-                fi
+            if ! get_domain_ip ${domain}; then
+                print_error_info ${TEXT4}
+                continue
+            fi
+            
+            if is_cdn_nameservers ${domain_ip}; then
+                get_input_api_info
+                get_input_ws_path_and_mirror_site
+                break
             else
-                echo
-                echo -e "${Error} 该域名是否由Cloudflare托管并成功解析过本机ip地址，请确认后再次尝试."
-                echo
+                print_error_info ${TEXT4}
                 continue
             fi
         done

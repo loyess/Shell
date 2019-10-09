@@ -611,6 +611,9 @@ config_firewall(){
                 if [[ ${plugin_num} == "2" ]]; then
                     iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${listen_port} -j ACCEPT
                     iptables -I INPUT -m state --state NEW -m udp -p udp --dport ${listen_port} -j ACCEPT
+                elif [[ ${libev_v2ray} = "4" ]] || [[ ${libev_v2ray} = "5" ]] || [[ ${plugin_num} == "5" ]]; then
+                    iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 443 -j ACCEPT
+                    iptables -I INPUT -m state --state NEW -m udp -p udp --dport 443 -j ACCEPT
                 else
                     iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${shadowsocksport} -j ACCEPT
                     iptables -I INPUT -m state --state NEW -m udp -p udp --dport ${shadowsocksport} -j ACCEPT
@@ -630,6 +633,9 @@ config_firewall(){
             if [[ ${plugin_num} == "2" ]]; then
                 firewall-cmd --permanent --zone=public --add-port=${listen_port}/tcp
                 firewall-cmd --permanent --zone=public --add-port=${listen_port}/udp
+            elif [[ ${libev_v2ray} = "4" ]] || [[ ${libev_v2ray} = "5" ]] || [[ ${plugin_num} == "5" ]]; then
+                firewall-cmd --permanent --zone=public --add-port=443/tcp
+                firewall-cmd --permanent --zone=public --add-port=443/udp
             else
                 firewall-cmd --permanent --zone=public --add-port=${shadowsocksport}/tcp
                 firewall-cmd --permanent --zone=public --add-port=${shadowsocksport}/udp

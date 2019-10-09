@@ -106,7 +106,7 @@ Usage: ./ss-plugins.sh [options...] [args...]
 
 3. ### 简略安装步骤-动图预览，以 ss + v2ray-plugin 为例：
 
-![01-v2ray-plugin](other/Images/01-v2ray-plugin.gif)
+![01-v2ray-plugin](./example.gif)
 
 &nbsp;
 

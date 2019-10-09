@@ -26,7 +26,6 @@ install_simple_obfs(){
         install_cleanup
         exit 1
     fi
-    [ -f /usr/local/bin/obfs-server ] && ln -s /usr/local/bin/obfs-server /usr/bin
+    [ -f /usr/local/bin/obfs-server ] && ln -fs /usr/local/bin/obfs-server /usr/bin
     echo -e "${Info} simple-obfs-${simple_obfs_ver} 安装成功."
-
 }

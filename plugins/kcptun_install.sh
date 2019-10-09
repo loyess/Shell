@@ -22,6 +22,6 @@ install_kcptun(){
         install_cleanup
         exit 1
     fi
-    [ -f ${KCPTUN_INSTALL_DIR} ] && ln -s ${KCPTUN_INSTALL_DIR} /usr/bin
+    [ -f ${KCPTUN_INSTALL_DIR} ] && ln -fs ${KCPTUN_INSTALL_DIR} /usr/bin
     
 }

@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.0.8"
+SHELL_VERSION="2.0.9"
 # ====================
 
 
@@ -311,15 +311,13 @@ check_kernel_headers(){
     return 1
 }
 
-check_ss_libev_version(){
-    if [[ -e '/usr/local/bin/ss-server' ]]; then
-        curr_ver=$(ss-server -v | grep shadowsocks-libev | cut -d\  -f2)
-        latest_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/shadowsocks-libev/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
-        if version_gt ${latest_ver} ${curr_ver}; then
-            return 0
-        else
-            return 1
-        fi
+check_latest_version(){
+    local current_v=$1
+    local latest_v=$2
+    if version_gt ${latest_v} ${current_v}; then
+        return 0
+    else
+        return 1
     fi
 }
 
@@ -356,6 +354,163 @@ choose_script_bbr(){
     esac
 }
 
+update_v2ray_plugin(){
+    cd ${CUR_DIR}
+    
+    if [[ -e '/usr/local/bin/v2ray-plugin' ]]; then
+        get_ver
+        current_v2ray_plugin_ver=$(v2ray-plugin -version | grep v2ray-plugin | cut -d\  -f2 | sed 's/v//g')
+        if ! check_latest_version ${current_v2ray_plugin_ver} ${v2ray_plugin_ver}; then
+            echo -e "${Point} v2ray-plugin 当前已是最新版本 ${current_v2ray_plugin_ver}，不需要更新."
+            echo
+            exit 1
+        fi
+        
+        local plugin_num="1"
+        download_plugins_file
+
+        
+        if [[ ${methods} == "Online" ]]; then
+            source <(curl -sL ${BASE_URL}/plugins/v2ray_plugin_install.sh)
+        else
+            cd ${CUR_DIR}
+            source ${BASE_URL}/plugins/v2ray_plugin_install.sh
+        fi
+        do_stop > /dev/null 2>&1
+        install_v2ray_plugin
+        do_restart > /dev/null 2>&1
+        
+        echo -e "${Info} v2ray-plugin 已成功升级为最新版本 ${v2ray_plugin_ver}"
+        echo
+        
+        install_cleanup
+    fi
+}
+
+update_kcptun(){
+    cd ${CUR_DIR}
+    if [[ -e ${KCPTUN_INSTALL_DIR} ]]; then
+        get_ver
+        current_kcptun_ver=$(kcptun-server -v | grep kcptun | cut -d\  -f3)
+        if ! check_latest_version ${current_kcptun_ver} ${kcptun_ver}; then
+            echo -e "${Point} kcptun 当前已是最新版本 ${current_kcptun_ver}，不需要更新."
+            echo
+            exit 1
+        fi
+        
+        local plugin_num="2"
+        download_plugins_file
+
+
+        if [[ ${methods} == "Online" ]]; then
+            source <(curl -sL ${BASE_URL}/plugins/kcptun_install.sh)
+        else
+            cd ${CUR_DIR}
+            source ${BASE_URL}/plugins/kcptun_install.sh
+        fi
+        
+        do_stop > /dev/null 2>&1
+        install_kcptun
+        do_restart > /dev/null 2>&1
+        
+        echo -e "${Info} kcptun 已成功升级为最新版本 ${kcptun_ver}"
+        echo
+        
+        install_cleanup
+        
+    fi
+}
+
+update_simple_obfs(){
+    cd ${CUR_DIR}
+    if [[ -e '/usr/local/bin/obfs-server' ]]; then
+        get_ver
+        current_simple_obfs_ver=$(obfs-server | grep simple-obfs | cut -d\  -f2)
+        if ! check_latest_version ${current_simple_obfs_ver} ${simple_obfs_ver}; then
+            echo -e "${Point} simple-obfs 当前已是最新版本 ${current_simple_obfs_ver}，不需要更新."
+            echo
+            exit 1
+        fi
+        
+        if [[ ${methods} == "Online" ]]; then
+            source <(curl -sL ${BASE_URL}/plugins/simple_obfs_install.sh)
+        else
+            cd ${CUR_DIR}
+            source ${BASE_URL}/plugins/simple_obfs_install.sh
+        fi
+        
+        do_stop > /dev/null 2>&1
+        install_simple_obfs
+        do_restart > /dev/null 2>&1
+        echo -e "${Info} simple-obfs 已成功升级为最新版本 ${simple_obfs_ver}"
+        echo
+        
+        install_cleanup
+    fi
+}
+
+update_goquiet(){
+    cd ${CUR_DIR}
+    if [[ -e '/usr/local/bin/gq-server' ]]; then
+        get_ver
+        current_goquiet_ver=$(gq-server -v | grep gq-server | cut -d\  -f2)
+        if ! check_latest_version ${current_goquiet_ver} ${goquiet_ver}; then
+            echo -e "${Point} goquiet 当前已是最新版本 ${current_goquiet_ver}，不需要更新."
+            echo
+            exit 1
+        fi
+        
+        local plugin_num="4"
+        download_plugins_file
+        
+        if [[ ${methods} == "Online" ]]; then
+            source <(curl -sL ${BASE_URL}/plugins/goquiet_install.sh)
+        else
+            cd ${CUR_DIR}
+            source ${BASE_URL}/plugins/goquiet_install.sh
+        fi
+        
+        do_stop > /dev/null 2>&1
+        install_goquiet
+        do_restart > /dev/null 2>&1
+        echo -e "${Info} goquiet 已成功升级为最新版本 ${goquiet_ver}"
+        echo
+        
+        install_cleanup
+    fi
+}
+
+update_cloak(){
+    cd ${CUR_DIR}
+    if [[ -e '/usr/local/bin/ck-server' ]]; then
+        get_ver
+        current_cloak_ver=$(ck-server -v | grep ck-server | cut -d\  -f2)
+        if ! check_latest_version ${current_cloak_ver} ${cloak_ver}; then
+            echo -e "${Point} cloak 当前已是最新版本 ${current_cloak_ver}，不需要更新."
+            echo
+            exit 1
+        fi
+        
+        local plugin_num="5"
+        download_plugins_file
+        
+        if [[ ${methods} == "Online" ]]; then
+            source <(curl -sL ${BASE_URL}/plugins/cloak_install.sh)
+        else
+            cd ${CUR_DIR}
+            source ${BASE_URL}/plugins/cloak_install.sh
+        fi 
+        
+        do_stop > /dev/null 2>&1
+        install_cloak
+        do_restart > /dev/null 2>&1
+        echo -e "${Info} cloak 已成功升级为最新版本 ${cloak_ver}"
+        echo
+        
+        install_cleanup
+    fi
+}
+
 get_ip(){
     local IP=$( ip addr | egrep -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | egrep -v "^192\.168|^172\.1[6-9]\.|^172\.2[0-9]\.|^172\.3[0-2]\.|^10\.|^127\.|^255\.|^0\." | head -n 1 )
     [ -z ${IP} ] && IP=$( wget -qO- -t1 -T2 ipv4.icanhazip.com )
@@ -371,12 +526,12 @@ get_ipv6(){
 get_ver(){
     libev_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/shadowsocks-libev/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
     [ -z ${libev_ver} ] && echo -e "${Error} 获取 shadowsocks-libev 最新版本失败." && exit 1
-    simple_obfs_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/simple-obfs/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
-    [ -z ${simple_obfs_ver} ] && echo -e "${Error} 获取 simple-obfs 最新版本失败." && exit 1
-    kcptun_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/xtaci/kcptun/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
-    [ -z ${kcptun_ver} ] && echo -e "${Error} 获取 kcptun 最新版本失败." && exit 1
     v2ray_plugin_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/v2ray-plugin/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
     [ -z ${v2ray_plugin_ver} ] && echo -e "${Error} 获取 v2ray-plugin 最新版本失败." && exit 1
+    kcptun_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/xtaci/kcptun/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+    [ -z ${kcptun_ver} ] && echo -e "${Error} 获取 kcptun 最新版本失败." && exit 1
+    simple_obfs_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/simple-obfs/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+    [ -z ${simple_obfs_ver} ] && echo -e "${Error} 获取 simple-obfs 最新版本失败." && exit 1
     goquiet_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/cbeuw/GoQuiet/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
     [ -z ${goquiet_ver} ] && echo -e "${Error} 获取 goquiet 最新版本失败." && exit 1
     cloak_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/cbeuw/Cloak/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
@@ -500,9 +655,8 @@ download(){
     fi
 }
 
-download_files(){
+download_ss_file(){
     cd ${CUR_DIR}
-    
     # Download Shadowsocks-libev
     get_ver
     shadowsocks_libev_file="shadowsocks-libev-${libev_ver}"
@@ -523,7 +677,10 @@ download_files(){
             mv "$(dirname ${SHADOWSOCKS_LIBEV_INIT})/shadowsocks-libev_debian.sh" "${SHADOWSOCKS_LIBEV_INIT}"
         fi        
     fi
-    
+}
+
+download_plugins_file(){
+    cd ${CUR_DIR}
     if [[ "${plugin_num}" == "1" ]]; then        
         # Download v2ray-plugin
         v2ray_plugin_file="v2ray-plugin-linux-amd64-v${v2ray_plugin_ver}"
@@ -944,6 +1101,12 @@ install_main(){
         fi
         
         install_v2ray_plugin
+        
+        if [[ ${libev_v2ray} == "4" ]]; then
+            wget -qO- ${CADDY_INSTALL_SCRIPT_URL} | bash -s install
+        elif [[ ${libev_v2ray} == "5" ]]; then
+            wget -qO- ${CADDY_INSTALL_SCRIPT_URL} | bash -s install tls.dns.cloudflare
+        fi
         plugin_client_name="v2ray"
     elif [ "${plugin_num}" == "2" ]; then
         if [[ ${methods} == "Online" ]]; then
@@ -995,7 +1158,8 @@ install_step_all(){
     disable_selinux
     install_prepare
     install_dependencies
-    download_files
+    download_ss_file
+    download_plugins_file
     if check_sys packageManager yum; then
         config_firewall
     fi
@@ -1193,30 +1357,43 @@ do_status(){
 
 do_update(){
     if [[ -e '/usr/local/bin/ss-server' ]]; then
-        if check_ss_libev_version; then
-            do_stop > /dev/null 2>&1
-            download_files
+        get_ver
+        current_libev_ver=$(ss-server -v | grep shadowsocks-libev | cut -d\  -f2)
+        if ! check_latest_version ${current_libev_ver} ${libev_ver}; then
+            echo
+            echo -e "${Point} shadowsocklibev-libev当前已是最新版本 ${current_libev_ver}，不需要更新."
             
-            if [[ ${methods} == "Online" ]]; then
-                source <(curl -sL ${BASE_URL}/tools/shadowsocks_libev_install.sh)
-            else
-                source ${BASE_URL}/tools/shadowsocks_libev_install.sh
-            fi
+            update_v2ray_plugin
+            update_kcptun
+            update_simple_obfs
+            update_goquiet
+            update_cloak
             
-            install_shadowsocks_libev
-            install_cleanup
-            do_restart > /dev/null 2>&1
-            echo
-            echo -e "${Point} shadowsocklibev-libev升级为 ${latest_ver}最新版本，并已重启运行..."
-            echo
-        else
-            echo
-            echo -e "${Point} shadowsocklibev-libev当前已是最新版本 ${curr_ver}，不需要更新..."
-            echo
             exit 1
         fi
+        
+        do_stop > /dev/null 2>&1
+        download_ss_file
+        
+        if [[ ${methods} == "Online" ]]; then
+            source <(curl -sL ${BASE_URL}/tools/shadowsocks_libev_install.sh)
+        else
+            source ${BASE_URL}/tools/shadowsocks_libev_install.sh
+        fi
+        
+        install_shadowsocks_libev
+        do_restart > /dev/null 2>&1
+        echo
+        echo -e "${Info} shadowsocklibev-libev 已成功升级为最新版本 ${libev_ver}"
+        
+        install_cleanup
+        
+        update_v2ray_plugin
+        update_kcptun
+        update_simple_obfs
+        update_goquiet
+        update_cloak
     fi
-    
 }
 
 do_uninstall(){

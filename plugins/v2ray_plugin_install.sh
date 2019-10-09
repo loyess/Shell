@@ -14,11 +14,4 @@ install_v2ray_plugin(){
         install_cleanup
         exit 1
     fi
-        
-    
-    if [[ ${libev_v2ray} == "4" ]]; then
-        wget -qO- ${CADDY_INSTALL_SCRIPT_URL} | bash -s install
-    elif [[ ${libev_v2ray} == "5" ]]; then
-        wget -qO- ${CADDY_INSTALL_SCRIPT_URL} | bash -s install tls.dns.cloudflare
-    fi
 }

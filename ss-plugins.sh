@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.1.2"
+SHELL_VERSION="2.1.3"
 # ====================
 
 
@@ -689,7 +689,7 @@ download_ss_file(){
     shadowsocks_libev_file="shadowsocks-libev-${libev_ver}"
     shadowsocks_libev_url="https://github.com/shadowsocks/shadowsocks-libev/releases/download/v${libev_ver}/shadowsocks-libev-${libev_ver}.tar.gz"
     download "${shadowsocks_libev_file}.tar.gz" "${shadowsocks_libev_url}"
-    download_service_file ${SHADOWSOCKS_LIBEV_INIT} ${SHADOWSOCKS_LIBEV_CENTOS} ${SS_INIT_CENTOS} ${SHADOWSOCKS_LIBEV_INIT} ${SS_INIT_DEBIAN}
+    download_service_file ${SHADOWSOCKS_LIBEV_INIT} ${SHADOWSOCKS_LIBEV_CENTOS} ${SS_INIT_CENTOS} ${SHADOWSOCKS_LIBEV_DEBIAN} ${SS_INIT_DEBIAN}
 }
 
 download_plugins_file(){

@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.1.1"
+SHELL_VERSION="2.1.2"
 # ====================
 
 
@@ -368,6 +368,24 @@ update_v2ray_plugin(){
     cd ${CUR_DIR}
     
     if [[ -e '/usr/local/bin/v2ray-plugin' ]]; then
+        if ! $(v2ray-plugin -version > /dev/null 2>&1); then
+            local plugin_num="1"
+            echo -e "${Info} 检测到v2ray-plugin有新版本，开始下载..."
+            download_plugins_file
+            echo -e "${Info} 下载完成，开始安装..."
+            improt_package "plugins" "v2ray_plugin_install.sh"
+            do_stop > /dev/null 2>&1
+            install_v2ray_plugin
+            do_restart > /dev/null 2>&1
+            
+            echo -e "${Info} v2ray-plugin已成功升级为最新版本${v2ray_plugin_ver}"
+            echo
+            
+            install_cleanup
+            
+            exit 0
+        fi
+        
         current_v2ray_plugin_ver=$(v2ray-plugin -version | grep v2ray-plugin | cut -d\  -f2 | sed 's/v//g')
         if ! check_latest_version ${current_v2ray_plugin_ver} ${v2ray_plugin_ver}; then
             echo -e "${Point} v2ray-plugin当前已是最新版本${current_v2ray_plugin_ver}不需要更新."

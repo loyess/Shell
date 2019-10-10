@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.0.9"
+SHELL_VERSION="2.1.0"
 # ====================
 
 
@@ -16,13 +16,34 @@ CUR_DIR=$( pwd )
 
 
 # base url
+methods="Online"
+BASE_URL="https://github.com/loyess/Shell/raw/master"
 if [ -e plugins ] && [ -e prepare ] && [ -e service ] && [ -e templates ] && [ -e tools ] && [ -e utils ]; then
     methods="Local"
-    BASE_URL="."
-else
-    methods="Online"
-    BASE_URL="https://github.com/loyess/Shell/raw/master"
+    BASE_URL="." 
 fi
+
+package=(
+plugins/v2ray_plugin_install.sh
+plugins/kcptun_install.sh
+plugins/simple_obfs_install.sh
+plugins/goquiet_install.sh
+plugins/cloak_install.sh
+prepare/shadowsocks_libev_prepare.sh
+prepare/v2ray_plugin_prepare.sh
+prepare/kcptun_prepare.sh
+prepare/simple_obfs_prepare.sh
+prepare/goquiet_prepare.sh
+prepare/cloak_prepare.sh
+service/
+templates/
+tools/
+utils/
+)
+package=()
+
+
+
 
 
 # bbr
@@ -194,6 +215,17 @@ usage() {
 	exit $1
 }
 
+improt_package(){
+    local package=$1
+    local sh_file=$2
+    if [[ ${methods} == "Online" ]]; then
+        source <(curl -sL ${BASE_URL}/${package}/${sh_file})
+    else
+        cd ${CUR_DIR}
+        source ${BASE_URL}/${package}/${sh_file}
+    fi
+}
+
 disable_selinux(){
     if [ -s /etc/selinux/config ] && grep -q 'SELINUX=enforcing' /etc/selinux/config; then
         sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
@@ -358,29 +390,23 @@ update_v2ray_plugin(){
     cd ${CUR_DIR}
     
     if [[ -e '/usr/local/bin/v2ray-plugin' ]]; then
-        get_ver
         current_v2ray_plugin_ver=$(v2ray-plugin -version | grep v2ray-plugin | cut -d\  -f2 | sed 's/v//g')
         if ! check_latest_version ${current_v2ray_plugin_ver} ${v2ray_plugin_ver}; then
-            echo -e "${Point} v2ray-plugin 当前已是最新版本 ${current_v2ray_plugin_ver}，不需要更新."
+            echo -e "${Point} v2ray-plugin当前已是最新版本${current_v2ray_plugin_ver}不需要更新."
             echo
             exit 1
         fi
         
         local plugin_num="1"
+        echo -e "${Info} 检测到v2ray-plugin有新版本，开始下载..."
         download_plugins_file
-
-        
-        if [[ ${methods} == "Online" ]]; then
-            source <(curl -sL ${BASE_URL}/plugins/v2ray_plugin_install.sh)
-        else
-            cd ${CUR_DIR}
-            source ${BASE_URL}/plugins/v2ray_plugin_install.sh
-        fi
+        echo -e "${Info} 下载完成，开始安装..."
+        improt_package "plugins" "v2ray_plugin_install.sh"
         do_stop > /dev/null 2>&1
         install_v2ray_plugin
         do_restart > /dev/null 2>&1
         
-        echo -e "${Info} v2ray-plugin 已成功升级为最新版本 ${v2ray_plugin_ver}"
+        echo -e "${Info} v2ray-plugin已成功升级为最新版本${v2ray_plugin_ver}"
         echo
         
         install_cleanup
@@ -390,30 +416,23 @@ update_v2ray_plugin(){
 update_kcptun(){
     cd ${CUR_DIR}
     if [[ -e ${KCPTUN_INSTALL_DIR} ]]; then
-        get_ver
         current_kcptun_ver=$(kcptun-server -v | grep kcptun | cut -d\  -f3)
         if ! check_latest_version ${current_kcptun_ver} ${kcptun_ver}; then
-            echo -e "${Point} kcptun 当前已是最新版本 ${current_kcptun_ver}，不需要更新."
+            echo -e "${Point} kcptun当前已是最新版本${current_kcptun_ver}不需要更新."
             echo
             exit 1
         fi
         
         local plugin_num="2"
+        echo -e "${Info} 检测到kcptun有新版本，开始下载..."
         download_plugins_file
-
-
-        if [[ ${methods} == "Online" ]]; then
-            source <(curl -sL ${BASE_URL}/plugins/kcptun_install.sh)
-        else
-            cd ${CUR_DIR}
-            source ${BASE_URL}/plugins/kcptun_install.sh
-        fi
-        
+        echo -e "${Info} 下载完成，开始安装..."
+        improt_package "plugins" "kcptun_install.sh"
         do_stop > /dev/null 2>&1
         install_kcptun
         do_restart > /dev/null 2>&1
         
-        echo -e "${Info} kcptun 已成功升级为最新版本 ${kcptun_ver}"
+        echo -e "${Info} kcptun已成功升级为最新版本${kcptun_ver}"
         echo
         
         install_cleanup
@@ -424,25 +443,18 @@ update_kcptun(){
 update_simple_obfs(){
     cd ${CUR_DIR}
     if [[ -e '/usr/local/bin/obfs-server' ]]; then
-        get_ver
         current_simple_obfs_ver=$(obfs-server | grep simple-obfs | cut -d\  -f2)
         if ! check_latest_version ${current_simple_obfs_ver} ${simple_obfs_ver}; then
-            echo -e "${Point} simple-obfs 当前已是最新版本 ${current_simple_obfs_ver}，不需要更新."
+            echo -e "${Point} simple-obfs当前已是最新版本${current_simple_obfs_ver}不需要更新."
             echo
             exit 1
         fi
-        
-        if [[ ${methods} == "Online" ]]; then
-            source <(curl -sL ${BASE_URL}/plugins/simple_obfs_install.sh)
-        else
-            cd ${CUR_DIR}
-            source ${BASE_URL}/plugins/simple_obfs_install.sh
-        fi
-        
+        improt_package "plugins" "simple_obfs_install.sh"
         do_stop > /dev/null 2>&1
+        echo -e "${Info} 检测到simple-obfs有新版本，开始下载并进行编译安装..."
         install_simple_obfs
         do_restart > /dev/null 2>&1
-        echo -e "${Info} simple-obfs 已成功升级为最新版本 ${simple_obfs_ver}"
+        echo -e "${Info} simple-obfs已成功升级为最新版本${simple_obfs_ver}"
         echo
         
         install_cleanup
@@ -452,28 +464,22 @@ update_simple_obfs(){
 update_goquiet(){
     cd ${CUR_DIR}
     if [[ -e '/usr/local/bin/gq-server' ]]; then
-        get_ver
         current_goquiet_ver=$(gq-server -v | grep gq-server | cut -d\  -f2)
         if ! check_latest_version ${current_goquiet_ver} ${goquiet_ver}; then
-            echo -e "${Point} goquiet 当前已是最新版本 ${current_goquiet_ver}，不需要更新."
+            echo -e "${Point} goquiet当前已是最新版本${current_goquiet_ver}不需要更新."
             echo
             exit 1
         fi
         
         local plugin_num="4"
+        echo -e "${Info} 检测到goquiet有新版本，开始下载..."
         download_plugins_file
-        
-        if [[ ${methods} == "Online" ]]; then
-            source <(curl -sL ${BASE_URL}/plugins/goquiet_install.sh)
-        else
-            cd ${CUR_DIR}
-            source ${BASE_URL}/plugins/goquiet_install.sh
-        fi
-        
+        echo -e "${Info} 下载完成，开始安装..."
+        improt_package "plugins" "goquiet_install.sh"
         do_stop > /dev/null 2>&1
         install_goquiet
         do_restart > /dev/null 2>&1
-        echo -e "${Info} goquiet 已成功升级为最新版本 ${goquiet_ver}"
+        echo -e "${Info} goquiet已成功升级为最新版本${goquiet_ver}"
         echo
         
         install_cleanup
@@ -483,28 +489,22 @@ update_goquiet(){
 update_cloak(){
     cd ${CUR_DIR}
     if [[ -e '/usr/local/bin/ck-server' ]]; then
-        get_ver
         current_cloak_ver=$(ck-server -v | grep ck-server | cut -d\  -f2)
         if ! check_latest_version ${current_cloak_ver} ${cloak_ver}; then
-            echo -e "${Point} cloak 当前已是最新版本 ${current_cloak_ver}，不需要更新."
+            echo -e "${Point} cloak当前已是最新版本${current_cloak_ver}不需要更新."
             echo
             exit 1
         fi
         
         local plugin_num="5"
+        echo -e "${Info} 检测到cloak有新版本，开始下载..."
         download_plugins_file
-        
-        if [[ ${methods} == "Online" ]]; then
-            source <(curl -sL ${BASE_URL}/plugins/cloak_install.sh)
-        else
-            cd ${CUR_DIR}
-            source ${BASE_URL}/plugins/cloak_install.sh
-        fi 
-        
+        echo -e "${Info} 下载完成，开始安装..."
+        improt_package "plugins" "cloak_install.sh"
         do_stop > /dev/null 2>&1
         install_cloak
         do_restart > /dev/null 2>&1
-        echo -e "${Info} cloak 已成功升级为最新版本 ${cloak_ver}"
+        echo -e "${Info} cloak已成功升级为最新版本${cloak_ver}"
         echo
         
         install_cleanup
@@ -661,28 +661,39 @@ download(){
     fi
 }
 
+download_service_file(){
+    local filename_path=$1
+    local online_centos_url=$2
+    local local_centos_file_path=$3
+    local online_debian_url=$4
+    local local_debian_file_path=$5
+    
+    if check_sys packageManager yum; then
+        if [[ ${methods} == "Online" ]]; then
+            download ${filename_path} ${online_centos_url}
+        else
+            cp -rf ${local_centos_file_path} ${filename_path}
+        fi
+    elif check_sys packageManager apt; then
+        if [[ ${methods} == "Online" ]]; then
+            download ${filename_path} ${online_debian_url}
+        else
+            cp -rf ${local_debian_file_path} ${filename_path}
+        fi
+    fi
+}
+
 download_ss_file(){
     cd ${CUR_DIR}
     # Download Shadowsocks-libev
     get_ver
+    local SS_INIT_CENTOS="./service/shadowsocks-libev_centos.sh"
+    local SS_INIT_DEBIAN="./service/shadowsocks-libev_debian.sh"
+    
     shadowsocks_libev_file="shadowsocks-libev-${libev_ver}"
     shadowsocks_libev_url="https://github.com/shadowsocks/shadowsocks-libev/releases/download/v${libev_ver}/shadowsocks-libev-${libev_ver}.tar.gz"
     download "${shadowsocks_libev_file}.tar.gz" "${shadowsocks_libev_url}"
-    if check_sys packageManager yum; then
-        if [[ ${methods} == "Online" ]]; then
-            download "${SHADOWSOCKS_LIBEV_INIT}" "${SHADOWSOCKS_LIBEV_CENTOS}"
-        else
-            cp ./service/shadowsocks-libev_centos.sh "$(dirname ${SHADOWSOCKS_LIBEV_INIT})"
-            mv "$(dirname ${SHADOWSOCKS_LIBEV_INIT})/shadowsocks-libev_centos.sh" "${SHADOWSOCKS_LIBEV_INIT}"    
-        fi        
-    elif check_sys packageManager apt; then
-        if [[ ${methods} == "Online" ]]; then
-            download "${SHADOWSOCKS_LIBEV_INIT}" "${SHADOWSOCKS_LIBEV_DEBIAN}"
-        else
-            cp ./service/shadowsocks-libev_debian.sh "$(dirname ${SHADOWSOCKS_LIBEV_INIT})"
-            mv "$(dirname ${SHADOWSOCKS_LIBEV_INIT})/shadowsocks-libev_debian.sh" "${SHADOWSOCKS_LIBEV_INIT}"
-        fi        
-    fi
+    download_service_file ${SHADOWSOCKS_LIBEV_INIT} ${SHADOWSOCKS_LIBEV_CENTOS} ${SS_INIT_CENTOS} ${SHADOWSOCKS_LIBEV_INIT} ${SS_INIT_DEBIAN}
 }
 
 download_plugins_file(){
@@ -698,24 +709,7 @@ download_plugins_file(){
         kcptun_file="kcptun-linux-amd64-${kcptun_ver}"
         kcptun_url="https://github.com/xtaci/kcptun/releases/download/v${kcptun_ver}/kcptun-linux-amd64-${kcptun_ver}.tar.gz"
         download "${kcptun_file}.tar.gz" "${kcptun_url}"
-        
-        if check_sys packageManager yum; then
-            if [[ ${methods} == "Online" ]]; then
-                download "${KCPTUN_INIT}" "${KCPTUN_CENTOS}"
-            else
-                cp ./service/kcptun_centos.sh "$(dirname ${KCPTUN_INIT})"
-                mv "$(dirname ${KCPTUN_INIT})/kcptun_centos.sh" "${KCPTUN_INIT}"
-            fi
-            
-        elif check_sys packageManager apt; then
-            if [[ ${methods} == "Online" ]]; then
-                download "${KCPTUN_INIT}" "${KCPTUN_DEBIAN}"
-            else
-                cp ./service/kcptun_debian.sh "$(dirname ${KCPTUN_INIT})"
-                mv "$(dirname ${KCPTUN_INIT})/kcptun_debian.sh" "${KCPTUN_INIT}"
-            fi
-            
-        fi
+        download_service_file ${KCPTUN_INIT} ${KCPTUN_CENTOS} "./service/kcptun_centos.sh" ${KCPTUN_DEBIAN} "./service/kcptun_debian.sh"
         
     elif [[ "${plugin_num}" == "4" ]]; then        
         # Download goquiet
@@ -729,23 +723,7 @@ download_plugins_file(){
         cloak_file="ck-server-linux-amd64-${cloak_ver}"
         cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${cloak_ver}/ck-server-linux-amd64-${cloak_ver}"
         download "${cloak_file}" "${cloak_url}"
-        
-        if check_sys packageManager yum; then
-            if [[ ${methods} == "Online" ]]; then
-                download "${CLOAK_INIT}" "${CLOAK_CENTOS}"
-            else
-                cp ./service/cloak_centos.sh "$(dirname ${CLOAK_INIT})"
-                mv "$(dirname ${CLOAK_INIT})/cloak_centos.sh" "${CLOAK_INIT}"
-            fi
-        elif check_sys packageManager apt; then
-            if [[ ${methods} == "Online" ]]; then
-                download "${CLOAK_INIT}" "${CLOAK_DEBIAN}"
-            else
-                cp ./service/cloak_debian.sh "$(dirname ${CLOAK_INIT})"
-                mv "$(dirname ${CLOAK_INIT})/cloak_debian.sh" "${CLOAK_INIT}"
-            fi
-        fi
-
+        download_service_file ${CLOAK_INIT} ${CLOAK_CENTOS} "./service/cloak_centos.sh" ${CLOAK_DEBIAN} "./service/cloak_debian.sh"
     fi
 }
 
@@ -869,12 +847,7 @@ config_ss(){
     fi
 
     # start wriet config
-    if [[ ${methods} == "Online" ]]; then
-        source <(curl -sL ${BASE_URL}/templates/config_file_templates.sh)
-    else
-        source ${BASE_URL}/templates/config_file_templates.sh
-    fi
-    
+    improt_package "templates" "config_file_templates.sh"
     
     if [[ ${plugin_num} == "1" ]]; then
         if [[ ${libev_v2ray} == "1" ]]; then
@@ -919,11 +892,7 @@ config_ss(){
 }
 
 gen_ss_links(){
-    if [[ ${methods} == "Online" ]]; then
-        source <(curl -sL ${BASE_URL}/templates/sip002_url_templates.sh)
-    else
-        source ${BASE_URL}/templates/sip002_url_templates.sh
-    fi
+    improt_package "templates" "sip002_url_templates.sh"
     
     if [[ ${plugin_num} == "1" ]]; then
         if [[ ${libev_v2ray} == "1" ]]; then
@@ -957,14 +926,10 @@ gen_ss_links(){
 install_completed(){
     ldconfig
     ${SHADOWSOCKS_LIBEV_INIT} start > /dev/null 2>&1
-    
-    if [[ ${methods} == "Online" ]]; then
-        source <(curl -sL ${BASE_URL}/templates/terminal_config_templates.sh)
-    else
-        source ${BASE_URL}/templates/terminal_config_templates.sh
-    fi
-    
     clear -x
+    
+    improt_package "templates" "terminal_config_templates.sh"
+    
     if [[ ${plugin_num} == "1" ]]; then
         if [[ ${libev_v2ray} == "1" ]]; then
             ss_v2ray_ws_http_show
@@ -1011,12 +976,7 @@ install_completed(){
 }
 
 install_prepare(){
-    if [[ ${methods} == "Online" ]]; then
-        source <(curl -sL ${BASE_URL}/prepare/shadowsocks_libev_prepare.sh)
-    else
-        source ${BASE_URL}/prepare/shadowsocks_libev_prepare.sh
-    fi
-    
+    improt_package "prepare" "shadowsocks_libev_prepare.sh"
     install_prepare_port
     install_prepare_password
     install_prepare_cipher
@@ -1031,44 +991,19 @@ install_prepare(){
     echo && read -e -p "(默认: 不安装)：" plugin_num
     [[ -z "${plugin_num}" ]] && plugin_num="" && echo -e "\n${Tip} 当前未选择任何插件，仅安装Shadowsocks-libev."
     if [[ ${plugin_num} == "1" ]]; then
-        if [[ ${methods} == "Online" ]]; then
-            source <(curl -sL ${BASE_URL}/prepare/v2ray_plugin_prepare.sh)
-        else
-            source ${BASE_URL}/prepare/v2ray_plugin_prepare.sh
-        fi
-        
+        improt_package "prepare" "v2ray_plugin_prepare.sh"
         install_prepare_libev_v2ray
     elif [[ ${plugin_num} == "2" ]]; then
-        if [[ ${methods} == "Online" ]]; then
-            source <(curl -sL ${BASE_URL}/prepare/kcptun_prepare.sh)
-        else
-            source ${BASE_URL}/prepare/kcptun_prepare.sh
-        fi
-        
+        improt_package "prepare" "kcptun_prepare.sh"
         install_prepare_libev_kcptun
     elif [[ ${plugin_num} == "3" ]]; then
-        if [[ ${methods} == "Online" ]]; then
-            source <(curl -sL ${BASE_URL}/prepare/simple_obfs_prepare.sh)
-        else
-            source ${BASE_URL}/prepare/simple_obfs_prepare.sh
-        fi
-        
+        improt_package "prepare" "simple_obfs_prepare.sh"
         install_prepare_libev_obfs
     elif [[ ${plugin_num} == "4" ]]; then
-        if [[ ${methods} == "Online" ]]; then
-            source <(curl -sL ${BASE_URL}/prepare/goquiet_prepare.sh)
-        else
-            source ${BASE_URL}/prepare/goquiet_prepare.sh
-        fi
-        
+        improt_package "prepare" "goquiet_prepare.sh"
         install_prepare_libev_goquiet
     elif [[ ${plugin_num} == "5" ]]; then
-        if [[ ${methods} == "Online" ]]; then
-            source <(curl -sL ${BASE_URL}/prepare/cloak_prepare.sh)
-        else
-            source ${BASE_URL}/prepare/cloak_prepare.sh
-        fi
-        
+        improt_package "prepare" "cloak_prepare.sh"
         install_prepare_libev_cloak
     elif [[ ${plugin_num} == "" ]]; then
         :
@@ -1089,23 +1024,10 @@ install_main(){
     fi
     ldconfig
     install_mbedtls
-    
-    if [[ ${methods} == "Online" ]]; then
-        source <(curl -sL ${BASE_URL}/tools/shadowsocks_libev_install.sh)
-    else
-        cd ${CUR_DIR}
-        source ${BASE_URL}/tools/shadowsocks_libev_install.sh
-    fi
-    
+    improt_package "tools" "shadowsocks_libev_install.sh"
     install_shadowsocks_libev
     if [ "${plugin_num}" == "1" ]; then
-        if [[ ${methods} == "Online" ]]; then
-            source <(curl -sL ${BASE_URL}/plugins/v2ray_plugin_install.sh)
-        else
-            cd ${CUR_DIR}
-            source ${BASE_URL}/plugins/v2ray_plugin_install.sh
-        fi
-        
+        improt_package "plugins" "v2ray_plugin_install.sh"
         install_v2ray_plugin
         
         if [[ ${libev_v2ray} == "4" ]]; then
@@ -1113,45 +1035,22 @@ install_main(){
         elif [[ ${libev_v2ray} == "5" ]]; then
             wget -qO- ${CADDY_INSTALL_SCRIPT_URL} | bash -s install tls.dns.cloudflare
         fi
+        
         plugin_client_name="v2ray"
     elif [ "${plugin_num}" == "2" ]; then
-        if [[ ${methods} == "Online" ]]; then
-            source <(curl -sL ${BASE_URL}/plugins/kcptun_install.sh)
-        else
-            cd ${CUR_DIR}
-            source ${BASE_URL}/plugins/kcptun_install.sh
-        fi
-        
+        improt_package "plugins" "kcptun_install.sh"
         install_kcptun
         plugin_client_name="kcptun"
     elif [ "${plugin_num}" == "3" ]; then
-        if [[ ${methods} == "Online" ]]; then
-            source <(curl -sL ${BASE_URL}/plugins/simple_obfs_install.sh)
-        else
-            cd ${CUR_DIR}
-            source ${BASE_URL}/plugins/simple_obfs_install.sh
-        fi
-        
+        improt_package "plugins" "simple_obfs_install.sh"
         install_simple_obfs
         plugin_client_name="obfs-local"
     elif [ "${plugin_num}" == "4" ]; then
-        if [[ ${methods} == "Online" ]]; then
-            source <(curl -sL ${BASE_URL}/plugins/goquiet_install.sh)
-        else
-            cd ${CUR_DIR}
-            source ${BASE_URL}/plugins/goquiet_install.sh
-        fi
-        
+        improt_package "plugins" "goquiet_install.sh"
         install_goquiet
         plugin_client_name="gq-client"
     elif [ "${plugin_num}" == "5" ]; then
-        if [[ ${methods} == "Online" ]]; then
-            source <(curl -sL ${BASE_URL}/plugins/cloak_install.sh)
-        else
-            cd ${CUR_DIR}
-            source ${BASE_URL}/plugins/cloak_install.sh
-        fi 
-       
+        improt_package "plugins" "cloak_install.sh"
         install_cloak
         gen_credentials
         plugin_client_name="ck-client"
@@ -1174,13 +1073,7 @@ install_step_all(){
     config_ss
     gen_ss_links
     install_completed
-    
-    if [[ ${methods} == "Online" ]]; then
-        source <(curl -sL ${BASE_URL}/utils/view_config.sh)
-    else
-        source ${BASE_URL}/utils/view_config.sh
-    fi
-    
+    improt_package "utils" "view_config.sh"
     show_config
 }
 
@@ -1363,11 +1256,12 @@ do_status(){
 
 do_update(){
     if [[ -e '/usr/local/bin/ss-server' ]]; then
+        echo -e "${Info} 正在进行版本比对请稍等..."
         get_ver
         current_libev_ver=$(ss-server -v | grep shadowsocks-libev | cut -d\  -f2)
         if ! check_latest_version ${current_libev_ver} ${libev_ver}; then
             echo
-            echo -e "${Point} shadowsocklibev-libev当前已是最新版本 ${current_libev_ver}，不需要更新."
+            echo -e "${Point} shadowsocklibev-libev当前已是最新版本${current_libev_ver}不需要更新."
             
             update_v2ray_plugin
             update_kcptun
@@ -1379,18 +1273,14 @@ do_update(){
         fi
         
         do_stop > /dev/null 2>&1
+        echo -e "${Info} 检测到SS有新版本，开始下载..."
         download_ss_file
-        
-        if [[ ${methods} == "Online" ]]; then
-            source <(curl -sL ${BASE_URL}/tools/shadowsocks_libev_install.sh)
-        else
-            source ${BASE_URL}/tools/shadowsocks_libev_install.sh
-        fi
-        
+        echo -e "${Info} 下载完成，开始执行编译安装..."
+        improt_package "tools" "shadowsocks_libev_install.sh"
         install_shadowsocks_libev
         do_restart > /dev/null 2>&1
         echo
-        echo -e "${Info} shadowsocklibev-libev 已成功升级为最新版本 ${libev_ver}"
+        echo -e "${Info} shadowsocklibev-libev已成功升级为最新版本${libev_ver}"
         
         install_cleanup
         
@@ -1563,12 +1453,7 @@ case ${action} in
         ;;
     uid)
         if [ "$(command -v ck-server)" ]; then
-            if [[ ${methods} == "Online" ]]; then
-                source <(curl -sL ${BASE_URL}/utils/ck_user_manager.sh)
-            else
-                source ${BASE_URL}/utils/ck_user_manager.sh
-            fi
-           
+            improt_package "utils" "ck_user_manager.sh"
             ck2_users_manager
             sleep 0.5
             
@@ -1579,33 +1464,18 @@ case ${action} in
         ;;
     link)
         if [ "$(command -v ck-server)" ]; then
-            if [[ ${methods} == "Online" ]]; then
-                source <(curl -sL ${BASE_URL}/utils/ck_sslink.sh)
-            else
-                source ${BASE_URL}/utils/ck_sslink.sh
-            fi
-            
+            improt_package "utils" "ck_sslink.sh"
             get_link_of_ck2 "${2}"
         else
             echo -e " ${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行..."
         fi
         ;;
     scan)
-        if [[ ${methods} == "Online" ]]; then
-            source <(curl -sL ${BASE_URL}/utils/qr_code.sh)
-        else
-            source ${BASE_URL}/utils/qr_code.sh
-        fi
-        
+        improt_package "utils" "qr_code.sh"
         gen_qr_code "${2}"
         ;;
     show)
-        if [[ ${methods} == "Online" ]]; then
-            source <(curl -sL ${BASE_URL}/utils/view_config.sh)
-        else
-            source ${BASE_URL}/utils/view_config.sh
-        fi
-        
+        improt_package "utils" "view_config.sh"
         show_config
         ;;
     help)

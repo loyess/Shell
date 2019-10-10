@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.1.0"
+SHELL_VERSION="2.1.1"
 # ====================
 
 
@@ -22,28 +22,6 @@ if [ -e plugins ] && [ -e prepare ] && [ -e service ] && [ -e templates ] && [ -
     methods="Local"
     BASE_URL="." 
 fi
-
-package=(
-plugins/v2ray_plugin_install.sh
-plugins/kcptun_install.sh
-plugins/simple_obfs_install.sh
-plugins/goquiet_install.sh
-plugins/cloak_install.sh
-prepare/shadowsocks_libev_prepare.sh
-prepare/v2ray_plugin_prepare.sh
-prepare/kcptun_prepare.sh
-prepare/simple_obfs_prepare.sh
-prepare/goquiet_prepare.sh
-prepare/cloak_prepare.sh
-service/
-templates/
-tools/
-utils/
-)
-package=()
-
-
-
 
 
 # bbr

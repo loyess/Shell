@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.1.3"
+SHELL_VERSION="2.1.4"
 # ====================
 
 
@@ -73,7 +73,12 @@ CK_SERVER_CONFIG="/etc/cloak/ckserver.json"
 # caddy
 CADDY_FILE="/usr/local/caddy/caddy"
 CADDY_CONF_FILE="/usr/local/caddy/Caddyfile"
-CADDY_INSTALL_SCRIPT_URL="https://git.io/fjuAR"
+CADDY_BASE_URL="https://caddyserver.com/download/linux/amd64"
+CADDY_INIT="/etc/init.d/caddy"
+ONLINE_CADDY_CENTOS_INIT_URL="${BASE_URL}/service/caddy_centos.sh"
+LOCAL_CADDY_DEBIAN_INIT_PATH="./service/caddy_centos.sh"
+ONLINE_CADDY_DEBIAN_INIT_URL="${BASE_URL}/service/caddy_debian.sh"
+LOCAL_CADDY_DEBIAN_INIT_PATH="./service/caddy_debian.sh"
 
 
 # shadowsocklibev-libev Ciphers
@@ -336,7 +341,7 @@ check_script_version(){
 	[[ -z ${SHELL_VERSION_NEW} ]] && echo -e "${Error} 无法链接到 Github !" && exit 0
 	if version_gt ${SHELL_VERSION_NEW} ${SHELL_VERSION}; then
         echo
-        echo -e "${Green}当前脚本版本为：${SHELL_VERSION} 检测到有新版本可更新...${suffix}"
+        echo -e "${Green}当前脚本版本为：${SHELL_VERSION} 检测到有新版本可更新.${suffix}"
         echo -e "按任意键开始…或按Ctrl+C取消"
         char=`get_char`
         wget -N --no-check-certificate -O ss-plugins.sh "https://git.io/fjlbl" && chmod +x ss-plugins.sh
@@ -364,24 +369,39 @@ choose_script_bbr(){
     esac
 }
 
+choose_caddy_extension(){
+    local libev_v2ray=$1
+    
+    improt_package "tools" "caddy_install.sh"
+    if [[ ${libev_v2ray} == "4" ]]; then
+        install_caddy
+    elif [[ ${libev_v2ray} == "5" ]]; then
+        install_caddy "tls.dns.cloudflare"
+    fi
+}
+
 update_v2ray_plugin(){
     cd ${CUR_DIR}
     
     if [[ -e '/usr/local/bin/v2ray-plugin' ]]; then
         if ! $(v2ray-plugin -version > /dev/null 2>&1); then
             local plugin_num="1"
-            echo -e "${Info} 检测到v2ray-plugin有新版本，开始下载..."
+            echo -e "${Info} 检测到v2ray-plugin有新版本，开始下载."
             download_plugins_file
-            echo -e "${Info} 下载完成，开始安装..."
+            echo -e "${Info} 下载完成，开始安装."
             improt_package "plugins" "v2ray_plugin_install.sh"
             do_stop > /dev/null 2>&1
             install_v2ray_plugin
             do_restart > /dev/null 2>&1
             
             echo -e "${Info} v2ray-plugin已成功升级为最新版本${v2ray_plugin_ver}"
-            echo
+            if [[ ! -e ${CADDY_FILE} ]]; then
+                echo
+            fi
             
             install_cleanup
+            
+            update_caddy
             
             exit 0
         fi
@@ -389,28 +409,38 @@ update_v2ray_plugin(){
         current_v2ray_plugin_ver=$(v2ray-plugin -version | grep v2ray-plugin | cut -d\  -f2 | sed 's/v//g')
         if ! check_latest_version ${current_v2ray_plugin_ver} ${v2ray_plugin_ver}; then
             echo -e "${Point} v2ray-plugin当前已是最新版本${current_v2ray_plugin_ver}不需要更新."
-            echo
+            if [[ ! -e ${CADDY_FILE} ]]; then
+                echo
+            fi
+            
+            update_caddy
+            
             exit 1
         fi
         
         local plugin_num="1"
-        echo -e "${Info} 检测到v2ray-plugin有新版本，开始下载..."
+        echo -e "${Info} 检测到v2ray-plugin有新版本，开始下载."
         download_plugins_file
-        echo -e "${Info} 下载完成，开始安装..."
+        echo -e "${Info} 下载完成，开始安装."
         improt_package "plugins" "v2ray_plugin_install.sh"
         do_stop > /dev/null 2>&1
         install_v2ray_plugin
         do_restart > /dev/null 2>&1
         
         echo -e "${Info} v2ray-plugin已成功升级为最新版本${v2ray_plugin_ver}"
-        echo
+        if [[ ! -e ${CADDY_FILE} ]]; then
+            echo
+        fi
         
         install_cleanup
+        
+        update_caddy
     fi
 }
 
 update_kcptun(){
     cd ${CUR_DIR}
+    
     if [[ -e ${KCPTUN_INSTALL_DIR} ]]; then
         current_kcptun_ver=$(kcptun-server -v | grep kcptun | cut -d\  -f3)
         if ! check_latest_version ${current_kcptun_ver} ${kcptun_ver}; then
@@ -420,9 +450,9 @@ update_kcptun(){
         fi
         
         local plugin_num="2"
-        echo -e "${Info} 检测到kcptun有新版本，开始下载..."
+        echo -e "${Info} 检测到kcptun有新版本，开始下载."
         download_plugins_file
-        echo -e "${Info} 下载完成，开始安装..."
+        echo -e "${Info} 下载完成，开始安装."
         improt_package "plugins" "kcptun_install.sh"
         do_stop > /dev/null 2>&1
         install_kcptun
@@ -432,12 +462,12 @@ update_kcptun(){
         echo
         
         install_cleanup
-        
     fi
 }
 
 update_simple_obfs(){
     cd ${CUR_DIR}
+    
     if [[ -e '/usr/local/bin/obfs-server' ]]; then
         current_simple_obfs_ver=$(obfs-server | grep simple-obfs | cut -d\  -f2)
         if ! check_latest_version ${current_simple_obfs_ver} ${simple_obfs_ver}; then
@@ -446,10 +476,11 @@ update_simple_obfs(){
             exit 1
         fi
         improt_package "plugins" "simple_obfs_install.sh"
+        echo -e "${Info} 检测到simple-obfs有新版本，开始下载并进行编译安装."
         do_stop > /dev/null 2>&1
-        echo -e "${Info} 检测到simple-obfs有新版本，开始下载并进行编译安装..."
         install_simple_obfs
         do_restart > /dev/null 2>&1
+        
         echo -e "${Info} simple-obfs已成功升级为最新版本${simple_obfs_ver}"
         echo
         
@@ -459,6 +490,7 @@ update_simple_obfs(){
 
 update_goquiet(){
     cd ${CUR_DIR}
+    
     if [[ -e '/usr/local/bin/gq-server' ]]; then
         current_goquiet_ver=$(gq-server -v | grep gq-server | cut -d\  -f2)
         if ! check_latest_version ${current_goquiet_ver} ${goquiet_ver}; then
@@ -468,13 +500,14 @@ update_goquiet(){
         fi
         
         local plugin_num="4"
-        echo -e "${Info} 检测到goquiet有新版本，开始下载..."
+        echo -e "${Info} 检测到goquiet有新版本，开始下载."
         download_plugins_file
-        echo -e "${Info} 下载完成，开始安装..."
+        echo -e "${Info} 下载完成，开始安装."
         improt_package "plugins" "goquiet_install.sh"
         do_stop > /dev/null 2>&1
         install_goquiet
         do_restart > /dev/null 2>&1
+
         echo -e "${Info} goquiet已成功升级为最新版本${goquiet_ver}"
         echo
         
@@ -484,6 +517,7 @@ update_goquiet(){
 
 update_cloak(){
     cd ${CUR_DIR}
+    
     if [[ -e '/usr/local/bin/ck-server' ]]; then
         current_cloak_ver=$(ck-server -v | grep ck-server | cut -d\  -f2)
         if ! check_latest_version ${current_cloak_ver} ${cloak_ver}; then
@@ -493,14 +527,44 @@ update_cloak(){
         fi
         
         local plugin_num="5"
-        echo -e "${Info} 检测到cloak有新版本，开始下载..."
+        echo -e "${Info} 检测到cloak有新版本，开始下载."
         download_plugins_file
-        echo -e "${Info} 下载完成，开始安装..."
+        echo -e "${Info} 下载完成，开始安装."
         improt_package "plugins" "cloak_install.sh"
         do_stop > /dev/null 2>&1
         install_cloak
         do_restart > /dev/null 2>&1
+        
         echo -e "${Info} cloak已成功升级为最新版本${cloak_ver}"
+        echo
+        
+        install_cleanup
+    fi
+}
+
+update_caddy(){
+    cd ${CUR_DIR}
+    
+    if [[ -e '/usr/local/caddy/caddy' ]]; then
+        current_caddy_ver=$(/usr/local/caddy/caddy -version | grep Caddy | cut -d\  -f2 | sed 's/v//g')
+        if ! check_latest_version ${current_caddy_ver} ${caddy_ver}; then
+            echo -e "${Point} caddy当前已是最新版本${current_caddy_ver}不需要更新."
+            echo
+            exit 1
+        fi
+        
+        if ! $(grep -q 'cloudflare' /usr/local/caddy/Caddyfile); then
+            libev_v2ray=4
+        else
+            libev_v2ray=5
+        fi
+        
+        echo -e "${Info} 检测到caddy有新版本，开始下载并安装."
+        do_stop > /dev/null 2>&1
+        choose_caddy_extension ${libev_v2ray}
+        do_restart > /dev/null 2>&1
+
+        echo -e "${Info} caddy已成功升级为最新版本${caddy_ver}"
         echo
         
         install_cleanup
@@ -532,6 +596,8 @@ get_ver(){
     [ -z ${goquiet_ver} ] && echo -e "${Error} 获取 goquiet 最新版本失败." && exit 1
     cloak_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/cbeuw/Cloak/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
     [ -z ${cloak_ver} ] && echo -e "${Error} 获取 cloak 最新版本失败." && exit 1
+    caddy_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/caddyserver/caddy/releases | grep -o '"tag_name": ".*"' | grep -v 'beta' | head -n 1 | sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+    [ -z ${caddy_ver} ] && echo -e "${Error} 获取 caddy 最新版本失败." && exit 1
 }
 
 get_char(){
@@ -767,11 +833,11 @@ install_dependencies(){
 install_libsodium(){    
     if [ ! -f /usr/lib/libsodium.a ]; then
         cd ${CUR_DIR}
-        echo -e "${Info} 下载${LIBSODIUM_FILE}..."
+        echo -e "${Info} 下载${LIBSODIUM_FILE}."
         download "${LIBSODIUM_FILE}.tar.gz" "${LIBSODIUM_URL}"
-        echo -e "${Info} 解压${LIBSODIUM_FILE}..."
+        echo -e "${Info} 解压${LIBSODIUM_FILE}."
         tar zxf ${LIBSODIUM_FILE}.tar.gz && cd ${LIBSODIUM_FILE}
-        echo -e "${Info} 编译安装${LIBSODIUM_FILE}..."
+        echo -e "${Info} 编译安装${LIBSODIUM_FILE}."
         ./configure --prefix=/usr && make && make install
         if [ $? -ne 0 ]; then
             echo -e "${Error} ${LIBSODIUM_FILE} 安装失败 !"
@@ -787,16 +853,16 @@ install_libsodium(){
 install_mbedtls(){
     if [ ! -f /usr/lib/libmbedtls.a ]; then
         cd ${CUR_DIR}
-        echo -e "${Info} 下载${MBEDTLS_FILE}..."
+        echo -e "${Info} 下载${MBEDTLS_FILE}."
         download "${MBEDTLS_FILE}-gpl.tgz" "${MBEDTLS_URL}"
-        echo -e "${Info} 解压${MBEDTLS_FILE}..."
+        echo -e "${Info} 解压${MBEDTLS_FILE}."
         tar xf ${MBEDTLS_FILE}-gpl.tgz
         cd ${MBEDTLS_FILE}
-        echo -e "${Info} 编译安装${MBEDTLS_FILE}..."
+        echo -e "${Info} 编译安装${MBEDTLS_FILE}."
         make SHARED=1 CFLAGS=-fPIC
         make DESTDIR=/usr install
         if [ $? -ne 0 ]; then
-            echo -e "${Error} ${MBEDTLS_FILE} 安装失败..."
+            echo -e "${Error} ${MBEDTLS_FILE} 安装失败."
             install_cleanup
             exit 1
         fi
@@ -1025,13 +1091,7 @@ install_main(){
     if [ "${plugin_num}" == "1" ]; then
         improt_package "plugins" "v2ray_plugin_install.sh"
         install_v2ray_plugin
-        
-        if [[ ${libev_v2ray} == "4" ]]; then
-            wget -qO- ${CADDY_INSTALL_SCRIPT_URL} | bash -s install
-        elif [[ ${libev_v2ray} == "5" ]]; then
-            wget -qO- ${CADDY_INSTALL_SCRIPT_URL} | bash -s install tls.dns.cloudflare
-        fi
-        
+        choose_caddy_extension ${libev_v2ray}
         plugin_client_name="v2ray"
     elif [ "${plugin_num}" == "2" ]; then
         improt_package "plugins" "kcptun_install.sh"
@@ -1055,7 +1115,7 @@ install_main(){
 }
 
 install_step_all(){
-    [[ -e '/usr/local/bin/ss-server' ]] && echo -e "${Info} Shadowsocks-libev 已经安装..." && exit 1
+    [[ -e '/usr/local/bin/ss-server' ]] && echo -e "${Info} Shadowsocks-libev 已经安装." && exit 1
     disable_selinux
     install_prepare
     install_dependencies
@@ -1192,71 +1252,72 @@ do_status(){
         if [[ -e '/usr/local/bin/ss-server' ]]; then
             check_pid
             if [[ ! -z "${PID}" ]]; then
-                echo -e "shadowsocklibev-libev (pid ${PID}) is already running..."
+                echo -e "${Info} shadowsocklibev-libev (pid ${PID}) is already running."
             else
-                echo -e "shadowsocklibev-libev is already installed but not running..."
+                echo -e "${Point} shadowsocklibev-libev is already installed but not running."
             fi
             
             if [ "$(command -v v2ray-plugin)" ]; then
                 if [[ ! -z "${V2_PID}" ]]; then
-                    echo -e "v2ray-plugin (pid ${V2_PID}) is already running..."
+                    echo -e "${Info} v2ray-plugin (pid ${V2_PID}) is already running."
                 else
-                    echo -e "v2ray-plugin is already installed but not running..."
+                    echo -e "${Point} v2ray-plugin is already installed but not running."
                 fi
             fi
             
             if [ "$(command -v kcptun-server)" ]; then
                 if [[ ! -z "${KP_PID}" ]]; then
-                    echo -e "kcptun (pid ${KP_PID}) is already running..."
+                    echo -e "${Info} kcptun (pid ${KP_PID}) is already running."
                 else
-                    echo -e "kcptun is already installed but not running..."
+                    echo -e "${Point} kcptun is already installed but not running."
                 fi
             fi
             
             if [ "$(command -v obfs-server)" ]; then
                 if [[ ! -z "${OBFS_PID}" ]]; then
-                    echo -e "simple-obfs (pid ${OBFS_PID}) is already running..."
+                    echo -e "${Info} simple-obfs (pid ${OBFS_PID}) is already running."
                 else
-                    echo -e "simple-obfs is already installed but not running..."
+                    echo -e "${Point} simple-obfs is already installed but not running."
                 fi
             fi
             
             if [ "$(command -v gq-server)" ]; then
                 if [[ ! -z "${GQ_PID}" ]]; then
-                    echo -e "goquiet (pid ${GQ_PID}) is already running..."
+                    echo -e "${Info} goquiet (pid ${GQ_PID}) is already running."
                 else
-                    echo -e "goquiet is already installed but not running..."
+                    echo -e "${Point} goquiet is already installed but not running."
                 fi
             fi
             
             if [ "$(command -v ck-server)" ]; then
                 if [[ ! -z "${CK_PID}" ]]; then
-                    echo -e "cloak (pid ${CK_PID}) is already running..."
+                    echo -e "${Info} cloak (pid ${CK_PID}) is already running."
                 else
-                    echo -e "cloak is already installed but not running..."
+                    echo -e "${Point} cloak is already installed but not running."
                 fi
             fi
             
             if [ -e "${CADDY_FILE}" ]; then
                 if [[ ! -z "${CADDY_PID}" ]]; then
-                    echo -e "caddy (pid ${CADDY_PID}) is already running..."
+                    echo -e "${Info} caddy (pid ${CADDY_PID}) is already running."
                 else
-                    echo -e "caddy is already installed but not running..."
+                    echo -e "${Point} caddy is already installed but not running."
                 fi
             fi
         else
-            echo -e "shadowsocklibev-libev and related plugins are not installed..."
+            echo -e "${Error} shadowsocklibev-libev and related plugins are not installed."
         fi
     fi
 }
 
 do_update(){
+    cd ${CUR_DIR}
+    
     if [[ -e '/usr/local/bin/ss-server' ]]; then
-        echo -e "${Info} 正在进行版本比对请稍等..."
+        echo -e "${Info} 正在进行版本比对请稍等."
         get_ver
         current_libev_ver=$(ss-server -v | grep shadowsocks-libev | cut -d\  -f2)
         if ! check_latest_version ${current_libev_ver} ${libev_ver}; then
-            echo
             echo -e "${Point} shadowsocklibev-libev当前已是最新版本${current_libev_ver}不需要更新."
             
             update_v2ray_plugin
@@ -1268,24 +1329,26 @@ do_update(){
             exit 1
         fi
         
-        do_stop > /dev/null 2>&1
-        echo -e "${Info} 检测到SS有新版本，开始下载..."
+        echo -e "${Info} 检测到SS有新版本，开始下载."
         download_ss_file
-        echo -e "${Info} 下载完成，开始执行编译安装..."
+        echo -e "${Info} 下载完成，开始执行编译安装."
         improt_package "tools" "shadowsocks_libev_install.sh"
+        do_stop > /dev/null 2>&1
         install_shadowsocks_libev
         do_restart > /dev/null 2>&1
-        echo
         echo -e "${Info} shadowsocklibev-libev已成功升级为最新版本${libev_ver}"
         
         install_cleanup
-        
+
         update_v2ray_plugin
         update_kcptun
         update_simple_obfs
         update_goquiet
         update_cloak
     fi
+    
+    
+    
 }
 
 do_uninstall(){
@@ -1343,7 +1406,8 @@ do_uninstall(){
         # ~/.acme.sh/acme.sh --uninstall > /dev/null 2>&1 && rm -rf ~/.acme.sh
         
         # uninstall caddy
-        wget -qO- https://git.io/fjuAR | bash -s uninstall > /dev/null 2>&1
+        improt_package "tools" "caddy_install.sh"
+        uninstall_caddy
         
         # uninstall ss-libev
         rm -fr $(dirname ${SHADOWSOCKS_LIBEV_CONFIG})
@@ -1392,10 +1456,10 @@ do_uninstall(){
         # uninstall ipcalc-0.41
         rm -rf /usr/local/bin/ipcalc-0.41
         
-        echo -e "${Info} Shadowsocks-libev 卸载成功..."
+        echo -e "${Info} Shadowsocks-libev 卸载成功."
     else
         echo
-        echo -e "${Info} Shadowsocks-libev 卸载取消..."
+        echo -e "${Info} Shadowsocks-libev 卸载取消."
         echo
     fi
 }
@@ -1455,7 +1519,7 @@ case ${action} in
             
             is_the_api_open "stop"
         else
-            echo -e " ${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行..."
+            echo -e " ${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行."
         fi
         ;;
     link)
@@ -1463,7 +1527,7 @@ case ${action} in
             improt_package "utils" "ck_sslink.sh"
             get_link_of_ck2 "${2}"
         else
-            echo -e " ${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行..."
+            echo -e " ${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行."
         fi
         ;;
     scan)

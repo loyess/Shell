@@ -20,7 +20,7 @@ get_link_of_ck2(){
         echo -e " Usage:"
         echo -e "   ./ss-plugins.sh link <new add user uid>"
         echo
-        echo -e " ${Error} 请检查参数UID是否正确，并且，使用 ./ss-plugins.sh uid 添加过新用户..."
+        echo -e " ${Error} 请检查参数UID是否正确，并且，使用 ./ss-plugins.sh uid 添加过新用户."
         echo
         exit 1
     fi

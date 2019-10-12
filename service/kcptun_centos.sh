@@ -71,7 +71,7 @@ do_status() {
     check_running
     case $? in
         0)
-        echo "$NAME (pid $PID) is running..."
+        echo "$NAME (pid $PID) is running."
         ;;
         1|2)
         echo "$NAME is stopped"
@@ -82,7 +82,7 @@ do_status() {
 
 do_start() {
     if check_running; then
-        echo "$NAME (pid $PID) is already running..."
+        echo "$NAME (pid $PID) is already running."
         return 0
     fi
     $DAEMON -c $CONF > /dev/null 2>&1 &

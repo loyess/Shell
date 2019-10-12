@@ -12,10 +12,10 @@ install_shadowsocks_libev(){
         elif check_sys packageManager apt; then
             update-rc.d -f ${service_name} defaults
         fi
-        echo -e "${Info} Shadowsocks-libev安装成功."
+        echo -e "${Info} shadowsocks-libev安装成功."
     else
         echo
-        echo -e "${Error} Shadowsocks-libev安装失败."
+        echo -e "${Error} shadowsocks-libev安装失败."
         echo
         install_cleanup
         exit 1

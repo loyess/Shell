@@ -3,6 +3,6 @@ show_config(){
         clear -x
         cat $HUMAN_CONFIG
     else
-        echo "The visual configuration was not found..."
+        echo "The visual configuration was not found."
     fi
 }

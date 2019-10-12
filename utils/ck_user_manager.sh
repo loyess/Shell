@@ -25,7 +25,7 @@ add_unrestricted_users(){
     do_restart > /dev/null 2>&1
     
     echo
-    echo -e "UID: ${Green}${CK_UID}${suffix} 添加成功..."
+    echo -e "UID: ${Green}${CK_UID}${suffix} 添加成功."
     echo
 }
 
@@ -48,7 +48,7 @@ EOF
     sleep 0.5
     
     echo
-    echo -e "UID: ${Green}${CK_UID}${suffix} 添加成功..."
+    echo -e "UID: ${Green}${CK_UID}${suffix} 添加成功."
     echo
 }
 
@@ -115,7 +115,7 @@ del_unrestricted_users(){
     do_restart > /dev/null 2>&1
     
     echo
-    echo -e "UID: ${Green}${DEL_UNRESTRICTED_UID}${suffix} 删除成功..."
+    echo -e "UID: ${Green}${DEL_UNRESTRICTED_UID}${suffix} 删除成功."
     echo
 }
 
@@ -125,7 +125,7 @@ del_restricted_users(){
     sleep 0.5
     
     echo
-    echo -e "UID: ${Green}${DEL_RESTRICTED_UID}${suffix} 删除成功..."
+    echo -e "UID: ${Green}${DEL_RESTRICTED_UID}${suffix} 删除成功."
     echo
 }
 
@@ -241,7 +241,7 @@ del_restricted_users_logic_code(){
         
         if [ ${userslist} = "null" ]; then
             echo
-            echo -e "${Point} 当前没有受限用户可以删除..."
+            echo -e "${Point} 当前没有受限用户可以删除."
             echo
             break
         fi
@@ -292,7 +292,7 @@ del_unrestricted_users_logic_cade(){
         
         if [[ ${#UIDS[*]} = 0 ]]; then
             echo
-            echo -e "${Point} 当前没有不受限用户可以删除..."
+            echo -e "${Point} 当前没有不受限用户可以删除."
             echo
             break
         fi

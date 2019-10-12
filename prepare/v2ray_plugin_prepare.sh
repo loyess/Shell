@@ -30,7 +30,7 @@ intall_acme_tool(){
         echo
     else
         echo
-        echo -e "${Info} 证书生成工具 acme.sh 已经安装，自动进入下一步，请选择... "
+        echo -e "${Info} 证书生成工具 acme.sh 已经安装，自动进入下一步，请选择. "
         echo
     fi
 }

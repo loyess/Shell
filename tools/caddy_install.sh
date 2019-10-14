@@ -31,7 +31,11 @@ install_caddy(){
 	rm -rf "init/"
     
 	chmod +x caddy
+    if [ ! -e "$(dirname ${CADDY_FILE})" ]; then
+        mkdir -p $(dirname ${CADDY_FILE})
+    fi
     mv caddy ${CADDY_FILE}
+    [ -f ${CADDY_FILE} ] && ln -fs ${CADDY_FILE} /usr/bin
     
     service_caddy
     echo && echo -e " Caddy 使用命令：${CADDY_CONF_FILE}
@@ -51,9 +55,9 @@ uninstall_caddy(){
             update-rc.d -f caddy remove
         fi
         [[ -s /tmp/caddy.log ]] && rm -rf /tmp/caddy.log
-        rm -rf ${CADDY_FILE}
-        rm -rf ${CADDY_CONF_FILE}
+        rm -rf $(dirname ${CADDY_FILE})
         rm -rf /etc/init.d/caddy
+        rm -rf /usr/bin/caddy
     fi
 }
 

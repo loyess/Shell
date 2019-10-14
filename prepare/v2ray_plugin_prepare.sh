@@ -216,6 +216,7 @@ get_input_ws_path_and_mirror_site(){
     echo
     [ -z "${mirror_site}" ] && mirror_site="https://www.bostonusa.com"
     echo -e "${Red}  mirror_site = ${mirror_site}${suffix}"
+    echo
 }
 
 print_error_info(){

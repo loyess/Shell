@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.1.6"
+SHELL_VERSION="2.1.7"
 # ====================
 
 
@@ -203,7 +203,7 @@ improt_package(){
     local sh_file=$2
     
     if [ ! "$(command -v curl)" ]; then
-        package_install "curl"
+        package_install "curl" > /dev/null 2>&1
     fi
     
     if [[ ${methods} == "Online" ]]; then

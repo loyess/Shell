@@ -201,12 +201,37 @@ usage() {
 improt_package(){
     local package=$1
     local sh_file=$2
+    
+    if [ ! "$(command -v curl)" ]; then
+        package_install "curl"
+    fi
+    
     if [[ ${methods} == "Online" ]]; then
         source <(curl -sL ${BASE_URL}/${package}/${sh_file})
     else
         cd ${CUR_DIR}
         source ${BASE_URL}/${package}/${sh_file}
     fi
+}
+
+package_install(){
+    local package_name=$1
+    
+    if check_sys packageManager yum; then
+        yum install -y $1 > /dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            echo -e "${Error} 安装 $1 失败."
+            exit 1
+        fi
+    elif check_sys packageManager apt; then
+        apt-get -y update > /dev/null 2>&1
+        apt-get -y install $1 > /dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            echo -e "${Error} 安装 $1 失败."
+            exit 1
+        fi
+    fi
+    echo -e "${Info} $1 安装完成."
 }
 
 disable_selinux(){

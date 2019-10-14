@@ -1,23 +1,3 @@
-package_install(){
-    local package_name=$1
-    
-    if check_sys packageManager yum; then
-        yum install -y $1 > /dev/null 2>&1
-        if [ $? -ne 0 ]; then
-            echo -e "${Error} 安装 $1 失败."
-            exit 1
-        fi
-    elif check_sys packageManager apt; then
-        apt-get -y update > /dev/null 2>&1
-        apt-get -y install $1 > /dev/null 2>&1
-        if [ $? -ne 0 ]; then
-            echo -e "${Error} 安装 $1 失败."
-            exit 1
-        fi
-    fi
-    echo -e "${Info} $1 安装完成."
-}
-
 intall_acme_tool(){
     # Install certificate generator tools
     if [ ! -e ~/.acme.sh/acme.sh ]; then
@@ -190,7 +170,6 @@ acme_get_certificate_by_force(){
 get_input_domain(){
     local text=$1
     
-    echo
     read -e -p "${text}：" domain
     echo
     echo -e "${Red}  host = ${domain}${suffix}"
@@ -207,7 +186,6 @@ get_input_email_for_caddy(){
 }
 
 get_input_api_info(){
-    echo
     read -e -p "请输入你的Cloudflare的Global API Key：" CF_Key
     echo
     echo -e "${Red}  CF_Key = ${CF_Key}${suffix}"
@@ -227,22 +205,17 @@ get_input_api_info(){
 }
 
 get_input_ws_path_and_mirror_site(){
-    echo
     read -e -p "请输入你的WebSocket分流路径(默认：/v2ray)：" path
     echo
     [ -z "${path}" ] && path="/v2ray"
-    echo
     echo -e "${Red}  path = ${path}${suffix}"
     echo
     
-    echo
     echo -e "${Tip} 该站点建议满足(位于海外、支持HTTPS协议、会用来传输大流量... )的条件，默认站点，随意找的，不建议使用"
     read -e -p "请输入你需要镜像到的站点(默认：https://www.bostonusa.com)：" mirror_site
     echo
     [ -z "${mirror_site}" ] && mirror_site="https://www.bostonusa.com"
-    echo
     echo -e "${Red}  mirror_site = ${mirror_site}${suffix}"
-    echo 
 }
 
 print_error_info(){

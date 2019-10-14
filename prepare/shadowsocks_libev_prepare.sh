@@ -11,7 +11,8 @@ install_prepare_port() {
                 echo
                 echo -e "${Red}  port = ${shadowsocksport}${suffix}"
                 echo
-                echo -e "${Tip} 如果插件选择v2ray(1|2|3)、goquiet、cloak时，此端口会被重置为 80 或 443，且插件选择${Red}v2ray(4|5)${suffix}时，该端口不能是443"
+                echo -e "${Tip} 插件选择v2ray(1|2|3) goquiet时，该端口将被重置为${Red}80${suffix}或${Red}443${suffix}"
+                echo -e "${Tip} 插件选择v2ray(4|5) cloak时，该端口不能是${Red}443${suffix}"
                 echo 
                 break
             fi

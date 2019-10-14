@@ -86,7 +86,7 @@ get_domain_ip(){
     fi
 }
 
-is_default_nameservers(){
+is_dns_only(){
     local IP=$1
     
     echo ${IP} | grep -qP $(get_ip)
@@ -97,7 +97,7 @@ is_default_nameservers(){
     fi
 }
 
-is_cdn_nameservers(){
+is_cdn_proxied(){
     local IP=$1
     local ipv4_text_list=`curl -s https://www.cloudflare.com/ips-v4`
     local ipcalc_install_path="/usr/local/bin/ipcalc-0.41"
@@ -125,16 +125,30 @@ is_cdn_nameservers(){
         fi
     done
     
-    if ${is_exist}; then
+    if [[ ${is_exist} == true ]]; then
         return 0
     else
         return 1
     fi
 }
 
+choose_api_get_mode(){
+    if [[ ! -e "/root/.api/cf.api" ]]; then
+        get_input_api_info
+    else
+        echo -e "检测到${Green}/root/.api/cf.api${suffix}文件存在，开始获取API信息."
+        CF_Email=$(cat /root/.api/cf.api | grep "CLOUDFLARE_EMAIL" | cut -d= -f2)
+        CF_Key=$(cat /root/.api/cf.api | grep "CLOUDFLARE_API_KEY" | cut -d= -f2)
+        echo
+        echo -e "${Red}  CF_Key = ${CF_Key}${suffix}"
+        echo
+        echo -e "${Red}  CF_Email = ${CF_Email}${suffix}"
+        echo 
+    fi
+}
+
 acme_get_certificate_by_api(){
-    get_input_api_info
-    
+    choose_api_get_mode
     intall_acme_tool
     
     echo
@@ -202,6 +216,14 @@ get_input_api_info(){
     echo
     echo -e "${Red}  CF_Email = ${CF_Email}${suffix}"
     echo
+    if [[ ! -e "/root/.api" ]]; then
+        mkdir -p "/root/.api"
+    fi
+    local CF_API_FILE="/root/.api/cf.api"
+    echo "CLOUDFLARE_EMAIL=${CF_Email}" > ${CF_API_FILE}
+    echo "CLOUDFLARE_API_KEY=${CF_Key}" >> ${CF_API_FILE}
+    echo -e "${Tip} 输入的Cloudflare API信息将会存储在/root/.api/cf.api"
+    echo
 }
 
 get_input_ws_path_and_mirror_site(){
@@ -251,18 +273,18 @@ install_prepare_libev_v2ray(){
         
         while true
         do    
-            get_input_domain "请输入你的域名"
+            get_input_domain "请输入你的域名(CF->DNS->Proxied status：Proxied或DNS-Only)"
             
             if ! get_domain_ip ${domain}; then
                 print_error_info ${TEXT1}
                 continue
             fi
             
-            if is_default_nameservers ${domain_ip}; then
-                acme_get_certificate_by_force
-                break
-            elif is_cdn_nameservers ${domain_ip}; then
+            if is_cdn_proxied ${domain_ip}; then
                 acme_get_certificate_by_api
+                break
+            elif is_dns_only ${domain_ip}; then
+                acme_get_certificate_by_force
                 break
             else
                 print_error_info ${TEXT2}
@@ -272,14 +294,14 @@ install_prepare_libev_v2ray(){
     elif [[ ${libev_v2ray} = "4" ]]; then
         while true
         do
-            get_input_domain "请输入你的域名(必须成功解析过本机ip)"
+            get_input_domain "请输入你的域名(CF->DNS->Proxied status：DNS-Only)"
             
             if ! get_domain_ip ${domain}; then
                 print_error_info ${TEXT3}
                 continue
             fi
             
-            if is_default_nameservers ${domain_ip}; then
+            if is_dns_only ${domain_ip}; then
                 get_input_email_for_caddy
                 get_input_ws_path_and_mirror_site
                 break
@@ -291,15 +313,15 @@ install_prepare_libev_v2ray(){
     elif [[ ${libev_v2ray} = "5" ]]; then
         while true
         do
-            get_input_domain "请输入你的域名(必须是交由Cloudflare域名服务器托管且成功解析过本机ip)"
+            get_input_domain "请输入你的域名(CF->DNS->Proxied status：Proxied)"
             
             if ! get_domain_ip ${domain}; then
                 print_error_info ${TEXT4}
                 continue
             fi
             
-            if is_cdn_nameservers ${domain_ip}; then
-                get_input_api_info
+            if is_cdn_proxied ${domain_ip}; then
+                choose_api_get_mode
                 get_input_ws_path_and_mirror_site
                 break
             else

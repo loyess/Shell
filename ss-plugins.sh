@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.1.5"
+SHELL_VERSION="2.1.6"
 # ====================
 
 
@@ -1183,6 +1183,10 @@ do_start(){
         fi
         
         if [ -e "${CADDY_FILE}" ]; then
+            if [[ -e "/root/.api/cf.api" ]]; then
+                export CLOUDFLARE_EMAIL=$(cat /root/.api/cf.api | grep "CLOUDFLARE_EMAIL" | cut -d= -f2)
+                export CLOUDFLARE_API_KEY=$(cat /root/.api/cf.api | grep "CLOUDFLARE_API_KEY" | cut -d= -f2)
+            fi
             /etc/init.d/caddy start
         fi
     else
@@ -1238,7 +1242,44 @@ do_restart(){
 do_status(){
     local mark=$1
     if [[ ${mark} == "menu" ]]; then
-        if [[ -e '/usr/local/bin/ss-server' ]]; then
+        check_pid
+        if [[ -e '/usr/local/bin/ss-server' ]] && [[ "$(command -v v2ray-plugin)" ]] && [[ -e "${CADDY_FILE}"  ]]; then
+            if [[ ! -z "${PID}" ]] && [[ ! -z "${V2_PID}" ]] && [[ ! -z "${CADDY_PID}" ]]; then
+                echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+            else
+                echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+            fi
+        elif [[ -e '/usr/local/bin/ss-server' ]] && [[ "$(command -v v2ray-plugin)" ]]; then
+            if [[ ! -z "${PID}" ]] && [[ ! -z "${V2_PID}" ]]; then
+                echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+            else
+                echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+            fi
+        elif [[ -e '/usr/local/bin/ss-server' ]] && [[ "$(command -v kcptun-server)" ]]; then
+            if [[ ! -z "${PID}" ]] && [[ ! -z "${KP_PID}" ]]; then
+                echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+            else
+                echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+            fi
+         elif [[ -e '/usr/local/bin/ss-server' ]] && [[ "$(command -v obfs-server)" ]]; then
+            if [[ ! -z "${PID}" ]] && [[ ! -z "${OBFS_PID}" ]]; then
+                echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+            else
+                echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+            fi
+         elif [[ -e '/usr/local/bin/ss-server' ]] && [[ "$(command -v gq-server)" ]]; then            
+            if [[ ! -z "${PID}" ]] && [[ ! -z "${GQ_PID}" ]]; then
+                echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+            else
+                echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+            fi
+         elif [[ -e '/usr/local/bin/ss-server' ]] && [[ "$(command -v ck-server)" ]]; then
+            if [[ ! -z "${PID}" ]] && [[ ! -z "${CK_PID}" ]]; then
+                echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+            else
+                echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+            fi
+        elif [[ -e '/usr/local/bin/ss-server' ]]; then
             check_pid
             if [[ ! -z "${PID}" ]]; then
                 echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"

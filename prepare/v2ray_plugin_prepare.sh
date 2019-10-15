@@ -113,12 +113,12 @@ is_cdn_proxied(){
 }
 
 choose_api_get_mode(){
-    if [[ ! -e "/root/.api/cf.api" ]]; then
+    if [[ ! -e ~/.api/cf.api ]]; then
         get_input_api_info
     else
-        echo -e "检测到${Green}/root/.api/cf.api${suffix}文件存在，开始获取API信息."
-        CF_Email=$(cat /root/.api/cf.api | grep "CLOUDFLARE_EMAIL" | cut -d= -f2)
-        CF_Key=$(cat /root/.api/cf.api | grep "CLOUDFLARE_API_KEY" | cut -d= -f2)
+        echo -e "检测到${Green}~/.api/cf.api${suffix}文件存在，开始获取API信息."
+        CF_Email=$(cat ~/.api/cf.api | grep "CLOUDFLARE_EMAIL" | cut -d= -f2)
+        CF_Key=$(cat ~/.api/cf.api | grep "CLOUDFLARE_API_KEY" | cut -d= -f2)
         echo
         echo -e "${Red}  CF_Key = ${CF_Key}${suffix}"
         echo
@@ -194,13 +194,13 @@ get_input_api_info(){
     echo
     echo -e "${Red}  CF_Email = ${CF_Email}${suffix}"
     echo
-    if [[ ! -e "/root/.api" ]]; then
-        mkdir -p "/root/.api"
+    if [[ ! -e ~/.api ]]; then
+        mkdir -p ~/.api
     fi
-    local CF_API_FILE="/root/.api/cf.api"
+    local CF_API_FILE=~/.api/cf.api
     echo "CLOUDFLARE_EMAIL=${CF_Email}" > ${CF_API_FILE}
     echo "CLOUDFLARE_API_KEY=${CF_Key}" >> ${CF_API_FILE}
-    echo -e "${Tip} 输入的Cloudflare API信息将会存储在/root/.api/cf.api"
+    echo -e "${Tip} 输入的Cloudflare API信息将会存储在~/.api/cf.api"
     echo
 }
 

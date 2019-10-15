@@ -1208,9 +1208,9 @@ do_start(){
         fi
         
         if [ -e "${CADDY_FILE}" ]; then
-            if [[ -e "/root/.api/cf.api" ]]; then
-                export CLOUDFLARE_EMAIL=$(cat /root/.api/cf.api | grep "CLOUDFLARE_EMAIL" | cut -d= -f2)
-                export CLOUDFLARE_API_KEY=$(cat /root/.api/cf.api | grep "CLOUDFLARE_API_KEY" | cut -d= -f2)
+            if [[ -e ~/.api/cf.api ]]; then
+                export CLOUDFLARE_EMAIL=$(cat ~/.api/cf.api | grep "CLOUDFLARE_EMAIL" | cut -d= -f2)
+                export CLOUDFLARE_API_KEY=$(cat ~/.api/cf.api | grep "CLOUDFLARE_API_KEY" | cut -d= -f2)
             fi
             /etc/init.d/caddy start
         fi

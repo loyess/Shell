@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.1.8"
+SHELL_VERSION="2.1.9"
 # ====================
 
 
@@ -363,6 +363,11 @@ check_latest_version(){
 
 check_port_occupy(){
     local PROT=$1
+    
+    if [ ! "$(command -v lsof)" ]; then
+        package_install "lsof" > /dev/null 2>&1
+    fi
+    
 	if [[ `lsof -i:"$1" | wc -l` -ne 0 ]];then
         # Occupied
         return 0
@@ -747,7 +752,7 @@ config_firewall(){
         else
             echo -e "${Warning} iptables看起来没有运行或没有安装，请在必要时手动启用端口 ${shadowsocksport}"
         fi
-    elif centosversion 7; then
+    elif centosversion 7 || centosversion 8; then
         systemctl status firewalld > /dev/null 2>&1
         if [ $? -eq 0 ]; then
             if [[ ${plugin_num} == "2" ]]; then

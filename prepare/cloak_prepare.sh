@@ -45,6 +45,9 @@ get_input_domain_of_rediraddr(){
 
 
 install_prepare_libev_cloak(){
+    if check_port_occupy "443"; then
+        echo -e "${Error} 检测到443端口被占用，请排查后重新运行." && exit 1
+    fi
     get_input_rediraddr
     get_input_domain_of_rediraddr
 }

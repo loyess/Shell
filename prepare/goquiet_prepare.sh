@@ -58,6 +58,9 @@ get_input_gqkey(){
 }
 
 install_prepare_libev_goquiet(){
+    if check_port_occupy "443"; then
+        echo -e "${Error} 检测到443端口被占用，请排查后重新运行." && exit 1
+    fi
     gen_random_str
     shadowsocksport=443
     get_input_webaddr

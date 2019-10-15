@@ -244,9 +244,15 @@ install_prepare_libev_v2ray(){
     
  
     if [[ ${libev_v2ray} == "1" ]]; then
+        if check_port_occupy "80"; then
+            echo -e "${Error} 检测到80端口被占用，请排查后重新运行." && exit 1
+        fi
         v2ray_plugin_prot_reset 80
         
     elif [[ ${libev_v2ray} = "2" || ${libev_v2ray} = "3" ]]; then
+        if check_port_occupy "443"; then
+            echo -e "${Error} 检测到443端口被占用，请排查后重新运行." && exit 1
+  	  fi
         v2ray_plugin_prot_reset 443
         
         while true
@@ -270,6 +276,9 @@ install_prepare_libev_v2ray(){
             fi
         done 
     elif [[ ${libev_v2ray} = "4" ]]; then
+        if check_port_occupy "443"; then
+       	 echo -e "${Error} 检测到443端口被占用，请排查后重新运行." && exit 1
+  	  fi
         while true
         do
             get_input_domain "请输入你的域名(CF->DNS->Proxied status：DNS-Only)"
@@ -290,6 +299,9 @@ install_prepare_libev_v2ray(){
             fi
         done
     elif [[ ${libev_v2ray} = "5" ]]; then
+        if check_port_occupy "443"; then
+     	   echo -e "${Error} 检测到443端口被占用，请排查后重新运行." && exit 1
+ 	   fi
         while true
         do
             get_input_domain "请输入你的域名(CF->DNS->Proxied status：Proxied)"

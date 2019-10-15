@@ -6,58 +6,41 @@ install_prepare_libev_kcptun(){
         read -e -p "(默认: 29900):" listen_port
         [ -z "${listen_port}" ] && listen_port=29900
         expr ${listen_port} + 1 &>/dev/null
-        if [ $? -eq 0 ]; then
-            if [ ${listen_port} -ge 1 ] && [ ${listen_port} -le 65535 ] && [ ${listen_port:0:1} != 0 ]; then
-                echo
-                echo -e "${Red}  port = ${listen_port}${suffix}"
-                echo
-                break
-            fi
-        fi
-        echo
-        echo -e "${Error} 请输入一个正确的数 [1-65535]"
-        echo
-        continue
-    done
-    
-    # 设置需要 Kcptun 加速的目标服务器地址 target_addr
-    while true
-    do
-        echo -e "请输入需要加速的地址\n${Tip} 可以输入IPv4 地址或者 IPv6 地址."
-        read -e -p "(默认: 127.0.0.1):" target_addr
-        [ -z "${target_addr}" ] && target_addr=127.0.0.1
-        if is_ipv4_or_ipv6 ${target_addr}; then
+        if [ $? -ne 0 ]; then
             echo
-            echo -e "${Red}  ip(target) = ${target_addr}${suffix}"
-            echo
-            break
-        else
-            echo
-            echo -e "${Error} 请输入正确合法的IP地址."
+            echo -e "${Error} 请输入一个有效数字."
             echo
             continue
         fi
-    done
-    
-    # 设置需要 Kcptun 加速的目标服务器端口 target_port
-    while true
-    do
-        echo -e "请输入需要加速的端口 [1-65535]\n${Tip} 这里用来加速SS，那就输入前面填写过的SS的端口: ${Red}${shadowsocksport}${suffix}"
-        read -e -p "(默认: ${shadowsocksport}):" target_port
-        [ -z "${target_port}" ] && target_port=${shadowsocksport}
-        expr ${target_port} + 1 &>/dev/null
-        if [ $? -eq 0 ]; then
-            if [ ${target_port} -ge 1 ] && [ ${target_port} -le 65535 ] && [ ${target_port:0:1} != 0 ]; then
-                echo
-                echo -e "${Red}  port(target) = ${target_port}${suffix}"
-                echo
-                break
-            fi
+        if [ ${listen_port:0:1} = 0 ]; then
+            echo
+            echo -e "${Error} 请输入一个非0开头的数字."
+            echo
+            continue
         fi
+        if [ ${listen_port} -le 1 ] && [ ${listen_port} -ge 65535 ]; then
+            echo
+            echo -e "${Error} 请输入一个在1-65535之间的数字."
+            echo
+            continue
+        fi
+        if [ ${listen_port} -eq ${shadowsocksport} ]; then
+            echo
+            echo -e "${Error} 请输入一个与SS端口不同的数字."
+            echo
+            continue
+        fi
+        if check_port_occupy ${listen_port}; then
+            echo
+            echo -e "${Error} 该端口已经被占用，请重新输入一个数字."
+            echo
+            continue
+        fi
+        
         echo
-        echo -e "${Error} 请输入一个正确的数 [1-65535]"
+        echo -e "${Red}  port = ${listen_port}${suffix}"
         echo
-        continue
+        break
     done
     
     # 设置 Kcptun 密码 key

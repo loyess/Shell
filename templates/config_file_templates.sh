@@ -148,7 +148,7 @@ kcptun_config_standalone(){
 	cat > ${KCPTUN_CONFIG}<<-EOF
 	{
 		"listen": ":${listen_port}",
-		"target": "${target_addr}:${target_port}",
+		"target": "127.0.0.1:${shadowsocksport}",
 		"key": "${key}",
 		"crypt": "${crypt}",
 		"mode": "${mode}",
@@ -231,7 +231,7 @@ cloak2_server_config(){
 		"RedirAddr":"${ckwebaddr}",
 		"PrivateKey":"${ckpv}",
 		"AdminUID":"${ckauid}",
-		"DatabasePath":"${ckdbp}/userinfo.db",
+		"DatabasePath":"${CK_DB_PATH}/userinfo.db",
 		"StreamTimeout":300
 	}
 	EOF

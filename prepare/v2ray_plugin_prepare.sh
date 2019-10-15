@@ -52,7 +52,7 @@ transport_mode_menu(){
 v2ray_plugin_prot_reset(){
     shadowsocksport=$1
     echo
-    echo -e "${Tip} server_port已被重置为：port = ${shadowsocksport}"
+    echo -e "${Tip} SS-libev端口已被重置为${Green}${shadowsocksport}${suffix}"
     echo 
 }
 
@@ -116,12 +116,12 @@ choose_api_get_mode(){
     if [[ ! -e ~/.api/cf.api ]]; then
         get_input_api_info
     else
+        echo
         echo -e "检测到${Green}~/.api/cf.api${suffix}文件存在，开始获取API信息."
         CF_Email=$(cat ~/.api/cf.api | grep "CLOUDFLARE_EMAIL" | cut -d= -f2)
         CF_Key=$(cat ~/.api/cf.api | grep "CLOUDFLARE_API_KEY" | cut -d= -f2)
         echo
         echo -e "${Red}  CF_Key = ${CF_Key}${suffix}"
-        echo
         echo -e "${Red}  CF_Email = ${CF_Email}${suffix}"
         echo 
     fi
@@ -169,7 +169,7 @@ acme_get_certificate_by_force(){
 
 get_input_domain(){
     local text=$1
-    
+    echo
     read -e -p "${text}：" domain
     echo
     echo -e "${Red}  host = ${domain}${suffix}"
@@ -186,7 +186,9 @@ get_input_email_for_caddy(){
 }
 
 get_input_api_info(){
+    echo
     read -e -p "请输入你的Cloudflare的Global API Key：" CF_Key
+    echo
     echo
     echo -e "${Red}  CF_Key = ${CF_Key}${suffix}"
     echo 
@@ -205,12 +207,14 @@ get_input_api_info(){
 }
 
 get_input_ws_path_and_mirror_site(){
+    echo
     read -e -p "请输入你的WebSocket分流路径(默认：/v2ray)：" path
     echo
     [ -z "${path}" ] && path="/v2ray"
     echo -e "${Red}  path = ${path}${suffix}"
     echo
     
+    echo
     echo -e "${Tip} 该站点建议满足(位于海外、支持HTTPS协议、会用来传输大流量... )的条件，默认站点，随意找的，不建议使用"
     read -e -p "请输入你需要镜像到的站点(默认：https://www.bostonusa.com)：" mirror_site
     echo
@@ -269,6 +273,7 @@ install_prepare_libev_v2ray(){
         while true
         do
             get_input_domain "请输入你的域名(CF->DNS->Proxied status：DNS-Only)"
+            check_ss_port ${shadowsocksport}
             
             if ! get_domain_ip ${domain}; then
                 print_error_info ${TEXT3}
@@ -288,6 +293,7 @@ install_prepare_libev_v2ray(){
         while true
         do
             get_input_domain "请输入你的域名(CF->DNS->Proxied status：Proxied)"
+            check_ss_port ${shadowsocksport}
             
             if ! get_domain_ip ${domain}; then
                 print_error_info ${TEXT4}

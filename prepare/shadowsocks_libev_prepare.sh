@@ -6,20 +6,34 @@ install_prepare_port() {
         read -e -p "(默认: ${ran_prot}):" shadowsocksport
         [ -z "${shadowsocksport}" ] && shadowsocksport=${ran_prot}
         expr ${shadowsocksport} + 1 &>/dev/null
-        if [ $? -eq 0 ]; then
-            if [ ${shadowsocksport} -ge 1 ] && [ ${shadowsocksport} -le 65535 ] && [ ${shadowsocksport:0:1} != 0 ]; then
-                echo
-                echo -e "${Red}  port = ${shadowsocksport}${suffix}"
-                echo
-                echo -e "${Tip} 插件选择v2ray(1|2|3) goquiet时，该端口将被重置为${Red}80${suffix}或${Red}443${suffix}"
-                echo -e "${Tip} 插件选择v2ray(4|5) cloak时，该端口不能是${Red}443${suffix}"
-                echo 
-                break
-            fi
+        if [ $? -ne 0 ]; then
+            echo
+            echo -e "${Error} 请输入一个有效数字."
+            echo
+            continue
+        fi
+        if [ ${shadowsocksport:0:1} = 0 ]; then
+            echo
+            echo -e "${Error} 请输入一个非0开头的数字."
+            echo
+            continue
+        fi
+        if [ ${shadowsocksport} -le 1 ] && [ ${shadowsocksport} -ge 65535 ]; then
+            echo
+            echo -e "${Error} 请输入一个在1-65535之间的数字."
+            echo
+            continue
+        fi
+        if check_port_occupy ${shadowsocksport}; then
+            echo
+            echo -e "${Error} 该端口已经被占用，请重新输入一个数字."
+            echo
+            continue
         fi
         echo
-        echo -e "${Error} 请输入一个正确的数 [1-65535]"
-        echo
+        echo -e "${Red}  port = ${shadowsocksport}${suffix}"
+        echo 
+        break
     done
 }
 

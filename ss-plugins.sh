@@ -65,7 +65,7 @@ KCPTUN_DEBIAN="${BASE_URL}/service/kcptun_debian.sh"
 CLOAK_INIT="/etc/init.d/cloak"
 CLOAK_CENTOS="${BASE_URL}/service/cloak_centos.sh"
 CLOAK_DEBIAN="${BASE_URL}/service/cloak_debian.sh"
-CK_DB_PATH="/etc/cloak/db"
+CK_DB_PATH="/etc/cloak"
 CK_CLIENT_CONFIG="/etc/cloak/ckclient.json"
 CK_SERVER_CONFIG="/etc/cloak/ckserver.json"
 
@@ -361,6 +361,17 @@ check_latest_version(){
     fi
 }
 
+check_port_occupy(){
+    local PROT=$1
+	if [[ `lsof -i:"$1" | wc -l` -ne 0 ]];then
+        # Occupied
+        return 0
+	else
+        # Unoccupied
+		return 1
+	fi
+}
+
 check_script_version(){
 	SHELL_VERSION_NEW=$(wget --no-check-certificate -qO- -t1 -T3 "https://git.io/fjlbl"|grep 'SHELL_VERSION="'|awk -F "=" '{print $NF}'|sed 's/\"//g'|head -1)
 	[[ -z ${SHELL_VERSION_NEW} ]] && echo -e "${Error} 无法链接到 Github !" && exit 0
@@ -372,6 +383,28 @@ check_script_version(){
         wget -N --no-check-certificate -O ss-plugins.sh "https://git.io/fjlbl" && chmod +x ss-plugins.sh
         echo -e "脚本已更新为最新版本[ ${SHELL_VERSION_NEW} ] !(注意：因为更新方式为直接覆盖当前运行的脚本，所以可能下面会提示一些报错，无视即可)" && exit 0
     fi
+}
+
+check_ss_port(){
+    local SS_PORT=$1
+    while true
+    do
+        if [[ ${SS_PORT} -ne "443" ]]; then
+            echo -e "${Tip} SS-libev端口为${Green}${shadowsocksport}${suffix}"
+            echo
+            break
+        fi
+        
+        gen_random_prot
+        if check_port_occupy ${ran_prot}; then
+            continue
+        fi
+        
+        shadowsocksport=${ran_prot}
+        echo -e "${Tip} SS-libev端口已由${Red}443${suffix}重置为${Green}${shadowsocksport}${suffix}"
+        echo  
+        break
+    done
 }
 
 choose_script_bbr(){

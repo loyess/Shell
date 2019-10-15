@@ -368,7 +368,7 @@ check_port_occupy(){
         package_install "lsof" > /dev/null 2>&1
     fi
     
-	if [[ `lsof -i:"$1" | wc -l` -ne 0 ]];then
+	if [[ `lsof -i:"${PROT}" | grep -v google_ | grep -v COMMAND | wc -l` -ne 0 ]];then
         # Occupied
         return 0
 	else

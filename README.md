@@ -35,10 +35,16 @@ Usage: ./ss-plugins.sh [options...] [args...]
 相关目录：
 
     SS-libev安装目录：/usr/local/bin
+    SS-libev启动文件：/etc/init.d/shadowsocks-libev
     SS-libev配置文件：/etc/shadowsocks-libev/config.json
 
     kcptun安装目录：/usr/local/kcptun
+    kcptun启动文件：/etc/init.d/kcptun
     kcptun配置文件：/etc/kcptun/config.json
+    
+    cloak安装目录：/usr/local/bin
+    cloak启动文件：/etc/init.d/cloak
+    cloak配置文件：/etc/cloak/ckserver.json
 
     caddy安装目录：/usr/local/caddy
     caddy配置文件: /usr/local/caddy/Caddyfile
@@ -46,7 +52,8 @@ Usage: ./ss-plugins.sh [options...] [args...]
 
     acme.sh安装目录：~/.acme.sh
     acme.sh生成证书目录：~/.acme.sh/xxx.xxx(域名)/
-
+	
+	cloudflare API存储路径：~/.api/cf.api
     其它插件可执行二进制文件目录：/usr/local/bin
 ```
 

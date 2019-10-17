@@ -1,11 +1,4 @@
-install_prepare_libev_obfs(){
-    if ! autoconf_version || centosversion 6; then
-        echo
-        echo -e "${Info} autoconf 版本小于 2.67，Shadowsocks-libev 插件 simple-obfs 的安装将被终止."
-        echo
-        exit 1
-    fi
-    
+get_input_obfs_mode(){
     while true
     do
         echo -e "请为simple-obfs选择obfs\n"
@@ -35,14 +28,40 @@ install_prepare_libev_obfs(){
         echo
         break
     done
-    
-    echo
-    echo -e "请为simple-obfs输入用于混淆的域名"
-    echo
-    read -e -p "(默认: www.bing.com):" domain
-    [ -z "$domain" ] && domain="www.bing.com"
-    echo
-    echo -e "${Red}  obfs-host = ${domain}${suffix}"
-    echo
-
 }
+
+get_input_domain_of_obfs(){
+	local DOMAIN_RE="(www\.)?[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:\d+)*(\/\w+\.\w+)*$"
+    
+	while true
+    do
+    	echo
+    	echo -e "请为simple-obfs输入用于混淆的域名"
+    	echo
+    	read -e -p "(默认: www.bing.com):" domain
+   	 [ -z "$domain" ] && domain="www.bing.com"
+   	if [ -z "$(echo $domain | grep -E ${DOMAIN_RE})" ]; then
+            echo
+            echo -e "${Error} 请输入正确合法的域名."
+            echo
+            continue
+        fi
+        
+   	 echo
+    	echo -e "${Red}  obfs-host = ${domain}${suffix}"
+   	 echo
+   	 break
+   done
+}
+
+install_prepare_libev_obfs(){
+    if ! autoconf_version || centosversion 6; then
+        echo
+        echo -e "${Info} autoconf 版本小于 2.67，Shadowsocks-libev 插件 simple-obfs 的安装将被终止."
+        echo
+        exit 1
+    fi
+    get_input_obfs_mode
+    get_input_domain_of_obfs
+}
+

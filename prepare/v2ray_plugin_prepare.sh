@@ -177,25 +177,59 @@ get_input_domain(){
 }
 
 get_input_email_for_caddy(){
-    echo 
-    read -e -p "请输入供于域名证书生成所需的 Email：" email
-    echo
-    echo -e "${Red}  email = ${email}${suffix}"
-    echo
-    
+    while true
+    do
+        echo 
+        read -e -p "请输入供于域名证书生成所需的 Email：" email
+        if [ -z "$(echo $email | grep -E ${EMAIL_RE})" ]; then
+            echo
+            echo -e "${Error} 请输入正确合法的邮箱."
+            echo
+            continue
+        fi
+        
+        echo
+        echo -e "${Red}  email = ${email}${suffix}"
+        echo 
+        break
+    done
 }
 
 get_input_api_info(){
-    echo
-    read -e -p "请输入你的Cloudflare的Global API Key：" CF_Key
-    echo
-    echo
-    echo -e "${Red}  CF_Key = ${CF_Key}${suffix}"
-    echo 
-    read -e -p "请输入你的Cloudflare的账号Email：" CF_Email
-    echo
-    echo -e "${Red}  CF_Email = ${CF_Email}${suffix}"
-    echo
+    while true
+    do
+        echo
+        read -e -p "请输入你的Cloudflare的Global API Key：" CF_Key
+        if [[ $(echo ${#CF_Key}) -ne 37 ]]; then
+            echo
+            echo -e "${Error} 请输入正确合法的Global API Key."
+            echo
+            continue
+        fi
+
+        echo
+        echo -e "${Red}  CF_Key = ${CF_Key}${suffix}"
+        echo 
+        break
+    done
+    
+    while true
+    do    
+        echo 
+        read -e -p "请输入你的Cloudflare的账号Email：" CF_Email
+        if [ -z "$(echo $CF_Email | grep -E ${EMAIL_RE})" ]; then
+            echo
+            echo -e "${Error} 请输入正确合法的邮箱."
+            echo
+            continue
+        fi
+        
+        echo
+        echo -e "${Red}  CF_Email = ${CF_Email}${suffix}"
+        echo
+        break
+    done
+    
     if [[ ! -e ~/.api ]]; then
         mkdir -p ~/.api
     fi
@@ -207,20 +241,41 @@ get_input_api_info(){
 }
 
 get_input_ws_path_and_mirror_site(){
-    echo
-    read -e -p "请输入你的WebSocket分流路径(默认：/v2ray)：" path
-    echo
-    [ -z "${path}" ] && path="/v2ray"
-    echo -e "${Red}  path = ${path}${suffix}"
-    echo
+    while true
+    do 
+        echo
+        read -e -p "请输入你的WebSocket分流路径(默认：/v2ray)：" path
+        [ -z "${path}" ] && path="/v2ray"
+        if [[ $path != /* ]]; then
+            echo
+            echo -e "${Error} 请输入以${Red} / ${suffix}开头的路径."
+            echo
+            continue
+        fi
+        echo
+        echo -e "${Red}  path = ${path}${suffix}"
+        echo
+        break
+    done
     
-    echo
-    echo -e "${Tip} 该站点建议满足(位于海外、支持HTTPS协议、会用来传输大流量... )的条件，默认站点，随意找的，不建议使用"
-    read -e -p "请输入你需要镜像到的站点(默认：https://www.bostonusa.com)：" mirror_site
-    echo
-    [ -z "${mirror_site}" ] && mirror_site="https://www.bostonusa.com"
-    echo -e "${Red}  mirror_site = ${mirror_site}${suffix}"
-    echo
+    while true
+    do 
+        echo
+        echo -e "${Tip} 该站点建议满足(位于海外、支持HTTPS协议、会用来传输大流量... )的条件，默认站点，随意找的，不建议使用"
+        read -e -p "请输入你需要镜像到的站点(默认：https://www.bostonusa.com)：" mirror_site
+        [ -z "${mirror_site}" ] && mirror_site="https://www.bostonusa.com"
+        if [ -z "$(echo $mirror_site | grep -E ${HTTPS_DOMAIN_RE})" ]; then
+            echo
+            echo -e "${Error} 请输入以${Red} https:// ${suffix}开头，以${Red} 域名 ${suffix}结尾的URL."
+            echo
+            continue
+        fi
+        
+        echo
+        echo -e "${Red}  mirror_site = ${mirror_site}${suffix}"
+        echo
+        break
+    done
 }
 
 print_error_info(){

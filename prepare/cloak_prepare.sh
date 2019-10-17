@@ -21,8 +21,6 @@ get_input_rediraddr(){
 }
 
 get_input_domain_of_rediraddr(){
-    local DOMAIN_RE="(www\.)?[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:\d+)*(\/\w+\.\w+)*$"
-    
     while true
     do
         echo

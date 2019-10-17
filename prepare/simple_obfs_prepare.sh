@@ -31,9 +31,7 @@ get_input_obfs_mode(){
 }
 
 get_input_domain_of_obfs(){
-	local DOMAIN_RE="(www\.)?[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:\d+)*(\/\w+\.\w+)*$"
-    
-	while true
+    while true
     do
     	echo
     	echo -e "请为simple-obfs输入用于混淆的域名"

@@ -1,5 +1,4 @@
 get_input_webaddr(){
-    IPV4_PORT_RE="^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\:443$"
     while true
     do
         echo
@@ -23,8 +22,6 @@ get_input_webaddr(){
 }
 
 get_input_domain_of_webaddr(){
-    local DOMAIN_RE="(www\.)?[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:\d+)*(\/\w+\.\w+)*$"
-    
     while true
     do
         echo

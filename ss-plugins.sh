@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.2.1"
+SHELL_VERSION="2.2.2"
 # ====================
 
 
@@ -918,9 +918,9 @@ install_prepare(){
     install_prepare_port
     install_prepare_password
     install_prepare_cipher
-    echo -e "请选择要安装的SS-Plugin
+    echo -e "请选择要安装的SS插件
     
-  ${Green}1.${suffix} v2ray
+  ${Green}1.${suffix} v2ray-plugin
   ${Green}2.${suffix} kcptun
   ${Green}3.${suffix} simple-obfs
   ${Green}4.${suffix} goquiet (unofficial)

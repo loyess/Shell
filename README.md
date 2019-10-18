@@ -78,7 +78,7 @@ Usage: ./ss-plugins.sh [options...] [args...]
 2. ### 可选插件与插件可选项
 
 ~~~shell
-  1. v2ray
+  1. v2ray-plugin
         1. ws+http
         2. ws+tls+[cdn]
         3. quic+tls+[cdn]
@@ -96,13 +96,13 @@ Usage: ./ss-plugins.sh [options...] [args...]
     kcptun仅用于加速。
     simple-obfs已被弃用，但不影响使用。
     cloak是goquiet的升级版，增加了同端口，多用户。
-    v2ray插件，带tls的都需要域名，cdn此处仅支持cloudflare，web则用了caddy。
+    v2ray-plugin，带tls的都需要域名，cdn此处仅支持cloudflare，web则用了caddy。
 	
-    使用v2ray插件的选项3时，请在CloudFlare后台Network页面，找到QUIC BETA设置项，点击Join the Waitlist 进行申请
+    使用v2ray-plugin的选项3时，请在CloudFlare后台Network页面，找到QUIC BETA设置项，点击Join the Waitlist 进行申请
 成功会收到邮件通知。由于是测试版，申请成功时间未定，也就意味着quic+tls+cdn，短时间无法使用。如需跳过cdn 只使用quic+tls 
 则须将ss客户端的 <服务器地址> --> <改为ip> 来使用（如若，依旧要填写域名，请使用原域名服务器进行解析。）
 	
-    使用v2ray插件的选项5时，请将CloudFlare后台Crypto页面里的SSL设置，改为 Full 或 Full (strict) 模式（前者不验证
+    使用v2ray-plugin的选项5时，请将CloudFlare后台Crypto页面里的SSL设置，改为 Full 或 Full (strict) 模式（前者不验证
 服务器证书，后者则会），否则，在浏览器打开你的域名会提示 ”重定向的次数过多“ 的错误！！！
 	
 

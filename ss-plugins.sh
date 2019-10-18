@@ -447,6 +447,37 @@ choose_caddy_extension(){
     fi
 }
 
+add_more_entropy(){
+    # Ubuntu series is started by default after installation
+    # Debian series needs to add configuration to start after installation
+    # CentOS 6 is installed by default but not started. CentOS 7 is not started by default after installation. CentOS 8 is installed and started by default.
+    if [[ ${ENTROPY_SIZE_BEFORE} -lt 1000 ]]; then
+        local ENTROPY_SIZE_BEFORE=$(cat /proc/sys/kernel/random/entropy_avail)
+        echo -e "${Info} 安装rng-tools之前熵池的熵值为${Green}${ENTROPY_SIZE_BEFORE}${suffix}"
+        if [[ ! $(command -v rngd) ]]; then
+            package_install "rng-tools"
+        fi
+        if centosversion 6; then
+            chkconfig --add rngd
+            chkconfig rngd on
+            service rngd start > /dev/null 2>&1
+        elif centosversion 7 || centosversion 8; then
+            systemctl enable rngd
+            systemctl start rngd > /dev/null 2>&1
+        elif check_sys sysRelease debian; then
+            update-rc.d -f rng-tools defaults
+            sed -i '/^HRNGDEVICE/'d /etc/default/rng-tools
+            echo "HRNGDEVICE=/dev/urandom" >> /etc/default/rng-tools
+            systemctl start rng-tools > /dev/null 2>&1
+        fi
+        sleep 5
+        local ENTROPY_SIZE_BEHIND=$(cat /proc/sys/kernel/random/entropy_avail)
+        echo -e "${Info} 安装rng-tools之后熵池的熵值为${Green}${ENTROPY_SIZE_BEHIND}${suffix}"
+    else
+        echo -e "${Info} 当前熵池熵值大于或等于1000，未安装ran-tools进行更多添加."
+    fi 
+}
+
 get_ip(){
     local IP=$( ip addr | egrep -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | egrep -v "^192\.168|^172\.1[6-9]\.|^172\.2[0-9]\.|^172\.3[0-2]\.|^10\.|^127\.|^255\.|^0\." | head -n 1 )
     [ -z ${IP} ] && IP=$( wget -qO- -t1 -T2 ipv4.icanhazip.com )
@@ -1001,12 +1032,13 @@ install_step_all(){
         config_firewall
     fi
     install_main
+    add_more_entropy
     install_cleanup
     config_ss
     gen_ss_links
     install_completed
     improt_package "utils" "view_config.sh"
-    show_config
+    show_config "all"
 }
 
 install_cleanup(){
@@ -1455,7 +1487,7 @@ case ${action} in
         ;;
     show)
         improt_package "utils" "view_config.sh"
-        show_config
+        show_config "standalone"
         ;;
     help)
         usage 0

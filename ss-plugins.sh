@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.2.3"
+SHELL_VERSION="2.2.4"
 # ====================
 
 
@@ -451,8 +451,8 @@ add_more_entropy(){
     # Ubuntu series is started by default after installation
     # Debian series needs to add configuration to start after installation
     # CentOS 6 is installed by default but not started. CentOS 7 is not started by default after installation. CentOS 8 is installed and started by default.
+    local ENTROPY_SIZE_BEFORE=$(cat /proc/sys/kernel/random/entropy_avail)
     if [[ ${ENTROPY_SIZE_BEFORE} -lt 1000 ]]; then
-        local ENTROPY_SIZE_BEFORE=$(cat /proc/sys/kernel/random/entropy_avail)
         echo -e "${Info} 安装rng-tools之前熵池的熵值为${Green}${ENTROPY_SIZE_BEFORE}${suffix}"
         if [[ ! $(command -v rngd) ]]; then
             package_install "rng-tools"

@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.2.4"
+SHELL_VERSION="2.2.5"
 # ====================
 
 
@@ -522,7 +522,7 @@ get_str_base64_encode(){
 }
 
 get_str_replace(){
-    echo -n $1 | sed 's/:/%3a/g;s/;/%3b/g;s/=/%3d/g;s/\//%2f/g'
+    echo -n $1 | sed 's/:/%3A/g;s/;/%3B/g;s/=/%3D/g;s/\//%2F/g'
 }
 
 gen_random_prot(){

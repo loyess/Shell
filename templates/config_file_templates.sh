@@ -84,7 +84,7 @@ ss_v2ray_ws_tls_web_config(){
 		"nameserver":"8.8.8.8",
 		"mode":"tcp_and_udp",
 		"plugin":"v2ray-plugin",
-		"plugin_opts":"server;path=${path};loglevel=none"
+		"plugin_opts":"server;path=${path}"
 	}
 	EOF
 }
@@ -119,7 +119,7 @@ ss_v2ray_ws_tls_web_cdn_config(){
 		"nameserver":"8.8.8.8",
 		"mode":"tcp_and_udp",
 		"plugin":"v2ray-plugin",
-		"plugin_opts":"server;path=${path};loglevel=none"
+		"plugin_opts":"server;path=${path}"
 	}
 	EOF
 }

@@ -48,12 +48,13 @@ Usage: ./ss-plugins.sh [options...] [args...]
 
     caddy安装目录：/usr/local/caddy
     caddy配置文件: /usr/local/caddy/Caddyfile
+    caddy日志文件：/tmp/caddy.log
     caddy生成证书目录：~/.caddy/acme/acme-v02.api.letsencrypt.org/sites/xxx.xxx(域名)/
 
     acme.sh安装目录：~/.acme.sh
     acme.sh生成证书目录：~/.acme.sh/xxx.xxx(域名)/
 	
-	cloudflare API存储路径：~/.api/cf.api
+    cloudflare API存储路径：~/.api/cf.api
     其它插件可执行二进制文件目录：/usr/local/bin
 ```
 

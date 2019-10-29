@@ -403,8 +403,8 @@ check_script_version(){
 	if version_gt ${SHELL_VERSION_NEW} ${SHELL_VERSION}; then
         echo
         echo -e "${Green}当前脚本版本为：${SHELL_VERSION} 检测到有新版本可更新.${suffix}"
-        echo -e "${Red}文件名有变动，脚本更新后，可能导致部分功能不能正常使用，建议卸载重装.${suffix}"
-        echo -e "${Red}请手动删除卸载残留目录 /etc/shadowsocks-libev${suffix}"
+        echo -e "${Red}脚本2.2.5版本之后，部分文件名有变动，更新后可能导致某些功能不能正常使用.${suffix}"
+        echo -e "${Red}建议卸载重装，然后手动删除卸载残留目录 /etc/shadowsocks-libev${suffix}"
         echo -e "按任意键开始…或按Ctrl+C取消"
         char=`get_char`
         wget -N --no-check-certificate -O ss-plugins.sh "https://git.io/fjlbl" && chmod +x ss-plugins.sh

@@ -3,31 +3,31 @@
 # description: A secure socks5 proxy, designed to protect your Internet traffic.
 
 ### BEGIN INIT INFO
-# Provides:          Shadowsocks-libev
+# Provides:          Shadowsocks-rust
 # Required-Start:    $network $syslog
 # Required-Stop:     $network
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: Fast tunnel proxy that helps you bypass firewalls
-# Description:       Start or stop the Shadowsocks-libev server
+# Description:       Start or stop the Shadowsocks-rust server
 ### END INIT INFO
 
 
-if [ -f /usr/local/bin/ss-server ]; then
-    DAEMON=/usr/local/bin/ss-server
-elif [ -f /usr/bin/ss-server ]; then
-    DAEMON=/usr/bin/ss-server
+if [ -f /usr/local/bin/ssserver ]; then
+    DAEMON=/usr/local/bin/ssserver
+elif [ -f /usr/bin/ssserver ]; then
+    DAEMON=/usr/bin/ssserver
 fi
-NAME=Shadowsocks-libev
+NAME=Shadowsocks-rust
 CONF=/etc/shadowsocks/config.json
 PID_DIR=/var/run
-PID_FILE=$PID_DIR/shadowsocks-libev.pid
+PID_FILE=$PID_DIR/shadowsocks-rust.pid
 RET_VAL=0
 
 [ -x $DAEMON ] || exit 0
 
 check_pid(){
-	get_pid=`ps -ef |grep -v grep | grep ss-server |awk '{print $2}'`
+	get_pid=`ps -ef |grep -v grep | grep ssserver |awk '{print $2}'`
 }
 
 check_pid

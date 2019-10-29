@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.2.5"
+SHELL_VERSION="2.2.6"
 # ====================
 
 
@@ -30,18 +30,33 @@ CHIAKGE_BBR_SCRIPT_URL="https://git.io/vxJ1I"
 
 
 # Humanization config PATH
-HUMAN_CONFIG="/etc/shadowsocks-libev/human-config"
+HUMAN_CONFIG="/etc/shadowsocks/humanization.conf"
 
 
-# shadowsocklibev-libev config and init
+# ss development language version
+SS_DLV=(
+shadowsocks-libev
+shadowsocks-rust
+)
+
+
+# shadowsocks config
+SHADOWSOCKS_CONFIG="/etc/shadowsocks/config.json"
+
+# shadowsocks-libev config and init
 SHADOWSOCKS_LIBEV_INSTALL_PATH="/usr/local/bin"
 SHADOWSOCKS_LIBEV_INIT="/etc/init.d/shadowsocks-libev"
-SHADOWSOCKS_LIBEV_CONFIG="/etc/shadowsocks-libev/config.json"
 SHADOWSOCKS_LIBEV_CENTOS="${BASE_URL}/service/shadowsocks-libev_centos.sh"
 SHADOWSOCKS_LIBEV_DEBIAN="${BASE_URL}/service/shadowsocks-libev_debian.sh"
 
+# shadowsocks-rust config and init
+SHADOWSOCKS_RUST_INSTALL_PATH="/usr/local/bin"
+SHADOWSOCKS_RUST_INIT="/etc/init.d/shadowsocks-rust"
+SHADOWSOCKS_RUST_CENTOS="${BASE_URL}/service/shadowsocks-rust_centos.sh"
+SHADOWSOCKS_RUST_DEBIAN="${BASE_URL}/service/shadowsocks-rust_debian.sh"
 
-# shadowsocklibev-libev dependencies
+
+# shadowsocks-libev dependencies
 LIBSODIUM_VERSION="1.0.18"
 LIBSODIUM_FILE="libsodium-${LIBSODIUM_VERSION}"
 LIBSODIUM_URL="https://github.com/jedisct1/libsodium/releases/download/${LIBSODIUM_VERSION}-RELEASE/libsodium-${LIBSODIUM_VERSION}.tar.gz"
@@ -81,7 +96,7 @@ ONLINE_CADDY_DEBIAN_INIT_URL="${BASE_URL}/service/caddy_debian.sh"
 LOCAL_CADDY_DEBIAN_INIT_PATH="./service/caddy_debian.sh"
 
 
-# shadowsocklibev-libev Ciphers
+# shadowsocks-libev Ciphers
 SHADOWSOCKS_CIPHERS=(
 rc4-md5
 salsa20
@@ -276,6 +291,7 @@ version_gt(){
 
 check_pid(){
     PID=`ps -ef |grep -v grep | grep ss-server |awk '{print $2}'`
+    RUST_PID=`ps -ef |grep -v grep | grep ssserver |awk '{print $2}'`
     V2_PID=`ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}'`
     KP_PID=`ps -ef |grep -v grep | grep kcptun-server |awk '{print $2}'`
     OBFS_PID=`ps -ef |grep -v grep | grep obfs-server |awk '{print $2}'`
@@ -387,6 +403,8 @@ check_script_version(){
 	if version_gt ${SHELL_VERSION_NEW} ${SHELL_VERSION}; then
         echo
         echo -e "${Green}当前脚本版本为：${SHELL_VERSION} 检测到有新版本可更新.${suffix}"
+        echo -e "${Red}文件名有变动，脚本更新后，可能导致部分功能不能正常使用，建议卸载重装.${suffix}"
+        echo -e "${Red}请手动删除卸载残留目录 /etc/shadowsocks-libev${suffix}"
         echo -e "按任意键开始…或按Ctrl+C取消"
         char=`get_char`
         wget -N --no-check-certificate -O ss-plugins.sh "https://git.io/fjlbl" && chmod +x ss-plugins.sh
@@ -474,7 +492,7 @@ add_more_entropy(){
         local ENTROPY_SIZE_BEHIND=$(cat /proc/sys/kernel/random/entropy_avail)
         echo -e "${Info} 安装rng-tools之后熵池的熵值为${Green}${ENTROPY_SIZE_BEHIND}${suffix}"
     else
-        echo -e "${Info} 当前熵池熵值大于或等于1000，未安装ran-tools进行更多添加."
+        echo -e "${Info} 当前熵池熵值大于或等于1000，未进行更多添加."
     fi 
 }
 
@@ -493,6 +511,8 @@ get_ipv6(){
 get_ver(){
     libev_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/shadowsocks-libev/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
     [ -z ${libev_ver} ] && echo -e "${Error} 获取 shadowsocks-libev 最新版本失败." && exit 1
+    rust_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/shadowsocks-rust/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+    [ -z ${rust_ver} ] && echo -e "${Error} 获取 shadowsocks-rust 最新版本失败." && exit 1
     v2ray_plugin_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/v2ray-plugin/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
     [ -z ${v2ray_plugin_ver} ] && echo -e "${Error} 获取 v2ray-plugin 最新版本失败." && exit 1
     kcptun_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/xtaci/kcptun/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
@@ -654,15 +674,27 @@ download_service_file(){
 
 download_ss_file(){
     cd ${CUR_DIR}
-    # Download Shadowsocks-libev
-    get_ver
-    local SS_INIT_CENTOS="./service/shadowsocks-libev_centos.sh"
-    local SS_INIT_DEBIAN="./service/shadowsocks-libev_debian.sh"
-    
-    shadowsocks_libev_file="shadowsocks-libev-${libev_ver}"
-    shadowsocks_libev_url="https://github.com/shadowsocks/shadowsocks-libev/releases/download/v${libev_ver}/shadowsocks-libev-${libev_ver}.tar.gz"
-    download "${shadowsocks_libev_file}.tar.gz" "${shadowsocks_libev_url}"
-    download_service_file ${SHADOWSOCKS_LIBEV_INIT} ${SHADOWSOCKS_LIBEV_CENTOS} ${SS_INIT_CENTOS} ${SHADOWSOCKS_LIBEV_DEBIAN} ${SS_INIT_DEBIAN}
+    if [[ ${SS_VERSION} = "shadowsocks-libev" ]]; then
+        # Download Shadowsocks-libev
+        get_ver
+        local SS_INIT_CENTOS="./service/shadowsocks-libev_centos.sh"
+        local SS_INIT_DEBIAN="./service/shadowsocks-libev_debian.sh"
+        
+        shadowsocks_libev_file="shadowsocks-libev-${libev_ver}"
+        shadowsocks_libev_url="https://github.com/shadowsocks/shadowsocks-libev/releases/download/v${libev_ver}/shadowsocks-libev-${libev_ver}.tar.gz"
+        download "${shadowsocks_libev_file}.tar.gz" "${shadowsocks_libev_url}"
+        download_service_file ${SHADOWSOCKS_LIBEV_INIT} ${SHADOWSOCKS_LIBEV_CENTOS} ${SS_INIT_CENTOS} ${SHADOWSOCKS_LIBEV_DEBIAN} ${SS_INIT_DEBIAN}
+    elif [[ ${SS_VERSION} = "shadowsocks-rust" ]]; then
+        # Download Shadowsocks-libev
+        get_ver
+        local SS_INIT_CENTOS="./service/shadowsocks-rust_centos.sh"
+        local SS_INIT_DEBIAN="./service/shadowsocks-rust_debian.sh"
+        
+        shadowsocks_rust_file="shadowsocks-v${rust_ver}-stable.x86_64-unknown-linux-musl"
+        shadowsocks_rust_url="https://github.com/shadowsocks/shadowsocks-rust/releases/download/v${rust_ver}/shadowsocks-v${rust_ver}-stable.x86_64-unknown-linux-musl.tar.xz"
+        download "${shadowsocks_rust_file}.tar.xz" "${shadowsocks_rust_url}"
+        download_service_file ${SHADOWSOCKS_RUST_INIT} ${SHADOWSOCKS_RUST_CENTOS} ${SS_INIT_CENTOS} ${SHADOWSOCKS_RUST_DEBIAN} ${SS_INIT_DEBIAN}
+    fi
 }
 
 download_plugins_file(){
@@ -811,8 +843,8 @@ config_ss(){
         server_value="[\"[::0]\",\"0.0.0.0\"]"
     fi
 
-    if [ ! -d "$(dirname ${SHADOWSOCKS_LIBEV_CONFIG})" ]; then
-        mkdir -p $(dirname ${SHADOWSOCKS_LIBEV_CONFIG})
+    if [ ! -d "$(dirname ${SHADOWSOCKS_CONFIG})" ]; then
+        mkdir -p $(dirname ${SHADOWSOCKS_CONFIG})
     fi
 
     # start wriet config
@@ -894,7 +926,12 @@ gen_ss_links(){
 
 install_completed(){
     ldconfig
-    ${SHADOWSOCKS_LIBEV_INIT} start > /dev/null 2>&1
+    if [[ ${SS_VERSION} = "shadowsocks-libev" ]]; then
+        ${SHADOWSOCKS_LIBEV_INIT} start > /dev/null 2>&1
+    elif [[ ${SS_VERSION} = "shadowsocks-rust" ]]; then
+        ${SHADOWSOCKS_RUST_INIT} start > /dev/null 2>&1
+    fi
+    
     clear -x
     
     improt_package "templates" "terminal_config_templates.sh"
@@ -945,7 +982,8 @@ install_completed(){
 }
 
 install_prepare(){
-    improt_package "prepare" "shadowsocks_libev_prepare.sh"
+    improt_package "prepare" "shadowsocks_prepare.sh"
+    choose_ss_install_version
     install_prepare_port
     install_prepare_password
     install_prepare_cipher
@@ -958,7 +996,7 @@ install_prepare(){
   ${Green}5.${suffix} cloak (based goquiet)
   "
     echo && read -e -p "(默认: 不安装)：" plugin_num
-    [[ -z "${plugin_num}" ]] && plugin_num="" && echo -e "\n${Tip} 当前未选择任何插件，仅安装Shadowsocks-libev."
+    [[ -z "${plugin_num}" ]] && plugin_num="" && echo -e "\n${Tip} 当前未选择任何插件，仅安装${SS_VERSION}."
     if [[ ${plugin_num} == "1" ]]; then
         improt_package "prepare" "v2ray_plugin_prepare.sh"
         install_prepare_libev_v2ray
@@ -987,14 +1025,22 @@ install_prepare(){
 }
 
 install_main(){
-    install_libsodium
-    if ! ldconfig -p | grep -wq "/usr/lib"; then
-        echo "/usr/lib" > /etc/ld.so.conf.d/lib.conf
+    if [[ ${SS_VERSION} = "shadowsocks-libev" ]]; then
+        install_libsodium
+        if ! ldconfig -p | grep -wq "/usr/lib"; then
+            echo "/usr/lib" > /etc/ld.so.conf.d/lib.conf
+        fi
+        ldconfig
+        install_mbedtls
     fi
-    ldconfig
-    install_mbedtls
-    improt_package "tools" "shadowsocks_libev_install.sh"
-    install_shadowsocks_libev
+    
+    improt_package "tools" "shadowsocks_install.sh"
+    if [[ ${SS_VERSION} = "shadowsocks-libev" ]]; then
+        install_shadowsocks_libev
+    elif [[ ${SS_VERSION} = "shadowsocks-rust" ]]; then
+        install_shadowsocks_rust
+    fi
+    
     if [ "${plugin_num}" == "1" ]; then
         improt_package "plugins" "v2ray_plugin_install.sh"
         install_v2ray_plugin
@@ -1022,10 +1068,14 @@ install_main(){
 }
 
 install_step_all(){
-    [[ -e '/usr/local/bin/ss-server' ]] && echo -e "${Info} Shadowsocks-libev 已经安装." && exit 1
+    [[ -e '/usr/local/bin/ss-server' ]] || [[ -e '/usr/local/bin/ssserver' ]] && echo -e "${Info} Shadowsocks 已经安装." && exit 1
     disable_selinux
     install_prepare
-    install_dependencies
+    if [[ ${SS_VERSION} = "shadowsocks-libev" ]]; then
+        install_dependencies
+    elif [[ ${SS_VERSION} = "shadowsocks-rust" ]] && [[ "${plugin_num}" == "3" ]]; then
+        install_dependencies
+    fi
     download_ss_file
     download_plugins_file
     if check_sys packageManager yum; then
@@ -1048,6 +1098,9 @@ install_cleanup(){
     rm -rf ${MBEDTLS_FILE} ${MBEDTLS_FILE}-gpl.tgz
     rm -rf ${shadowsocks_libev_file} ${shadowsocks_libev_file}.tar.gz
     
+    # ss-rust
+    rm -rf ${shadowsocks_rust_file}.tar.xz
+    
     # v2ray-plugin
     rm -rf v2ray-plugin_linux_amd64 ${v2ray_plugin_file}.tar.gz
     
@@ -1065,48 +1118,56 @@ install_cleanup(){
 }
 
 do_start(){
-    if [ "$(command -v ss-server)" ]; then
+    if [[ ! "$(command -v ss-server)" ]] && [[ ! "$(command -v ssserver)" ]]; then
+        echo
+        echo -e " ${Red} Shadowsocks 未安装，请尝试安装后，再来执行此操作。${suffix}"
+        echo
+        exit 1
+    fi
+    
+    if [[ "$(command -v ss-server)" ]]; then
         ${SHADOWSOCKS_LIBEV_INIT} start
-        
-        sleep 0.5
-        check_pid
-        if [[ ! -z "${V2_PID}" ]]; then
-            echo "Starting v2ray-plugin success"
+    fi
+    
+    if [[ "$(command -v ssserver)" ]]; then
+        ${SHADOWSOCKS_RUST_INIT} start
+    fi
+    
+    sleep 0.5
+    check_pid
+    if [[ ! -z "${V2_PID}" ]]; then
+        echo "Starting v2ray-plugin success"
+    fi
+    
+    if [ "$(command -v kcptun-server)" ]; then
+        ${KCPTUN_INIT} start
+    fi
+    
+    if [[ ! -z "${OBFS_PID}" ]]; then
+        echo "Starting simple-obfs success"
+    fi
+    
+    if [[ ! -z "${GQ_PID}" ]]; then
+        echo "Starting goquiet success"
+    fi
+    
+    if [[ -e "${CLOAK_INIT}" ]]; then
+        /etc/init.d/cloak start
+    fi
+    
+    if [ -e "${CADDY_FILE}" ]; then
+        if [[ -e ~/.api/cf.api ]]; then
+            export CLOUDFLARE_EMAIL=$(cat ~/.api/cf.api | grep "CLOUDFLARE_EMAIL" | cut -d= -f2)
+            export CLOUDFLARE_API_KEY=$(cat ~/.api/cf.api | grep "CLOUDFLARE_API_KEY" | cut -d= -f2)
         fi
-        
-        if [ "$(command -v kcptun-server)" ]; then
-            ${KCPTUN_INIT} start
-        fi
-        
-        if [[ ! -z "${OBFS_PID}" ]]; then
-            echo "Starting simple-obfs success"
-        fi
-        
-        if [[ ! -z "${GQ_PID}" ]]; then
-            echo "Starting goquiet success"
-        fi
-        
-        if [[ -e "${CLOAK_INIT}" ]]; then
-            /etc/init.d/cloak start
-        fi
-        
-        if [ -e "${CADDY_FILE}" ]; then
-            if [[ -e ~/.api/cf.api ]]; then
-                export CLOUDFLARE_EMAIL=$(cat ~/.api/cf.api | grep "CLOUDFLARE_EMAIL" | cut -d= -f2)
-                export CLOUDFLARE_API_KEY=$(cat ~/.api/cf.api | grep "CLOUDFLARE_API_KEY" | cut -d= -f2)
-            fi
-            /etc/init.d/caddy start
-        fi
-    else
-        echo
-        echo -e " ${Red} Shadowsocks-libev 未安装，请尝试安装后，再来执行此操作。${suffix}"
-        echo
+        /etc/init.d/caddy start
     fi  
 }
 
 do_stop(){
     # kill v2ray-plugin 、obfs-server、gq-server ck-server
     ps -ef |grep -v grep | grep ss-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+    ps -ef |grep -v grep | grep ssserver |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
     ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
     ps -ef |grep -v grep | grep kcptun-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
     ps -ef |grep -v grep | grep obfs-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
@@ -1114,7 +1175,13 @@ do_stop(){
     ps -ef |grep -v grep | grep ck-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
     ps -ef |grep -v grep | grep caddy |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
 
-    echo -e "Stopping Shadowsocks-libev success"
+    if [ "$(command -v ss-server)" ]; then
+        echo -e "Stopping Shadowsocks-libev success"
+    fi
+    
+    if [ "$(command -v ssserver)" ]; then
+        echo -e "Stopping Shadowsocks-rust success"
+    fi
     
     if [ "$(command -v v2ray-plugin)" ]; then
         echo -e "Stopping v2ray-plugin success"
@@ -1149,47 +1216,55 @@ do_restart(){
 # install status
 do_status(){
     local mark=$1
-    if [[ ${mark} == "menu" ]]; then
+    if [ "$(command -v ss-server)" ]; then
         check_pid
-        if [[ -e '/usr/local/bin/ss-server' ]] && [[ "$(command -v v2ray-plugin)" ]] && [[ -e "${CADDY_FILE}"  ]]; then
-            if [[ ! -z "${PID}" ]] && [[ ! -z "${V2_PID}" ]] && [[ ! -z "${CADDY_PID}" ]]; then
+        local BIN_PATH=/usr/local/bin/ss-server
+        local SS_PID=${PID}
+    elif [ "$(command -v ssserver)" ]; then
+        check_pid
+        local BIN_PATH=/usr/local/bin/ssserver
+        local SS_PID=${RUST_PID}
+    fi
+    
+    if [[ ${mark} == "menu" ]]; then
+        if [[ -e ${BIN_PATH} ]] && [[ "$(command -v v2ray-plugin)" ]] && [[ -e "${CADDY_FILE}"  ]]; then
+            if [[ ! -z "${SS_PID}" ]] && [[ ! -z "${V2_PID}" ]] && [[ ! -z "${CADDY_PID}" ]]; then
                 echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
             else
                 echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
             fi
-        elif [[ -e '/usr/local/bin/ss-server' ]] && [[ "$(command -v v2ray-plugin)" ]]; then
-            if [[ ! -z "${PID}" ]] && [[ ! -z "${V2_PID}" ]]; then
+        elif [[ -e ${BIN_PATH} ]] && [[ "$(command -v v2ray-plugin)" ]]; then
+            if [[ ! -z "${SS_PID}" ]] && [[ ! -z "${V2_PID}" ]]; then
                 echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
             else
                 echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
             fi
-        elif [[ -e '/usr/local/bin/ss-server' ]] && [[ "$(command -v kcptun-server)" ]]; then
-            if [[ ! -z "${PID}" ]] && [[ ! -z "${KP_PID}" ]]; then
+        elif [[ -e ${BIN_PATH} ]] && [[ "$(command -v kcptun-server)" ]]; then
+            if [[ ! -z "${SS_PID}" ]] && [[ ! -z "${KP_PID}" ]]; then
                 echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
             else
                 echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
             fi
-         elif [[ -e '/usr/local/bin/ss-server' ]] && [[ "$(command -v obfs-server)" ]]; then
-            if [[ ! -z "${PID}" ]] && [[ ! -z "${OBFS_PID}" ]]; then
+         elif [[ -e ${BIN_PATH} ]] && [[ "$(command -v obfs-server)" ]]; then
+            if [[ ! -z "${SS_PID}" ]] && [[ ! -z "${OBFS_PID}" ]]; then
                 echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
             else
                 echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
             fi
-         elif [[ -e '/usr/local/bin/ss-server' ]] && [[ "$(command -v gq-server)" ]]; then            
-            if [[ ! -z "${PID}" ]] && [[ ! -z "${GQ_PID}" ]]; then
+         elif [[ -e ${BIN_PATH} ]] && [[ "$(command -v gq-server)" ]]; then            
+            if [[ ! -z "${SS_PID}" ]] && [[ ! -z "${GQ_PID}" ]]; then
                 echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
             else
                 echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
             fi
-         elif [[ -e '/usr/local/bin/ss-server' ]] && [[ "$(command -v ck-server)" ]]; then
-            if [[ ! -z "${PID}" ]] && [[ ! -z "${CK_PID}" ]]; then
+         elif [[ -e ${BIN_PATH} ]] && [[ "$(command -v ck-server)" ]]; then
+            if [[ ! -z "${SS_PID}" ]] && [[ ! -z "${CK_PID}" ]]; then
                 echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
             else
                 echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
             fi
-        elif [[ -e '/usr/local/bin/ss-server' ]]; then
-            check_pid
-            if [[ ! -z "${PID}" ]]; then
+        elif [[ -e ${BIN_PATH} ]]; then
+            if [[ ! -z "${SS_PID}" ]]; then
                 echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
             else
                 echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
@@ -1198,63 +1273,76 @@ do_status(){
             echo -e " 当前状态: ${Red}未安装${suffix}"
         fi
     else
-        if [[ -e '/usr/local/bin/ss-server' ]]; then
-            check_pid
+        if [[ ! -e ${BIN_PATH} ]]; then
+            echo
+            echo -e "${Error} shadowsocklibev-libev and related plugins are not installed."
+            echo
+            exit 1
+        fi
+        
+        check_pid
+        if [ "$(command -v ss-server)" ]; then
             if [[ ! -z "${PID}" ]]; then
                 echo -e "${Info} shadowsocklibev-libev (pid ${PID}) is already running."
             else
                 echo -e "${Point} shadowsocklibev-libev is already installed but not running."
             fi
-            
-            if [ "$(command -v v2ray-plugin)" ]; then
-                if [[ ! -z "${V2_PID}" ]]; then
-                    echo -e "${Info} v2ray-plugin (pid ${V2_PID}) is already running."
-                else
-                    echo -e "${Point} v2ray-plugin is already installed but not running."
-                fi
+        fi
+        
+        if [ "$(command -v ssserver)" ]; then
+            if [[ ! -z "${RUST_PID}" ]]; then
+                echo -e "${Info} shadowsocklibev-rust (pid ${PID}) is already running."
+            else
+                echo -e "${Point} shadowsocklibev-rust is already installed but not running."
             fi
-            
-            if [ "$(command -v kcptun-server)" ]; then
-                if [[ ! -z "${KP_PID}" ]]; then
-                    echo -e "${Info} kcptun (pid ${KP_PID}) is already running."
-                else
-                    echo -e "${Point} kcptun is already installed but not running."
-                fi
+        fi
+        
+        if [ "$(command -v v2ray-plugin)" ]; then
+            if [[ ! -z "${V2_PID}" ]]; then
+                echo -e "${Info} v2ray-plugin (pid ${V2_PID}) is already running."
+            else
+                echo -e "${Point} v2ray-plugin is already installed but not running."
             fi
-            
-            if [ "$(command -v obfs-server)" ]; then
-                if [[ ! -z "${OBFS_PID}" ]]; then
-                    echo -e "${Info} simple-obfs (pid ${OBFS_PID}) is already running."
-                else
-                    echo -e "${Point} simple-obfs is already installed but not running."
-                fi
+        fi
+        
+        if [ "$(command -v kcptun-server)" ]; then
+            if [[ ! -z "${KP_PID}" ]]; then
+                echo -e "${Info} kcptun (pid ${KP_PID}) is already running."
+            else
+                echo -e "${Point} kcptun is already installed but not running."
             fi
-            
-            if [ "$(command -v gq-server)" ]; then
-                if [[ ! -z "${GQ_PID}" ]]; then
-                    echo -e "${Info} goquiet (pid ${GQ_PID}) is already running."
-                else
-                    echo -e "${Point} goquiet is already installed but not running."
-                fi
+        fi
+        
+        if [ "$(command -v obfs-server)" ]; then
+            if [[ ! -z "${OBFS_PID}" ]]; then
+                echo -e "${Info} simple-obfs (pid ${OBFS_PID}) is already running."
+            else
+                echo -e "${Point} simple-obfs is already installed but not running."
             fi
-            
-            if [ "$(command -v ck-server)" ]; then
-                if [[ ! -z "${CK_PID}" ]]; then
-                    echo -e "${Info} cloak (pid ${CK_PID}) is already running."
-                else
-                    echo -e "${Point} cloak is already installed but not running."
-                fi
+        fi
+        
+        if [ "$(command -v gq-server)" ]; then
+            if [[ ! -z "${GQ_PID}" ]]; then
+                echo -e "${Info} goquiet (pid ${GQ_PID}) is already running."
+            else
+                echo -e "${Point} goquiet is already installed but not running."
             fi
-            
-            if [ -e "${CADDY_FILE}" ]; then
-                if [[ ! -z "${CADDY_PID}" ]]; then
-                    echo -e "${Info} caddy (pid ${CADDY_PID}) is already running."
-                else
-                    echo -e "${Point} caddy is already installed but not running."
-                fi
+        fi
+        
+        if [ "$(command -v ck-server)" ]; then
+            if [[ ! -z "${CK_PID}" ]]; then
+                echo -e "${Info} cloak (pid ${CK_PID}) is already running."
+            else
+                echo -e "${Point} cloak is already installed but not running."
             fi
-        else
-            echo -e "${Error} shadowsocklibev-libev and related plugins are not installed."
+        fi
+        
+        if [ -e "${CADDY_FILE}" ]; then
+            if [[ ! -z "${CADDY_PID}" ]]; then
+                echo -e "${Info} caddy (pid ${CADDY_PID}) is already running."
+            else
+                echo -e "${Point} caddy is already installed but not running."
+            fi
         fi
     fi
 }
@@ -1283,7 +1371,7 @@ do_update(){
         echo -e "${Info} 检测到SS有新版本，开始下载."
         download_ss_file
         echo -e "${Info} 下载完成，开始执行编译安装."
-        improt_package "tools" "shadowsocks_libev_install.sh"
+        improt_package "tools" "shadowsocks_install.sh"
         do_stop > /dev/null 2>&1
         install_shadowsocks_libev
         do_restart > /dev/null 2>&1
@@ -1296,29 +1384,72 @@ do_update(){
         update_simple_obfs
         update_goquiet
         update_cloak
+    elif [[ -e '/usr/local/bin/ssserver' ]]; then
+        echo -e "${Info} 正在进行版本比对请稍等."
+        get_ver
+        current_rust_ver=$(ssserver -V | grep shadowsocks | cut -d\  -f2)
+        if ! check_latest_version ${current_rust_ver} ${rust_ver}; then
+            echo -e "${Point} shadowsocklibev-rust当前已是最新版本${current_rust_ver}不需要更新."
+            
+            update_v2ray_plugin
+            update_kcptun
+            update_simple_obfs
+            update_goquiet
+            update_cloak
+            
+            exit 1
+        fi
+        
+        echo -e "${Info} 检测到SS有新版本，开始下载."
+        download_ss_file
+        echo -e "${Info} 下载完成，开始执行编译安装."
+        improt_package "tools" "shadowsocks_install.sh"
+        do_stop > /dev/null 2>&1
+        install_shadowsocks_rust
+        do_restart > /dev/null 2>&1
+        echo -e "${Info} shadowsocklibev-rust已成功升级为最新版本${rust_ver}"
+        
+        install_cleanup
+
+        update_v2ray_plugin
+        update_kcptun
+        update_simple_obfs
+        update_goquiet
+        update_cloak
     fi
-    
-    
-    
 }
 
 do_uninstall(){
-    printf "你确定要卸载Shadowsocks-libev吗? [y/n]\n"
+    printf "你确定要卸载Shadowsocks吗? [y/n]\n"
     read -e -p "(默认: n):" answer
     [ -z ${answer} ] && answer="n"
     if [ "${answer}" == "y" ] || [ "${answer}" == "Y" ]; then
-        # check Shadowsocks-libev status
-        ${SHADOWSOCKS_LIBEV_INIT} status > /dev/null 2>&1
-        if [ $? -eq 0 ]; then
-            ${SHADOWSOCKS_LIBEV_INIT} stop > /dev/null 2>&1
+        if [ "$(command -v ss-server)" ]; then
+            # check Shadowsocks-libev status
+            ${SHADOWSOCKS_LIBEV_INIT} status > /dev/null 2>&1
+            if [ $? -eq 0 ]; then
+                ${SHADOWSOCKS_LIBEV_INIT} stop > /dev/null 2>&1
+            fi
+            local ss_service_name=$(basename ${SHADOWSOCKS_LIBEV_INIT})
+            if check_sys packageManager yum; then
+                chkconfig --del ${ss_service_name}
+            elif check_sys packageManager apt; then
+                update-rc.d -f ${ss_service_name} remove
+            fi
+        elif [ "$(command -v ssserver)" ]; then
+            # check Shadowsocks-rust status
+            ${SHADOWSOCKS_RUST_INIT} status > /dev/null 2>&1
+            if [ $? -eq 0 ]; then
+                ${SHADOWSOCKS_RUST_INIT} stop > /dev/null 2>&1
+            fi
+            local ss_service_name=$(basename ${SHADOWSOCKS_RUST_INIT})
+            if check_sys packageManager yum; then
+                chkconfig --del ${ss_service_name}
+            elif check_sys packageManager apt; then
+                update-rc.d -f ${ss_service_name} remove
+            fi
         fi
-        local ss_service_name=$(basename ${SHADOWSOCKS_LIBEV_INIT})
-        if check_sys packageManager yum; then
-            chkconfig --del ${ss_service_name}
-        elif check_sys packageManager apt; then
-            update-rc.d -f ${ss_service_name} remove
-        fi
-        
+
         # check kcptun status
         if [ -e ${KCPTUN_INIT} ]; then
             ${KCPTUN_INIT} status > /dev/null 2>&1
@@ -1361,7 +1492,7 @@ do_uninstall(){
         uninstall_caddy
         
         # uninstall ss-libev
-        rm -fr $(dirname ${SHADOWSOCKS_LIBEV_CONFIG})
+        rm -fr $(dirname ${SHADOWSOCKS_CONFIG})
         rm -f /usr/local/bin/ss-local
         rm -f /usr/local/bin/ss-tunnel
         rm -f /usr/local/bin/ss-server
@@ -1381,6 +1512,13 @@ do_uninstall(){
         rm -f /usr/local/share/man/man8/shadowsocks-libev.8
         rm -fr /usr/local/share/doc/shadowsocks-libev
         rm -f ${SHADOWSOCKS_LIBEV_INIT}
+        
+        # uninstall ss-rust
+        rm -f /usr/local/bin/ssserver
+        rm -f /usr/local/bin/sslocal
+        rm -f /usr/local/bin/ssdns
+        rm -f /usr/local/bin/ssurl
+        rm -f ${SHADOWSOCKS_RUST_INIT}
         
         # uninstall v2ray-plugin
         rm -f /usr/local/bin/v2ray-plugin
@@ -1407,10 +1545,10 @@ do_uninstall(){
         # uninstall ipcalc-0.41
         rm -rf /usr/local/bin/ipcalc-0.41
         
-        echo -e "${Info} Shadowsocks-libev 卸载成功."
+        echo -e "${Info} Shadowsocks 卸载成功."
     else
         echo
-        echo -e "${Info} Shadowsocks-libev 卸载取消."
+        echo -e "${Info} Shadowsocks 卸载取消."
         echo
     fi
 }
@@ -1423,7 +1561,7 @@ do_install(){
         exit 1
     fi
     
-    echo -e " Shadowsocks-libev一键管理脚本 ${Red}[v${SHELL_VERSION} ${methods}]${suffix}
+    echo -e " Shadowsocks一键管理脚本 ${Red}[v${SHELL_VERSION} ${methods}]${suffix}
 
     ${Green}1.${suffix} BBR
     ${Green}2.${suffix} Install

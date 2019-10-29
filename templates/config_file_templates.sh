@@ -1,6 +1,6 @@
 # ss config
 ss_config_standalone(){
-	cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
+	cat > ${SHADOWSOCKS_CONFIG}<<-EOF
 	{
 		"server":${server_value},
 		"server_port":${shadowsocksport},
@@ -17,7 +17,7 @@ ss_config_standalone(){
 
 # ss + v2ray-plugin config
 ss_v2ray_ws_http_config(){
-	cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
+	cat > ${SHADOWSOCKS_CONFIG}<<-EOF
 	{
 		"server":${server_value},
 		"server_port":${shadowsocksport},
@@ -35,7 +35,7 @@ ss_v2ray_ws_http_config(){
 }
 
 ss_v2ray_ws_tls_cdn_config(){
-	cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
+	cat > ${SHADOWSOCKS_CONFIG}<<-EOF
 	{
 		"server":${server_value},
 		"server_port":${shadowsocksport},
@@ -54,7 +54,7 @@ ss_v2ray_ws_tls_cdn_config(){
 
 
 ss_v2ray_quic_tls_cdn_config(){
-	cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
+	cat > ${SHADOWSOCKS_CONFIG}<<-EOF
 	{
 		"server":${server_value},
 		"server_port":${shadowsocksport},
@@ -72,7 +72,7 @@ ss_v2ray_quic_tls_cdn_config(){
 }
 
 ss_v2ray_ws_tls_web_config(){
-	cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
+	cat > ${SHADOWSOCKS_CONFIG}<<-EOF
 	{
 		"server":${server_value},
 		"server_port":${shadowsocksport},
@@ -107,7 +107,7 @@ caddy_config_none_cdn(){
 }
 
 ss_v2ray_ws_tls_web_cdn_config(){
-	cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
+	cat > ${SHADOWSOCKS_CONFIG}<<-EOF
 	{
 		"server":${server_value},
 		"server_port":${shadowsocksport},
@@ -165,7 +165,7 @@ kcptun_config_standalone(){
 
 # ss + simple-obfs
 ss_obfs_http_config(){
-	cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
+	cat > ${SHADOWSOCKS_CONFIG}<<-EOF
 	{
 		"server":${server_value},
 		"server_port":${shadowsocksport},
@@ -183,7 +183,7 @@ ss_obfs_http_config(){
 }
 
 ss_obfs_tls_config(){
-	cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
+	cat > ${SHADOWSOCKS_CONFIG}<<-EOF
 	{
 		"server":${server_value},
 		"server_port":${shadowsocksport},
@@ -202,7 +202,7 @@ ss_obfs_tls_config(){
 
 # ss + goquiet
 ss_goquiet_config(){
-	cat > ${SHADOWSOCKS_LIBEV_CONFIG}<<-EOF
+	cat > ${SHADOWSOCKS_CONFIG}<<-EOF
 	{
 		"server":${server_value},
 		"server_port":${shadowsocksport},

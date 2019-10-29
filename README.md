@@ -36,7 +36,11 @@ Usage: ./ss-plugins.sh [options...] [args...]
 
     SS-libev安装目录：/usr/local/bin
     SS-libev启动文件：/etc/init.d/shadowsocks-libev
-    SS-libev配置文件：/etc/shadowsocks-libev/config.json
+    SS-libev配置文件：/etc/shadowsocks/config.json
+    
+    SS-rust安装目录：/usr/local/bin
+    SS-rust启动文件：/etc/init.d/shadowsocks-rust
+    SS-rust配置文件：/etc/shadowsocks/config.json
 
     kcptun安装目录：/usr/local/kcptun
     kcptun启动文件：/etc/init.d/kcptun

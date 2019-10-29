@@ -17,7 +17,7 @@ elif [ -f /usr/bin/ss-server ]; then
     DAEMON=/usr/bin/ss-server
 fi
 NAME=Shadowsocks-libev
-CONF=/etc/shadowsocks-libev/config.json
+CONF=/etc/shadowsocks/config.json
 PID_DIR=/var/run
 PID_FILE=$PID_DIR/shadowsocks-libev.pid
 RET_VAL=0

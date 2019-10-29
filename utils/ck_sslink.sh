@@ -1,8 +1,8 @@
 get_link_of_ck2(){
     local ckauid=$1
     if [ ${#ckauid} == 24 ] && [ -e '/usr/local/bin/ck-client' ]; then
-        local shadowsockscipher=$(cat ${SHADOWSOCKS_LIBEV_CONFIG} | jq -r .method)
-        local shadowsockspwd=$(cat ${SHADOWSOCKS_LIBEV_CONFIG} | jq -r .password)
+        local shadowsockscipher=$(cat ${SHADOWSOCKS_CONFIG} | jq -r .method)
+        local shadowsockspwd=$(cat ${SHADOWSOCKS_CONFIG} | jq -r .password)
         local ckpub=$(cat ${CK_CLIENT_CONFIG} | jq -r .PublicKey)
         local ckservername=$(cat ${CK_CLIENT_CONFIG} | jq -r .ServerName)
         

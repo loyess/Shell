@@ -11,6 +11,10 @@ dos2unix ./utils/ck_user_manager.sh
 dos2unix ./utils/qr_code.sh
 dos2unix ./utils/view_config.sh
 dos2unix ./utils/update.sh
+dos2unix ./utils/start.sh
+dos2unix ./utils/stop.sh
+dos2unix ./utils/status.sh
+dos2unix ./utils/uninstall.sh
 
 
 dos2unix ./prepare/shadowsocks_prepare.sh

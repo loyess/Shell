@@ -338,8 +338,9 @@ del_unrestricted_users_logic_cade(){
 
 ck2_users_manager(){
     if [[ ! -e '/usr/local/bin/ck-client' ]]; then
-        get_ver
         # Download cloak client
+        cloak_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/cbeuw/Cloak/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        [ -z ${cloak_ver} ] && echo -e "${Error} 获取 cloak 最新版本失败." && exit 1
         cloak_ver="2.1.1"
         local cloak_file="ck-client-linux-amd64-${cloak_ver}"
         local cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${cloak_ver}/ck-client-linux-amd64-${cloak_ver}"

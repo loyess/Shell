@@ -45,19 +45,3 @@ install_caddy(){
 ${Info} Caddy 安装完成！"
 }
 
-uninstall_caddy(){
-	if [[ -e ${CADDY_FILE} ]]; then
-        PID=`ps -ef |grep "caddy" |grep -v "grep" |grep -v "init.d" |grep -v "service" |grep -v "caddy_install" |awk '{print $2}'`
-        [[ ! -z ${PID} ]] && kill -9 ${PID}
-        if check_sys packageManager yum; then
-            chkconfig --del caddy
-        elif check_sys packageManager apt; then
-            update-rc.d -f caddy remove
-        fi
-        [[ -s /tmp/caddy.log ]] && rm -rf /tmp/caddy.log
-        rm -rf $(dirname ${CADDY_FILE})
-        rm -rf /etc/init.d/caddy
-        rm -rf /usr/bin/caddy
-    fi
-}
-

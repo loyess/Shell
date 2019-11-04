@@ -1150,8 +1150,64 @@ do_status(){
     fi
     
     if [[ ${mark} == "menu" ]]; then
-        improt_package "utils" "status.sh"
-        menu_status
+        if [[ -e ${BIN_PATH} ]] && [[ "$(command -v v2ray-plugin)" ]] && [[ -e "${CADDY_FILE}"  ]]; then
+            V2_PID=`ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}'`
+            CADDY_PID=`ps -ef |grep -v grep | grep caddy |awk '{print $2}'`
+            
+            if [[ ! -z "${SS_PID}" ]] && [[ ! -z "${V2_PID}" ]] && [[ ! -z "${CADDY_PID}" ]]; then
+                echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+            else
+                echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+            fi
+        elif [[ -e ${BIN_PATH} ]] && [[ "$(command -v v2ray-plugin)" ]]; then
+            V2_PID=`ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}'`
+            
+            if [[ ! -z "${SS_PID}" ]] && [[ ! -z "${V2_PID}" ]]; then
+                echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+            else
+                echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+            fi
+        elif [[ -e ${BIN_PATH} ]] && [[ "$(command -v kcptun-server)" ]]; then
+            KP_PID=`ps -ef |grep -v grep | grep kcptun-server |awk '{print $2}'`
+            
+            if [[ ! -z "${SS_PID}" ]] && [[ ! -z "${KP_PID}" ]]; then
+                echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+            else
+                echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+            fi
+         elif [[ -e ${BIN_PATH} ]] && [[ "$(command -v obfs-server)" ]]; then
+            OBFS_PID=`ps -ef |grep -v grep | grep obfs-server |awk '{print $2}'`
+            
+            if [[ ! -z "${SS_PID}" ]] && [[ ! -z "${OBFS_PID}" ]]; then
+                echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+            else
+                echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+            fi
+         elif [[ -e ${BIN_PATH} ]] && [[ "$(command -v gq-server)" ]]; then    
+            GQ_PID=`ps -ef |grep -v grep | grep gq-server |awk '{print $2}'`
+            
+            if [[ ! -z "${SS_PID}" ]] && [[ ! -z "${GQ_PID}" ]]; then
+                echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+            else
+                echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+            fi
+         elif [[ -e ${BIN_PATH} ]] && [[ "$(command -v ck-server)" ]]; then
+            CK_PID=`ps -ef |grep -v grep | grep ck-server |awk '{print $2}'`
+            
+            if [[ ! -z "${SS_PID}" ]] && [[ ! -z "${CK_PID}" ]]; then
+                echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+            else
+                echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+            fi
+        elif [[ -e ${BIN_PATH} ]]; then
+            if [[ ! -z "${SS_PID}" ]]; then
+                echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+            else
+                echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+            fi
+        else
+            echo -e " 当前状态: ${Red}未安装${suffix}"
+        fi
     else
         if [[ ! -e ${BIN_PATH} ]]; then
             echo

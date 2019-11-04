@@ -60,6 +60,7 @@ v2ray_plugin_uninstall(){
     ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
     
     # uninstall v2ray-plugin
+    rm -f /var/run/v2ray-plugin.pid
     rm -f /usr/local/bin/v2ray-plugin
 
 }
@@ -90,6 +91,7 @@ simple_obfs_uninstall(){
     ps -ef |grep -v grep | grep obfs-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
     
     # uninstall simple-obfs
+    rm -f /var/run/simple-obfs.pid
     rm -f /usr/local/bin/obfs-local
     rm -f /usr/local/bin/obfs-server
 }
@@ -98,6 +100,7 @@ goquiet_uninstall(){
     ps -ef |grep -v grep | grep gq-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
     
     # uninstall goquiet
+    rm -f /var/run/goquiet.pid
     rm -f /usr/local/bin/gq-server
 }
 

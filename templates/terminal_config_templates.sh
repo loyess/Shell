@@ -135,7 +135,7 @@ ss_kcptun_show(){
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件选项 :                                      " >> ${HUMAN_CONFIG}
-    if [[ ${nocomp} -eq "false" ]]; then
+    if [[ ${nocomp} == false ]]; then
     echo -e " 插件参数 : ${Red}-l %SS_LOCAL_HOST%:%SS_LOCAL_PORT% -r %SS_REMOTE_HOST%:%SS_REMOTE_PORT% --crypt ${crypt} --key ${key} --mtu ${MTU} --sndwnd ${rcvwnd} --rcvwnd ${sndwnd} --mode ${mode} --datashard ${datashard} --parityshard ${parityshard} --dscp ${DSCP}${suffix}" >> ${HUMAN_CONFIG}
     else
     echo -e " 插件参数 : ${Red}-l %SS_LOCAL_HOST%:%SS_LOCAL_PORT% -r %SS_REMOTE_HOST%:%SS_REMOTE_PORT% --crypt ${crypt} --key ${key} --mtu ${MTU} --sndwnd ${rcvwnd} --rcvwnd ${sndwnd} --mode ${mode} --datashard ${datashard} --parityshard ${parityshard} --dscp ${DSCP} --nocomp ${nocomp}${suffix}" >> ${HUMAN_CONFIG}

@@ -336,20 +336,33 @@ del_unrestricted_users_logic_cade(){
     done
 }
 
+download_ck_clinet(){
+    local CK_CLIENT_V=$1
+    
+    # Download cloak client
+    local cloak_file="ck-client-linux-amd64-${CK_CLIENT_V}"
+    local cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${CK_CLIENT_V}/ck-client-linux-amd64-${CK_CLIENT_V}"
+    download "${cloak_file}" "${cloak_url}"
+    
+    # install ck-client
+    cd ${CUR_DIR}
+    chmod +x ${cloak_file}
+    mv ${cloak_file} /usr/local/bin/ck-client
+}
+
 ck2_users_manager(){
     if [[ ! -e '/usr/local/bin/ck-client' ]]; then
         # Download cloak client
-        cloak_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/cbeuw/Cloak/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
-        [ -z ${cloak_ver} ] && echo -e "${Error} 获取 cloak 最新版本失败." && exit 1
-        cloak_ver="2.1.1"
-        local cloak_file="ck-client-linux-amd64-${cloak_ver}"
-        local cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${cloak_ver}/ck-client-linux-amd64-${cloak_ver}"
-        download "${cloak_file}" "${cloak_url}"
-        
-        # install ck-client
-        cd ${CUR_DIR}
-        chmod +x ${cloak_file}
-        mv ${cloak_file} /usr/local/bin/ck-client
+        cloak_ver=$(ck-server -v | grep ck-server | cut -d\  -f2)
+        download_ck_clinet ${cloak_ver}
+    fi
+    
+    ck_server_v=$(ck-server -v | grep ck-server | cut -d\  -f2)
+    ck_client_v=$(ck-client -v | grep ck-client | cut -d\  -f2)
+    if version_gt ${ck_server_v} ${ck_client_v}; then
+        # Download cloak client
+        cloak_ver=${ck_server_v}
+        download_ck_clinet ${cloak_ver}
     fi
     
     is_the_api_open "start"

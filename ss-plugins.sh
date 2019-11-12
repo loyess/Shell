@@ -700,7 +700,7 @@ download_plugins_file(){
         # Download cloak server
         cloak_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/cbeuw/Cloak/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
         [ -z ${cloak_ver} ] && echo -e "${Error} 获取 cloak 最新版本失败." && exit 1
-        cloak_ver="2.1.1"
+        # cloak_ver="2.1.1"
         cloak_file="ck-server-linux-amd64-${cloak_ver}"
         cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${cloak_ver}/ck-server-linux-amd64-${cloak_ver}"
         download "${cloak_file}" "${cloak_url}"

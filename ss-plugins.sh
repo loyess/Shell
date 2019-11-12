@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.2.7"
+SHELL_VERSION="2.2.8"
 # ====================
 
 
@@ -35,8 +35,8 @@ HUMAN_CONFIG="/etc/shadowsocks/humanization.conf"
 
 # ss development language version
 SS_DLV=(
-shadowsocks-libev
-shadowsocks-rust
+ss-libev
+ss-rust
 )
 
 
@@ -644,7 +644,7 @@ download_service_file(){
 
 download_ss_file(){
     cd ${CUR_DIR}
-    if [[ ${SS_VERSION} = "shadowsocks-libev" ]]; then
+    if [[ ${SS_VERSION} = "ss-libev" ]]; then
         # Download Shadowsocks-libev
         libev_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/shadowsocks-libev/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
         [ -z ${libev_ver} ] && echo -e "${Error} 获取 shadowsocks-libev 最新版本失败." && exit 1
@@ -655,7 +655,7 @@ download_ss_file(){
         shadowsocks_libev_url="https://github.com/shadowsocks/shadowsocks-libev/releases/download/v${libev_ver}/shadowsocks-libev-${libev_ver}.tar.gz"
         download "${shadowsocks_libev_file}.tar.gz" "${shadowsocks_libev_url}"
         download_service_file ${SHADOWSOCKS_LIBEV_INIT} ${SHADOWSOCKS_LIBEV_CENTOS} ${SS_INIT_CENTOS} ${SHADOWSOCKS_LIBEV_DEBIAN} ${SS_INIT_DEBIAN}
-    elif [[ ${SS_VERSION} = "shadowsocks-rust" ]]; then
+    elif [[ ${SS_VERSION} = "ss-rust" ]]; then
         # Download Shadowsocks-libev
         rust_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/shadowsocks-rust/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
         [ -z ${rust_ver} ] && echo -e "${Error} 获取 shadowsocks-rust 最新版本失败." && exit 1
@@ -906,9 +906,9 @@ gen_ss_links(){
 
 install_completed(){
     ldconfig
-    if [[ ${SS_VERSION} = "shadowsocks-libev" ]]; then
+    if [[ ${SS_VERSION} = "ss-libev" ]]; then
         ${SHADOWSOCKS_LIBEV_INIT} start > /dev/null 2>&1
-    elif [[ ${SS_VERSION} = "shadowsocks-rust" ]]; then
+    elif [[ ${SS_VERSION} = "ss-rust" ]]; then
         ${SHADOWSOCKS_RUST_INIT} start > /dev/null 2>&1
     fi
     
@@ -1002,14 +1002,14 @@ install_prepare(){
     echo "按任意键开始…或按Ctrl+C取消"
     char=`get_char`
     
-    if [[ ${SS_VERSION} = "shadowsocks-rust" ]] && [[ "${plugin_num}" != "3" ]]; then
+    if [[ ${SS_VERSION} = "ss-rust" ]] && [[ "${plugin_num}" != "3" ]]; then
         echo
         echo -e "${Info} 即将开始下载相关文件请稍等."
     fi
 }
 
 install_main(){
-    if [[ ${SS_VERSION} = "shadowsocks-libev" ]]; then
+    if [[ ${SS_VERSION} = "ss-libev" ]]; then
         install_libsodium
         if ! ldconfig -p | grep -wq "/usr/lib"; then
             echo "/usr/lib" > /etc/ld.so.conf.d/lib.conf
@@ -1019,9 +1019,9 @@ install_main(){
     fi
     
     improt_package "tools" "shadowsocks_install.sh"
-    if [[ ${SS_VERSION} = "shadowsocks-libev" ]]; then
+    if [[ ${SS_VERSION} = "ss-libev" ]]; then
         install_shadowsocks_libev
-    elif [[ ${SS_VERSION} = "shadowsocks-rust" ]]; then
+    elif [[ ${SS_VERSION} = "ss-rust" ]]; then
         install_shadowsocks_rust
     fi
     
@@ -1055,10 +1055,14 @@ install_step_all(){
     [[ -e '/usr/local/bin/ss-server' ]] || [[ -e '/usr/local/bin/ssserver' ]] && echo -e "${Info} Shadowsocks 已经安装." && exit 1
     disable_selinux
     install_prepare
-    if [[ ${SS_VERSION} = "shadowsocks-libev" ]]; then
+    if [[ ${SS_VERSION} = "ss-libev" ]]; then
         install_dependencies
-    elif [[ ${SS_VERSION} = "shadowsocks-rust" ]] && [[ "${plugin_num}" == "3" ]]; then
+    elif [[ ${SS_VERSION} = "ss-rust" ]] && [[ "${plugin_num}" == "3" ]]; then
         install_dependencies
+    elif [[ ${SS_VERSION} = "ss-rust" ]] && [[ "${plugin_num}" == "5" ]]; then
+        if [ ! "$(command -v jq)" ]; then
+            package_install "jq" > /dev/null 2>&1
+        fi
     fi
     download_ss_file
     download_plugins_file

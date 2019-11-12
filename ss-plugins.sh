@@ -732,14 +732,14 @@ install_dependencies(){
         echo -e "${Info} EPEL存储库检查完成."
 
         yum_depends=(
-            gettext gcc pcre pcre-devel autoconf libtool automake make asciidoc xmlto c-ares-devel libev-devel zlib-devel openssl-devel git wget qrencode jq
+            gettext gcc pcre pcre-devel autoconf libtool automake make asciidoc xmlto c-ares-devel libev-devel zlib-devel openssl-devel git qrencode jq
         )
         for depend in ${yum_depends[@]}; do
             error_detect_depends "yum -y install ${depend}"
         done
     elif check_sys packageManager apt; then
         apt_depends=(
-            gettext gcc build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libc-ares-dev automake libssl-dev git wget qrencode jq
+            gettext gcc build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libc-ares-dev automake libssl-dev git qrencode jq
         )
 
         apt-get -y update

@@ -387,7 +387,7 @@ check_port_occupy(){
 }
 
 check_script_version(){
-	SHELL_VERSION_NEW=$(wget --no-check-certificate -qO- -t1 -T3 "https://git.io/fjlbl"|grep 'SHELL_VERSION="'|awk -F "=" '{print $NF}'|sed 's/\"//g'|head -1)
+	SHELL_VERSION_NEW=$(wget --no-check-certificate -qO- "https://git.io/fjlbl"|grep 'SHELL_VERSION="'|awk -F "=" '{print $NF}'|sed 's/\"//g'|head -1)
 	[[ -z ${SHELL_VERSION_NEW} ]] && echo -e "${Error} 无法链接到 Github !" && exit 0
 	if version_gt ${SHELL_VERSION_NEW} ${SHELL_VERSION}; then
         echo

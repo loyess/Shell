@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.2.9"
+SHELL_VERSION="2.3.0"
 # ====================
 
 
@@ -215,7 +215,7 @@ usage() {
   
 	EOF
 
-	exit $1
+    exit $1
 }
 
 improt_package(){
@@ -378,25 +378,29 @@ check_port_occupy(){
         package_install "lsof" > /dev/null 2>&1
     fi
     
-	if [[ `lsof -i:"${PROT}" | grep -v google_ | grep -v COMMAND | wc -l` -ne 0 ]];then
+    if [[ `lsof -i:"${PROT}" | grep -v google_ | grep -v COMMAND | wc -l` -ne 0 ]];then
         # Occupied
         return 0
-	else
+    else
         # Unoccupied
-		return 1
-	fi
+        return 1
+    fi
 }
 
-check_script_version(){
-	SHELL_VERSION_NEW=$(wget --no-check-certificate -qO- "https://git.io/fjlbl"|grep 'SHELL_VERSION="'|awk -F "=" '{print $NF}'|sed 's/\"//g'|head -1)
-	[[ -z ${SHELL_VERSION_NEW} ]] && echo -e "${Error} 无法链接到 Github !" && exit 0
-	if version_gt ${SHELL_VERSION_NEW} ${SHELL_VERSION}; then
+check_script_update(){
+    SHELL_VERSION_NEW=$(wget --no-check-certificate -qO- "https://git.io/fjlbl"|grep 'SHELL_VERSION="'|awk -F "=" '{print $NF}'|sed 's/\"//g'|head -1)
+    [[ -z ${SHELL_VERSION_NEW} ]] && echo -e "${Error} 无法链接到 Github !" && exit 0
+    if version_gt ${SHELL_VERSION_NEW} ${SHELL_VERSION}; then
         echo
         echo -e "${Green}当前脚本版本为：${SHELL_VERSION} 检测到有新版本可更新.${suffix}"
         echo -e "按任意键开始…或按Ctrl+C取消"
         char=`get_char`
         wget -N --no-check-certificate -O ss-plugins.sh "https://git.io/fjlbl" && chmod +x ss-plugins.sh
         echo -e "脚本已更新为最新版本[ ${SHELL_VERSION_NEW} ] !(注意：因为更新方式为直接覆盖当前运行的脚本，所以可能下面会提示一些报错，无视即可)" && exit 0
+    else
+        echo
+        echo -e "${Info} 当前脚本版本为: ${SHELL_VERSION} 未检测到更新版本."
+        echo
     fi
 }
 
@@ -1307,7 +1311,7 @@ case ${action} in
         do_${action} "status"
         ;;
     script)
-        check_script_version
+        check_script_update
         ;;
     uid)
         if [ "$(command -v ck-server)" ]; then

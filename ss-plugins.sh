@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.3.0"
+SHELL_VERSION="2.3.1"
 # ====================
 
 
@@ -1110,6 +1110,41 @@ install_cleanup(){
     rm -rf ${cloak_file}
 }
 
+do_uid(){
+    if [ "$(command -v ck-server)" ]; then
+        improt_package "utils" "ck_user_manager.sh"
+        ck2_users_manager
+        sleep 0.5
+        
+        is_the_api_open "stop"
+    else
+        echo -e " ${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行."
+    fi
+}
+
+do_link(){
+    local CK_UID=$1
+    
+    if [ "$(command -v ck-server)" ]; then
+        improt_package "utils" "ck_sslink.sh"
+        get_link_of_ck2 "${CK_UID}"
+    else
+        echo -e " ${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行."
+    fi
+}
+
+do_scan(){
+    local SS_URL=$1
+    
+    improt_package "utils" "qr_code.sh"
+    gen_qr_code "${SS_URL}"
+}
+
+do_show(){
+    improt_package "utils" "view_config.sh"
+    show_config "standalone"
+}
+
 do_start(){
     if [[ ! "$(command -v ss-server)" ]] && [[ ! "$(command -v ssserver)" ]]; then
         echo
@@ -1314,31 +1349,16 @@ case ${action} in
         check_script_update
         ;;
     uid)
-        if [ "$(command -v ck-server)" ]; then
-            improt_package "utils" "ck_user_manager.sh"
-            ck2_users_manager
-            sleep 0.5
-            
-            is_the_api_open "stop"
-        else
-            echo -e " ${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行."
-        fi
+        do_${action} 
         ;;
     link)
-        if [ "$(command -v ck-server)" ]; then
-            improt_package "utils" "ck_sslink.sh"
-            get_link_of_ck2 "${2}"
-        else
-            echo -e " ${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行."
-        fi
+        do_${action}  "${2}"
         ;;
     scan)
-        improt_package "utils" "qr_code.sh"
-        gen_qr_code "${2}"
+        do_${action}  "${2}"
         ;;
     show)
-        improt_package "utils" "view_config.sh"
-        show_config "standalone"
+        do_${action}
         ;;
     help)
         usage 0

@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.2.8"
+SHELL_VERSION="2.2.9"
 # ====================
 
 
@@ -203,6 +203,7 @@ usage() {
         stop             关闭
         restart          重启
         status           查看状态
+        script           升级脚本
         show             显示可视化配置
         uid              为cloak添加一个新的uid用户
         link             用新添加的uid生成一个新的SS://链接
@@ -1295,9 +1296,6 @@ do_install(){
 
 
 
-# check script version and update
-check_script_version
-
 # install and tools
 action=${1:-"install"}
 
@@ -1307,6 +1305,9 @@ case ${action} in
         ;;
     status)
         do_${action} "status"
+        ;;
+    script)
+        check_script_version
         ;;
     uid)
         if [ "$(command -v ck-server)" ]; then
@@ -1341,5 +1342,4 @@ case ${action} in
     *)
         usage 1
         ;;
-        
 esac

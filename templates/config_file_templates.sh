@@ -158,7 +158,8 @@ kcptun_config_standalone(){
 		"datashard": ${datashard},
 		"parityshard": ${parityshard},
 		"dscp": ${DSCP},
-		"nocomp": ${nocomp}
+		"nocomp": ${nocomp},
+		"tcp": ${KP_TCP}
 	}
 	EOF
 }

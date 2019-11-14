@@ -135,13 +135,23 @@ ss_kcptun_show(){
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件选项 :                                      " >> ${HUMAN_CONFIG}
-    if [[ ${nocomp} == false ]]; then
-    echo -e " 插件参数 : ${Red}-l %SS_LOCAL_HOST%:%SS_LOCAL_PORT% -r %SS_REMOTE_HOST%:%SS_REMOTE_PORT% --crypt ${crypt} --key ${key} --mtu ${MTU} --sndwnd ${rcvwnd} --rcvwnd ${sndwnd} --mode ${mode} --datashard ${datashard} --parityshard ${parityshard} --dscp ${DSCP}${suffix}" >> ${HUMAN_CONFIG}
+    if [[ ${nocomp} == false ]] && [[ ${KP_TCP} == false ]]; then
+        echo -e " 插件参数 : ${Red}-l %SS_LOCAL_HOST%:%SS_LOCAL_PORT% -r %SS_REMOTE_HOST%:%SS_REMOTE_PORT% --crypt ${crypt} --key ${key} --mtu ${MTU} --sndwnd ${rcvwnd} --rcvwnd ${sndwnd} --mode ${mode} --datashard ${datashard} --parityshard ${parityshard} --dscp ${DSCP}${suffix}" >> ${HUMAN_CONFIG}
+        echo >> ${HUMAN_CONFIG}
+        echo -e " 手机参数 : crypt=${crypt};key=${key};mtu=${MTU};sndwnd=${rcvwnd};rcvwnd=${sndwnd};mode=${mode};datashard=${datashard};parityshard=${parityshard};dscp=${DSCP}" >> ${HUMAN_CONFIG}
+    elif [[ ${nocomp} == true ]] && [[ ${KP_TCP} == false ]]; then
+        echo -e " 插件参数 : ${Red}-l %SS_LOCAL_HOST%:%SS_LOCAL_PORT% -r %SS_REMOTE_HOST%:%SS_REMOTE_PORT% --crypt ${crypt} --key ${key} --mtu ${MTU} --sndwnd ${rcvwnd} --rcvwnd ${sndwnd} --mode ${mode} --datashard ${datashard} --parityshard ${parityshard} --dscp ${DSCP} --nocomp ${nocomp}${suffix}" >> ${HUMAN_CONFIG}
+        echo >> ${HUMAN_CONFIG}
+        echo -e " 手机参数 : crypt=${crypt};key=${key};mtu=${MTU};sndwnd=${rcvwnd};rcvwnd=${sndwnd};mode=${mode};datashard=${datashard};parityshard=${parityshard};dscp=${DSCP};nocomp=${nocomp}" >> ${HUMAN_CONFIG}
+    elif [[ ${nocomp} == false ]] && [[ ${KP_TCP} == true ]]; then
+        echo -e " 插件参数 : ${Red}-l %SS_LOCAL_HOST%:%SS_LOCAL_PORT% -r %SS_REMOTE_HOST%:%SS_REMOTE_PORT% --crypt ${crypt} --key ${key} --mtu ${MTU} --sndwnd ${rcvwnd} --rcvwnd ${sndwnd} --mode ${mode} --datashard ${datashard} --parityshard ${parityshard} --dscp ${DSCP} --tcp ${KP_TCP}${suffix}" >> ${HUMAN_CONFIG}
+        echo >> ${HUMAN_CONFIG}
+        echo -e " 手机参数 : crypt=${crypt};key=${key};mtu=${MTU};sndwnd=${rcvwnd};rcvwnd=${sndwnd};mode=${mode};datashard=${datashard};parityshard=${parityshard};dscp=${DSCP};tcp=${KP_TCP}" >> ${HUMAN_CONFIG}
     else
-    echo -e " 插件参数 : ${Red}-l %SS_LOCAL_HOST%:%SS_LOCAL_PORT% -r %SS_REMOTE_HOST%:%SS_REMOTE_PORT% --crypt ${crypt} --key ${key} --mtu ${MTU} --sndwnd ${rcvwnd} --rcvwnd ${sndwnd} --mode ${mode} --datashard ${datashard} --parityshard ${parityshard} --dscp ${DSCP} --nocomp ${nocomp}${suffix}" >> ${HUMAN_CONFIG}
+        echo -e " 插件参数 : ${Red}-l %SS_LOCAL_HOST%:%SS_LOCAL_PORT% -r %SS_REMOTE_HOST%:%SS_REMOTE_PORT% --crypt ${crypt} --key ${key} --mtu ${MTU} --sndwnd ${rcvwnd} --rcvwnd ${sndwnd} --mode ${mode} --datashard ${datashard} --parityshard ${parityshard} --dscp ${DSCP} --nocomp ${nocomp} --tcp ${KP_TCP}${suffix}" >> ${HUMAN_CONFIG}
+        echo >> ${HUMAN_CONFIG}
+        echo -e " 手机参数 : crypt=${crypt};key=${key};mtu=${MTU};sndwnd=${rcvwnd};rcvwnd=${sndwnd};mode=${mode};datashard=${datashard};parityshard=${parityshard};dscp=${DSCP};nocomp=${nocomp};tcp=${KP_TCP}" >> ${HUMAN_CONFIG}
     fi
-    echo >> ${HUMAN_CONFIG}
-    echo -e " 手机参数 : crypt=${crypt};key=${key};mtu=${MTU};sndwnd=${rcvwnd};rcvwnd=${sndwnd};mode=${mode};datashard=${datashard};parityshard=${parityshard};dscp=${DSCP};nocomp=${nocomp}" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}

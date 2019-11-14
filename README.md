@@ -20,6 +20,7 @@ Usage: ./ss-plugins.sh [options...] [args...]
         stop             关闭
         restart          重启
         status           查看状态
+        script           升级脚本
         show             显示可视化配置
         uid              为cloak添加一个新的uid用户
         link             用新添加的uid生成一个新的SS://链接

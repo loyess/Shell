@@ -177,10 +177,10 @@ update_cloak(){
 update_caddy(){
     cd ${CUR_DIR}
     
-    if [[ -e '/usr/local/caddy/caddy' ]]; then
+    if [[ -e ${CADDY_BIN_PATH} ]]; then
         caddy_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/caddyserver/caddy/releases | grep -o '"tag_name": ".*"' | grep -v 'beta' | head -n 1 | sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
         [ -z ${caddy_ver} ] && echo -e "${Error} 获取 caddy 最新版本失败." && exit 1
-        current_caddy_ver=$(/usr/local/caddy/caddy -version | grep Caddy | cut -d\  -f2 | sed 's/v//g')
+        current_caddy_ver=$(${CADDY_BIN_PATH} -version | grep Caddy | cut -d\  -f2 | sed 's/v//g')
         if ! check_latest_version ${current_caddy_ver} ${caddy_ver}; then
             echo -e "${Point} caddy当前已是最新版本${current_caddy_ver}不需要更新."
             echo

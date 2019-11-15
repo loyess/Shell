@@ -1,10 +1,10 @@
 install_kcptun(){
     cd ${CUR_DIR}
     tar zxf ${kcptun_file}.tar.gz
-    if [ ! -d "$(dirname ${KCPTUN_INSTALL_DIR})" ]; then
-        mkdir -p $(dirname ${KCPTUN_INSTALL_DIR})
+    if [ ! -d ${KCPTUN_INSTALL_PATH} ]; then
+        mkdir -p ${KCPTUN_INSTALL_PATH}
     fi
-    mv server_linux_amd64 ${KCPTUN_INSTALL_DIR}
+    mv server_linux_amd64 ${KCPTUN_BIN_PATH}
     if [ $? -eq 0 ]; then
         chmod +x ${KCPTUN_INIT}
         local service_name=$(basename ${KCPTUN_INIT})
@@ -22,6 +22,6 @@ install_kcptun(){
         install_cleanup
         exit 1
     fi
-    [ -f ${KCPTUN_INSTALL_DIR} ] && ln -fs ${KCPTUN_INSTALL_DIR} /usr/bin
+    [ -f ${KCPTUN_BIN_PATH} ] && ln -fs ${KCPTUN_BIN_PATH} /usr/bin
     
 }

@@ -254,10 +254,10 @@ install_prepare_libev_kcptun(){
         continue
     done 
     
-    # 设置是否关闭数据压缩 nocomp
+    # 是否关闭数据压缩 nocomp
     while true
     do
-        echo -e "设置是否关闭数据压缩(nocomp)"
+        echo -e "是否禁用数据压缩(nocomp)"
 		read -p "(默认: n) [y/n]: " yn
         [ -z "${yn}" ] && yn="N"
         case "${yn:0:1}" in
@@ -282,10 +282,10 @@ install_prepare_libev_kcptun(){
 	done
     
     if [[ ${nocomp} = true ]]; then
-        # 设置是否开启模拟TCP连接 TCP
+        # 是否开启模拟TCP连接 TCP
         while true
         do
-            echo -e "设置是否开启模拟TCP连接(tcp)"
+            echo -e "是否开启模拟TCP连接(tcp)"
             read -p "(默认: n) [y/n]: " yn
             [ -z "${yn}" ] && yn="N"
             case "${yn:0:1}" in

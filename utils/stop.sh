@@ -58,7 +58,7 @@ cloak_stop(){
 caddy_stop(){
     ps -ef |grep -v grep | grep caddy |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
     
-    if [ -e "${CADDY_FILE}" ]; then
+    if [ -e "${CADDY_BIN_PATH}" ]; then
         echo -e "Stopping caddy success"
     fi
 }

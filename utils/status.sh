@@ -65,7 +65,7 @@ other_status(){
         fi
     fi
     
-    if [ -e "${CADDY_FILE}" ]; then
+    if [ -e "${CADDY_BIN_PATH}" ]; then
         CADDY_PID=`ps -ef |grep -v grep | grep caddy |awk '{print $2}'`
         
         if [[ ! -z "${CADDY_PID}" ]]; then

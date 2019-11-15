@@ -45,12 +45,14 @@ SHADOWSOCKS_CONFIG="/etc/shadowsocks/config.json"
 
 # shadowsocks-libev config and init
 SHADOWSOCKS_LIBEV_INSTALL_PATH="/usr/local/bin"
+SHADOWSOCKS_LIBEV_BIN_PATH="/usr/local/bin/ss-server"
 SHADOWSOCKS_LIBEV_INIT="/etc/init.d/shadowsocks-libev"
 SHADOWSOCKS_LIBEV_CENTOS="${BASE_URL}/service/shadowsocks-libev_centos.sh"
 SHADOWSOCKS_LIBEV_DEBIAN="${BASE_URL}/service/shadowsocks-libev_debian.sh"
 
 # shadowsocks-rust config and init
 SHADOWSOCKS_RUST_INSTALL_PATH="/usr/local/bin"
+SHADOWSOCKS_RUST_BIN_PATH="/usr/local/bin/ssserver"
 SHADOWSOCKS_RUST_INIT="/etc/init.d/shadowsocks-rust"
 SHADOWSOCKS_RUST_CENTOS="${BASE_URL}/service/shadowsocks-rust_centos.sh"
 SHADOWSOCKS_RUST_DEBIAN="${BASE_URL}/service/shadowsocks-rust_debian.sh"
@@ -66,9 +68,14 @@ MBEDTLS_FILE="mbedtls-${MBEDTLS_VERSION}"
 MBEDTLS_URL="https://tls.mbed.org/download/mbedtls-${MBEDTLS_VERSION}-gpl.tgz"
 
 
+# v2ray-plugin
+V2RAY_PLUGIN_INSTALL_PATH="/usr/local/bin"
+V2RAY_PLUGIN_BIN_PATH="/usr/local/bin/v2ray-plugin"
+
 
 # kcptun
-KCPTUN_INSTALL_DIR="/usr/local/kcptun/kcptun-server"
+KCPTUN_INSTALL_PATH="/usr/local/kcptun"
+KCPTUN_BIN_PATH="/usr/local/kcptun/kcptun-server"
 KCPTUN_INIT="/etc/init.d/kcptun"
 KCPTUN_CONFIG="/etc/kcptun/config.json"
 KCPTUN_LOG_DIR="/var/log/kcptun-server.log"
@@ -76,7 +83,20 @@ KCPTUN_CENTOS="${BASE_URL}/service/kcptun_centos.sh"
 KCPTUN_DEBIAN="${BASE_URL}/service/kcptun_debian.sh"
 
 
+# simple-obfs
+SIMPLE_OBFS_INSTALL_PATH="/usr/local/bin"
+SIMPLE_OBFS_BIN_PATH="/usr/local/bin/obfs-server"
+
+
+# goquiet
+GOQUIET_INSTALL_PATH="/usr/local/bin"
+GOQUIET_BIN_PATH="/usr/local/bin/gq-server"
+
+
 # cloak
+CLOAK_INSTALL_PATH="/usr/local/bin"
+CLOAK_SERVER_BIN_PATH="/usr/local/bin/ck-server"
+CLOAK_CLIENT_BIN_PATH="/usr/local/bin/ck-client"
 CLOAK_INIT="/etc/init.d/cloak"
 CLOAK_CENTOS="${BASE_URL}/service/cloak_centos.sh"
 CLOAK_DEBIAN="${BASE_URL}/service/cloak_debian.sh"
@@ -86,7 +106,8 @@ CK_SERVER_CONFIG="/etc/cloak/ckserver.json"
 
 
 # caddy
-CADDY_FILE="/usr/local/caddy/caddy"
+CADDY_INSTALL_PATH="/usr/local/caddy"
+CADDY_BIN_PATH="/usr/local/caddy/caddy"
 CADDY_CONF_FILE="/usr/local/caddy/Caddyfile"
 CADDY_BASE_URL="https://caddyserver.com/download/linux/amd64"
 CADDY_INIT="/etc/init.d/caddy"
@@ -216,6 +237,70 @@ usage() {
 	EOF
 
     exit $1
+}
+
+menu_status(){
+    local BIN_PATH=$1
+    local SS_PID=$2
+    
+    if [[ -e ${BIN_PATH} ]] && [[ -e ${V2RAY_PLUGIN_BIN_PATH} ]] && [[ -e ${CADDY_BIN_PATH}  ]]; then
+        V2_PID=`ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}'`
+        CADDY_PID=`ps -ef |grep -v grep | grep caddy |awk '{print $2}'`
+        
+        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${V2_PID} ]] && [[ ! -z ${CADDY_PID} ]]; then
+            echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+        else
+            echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+        fi
+    elif [[ -e ${BIN_PATH} ]] && [[ -e ${V2RAY_PLUGIN_BIN_PATH} ]]; then
+        V2_PID=`ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}'`
+        
+        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${V2_PID} ]]; then
+            echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+        else
+            echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+        fi
+    elif [[ -e ${BIN_PATH} ]] && [[ -e ${KCPTUN_BIN_PATH} ]]; then
+        KP_PID=`ps -ef |grep -v grep | grep kcptun-server |awk '{print $2}'`
+        
+        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${KP_PID} ]]; then
+            echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+        else
+            echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+        fi
+     elif [[ -e ${BIN_PATH} ]] && [[ -e ${SIMPLE_OBFS_BIN_PATH} ]]; then
+        OBFS_PID=`ps -ef |grep -v grep | grep obfs-server |awk '{print $2}'`
+        
+        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${OBFS_PID} ]]; then
+            echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+        else
+            echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+        fi
+     elif [[ -e ${BIN_PATH} ]] && [[ -e ${GOQUIET_BIN_PATH} ]]; then    
+        GQ_PID=`ps -ef |grep -v grep | grep gq-server |awk '{print $2}'`
+        
+        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${GQ_PID} ]]; then
+            echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+        else
+            echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+        fi
+     elif [[ -e ${BIN_PATH} ]] && [[ -e ${CLOAK_SERVER_BIN_PATH} ]]; then
+        CK_PID=`ps -ef |grep -v grep | grep ck-server |awk '{print $2}'`
+        
+        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${CK_PID} ]]; then
+            echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+        else
+            echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+        fi
+    elif [[ -e ${BIN_PATH} ]]; then
+        if [[ ! -z ${SS_PID} ]]; then
+            echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+        else
+            echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+        fi
+    else
+        echo -e " 当前状态: ${Red}未安装${suffix}"
+    fi
 }
 
 improt_package(){
@@ -1057,7 +1142,7 @@ install_main(){
 }
 
 install_step_all(){
-    [[ -e '/usr/local/bin/ss-server' ]] || [[ -e '/usr/local/bin/ssserver' ]] && echo -e "${Info} Shadowsocks 已经安装." && exit 1
+    [[ -e ${SHADOWSOCKS_LIBEV_BIN_PATH} ]] || [[ -e ${SHADOWSOCKS_RUST_BIN_PATH} ]] && echo -e "${Info} Shadowsocks 已经安装." && exit 1
     disable_selinux
     install_prepare
     if [[ ${SS_VERSION} = "ss-libev" ]]; then
@@ -1118,7 +1203,9 @@ do_uid(){
         
         is_the_api_open "stop"
     else
-        echo -e " ${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行."
+        echo
+        echo -e "${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行."
+        echo
     fi
 }
 
@@ -1129,7 +1216,9 @@ do_link(){
         improt_package "utils" "ck_sslink.sh"
         get_link_of_ck2 "${CK_UID}"
     else
-        echo -e " ${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行."
+        echo
+        echo -e "${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行."
+        echo
     fi
 }
 
@@ -1180,78 +1269,20 @@ do_restart(){
     do_start
 }
 
-# install status
 do_status(){
     local mark=$1
     if [ "$(command -v ss-server)" ]; then
         PID=`ps -ef |grep -v grep | grep ss-server |awk '{print $2}'`
-        local BIN_PATH=/usr/local/bin/ss-server
+        local BIN_PATH=${SHADOWSOCKS_LIBEV_BIN_PATH}
         local SS_PID=${PID}
     elif [ "$(command -v ssserver)" ]; then
         RUST_PID=`ps -ef |grep -v grep | grep ssserver |awk '{print $2}'`
-        local BIN_PATH=/usr/local/bin/ssserver
+        local BIN_PATH=${SHADOWSOCKS_RUST_BIN_PATH}
         local SS_PID=${RUST_PID}
     fi
     
     if [[ ${mark} == "menu" ]]; then
-        if [[ -e ${BIN_PATH} ]] && [[ "$(command -v v2ray-plugin)" ]] && [[ -e "${CADDY_FILE}"  ]]; then
-            V2_PID=`ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}'`
-            CADDY_PID=`ps -ef |grep -v grep | grep caddy |awk '{print $2}'`
-            
-            if [[ ! -z "${SS_PID}" ]] && [[ ! -z "${V2_PID}" ]] && [[ ! -z "${CADDY_PID}" ]]; then
-                echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
-            else
-                echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
-            fi
-        elif [[ -e ${BIN_PATH} ]] && [[ "$(command -v v2ray-plugin)" ]]; then
-            V2_PID=`ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}'`
-            
-            if [[ ! -z "${SS_PID}" ]] && [[ ! -z "${V2_PID}" ]]; then
-                echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
-            else
-                echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
-            fi
-        elif [[ -e ${BIN_PATH} ]] && [[ "$(command -v kcptun-server)" ]]; then
-            KP_PID=`ps -ef |grep -v grep | grep kcptun-server |awk '{print $2}'`
-            
-            if [[ ! -z "${SS_PID}" ]] && [[ ! -z "${KP_PID}" ]]; then
-                echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
-            else
-                echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
-            fi
-         elif [[ -e ${BIN_PATH} ]] && [[ "$(command -v obfs-server)" ]]; then
-            OBFS_PID=`ps -ef |grep -v grep | grep obfs-server |awk '{print $2}'`
-            
-            if [[ ! -z "${SS_PID}" ]] && [[ ! -z "${OBFS_PID}" ]]; then
-                echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
-            else
-                echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
-            fi
-         elif [[ -e ${BIN_PATH} ]] && [[ "$(command -v gq-server)" ]]; then    
-            GQ_PID=`ps -ef |grep -v grep | grep gq-server |awk '{print $2}'`
-            
-            if [[ ! -z "${SS_PID}" ]] && [[ ! -z "${GQ_PID}" ]]; then
-                echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
-            else
-                echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
-            fi
-         elif [[ -e ${BIN_PATH} ]] && [[ "$(command -v ck-server)" ]]; then
-            CK_PID=`ps -ef |grep -v grep | grep ck-server |awk '{print $2}'`
-            
-            if [[ ! -z "${SS_PID}" ]] && [[ ! -z "${CK_PID}" ]]; then
-                echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
-            else
-                echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
-            fi
-        elif [[ -e ${BIN_PATH} ]]; then
-            if [[ ! -z "${SS_PID}" ]]; then
-                echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
-            else
-                echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
-            fi
-        else
-            echo -e " 当前状态: ${Red}未安装${suffix}"
-        fi
+        menu_status ${BIN_PATH} ${SS_PID}
     else
         if [[ ! -e ${BIN_PATH} ]]; then
             echo
@@ -1270,9 +1301,9 @@ do_update(){
     
     improt_package "utils" "update.sh"
     
-    if [[ -e '/usr/local/bin/ss-server' ]]; then
+    if [[ -e ${SHADOWSOCKS_LIBEV_BIN_PATH} ]]; then
         update_shadowsocks_libev
-    elif [[ -e '/usr/local/bin/ssserver' ]]; then
+    elif [[ -e ${SHADOWSOCKS_RUST_BIN_PATH} ]]; then
         update_shadowsocks_rust
     fi
 }
@@ -1302,6 +1333,8 @@ do_uninstall(){
 }
 
 do_install(){
+    local FLAG
+    
     # check supported
     if ! install_check; then
         echo -e "[${Red}Error${suffix}] Your OS is not supported to run it!"
@@ -1309,7 +1342,15 @@ do_install(){
         exit 1
     fi
     
-    echo -e " Shadowsocks一键管理脚本 ${Red}[v${SHELL_VERSION} ${methods}]${suffix}
+    if [[ -e ${SHADOWSOCKS_LIBEV_BIN_PATH} ]]; then
+        FLAG="Shadowsocks-libev"
+    elif [[ -e ${SHADOWSOCKS_RUST_BIN_PATH} ]]; then
+        FLAG="Shadowsocks-rust"
+    else
+        FLAG="Shadowsocks"
+    fi
+    
+    echo -e " ${FLAG}一键脚本 ${Red}[v${SHELL_VERSION} ${methods}]${suffix}
 
     ${Green}1.${suffix} BBR
     ${Green}2.${suffix} Install

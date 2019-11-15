@@ -1,7 +1,7 @@
 update_v2ray_plugin(){
     cd ${CUR_DIR}
     
-    if [[ -e '/usr/local/bin/v2ray-plugin' ]]; then
+    if [[ -e ${V2RAY_PLUGIN_BIN_PATH} ]]; then
         v2ray_plugin_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/v2ray-plugin/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
         [ -z ${v2ray_plugin_ver} ] && echo -e "${Error} 获取 v2ray-plugin 最新版本失败." && exit 1
         current_v2ray_plugin_ver=$(v2ray-plugin -version | grep v2ray-plugin | cut -d\  -f2 | sed 's/v//g')
@@ -17,7 +17,7 @@ update_v2ray_plugin(){
             do_restart > /dev/null 2>&1
             
             echo -e "${Info} v2ray-plugin已成功升级为最新版本${v2ray_plugin_ver}"
-            if [[ ! -e ${CADDY_FILE} ]]; then
+            if [[ ! -e ${CADDY_BIN_PATH} ]]; then
                 echo
                 exit 1
             fi
@@ -31,7 +31,7 @@ update_v2ray_plugin(){
         
         if ! check_latest_version ${current_v2ray_plugin_ver} ${v2ray_plugin_ver}; then
             echo -e "${Point} v2ray-plugin当前已是最新版本${current_v2ray_plugin_ver}不需要更新."
-            if [[ ! -e ${CADDY_FILE} ]]; then
+            if [[ ! -e ${CADDY_BIN_PATH} ]]; then
                 echo
                 exit 1
             fi
@@ -51,7 +51,7 @@ update_v2ray_plugin(){
         do_restart > /dev/null 2>&1
         
         echo -e "${Info} v2ray-plugin已成功升级为最新版本${v2ray_plugin_ver}"
-        if [[ ! -e ${CADDY_FILE} ]]; then
+        if [[ ! -e ${CADDY_BIN_PATH} ]]; then
             echo
             exit 1
         fi
@@ -65,7 +65,7 @@ update_v2ray_plugin(){
 update_kcptun(){
     cd ${CUR_DIR}
     
-    if [[ -e ${KCPTUN_INSTALL_DIR} ]]; then
+    if [[ -e ${KCPTUN_BIN_PATH} ]]; then
         kcptun_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/xtaci/kcptun/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
         [ -z ${kcptun_ver} ] && echo -e "${Error} 获取 kcptun 最新版本失败." && exit 1
         current_kcptun_ver=$(kcptun-server -v | grep kcptun | cut -d\  -f3)
@@ -94,7 +94,7 @@ update_kcptun(){
 update_simple_obfs(){
     cd ${CUR_DIR}
     
-    if [[ -e '/usr/local/bin/obfs-server' ]]; then
+    if [[ -e ${SIMPLE_OBFS_BIN_PATH} ]]; then
         simple_obfs_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/simple-obfs/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
         [ -z ${simple_obfs_ver} ] && echo -e "${Error} 获取 simple-obfs 最新版本失败." && exit 1
         current_simple_obfs_ver=$(obfs-server | grep simple-obfs | cut -d\  -f2)
@@ -119,7 +119,7 @@ update_simple_obfs(){
 update_goquiet(){
     cd ${CUR_DIR}
     
-    if [[ -e '/usr/local/bin/gq-server' ]]; then
+    if [[ -e ${GOQUIET_BIN_PATH} ]]; then
         goquiet_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/cbeuw/GoQuiet/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
         [ -z ${goquiet_ver} ] && echo -e "${Error} 获取 goquiet 最新版本失败." && exit 1
         current_goquiet_ver=$(gq-server -v | grep gq-server | cut -d\  -f2)
@@ -148,7 +148,7 @@ update_goquiet(){
 update_cloak(){
     cd ${CUR_DIR}
     
-    if [[ -e '/usr/local/bin/ck-server' ]]; then
+    if [[ -e ${CLOAK_SERVER_BIN_PATH} ]]; then
         cloak_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/cbeuw/Cloak/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
         [ -z ${cloak_ver} ] && echo -e "${Error} 获取 cloak 最新版本失败." && exit 1
         current_cloak_ver=$(ck-server -v | grep ck-server | cut -d\  -f2)

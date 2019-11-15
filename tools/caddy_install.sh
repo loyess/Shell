@@ -31,11 +31,11 @@ install_caddy(){
 	rm -rf "init/"
     
 	chmod +x caddy
-    if [ ! -e "$(dirname ${CADDY_FILE})" ]; then
-        mkdir -p $(dirname ${CADDY_FILE})
+    if [ ! -e ${CADDY_INSTALL_PATH} ]; then
+        mkdir -p ${CADDY_INSTALL_PATH}
     fi
-    mv caddy ${CADDY_FILE}
-    [ -f ${CADDY_FILE} ] && ln -fs ${CADDY_FILE} /usr/bin
+    mv caddy ${CADDY_BIN_PATH}
+    [ -f ${CADDY_BIN_PATH} ] && ln -fs ${CADDY_BIN_PATH} /usr/bin
     
     service_caddy
     echo && echo -e " Caddy 使用命令：${CADDY_CONF_FILE}

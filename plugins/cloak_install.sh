@@ -1,7 +1,7 @@
 install_cloak(){
     cd ${CUR_DIR}
     chmod +x ${cloak_file}
-    mv ${cloak_file} /usr/local/bin/ck-server
+    mv ${cloak_file} ${CLOAK_SERVER_BIN_PATH}
     if [ $? -eq 0 ]; then
         chmod +x ${CLOAK_INIT}
         local service_name=$(basename ${CLOAK_INIT})

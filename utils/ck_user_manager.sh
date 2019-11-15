@@ -5,7 +5,7 @@ is_the_api_open(){
     if [ "${mark}" == "start" ]; then
         if [ -z ${PID} ]; then
             # open the Api
-            /usr/local/bin/ck-client -s 127.0.0.1 -l 8080 -a $(cat ${CK_SERVER_CONFIG} | jq -r .AdminUID) -c ${CK_CLIENT_CONFIG} > /dev/null 2>&1 &
+            ${CLOAK_CLIENT_BIN_PATH} -s 127.0.0.1 -l 8080 -a $(cat ${CK_SERVER_CONFIG} | jq -r .AdminUID) -c ${CK_CLIENT_CONFIG} > /dev/null 2>&1 &
             sleep 0.5
         fi
     elif [ "${mark}" == "stop" ]; then
@@ -347,11 +347,11 @@ download_ck_clinet(){
     # install ck-client
     cd ${CUR_DIR}
     chmod +x ${cloak_file}
-    mv ${cloak_file} /usr/local/bin/ck-client
+    mv ${cloak_file} ${CLOAK_CLIENT_BIN_PATH}
 }
 
 ck2_users_manager(){
-    if [[ ! -e '/usr/local/bin/ck-client' ]]; then
+    if [[ ! -e ${CLOAK_CLIENT_BIN_PATH} ]]; then
         # Download cloak client
         cloak_ver=$(ck-server -v | grep ck-server | cut -d\  -f2)
         download_ck_clinet ${cloak_ver}

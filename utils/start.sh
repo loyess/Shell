@@ -145,7 +145,7 @@ cloak_start(){
 }
 
 caddy_start(){
-    if [ -e "${CADDY_FILE}" ]; then
+    if [ -e "${CADDY_BIN_PATH}" ]; then
         if [[ -e ~/.api/cf.api ]]; then
             export CLOUDFLARE_EMAIL=$(cat ~/.api/cf.api | grep "CLOUDFLARE_EMAIL" | cut -d= -f2)
             export CLOUDFLARE_API_KEY=$(cat ~/.api/cf.api | grep "CLOUDFLARE_API_KEY" | cut -d= -f2)

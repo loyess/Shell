@@ -1,7 +1,7 @@
 install_goquiet(){
     cd ${CUR_DIR}
     chmod +x ${goquiet_file}
-    mv ${goquiet_file} /usr/local/bin/gq-server
+    mv ${goquiet_file} ${GOQUIET_BIN_PATH}
     if [ $? -eq 0 ]; then
         echo -e "${Info} GoQuiet安装成功."
     else

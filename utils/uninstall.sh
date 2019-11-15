@@ -81,7 +81,7 @@ kcptun_uninstall(){
     fi
     
     # uninstall kcptun
-    rm -fr $(dirname ${KCPTUN_INSTALL_DIR}) > /dev/null 2>&1
+    rm -fr ${KCPTUN_INSTALL_PATH} > /dev/null 2>&1
     rm -fr $(dirname ${KCPTUN_CONFIG}) > /dev/null 2>&1
     rm -fr ${KCPTUN_LOG_DIR} > /dev/null 2>&1
     rm -f ${KCPTUN_INIT} > /dev/null 2>&1
@@ -129,7 +129,7 @@ cloak_uninstall(){
 }
 
 caddy_uninstall(){
-    if [[ -e ${CADDY_FILE} ]]; then
+    if [[ -e ${CADDY_BIN_PATH} ]]; then
         PID=`ps -ef |grep "caddy" |grep -v "grep" |grep -v "init.d" |grep -v "service" |grep -v "caddy_install" |awk '{print $2}'`
         [[ ! -z ${PID} ]] && kill -9 ${PID}
         if check_sys packageManager yum; then
@@ -138,7 +138,7 @@ caddy_uninstall(){
             update-rc.d -f caddy remove
         fi
         [[ -s /tmp/caddy.log ]] && rm -rf /tmp/caddy.log
-        rm -rf $(dirname ${CADDY_FILE})
+        rm -rf $(dirname ${CADDY_BIN_PATH})
         rm -rf /etc/init.d/caddy
         rm -rf /usr/bin/caddy
     fi

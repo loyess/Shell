@@ -9,7 +9,7 @@ other_status(){
     
     if [ "$(command -v ssserver)" ]; then
         if [[ ! -z "${RUST_PID}" ]]; then
-            echo -e "${Info} shadowsocklibev-rust (pid ${PID}) is already running."
+            echo -e "${Info} shadowsocklibev-rust (pid ${RUST_PID}) is already running."
         else
             echo -e "${Point} shadowsocklibev-rust is already installed but not running."
         fi

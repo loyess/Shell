@@ -1047,10 +1047,6 @@ install_completed(){
             ss_v2ray_ws_tls_web_show
         elif [[ ${libev_v2ray} == "5" ]]; then
             if [[ ${web_flag} = "1" ]]; then
-                # cloudflare email & api key
-                export CLOUDFLARE_EMAIL="${CF_Email}"
-                export CLOUDFLARE_API_KEY="${CF_Key}"
-                
                 # start caddy
                 /etc/init.d/caddy start > /dev/null 2>&1
             elif [[ ${web_flag} = "2" ]]; then

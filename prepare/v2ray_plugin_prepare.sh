@@ -197,8 +197,8 @@ choose_api_get_mode(){
         CF_Email=$(cat ~/.api/cf.api | grep "CLOUDFLARE_EMAIL" | cut -d= -f2)
         CF_Key=$(cat ~/.api/cf.api | grep "CLOUDFLARE_API_KEY" | cut -d= -f2)
         echo
-        echo -e "${Red}  CF_Key = ${CF_Key}${suffix}"
-        echo -e "${Red}  CF_Email = ${CF_Email}${suffix}"
+        echo -e "${Red}  email = ${CF_Email}${suffix}"
+        echo -e "${Red}  key = ${CF_Key}${suffix}"
         echo 
     fi
 }
@@ -273,23 +273,6 @@ get_input_email_for_caddy(){
 
 get_input_api_info(){
     while true
-    do
-        echo
-        read -e -p "请输入你的Cloudflare的Global API Key：" CF_Key
-        if [[ $(echo ${#CF_Key}) -ne 37 ]]; then
-            echo
-            echo -e "${Error} 请输入正确合法的Global API Key."
-            echo
-            continue
-        fi
-
-        echo
-        echo -e "${Red}  CF_Key = ${CF_Key}${suffix}"
-        echo 
-        break
-    done
-    
-    while true
     do    
         echo 
         read -e -p "请输入你的Cloudflare的账号Email：" CF_Email
@@ -301,8 +284,25 @@ get_input_api_info(){
         fi
         
         echo
-        echo -e "${Red}  CF_Email = ${CF_Email}${suffix}"
+        echo -e "${Red}  email = ${CF_Email}${suffix}"
         echo
+        break
+    done
+    
+    while true
+    do
+        echo
+        read -e -p "请输入你的Cloudflare的Global API Key：" CF_Key
+        if [[ $(echo ${#CF_Key}) -ne 37 ]]; then
+            echo
+            echo -e "${Error} 请输入正确合法的Global API Key."
+            echo
+            continue
+        fi
+
+        echo
+        echo -e "${Red}  key = ${CF_Key}${suffix}"
+        echo 
         break
     done
     

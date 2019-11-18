@@ -44,6 +44,11 @@ if [ ! -d $PID_DIR ]; then
     fi
 fi
 
+if $(grep -q 'cloudflare' $CONF); then
+    export CLOUDFLARE_EMAIL=$(cat ~/.api/cf.api | grep "CLOUDFLARE_EMAIL" | cut -d= -f2)
+    export CLOUDFLARE_API_KEY=$(cat ~/.api/cf.api | grep "CLOUDFLARE_API_KEY" | cut -d= -f2)
+fi
+
 if [ ! -f $CONF ]; then
     echo "$NAME config file $CONF not found"
     exit 1

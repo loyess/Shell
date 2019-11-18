@@ -154,3 +154,19 @@ caddy_start(){
     fi  
 }
 
+nginx_start(){
+    if [ -e "${NGINX_BIN_PATH}" ]; then
+        systemctl start nginx
+        
+        if $(systemctl status nginx | grep -q '\(running\)'); then 
+            echo "Starting nginx success"
+        else
+            echo "Starting nginx failed"
+        fi
+    fi
+}
+
+
+
+
+

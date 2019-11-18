@@ -63,3 +63,15 @@ caddy_stop(){
     fi
 }
 
+nginx_stop(){
+    if [ -e "${NGINX_BIN_PATH}" ]; then
+        systemctl stop nginx
+        
+        if $(systemctl status nginx | grep -q '\(dead\)'); then 
+            echo "Stopping nginx success"
+        else
+            echo "Stopping nginx failed"
+        fi
+    fi
+}
+

@@ -74,4 +74,14 @@ other_status(){
             echo -e "${Point} caddy is already installed but not running."
         fi
     fi
+    
+    if [ -e "${NGINX_BIN_PATH}" ]; then
+        NGINX_PID=`ps -ef |grep -v grep | grep nginx.conf |awk '{print $2}'`
+        
+        if [[ ! -z "${NGINX_PID}" ]]; then
+            echo -e "${Info} nginx (pid ${NGINX_PID}) is already running."
+        else
+            echo -e "${Point} nginx is already installed but not running."
+        fi
+    fi
 }

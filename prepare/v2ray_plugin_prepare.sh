@@ -49,6 +49,82 @@ transport_mode_menu(){
     done
 }
 
+web_server_menu(){
+    local libev_v2ray=$1
+    local WEB_SERVER_STYLE=(caddy nginx)
+    if [[ ${libev_v2ray} = "4" || ${libev_v2ray} = "5" ]]; then
+        while true
+        do
+            echo -e "请选择一个web服务器\n"
+            for ((i=1;i<=${#WEB_SERVER_STYLE[@]};i++)); do
+                hint="${WEB_SERVER_STYLE[$i-1]}"
+                echo -e "${Green}  ${i}.${suffix} ${hint}"
+            done
+            echo
+            read -e -p "(默认：${WEB_SERVER_STYLE[0]}):" web_flag
+            [ -z "$web_flag" ] && web_flag=1
+            expr ${web_flag} + 1 &>/dev/null
+            if [ $? -ne 0 ]; then
+                echo
+                echo -e "${Error} 请输入一个数字"
+                echo
+                continue
+            fi
+            if [[ "$web_flag" -lt 1 || "$web_flag" -gt ${#WEB_SERVER_STYLE[@]} ]]; then
+                echo
+                echo -e "${Error} 请输入一个数字在 [1-${#WEB_SERVER_STYLE[@]}] 之间"
+                echo
+                continue
+            fi
+            
+            web_server=${WEB_SERVER_STYLE[$web_flag-1]}
+            echo
+            echo -e "${Red}  web = ${web_server}${suffix}"
+            echo 
+            
+            break
+        done
+    fi
+}
+
+choose_nginx_version_menu(){
+    local web_flag=$1
+    local NGINX_PACKAGES_V=(Stable Mainline)
+    
+    if [[ ${web_flag} = "2" ]]; then
+        while true
+        do
+            echo -e "请选择Nginx软件包版本\n"
+            for ((i=1;i<=${#NGINX_PACKAGES_V[@]};i++)); do
+                hint="${NGINX_PACKAGES_V[$i-1]}"
+                echo -e "${Green}  ${i}.${suffix} ${hint}"
+            done
+            echo
+            read -e -p "(默认：${NGINX_PACKAGES_V[0]}):" pkg_flag
+            [ -z "$pkg_flag" ] && pkg_flag=1
+            expr ${pkg_flag} + 1 &>/dev/null
+            if [ $? -ne 0 ]; then
+                echo
+                echo -e "${Error} 请输入一个数字"
+                echo
+                continue
+            fi
+            if [[ "$pkg_flag" -lt 1 || "$pkg_flag" -gt ${#NGINX_PACKAGES_V[@]} ]]; then
+                echo
+                echo -e "${Error} 请输入一个数字在 [1-${#NGINX_PACKAGES_V[@]}] 之间"
+                echo
+                continue
+            fi
+            
+            echo
+            echo -e "${Red}  version = ${NGINX_PACKAGES_V[$pkg_flag-1]}${suffix}"
+            echo 
+            
+            break
+        done
+    fi
+}
+
 v2ray_plugin_prot_reset(){
     shadowsocksport=$1
     echo
@@ -296,9 +372,11 @@ error_info_text(){
 install_prepare_libev_v2ray(){
     error_info_text
     transport_mode_menu
+    web_server_menu ${libev_v2ray}
+    choose_nginx_version_menu ${web_flag}
     
  
-    if [[ ${libev_v2ray} == "1" ]]; then
+    if [[ ${libev_v2ray} = "1" ]]; then
         if check_port_occupy "80"; then
             echo -e "${Error} 检测到80端口被占用，请排查后重新运行." && exit 1
         fi
@@ -307,7 +385,7 @@ install_prepare_libev_v2ray(){
     elif [[ ${libev_v2ray} = "2" || ${libev_v2ray} = "3" ]]; then
         if check_port_occupy "443"; then
             echo -e "${Error} 检测到443端口被占用，请排查后重新运行." && exit 1
-  	  fi
+        fi
         v2ray_plugin_prot_reset 443
         
         while true
@@ -332,8 +410,8 @@ install_prepare_libev_v2ray(){
         done 
     elif [[ ${libev_v2ray} = "4" ]]; then
         if check_port_occupy "443"; then
-       	 echo -e "${Error} 检测到443端口被占用，请排查后重新运行." && exit 1
-  	  fi
+            echo -e "${Error} 检测到443端口被占用，请排查后重新运行." && exit 1
+        fi
         while true
         do
             get_input_domain "请输入你的域名(CF->DNS->Proxied status：DNS-Only)"
@@ -345,7 +423,12 @@ install_prepare_libev_v2ray(){
             fi
             
             if is_dns_only ${domain_ip}; then
-                get_input_email_for_caddy
+                if [[ ${web_flag} = "1" ]]; then
+                    get_input_email_for_caddy
+                elif [[ ${web_flag} = "2" ]]; then
+                    acme_get_certificate_by_force
+                fi
+                
                 get_input_ws_path_and_mirror_site
                 break
             else
@@ -355,8 +438,8 @@ install_prepare_libev_v2ray(){
         done
     elif [[ ${libev_v2ray} = "5" ]]; then
         if check_port_occupy "443"; then
-     	   echo -e "${Error} 检测到443端口被占用，请排查后重新运行." && exit 1
- 	   fi
+            echo -e "${Error} 检测到443端口被占用，请排查后重新运行." && exit 1
+        fi
         while true
         do
             get_input_domain "请输入你的域名(CF->DNS->Proxied status：Proxied)"
@@ -368,7 +451,12 @@ install_prepare_libev_v2ray(){
             fi
             
             if is_cdn_proxied ${domain_ip}; then
-                choose_api_get_mode
+                if [[ ${web_flag} = "1" ]]; then
+                    choose_api_get_mode
+                elif [[ ${web_flag} = "2" ]]; then
+                    acme_get_certificate_by_api
+                fi
+                
                 get_input_ws_path_and_mirror_site
                 break
             else

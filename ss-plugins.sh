@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.3.2"
+SHELL_VERSION="2.3.3"
 # ====================
 
 
@@ -115,6 +115,11 @@ ONLINE_CADDY_CENTOS_INIT_URL="${BASE_URL}/service/caddy_centos.sh"
 LOCAL_CADDY_DEBIAN_INIT_PATH="./service/caddy_centos.sh"
 ONLINE_CADDY_DEBIAN_INIT_URL="${BASE_URL}/service/caddy_debian.sh"
 LOCAL_CADDY_DEBIAN_INIT_PATH="./service/caddy_debian.sh"
+
+
+# nginx
+NGINX_BIN_PATH="/usr/sbin/nginx"
+NGINX_CONFIG="/etc/nginx/nginx.conf"
 
 
 # shadowsocks-libev Ciphers
@@ -248,6 +253,15 @@ menu_status(){
         CADDY_PID=`ps -ef |grep -v grep | grep caddy |awk '{print $2}'`
         
         if [[ ! -z ${SS_PID} ]] && [[ ! -z ${V2_PID} ]] && [[ ! -z ${CADDY_PID} ]]; then
+            echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+        else
+            echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+        fi
+    elif [[ -e ${BIN_PATH} ]] && [[ -e ${V2RAY_PLUGIN_BIN_PATH} ]] && [[ -e ${NGINX_BIN_PATH}  ]]; then
+        V2_PID=`ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}'`
+        NGINX_PID=`ps -ef |grep -v grep | grep nginx.conf |awk '{print $2}'`
+        
+        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${V2_PID} ]] && [[ ! -z ${NGINX_PID} ]]; then
             echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
         else
             echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
@@ -929,10 +943,20 @@ config_ss(){
             ss_v2ray_quic_tls_cdn_config
         elif [[ ${libev_v2ray} == "4" ]]; then
             ss_v2ray_ws_tls_web_config
-            caddy_config_none_cdn    
+            if [[ ${web_flag} = "1" ]]; then
+                caddy_config_none_cdn
+            elif [[ ${web_flag} = "2" ]]; then
+                mirror_domain=$(echo ${mirror_site} | sed 's/https:\/\///g')
+                nginx_config
+            fi 
         elif [[ ${libev_v2ray} == "5" ]]; then
             ss_v2ray_ws_tls_web_cdn_config
-            caddy_config_with_cdn
+            if [[ ${web_flag} = "1" ]]; then
+                caddy_config_with_cdn
+            elif [[ ${web_flag} = "2" ]]; then
+                mirror_domain=$(echo ${mirror_site} | sed 's/https:\/\///g')
+                nginx_config
+            fi 
         fi
     elif [[ ${plugin_num} == "2" ]]; then
         if [ ! -d "$(dirname ${KCPTUN_CONFIG})" ]; then
@@ -1014,18 +1038,24 @@ install_completed(){
         elif [[ ${libev_v2ray} == "3" ]]; then
             ss_v2ray_quic_tls_cdn_show
         elif [[ ${libev_v2ray} == "4" ]]; then
-            # start caddy
-            /etc/init.d/caddy start > /dev/null 2>&1
-            
+            if [[ ${web_flag} = "1" ]]; then
+                # start caddy
+                /etc/init.d/caddy start > /dev/null 2>&1
+            elif [[ ${web_flag} = "2" ]]; then
+                systemctl start nginx
+            fi 
             ss_v2ray_ws_tls_web_show
         elif [[ ${libev_v2ray} == "5" ]]; then
-            # cloudflare email & api key
-            export CLOUDFLARE_EMAIL="${CF_Email}"
-            export CLOUDFLARE_API_KEY="${CF_Key}"
-            
-            # start caddy
-            /etc/init.d/caddy start > /dev/null 2>&1
-            
+            if [[ ${web_flag} = "1" ]]; then
+                # cloudflare email & api key
+                export CLOUDFLARE_EMAIL="${CF_Email}"
+                export CLOUDFLARE_API_KEY="${CF_Key}"
+                
+                # start caddy
+                /etc/init.d/caddy start > /dev/null 2>&1
+            elif [[ ${web_flag} = "2" ]]; then
+                systemctl start nginx
+            fi 
             ss_v2ray_ws_tls_web_cdn_show
         fi
     elif [[ ${plugin_num} == "2" ]]; then
@@ -1118,7 +1148,12 @@ install_main(){
     if [ "${plugin_num}" == "1" ]; then
         improt_package "plugins" "v2ray_plugin_install.sh"
         install_v2ray_plugin
-        choose_caddy_extension ${libev_v2ray}
+        if [[ ${web_flag} = "1" ]]; then
+            choose_caddy_extension ${libev_v2ray}
+        elif [[ ${web_flag} = "2" ]]; then
+            improt_package "tools" "nginx_install.sh"
+            install_nginx
+        fi
         plugin_client_name="v2ray"
     elif [ "${plugin_num}" == "2" ]; then
         improt_package "plugins" "kcptun_install.sh"
@@ -1251,6 +1286,7 @@ do_start(){
     goquiet_start
     cloak_start
     caddy_start
+    nginx_start
 }
 
 do_stop(){
@@ -1262,6 +1298,7 @@ do_stop(){
     goquiet_stop
     cloak_stop
     caddy_stop
+    nginx_stop
 }
 
 do_restart(){
@@ -1328,6 +1365,7 @@ do_uninstall(){
     goquiet_uninstall
     cloak_uninstall
     caddy_uninstall
+    nginx_uninstall
     ipcalc_uninstall
     echo -e "${Info} Shadowsocks 卸载成功."
 }

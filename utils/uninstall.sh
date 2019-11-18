@@ -144,6 +144,18 @@ caddy_uninstall(){
     fi
 }
 
+nginx_uninstall(){
+    if [[ -e ${NGINX_BIN_PATH} ]]; then
+        if check_sys packageManager yum; then
+            sudo yum remove -y nginx > /dev/null 2>&1
+            rm -rf $(dirname ${NGINX_CONFIG})
+        elif check_sys packageManager apt; then
+            sudo apt remove -y nginx --purge > /dev/null 2>&1
+            rm -rf $(dirname ${NGINX_CONFIG})
+        fi
+    fi
+}
+
 # acme_uninstall(){
     # uninstall acme.sh
     # ~/.acme.sh/acme.sh --uninstall > /dev/null 2>&1 && rm -rf ~/.acme.sh

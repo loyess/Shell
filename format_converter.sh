@@ -27,6 +27,7 @@ dos2unix ./prepare/cloak_prepare.sh
 
 dos2unix ./tools/shadowsocks_install.sh
 dos2unix ./tools/caddy_install.sh
+dos2unix ./tools/nginx_install.sh
 
 
 

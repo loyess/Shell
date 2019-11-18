@@ -124,6 +124,53 @@ ss_v2ray_ws_tls_web_cdn_config(){
 	EOF
 }
 
+nginx_config(){
+	cat > /etc/nginx/nginx.conf<<-EOF
+	events {
+	    worker_connections  4096;  ## Default: 1024
+	}
+
+	http {
+	    server {
+	        listen 80;
+	        server_name ${domain};
+	        return 301 https://\$http_host\$request_uri;
+	    }
+	    
+	    server{
+	        listen 443 ssl;
+	        server_name ${domain};
+	        ssl on;
+	        ssl_certificate ${cerpath};
+	        ssl_certificate_key ${keypath};
+	        ssl_session_cache shared:SSL:10m;
+	        ssl_session_timeout  10m;
+	        add_header Strict-Transport-Security "max-age=31536000";
+	        
+	        location ${path} {
+	            proxy_redirect off;
+	            proxy_http_version 1.1;
+	            proxy_pass http://localhost:${shadowsocksport};
+	            proxy_set_header Host \$http_host;
+	            proxy_set_header Upgrade \$http_upgrade;
+	            proxy_set_header Connection "upgrade";
+	        }
+	        
+	        location / {
+	            sub_filter ${mirror_domain} ${domain};
+	            sub_filter_once off;
+	            proxy_set_header X-Real-IP \$remote_addr;
+	            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+	            proxy_set_header Referer ${mirror_site};
+	            proxy_set_header Host ${mirror_domain};
+	            proxy_pass ${mirror_site};
+	            proxy_set_header Accept-Encoding "";
+	        }
+	    }
+	}
+	EOF
+}
+
 caddy_config_with_cdn(){
 	cat > ${CADDY_CONF_FILE}<<-EOF
 	${domain}:443 {

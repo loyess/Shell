@@ -55,6 +55,11 @@ Usage: ./ss-plugins.sh [options...] [args...]
     caddy配置文件: /usr/local/caddy/Caddyfile
     caddy日志文件：/tmp/caddy.log
     caddy生成证书目录：~/.caddy/acme/acme-v02.api.letsencrypt.org/sites/xxx.xxx(域名)/
+    
+    nginx二进制文件：/usr/sbin/nginx
+    nginx配置文件：/etc/nginx/nginx.conf
+    nginx错误日志：/var/log/nginx/error.log
+    nginx访问日志：/var/log/nginx/access.log
 
     acme.sh安装目录：~/.acme.sh
     acme.sh生成证书目录：~/.acme.sh/xxx.xxx(域名)/

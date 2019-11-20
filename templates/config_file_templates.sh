@@ -145,23 +145,36 @@ caddy_config_with_cdn(){
 
 nginx_config(){
 	cat > /etc/nginx/nginx.conf<<-EOF
+	user nginx;
+	worker_processes auto;
+	error_log /var/log/nginx/error.log info;
+	pid /var/run/nginx.pid;
+
 	events {
-	    worker_connections  4096;  ## Default: 1024
+	    accept_mutex on;
+	    multi_accept on;
+	    worker_connections 1024;
 	}
 
 	http {
+	    keepalive_timeout 60;
+	    access_log /var/log/nginx/access.log combined;
+
 	    server {
 	        listen 80;
+	        listen [::]:80;
 	        server_name ${domain};
 	        return 301 https://\$http_host\$request_uri;
 	    }
 	    
 	    server{
 	        listen 443 ssl;
+	        listen [::]:443 ssl;
 	        server_name ${domain};
-	        ssl on;
 	        ssl_certificate ${cerpath};
 	        ssl_certificate_key ${keypath};
+	        ssl_ciphers HIGH:!aNULL:!MD5;
+	        ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
 	        ssl_session_cache shared:SSL:10m;
 	        ssl_session_timeout  10m;
 	        add_header Strict-Transport-Security "max-age=31536000";

@@ -924,7 +924,11 @@ config_ss(){
 
     local server_value="\"0.0.0.0\""
     if get_ipv6; then
-        server_value="[\"[::0]\",\"0.0.0.0\"]"
+        local V=${SS_VERSION}
+        local N=${plugin_num}
+        if [[ ${V} = "ss-libev" ]] && [[ ${N} = "2" ]] || [[ ${N} = "3" ]] || [[ ${N} == "5" ]] || [[ -z ${N} ]]; then
+            server_value="[\"[::0]\",\"0.0.0.0\"]"
+        fi
     fi
 
     if [ ! -d "$(dirname ${SHADOWSOCKS_CONFIG})" ]; then

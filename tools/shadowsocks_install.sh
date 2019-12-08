@@ -25,8 +25,8 @@ install_shadowsocks_libev(){
 install_shadowsocks_rust(){
     cd ${CUR_DIR}
     tar xf ${shadowsocks_rust_file}.tar.xz
-    chmod +x ssdns sslocal ssserver ssurl
-    mv ssdns sslocal ssserver ssurl ${SHADOWSOCKS_RUST_INSTALL_PATH}
+    chmod +x sstunnel sslocal ssserver ssurl
+    mv sstunnel sslocal ssserver ssurl ${SHADOWSOCKS_RUST_INSTALL_PATH}
     if [ $? -eq 0 ]; then
         chmod +x ${SHADOWSOCKS_RUST_INIT}
         local service_name=$(basename ${SHADOWSOCKS_RUST_INIT})

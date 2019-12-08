@@ -50,7 +50,7 @@ shadowsocks_uninstall(){
     # uninstall ss-rust
     rm -f /usr/local/bin/ssserver
     rm -f /usr/local/bin/sslocal
-    rm -f /usr/local/bin/ssdns
+    rm -f /usr/local/bin/sstunnel
     rm -f /usr/local/bin/ssurl
     rm -f ${SHADOWSOCKS_RUST_INIT}
 }

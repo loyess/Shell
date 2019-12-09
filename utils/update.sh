@@ -206,6 +206,8 @@ update_caddy(){
 }
 
 update_shadowsocks_libev(){
+    local SS_VERSION="ss-libev"
+    
     echo -e "${Info} 正在进行版本比对请稍等."
     libev_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/shadowsocks-libev/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
     [ -z ${libev_ver} ] && echo -e "${Error} 获取 shadowsocks-libev 最新版本失败." && exit 1
@@ -241,10 +243,12 @@ update_shadowsocks_libev(){
 }
 
 update_shadowsocks_rust(){
+    local SS_VERSION="ss-rust"
+    
     echo -e "${Info} 正在进行版本比对请稍等."
     rust_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/shadowsocks-rust/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
     [ -z ${rust_ver} ] && echo -e "${Error} 获取 shadowsocks-rust 最新版本失败." && exit 1
-    current_rust_ver=$(ssserver -V |  grep -oE "[0-9]+.[0-9]+.[0-9]+")
+    current_rust_ver=$(ssserver -V | grep -oE "[0-9]+.[0-9]+.[0-9]+")
     if ! check_latest_version ${current_rust_ver} $(echo ${rust_ver} | grep -oE "[0-9]+.[0-9]+.[0-9]+"); then
         echo -e "${Point} shadowsocklibev-rust当前已是最新版本${current_rust_ver}不需要更新."
         
@@ -259,7 +263,7 @@ update_shadowsocks_rust(){
     
     echo -e "${Info} 检测到SS有新版本，开始下载."
     download_ss_file
-    echo -e "${Info} 下载完成，开始执行编译安装."
+    echo -e "${Info} 下载完成，开始进行覆盖安装."
     improt_package "tools" "shadowsocks_install.sh"
     do_stop > /dev/null 2>&1
     install_shadowsocks_rust

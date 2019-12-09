@@ -160,9 +160,9 @@ Usage: ./ss-plugins.sh [options...] [args...]
 
 本脚本改自于各路大神，水平马马虎虎，方便自用。
 
-这里只对 linux-amd64 处理器架构做了支持，其它的就不要尝试了，推荐Ubuntu 18.04 LTS。
+这里只对 linux-amd64 处理器架构做了支持，其它的就不要尝试了，支持 CentOS6+ | Ubuntu16.04+ | Debian9+ ，其它更低版本是否支持，请自行尝试。推荐使用最新版。
 
-v2ray-plugin 所要用到的域名，可以从 [freenom.com](https://www.freenom.com) 获取免费域名， 申请需要挂代理，代理是哪国ip 就填写哪国的资料，不然会导致无法申请。 
+~~v2ray-plugin 所要用到的域名，可以从 [freenom.com](https://www.freenom.com) 获取免费域名， 申请需要挂代理，代理是哪国ip 就填写哪国的资料，不然会导致无法申请。~~ (似乎失效了，有账号的仍能注册)
 
 另外，生成的 ss:// 链接，不支持插件参数导入，需要手动复制粘贴，使用 kcptun 插件时，该链接仅支持在手机上导入。
 

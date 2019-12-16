@@ -248,9 +248,17 @@ update_shadowsocks_rust(){
     echo -e "${Info} 正在进行版本比对请稍等."
     rust_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/shadowsocks-rust/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
     [ -z ${rust_ver} ] && echo -e "${Error} 获取 shadowsocks-rust 最新版本失败." && exit 1
-    current_rust_ver=$(ssserver -V | grep -oE "[0-9]+.[0-9]+.[0-9]+")
-    if ! check_latest_version ${current_rust_ver} $(echo ${rust_ver} | grep -oE "[0-9]+.[0-9]+.[0-9]+"); then
-        echo -e "${Point} shadowsocklibev-rust当前已是最新版本${current_rust_ver}不需要更新."
+    if $(echo ${rust_ver} | grep -q 'alpha'); then 
+        rust_ver=$(echo ${rust_ver} | sed 's/-alpha//g')
+    fi
+    
+    current_rust_ver=$(ssserver -V | grep shadowsocks | cut -d\  -f2)
+    if $(echo ${current_rust_ver} | grep -q 'alpha'); then 
+        current_rust_ver=$(echo ${current_rust_ver} | sed 's/-alpha//g')
+    fi
+    
+    if ! check_latest_version ${current_rust_ver} ${rust_ver}; then
+        echo -e "${Point} shadowsocklibev-rust当前已是最新版本$(ssserver -V | grep shadowsocks | cut -d\  -f2)不需要更新."
         
         update_v2ray_plugin
         update_kcptun

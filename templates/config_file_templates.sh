@@ -47,7 +47,7 @@ ss_v2ray_ws_tls_cdn_config(){
 	    "nameserver":"8.8.8.8",
 	    "mode":"tcp_and_udp",
 	    "plugin":"v2ray-plugin",
-	    "plugin_opts":"server;tls;host=${domain};cert=${cerpath};key=${keypath}"
+	    "plugin_opts":"server;tls;host=${domain};cert=${cerpath};key=${keypath};path=${path}"
 	}
 	EOF
 }

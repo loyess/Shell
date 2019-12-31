@@ -433,6 +433,10 @@ install_prepare_libev_v2ray(){
                 continue
             fi
         done 
+        
+        if [[ ${libev_v2ray} = "2" ]]; then
+            get_input_ws_path
+        fi
     elif [[ ${libev_v2ray} = "4" ]]; then
         if check_port_occupy "443"; then
             echo -e "${Error} 检测到443端口被占用，请排查后重新运行." && exit 1

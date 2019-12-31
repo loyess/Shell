@@ -17,7 +17,7 @@ ss_v2ray_ws_tls_cdn_link(){
     local link_head="ss://"
     local cipher_pwd=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}")
     local ip_port_plugin="@${domain}:${shadowsocksport}/?plugin=${plugin_client_name}"
-    local plugin_opts=$(get_str_replace ";tls;host=${domain}")
+    local plugin_opts=$(get_str_replace ";tls;host=${domain};path=${path}")
     ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
 }
 

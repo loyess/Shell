@@ -252,6 +252,27 @@ get_input_domain(){
     echo
 }
 
+get_input_host(){
+    while true
+    do
+    	echo
+    	echo -e "请为v2ray-plugin输入用于混淆的域名"
+    	read -e -p "(默认: www.bing.com):" domain
+        [ -z "$domain" ] && domain="www.bing.com"
+        if [ -z "$(echo $domain | grep -E ${DOMAIN_RE})" ]; then
+            echo
+            echo -e "${Error} 请输入正确合法的域名."
+            echo
+            continue
+        fi
+        
+        echo
+    	echo -e "${Red}  host = ${domain}${suffix}"
+        echo
+        break
+   done
+}
+
 get_input_email_for_caddy(){
     while true
     do
@@ -316,7 +337,7 @@ get_input_api_info(){
     echo
 }
 
-get_input_ws_path_and_mirror_site(){
+get_input_ws_path(){
     while true
     do 
         echo
@@ -333,7 +354,9 @@ get_input_ws_path_and_mirror_site(){
         echo
         break
     done
-    
+}
+
+get_input_mirror_site(){
     while true
     do 
         echo
@@ -381,6 +404,8 @@ install_prepare_libev_v2ray(){
             echo -e "${Error} 检测到80端口被占用，请排查后重新运行." && exit 1
         fi
         v2ray_plugin_prot_reset 80
+        get_input_host
+        get_input_ws_path
         
     elif [[ ${libev_v2ray} = "2" || ${libev_v2ray} = "3" ]]; then
         if check_port_occupy "443"; then
@@ -429,7 +454,8 @@ install_prepare_libev_v2ray(){
                     acme_get_certificate_by_force
                 fi
                 
-                get_input_ws_path_and_mirror_site
+                get_input_ws_path
+                get_input_mirror_site
                 break
             else
                 print_error_info ${TEXT3}
@@ -457,7 +483,8 @@ install_prepare_libev_v2ray(){
                     acme_get_certificate_by_api
                 fi
                 
-                get_input_ws_path_and_mirror_site
+                get_input_ws_path
+                get_input_mirror_site
                 break
             else
                 print_error_info ${TEXT4}

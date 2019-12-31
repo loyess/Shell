@@ -29,7 +29,7 @@ ss_v2ray_ws_http_config(){
 	    "nameserver":"8.8.8.8",
 	    "mode":"tcp_and_udp",
 	    "plugin":"v2ray-plugin",
-	    "plugin_opts":"server"
+	    "plugin_opts":"server;host=${domain};path=${path}"
 	}
 	EOF
 }

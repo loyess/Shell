@@ -23,7 +23,7 @@ ss_v2ray_ws_http_show(){
     echo -e " 密码     : ${Red}${shadowsockspwd}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " 插件选项 :                                      " >> ${HUMAN_CONFIG}
+    echo -e " 插件选项 : ${Red}host=${domain};path=${path}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}

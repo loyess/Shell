@@ -23,7 +23,7 @@ ss_v2ray_ws_http_show(){
     echo -e " 密码     : ${Red}${shadowsockspwd}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " 插件选项 : ${Red}host=${domain};path=${path}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件选项 : ${Red}host=${domain};path=${path};mux=${mux}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
@@ -45,7 +45,7 @@ ss_v2ray_ws_tls_cdn_show(){
     echo -e " 密码     : ${Red}${shadowsockspwd}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " 插件选项 : ${Red}tls;host=${domain};path=${path}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件选项 : ${Red}tls;host=${domain};path=${path};mux=${mux}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
@@ -67,7 +67,7 @@ ss_v2ray_quic_tls_cdn_show(){
     echo -e " 密码     : ${Red}${shadowsockspwd}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " 插件选项 : ${Red}mode=quic;host=${domain}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件选项 : ${Red}mode=quic;host=${domain};mux=${mux}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
@@ -89,7 +89,7 @@ ss_v2ray_ws_tls_web_show(){
     echo -e " 密码     : ${Red}${shadowsockspwd}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " 插件选项 : ${Red}tls;host=${domain};path=${path}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件选项 : ${Red}tls;host=${domain};path=${path};mux=${mux}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
@@ -111,7 +111,7 @@ ss_v2ray_ws_tls_web_cdn_show(){
     echo -e " 密码     : ${Red}${shadowsockspwd}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " 插件选项 : ${Red}tls;host=${domain};path=${path}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件选项 : ${Red}tls;host=${domain};path=${path};mux=${mux}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}

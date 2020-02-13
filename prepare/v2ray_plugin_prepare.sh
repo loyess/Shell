@@ -377,6 +377,34 @@ get_input_mirror_site(){
     done
 }
 
+is_disable_mux(){
+    while true
+    do
+        echo -e "是否禁用多路复用(mux)"
+		read -p "(默认: n) [y/n]: " yn
+        [ -z "${yn}" ] && yn="N"
+        case "${yn:0:1}" in
+            y|Y)
+                mux=0
+                ;;
+            n|N)
+                mux=1
+                ;;
+            *)
+                echo
+                echo -e "${Error} 输入有误，请重新输入!"
+                echo
+                continue
+                ;;
+        esac
+        
+        echo
+        echo -e "${Red}  mux = ${mux}${suffix}"
+        echo
+        break
+    done
+}
+
 print_error_info(){
     local text=$1
     
@@ -406,6 +434,7 @@ install_prepare_libev_v2ray(){
         v2ray_plugin_prot_reset 80
         get_input_host
         get_input_ws_path
+        is_disable_mux
         
     elif [[ ${libev_v2ray} = "2" || ${libev_v2ray} = "3" ]]; then
         if check_port_occupy "443"; then
@@ -437,6 +466,8 @@ install_prepare_libev_v2ray(){
         if [[ ${libev_v2ray} = "2" ]]; then
             get_input_ws_path
         fi
+        
+        is_disable_mux
     elif [[ ${libev_v2ray} = "4" ]]; then
         if check_port_occupy "443"; then
             echo -e "${Error} 检测到443端口被占用，请排查后重新运行." && exit 1
@@ -460,6 +491,7 @@ install_prepare_libev_v2ray(){
                 
                 get_input_ws_path
                 get_input_mirror_site
+                is_disable_mux
                 break
             else
                 print_error_info ${TEXT3}
@@ -489,6 +521,7 @@ install_prepare_libev_v2ray(){
                 
                 get_input_ws_path
                 get_input_mirror_site
+                is_disable_mux
                 break
             else
                 print_error_info ${TEXT4}

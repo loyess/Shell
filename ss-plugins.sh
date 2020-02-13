@@ -1154,7 +1154,7 @@ install_main(){
             improt_package "tools" "nginx_install.sh"
             install_nginx
         fi
-        plugin_client_name="v2ray"
+        plugin_client_name="v2ray-plugin"
     elif [ "${plugin_num}" == "2" ]; then
         improt_package "plugins" "kcptun_install.sh"
         install_kcptun

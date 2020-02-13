@@ -380,6 +380,7 @@ get_input_mirror_site(){
 is_disable_mux(){
     while true
     do
+        echo
         echo -e "是否禁用多路复用(mux)"
 		read -p "(默认: n) [y/n]: " yn
         [ -z "${yn}" ] && yn="N"

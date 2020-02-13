@@ -52,6 +52,8 @@ shadowsocks_uninstall(){
     rm -f /usr/local/bin/sslocal
     rm -f /usr/local/bin/sstunnel
     rm -f /usr/local/bin/ssurl
+    rm -f /usr/local/bin/ssmanager
+    rm -f /usr/local/bin/ssredir
     rm -f ${SHADOWSOCKS_RUST_INIT}
 }
 

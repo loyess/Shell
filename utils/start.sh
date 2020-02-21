@@ -144,6 +144,42 @@ cloak_start(){
     fi
 }
 
+mtt_start(){
+    if [ "$(command -v mtt-server)" ]; then
+        local NAME="mos-tls-tunnel"
+        local PID_DIR=/var/run
+        local PID_FILE=$PID_DIR/$NAME.pid
+        local MTT_PID=`ps -ef |grep -v grep | grep mtt-server |awk '{print $2}'`
+        
+        if [ -z ${MTT_PID} ]; then
+            if [ -e ${PID_FILE} ]; then
+                rm -f ${PID_FILE}
+            fi
+        fi
+
+        if [ ! -d ${PID_DIR} ]; then
+            mkdir -p ${PID_DIR}
+            if [ $? -ne 0 ]; then
+                echo "Creating PID directory $PID_DIR failed"
+                exit 1
+            fi
+        fi
+        
+        if check_running ${PID_FILE}; then
+            echo "$NAME (pid $PID) is already running."
+            return 0
+        fi
+        
+        echo ${MTT_PID} > ${PID_FILE}
+        
+        if check_running ${PID_FILE}; then
+            echo "Starting $NAME success"
+        else
+            echo "Starting $NAME failed"
+        fi    
+    fi
+}
+
 caddy_start(){
     if [ -e "${CADDY_BIN_PATH}" ]; then
         /etc/init.d/caddy start

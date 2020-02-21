@@ -23,6 +23,7 @@ dos2unix ./prepare/kcptun_prepare.sh
 dos2unix ./prepare/simple_obfs_prepare.sh
 dos2unix ./prepare/goquiet_prepare.sh
 dos2unix ./prepare/cloak_prepare.sh
+dos2unix ./prepare/mos_tls_tunnel_prepare.sh
 
 
 dos2unix ./tools/shadowsocks_install.sh
@@ -36,6 +37,7 @@ dos2unix ./plugins/kcptun_install.sh
 dos2unix ./plugins/simple_obfs_install.sh
 dos2unix ./plugins/goquiet_install.sh
 dos2unix ./plugins/cloak_install.sh
+dos2unix ./plugins/mos_tls_tunnel_install.sh
 
 
 dos2unix ./templates/config_file_templates.sh

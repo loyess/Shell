@@ -64,6 +64,16 @@ other_status(){
             echo -e "${Point} cloak is already installed but not running."
         fi
     fi
+
+    if [ "$(command -v mtt-server)" ]; then
+        MTT_PID=`ps -ef |grep -v grep | grep mtt-server |awk '{print $2}'`
+        
+        if [[ ! -z "${MTT_PID}" ]]; then
+            echo -e "${Info} mos-tls-tunnel (pid ${MTT_PID}) is already running."
+        else
+            echo -e "${Point} mos-tls-tunnel is already installed but not running."
+        fi
+    fi
     
     if [ -e "${CADDY_BIN_PATH}" ]; then
         CADDY_PID=`ps -ef |grep -v grep | grep caddy |awk '{print $2}'`

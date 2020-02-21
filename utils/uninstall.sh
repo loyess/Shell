@@ -130,6 +130,14 @@ cloak_uninstall(){
     rm -fr $(dirname ${CK_CLIENT_CONFIG}) > /dev/null 2>&1
 }
 
+mtt_uninstall(){
+    ps -ef |grep -v grep | grep mtt-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+    
+    # uninstall mos-tls-tunnel
+    rm -f /var/run/mos-tls-tunnel.pid
+    rm -f /usr/local/bin/mtt-server
+}
+
 caddy_uninstall(){
     if [[ -e ${CADDY_BIN_PATH} ]]; then
         PID=`ps -ef |grep "caddy" |grep -v "grep" |grep -v "init.d" |grep -v "service" |grep -v "caddy_install" |awk '{print $2}'`

@@ -55,6 +55,15 @@ cloak_stop(){
     fi
 }
 
+mtt_stop(){
+    ps -ef |grep -v grep | grep mtt-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+
+    if [ "$(command -v mtt-server)" ]; then
+        rm -f /var/run/mos-tls-tunnel.pid
+        echo -e "Stopping mtt-server success"
+    fi
+}
+
 caddy_stop(){
     ps -ef |grep -v grep | grep caddy |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
     

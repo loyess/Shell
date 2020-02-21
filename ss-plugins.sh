@@ -105,6 +105,12 @@ CK_CLIENT_CONFIG="/etc/cloak/ckclient.json"
 CK_SERVER_CONFIG="/etc/cloak/ckserver.json"
 
 
+# mos-tls-tunnel
+MTT_VERSION_FILE="/etc/shadowsocks/mtt.version"
+MTT_INSTALL_PATH="/usr/local/bin"
+MTT_BIN_PATH="/usr/local/bin/mtt-server"
+
+
 # caddy
 CADDY_INSTALL_PATH="/usr/local/caddy"
 CADDY_BIN_PATH="/usr/local/caddy/caddy"
@@ -187,6 +193,13 @@ normal
 OBFUSCATION_WRAPPER=(
 http
 tls
+)
+
+
+# mos-tls-tunnel Transport mode
+MTT_TRANSPORT_MODE=(
+tls
+wss
 )
 
 
@@ -302,6 +315,14 @@ menu_status(){
         CK_PID=`ps -ef |grep -v grep | grep ck-server |awk '{print $2}'`
         
         if [[ ! -z ${SS_PID} ]] && [[ ! -z ${CK_PID} ]]; then
+            echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+        else
+            echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+        fi
+    elif [[ -e ${BIN_PATH} ]] && [[ -e ${MTT_BIN_PATH} ]]; then    
+        MTT_PID=`ps -ef |grep -v grep | grep mtt-server |awk '{print $2}'`
+        
+        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${MTT_PID} ]]; then
             echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
         else
             echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
@@ -809,6 +830,19 @@ download_plugins_file(){
         cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${cloak_ver}/ck-server-linux-amd64-${cloak_ver}"
         download "${cloak_file}" "${cloak_url}"
         download_service_file ${CLOAK_INIT} ${CLOAK_CENTOS} "./service/cloak_centos.sh" ${CLOAK_DEBIAN} "./service/cloak_debian.sh"
+    
+    elif [[ "${plugin_num}" == "6" ]]; then
+        # Download mos-tls-tunnel
+        mtt_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/IrineSistiana/mos-tls-tunnel/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        [ -z ${mtt_ver} ] && echo -e "${Error} 获取 mos-tls-tunnel 最新版本失败." && exit 1
+        # wriet version num
+        if [ ! -d "$(dirname ${SHADOWSOCKS_CONFIG})" ]; then
+            mkdir -p $(dirname ${SHADOWSOCKS_CONFIG})
+        fi
+        echo ${mtt_ver} > ${MTT_VERSION_FILE}
+        mtt_file="mos-tls-tunnel-linux-amd64"
+        mtt_url="https://github.com/IrineSistiana/mos-tls-tunnel/releases/download/v${mtt_ver}/mos-tls-tunnel-linux-amd64.zip"
+        download "${mtt_file}.zip" "${mtt_url}"
     fi
 }
 
@@ -985,6 +1019,16 @@ config_ss(){
         ss_config_standalone
         cloak2_server_config
         cloak2_client_config
+    elif [[ ${plugin_num} == "6" ]]; then
+        if [[ ${libev_mtt} == "1" ]]; then
+           ss_mtt_tls_config
+        elif [[ ${libev_mtt} == "2" ]]; then    
+           ss_mtt_wss_config
+        fi
+        
+        if [[ ${isEnable} == enable ]]; then
+            sed 's/"plugin_opts":"/"plugin_opts":"mux;/' -i ${SHADOWSOCKS_CONFIG}
+        fi
     else
         ss_config_standalone
     fi
@@ -1017,6 +1061,12 @@ gen_ss_links(){
         ss_goquiet_link
     elif [[ ${plugin_num} == "5" ]]; then
         ss_cloak_link_new
+    elif [[ ${plugin_num} == "6" ]]; then
+        if [[ ${libev_mtt} == "1" ]]; then
+           ss_mtt_tls_link
+        elif [[ ${libev_mtt} == "2" ]]; then    
+           ss_mtt_wss_link
+        fi
     else
         ss_link
     fi
@@ -1076,6 +1126,12 @@ install_completed(){
         ${CLOAK_INIT} start  > /dev/null 2>&1
         
         ss_cloak_show_new
+    elif [[ ${plugin_num} == "6" ]]; then
+        if [[ ${libev_mtt} == "1" ]]; then
+           ss_mtt_tls_show
+        elif [[ ${libev_mtt} == "2" ]]; then    
+           ss_mtt_wss_show
+        fi
     else
         ss_show
     fi
@@ -1094,6 +1150,7 @@ install_prepare(){
   ${Green}3.${suffix} simple-obfs
   ${Green}4.${suffix} goquiet (unofficial)
   ${Green}5.${suffix} cloak (based goquiet)
+  ${Green}6.${suffix} mos-tls-tunnel
   "
     echo && read -e -p "(默认: 不安装)：" plugin_num
     [[ -z "${plugin_num}" ]] && plugin_num="" && echo -e "\n${Tip} 当前未选择任何插件，仅安装${SS_VERSION}."
@@ -1112,10 +1169,13 @@ install_prepare(){
     elif [[ ${plugin_num} == "5" ]]; then
         improt_package "prepare" "cloak_prepare.sh"
         install_prepare_libev_cloak
+    elif [[ ${plugin_num} == "6" ]]; then
+        improt_package "prepare" "mos_tls_tunnel_prepare.sh"
+        install_prepare_libev_mos_tls_tunnel
     elif [[ ${plugin_num} == "" ]]; then
         :
     else
-        echo -e "${Error} 请输入正确的数字 [1-5]" && exit 1
+        echo -e "${Error} 请输入正确的数字 [1-6]" && exit 1
     fi
     
     echo
@@ -1172,7 +1232,10 @@ install_main(){
         install_cloak
         gen_credentials
         plugin_client_name="ck-client"
-        
+    elif [ "${plugin_num}" == "6" ]; then
+        improt_package "plugins" "mos_tls_tunnel_install.sh"
+        install_mos_tls_tunnel
+        plugin_client_name="mostlstunnel"
     fi
 }
 
@@ -1228,6 +1291,9 @@ install_cleanup(){
     
     # cloak
     rm -rf ${cloak_file}
+    
+    # mos-tls-tunnel
+    rm -rf ${mtt_file}.zip LICENSE README.md mtt-client
 }
 
 do_uid(){
@@ -1285,6 +1351,7 @@ do_start(){
     simple_obfs_start
     goquiet_start
     cloak_start
+    mtt_start
     caddy_start
     nginx_start
 }
@@ -1297,6 +1364,7 @@ do_stop(){
     simple_obfs_stop
     goquiet_stop
     cloak_stop
+    mtt_stop
     caddy_stop
     nginx_stop
 }
@@ -1364,6 +1432,7 @@ do_uninstall(){
     simple_obfs_uninstall
     goquiet_uninstall
     cloak_uninstall
+    mtt_uninstall
     caddy_uninstall
     nginx_uninstall
     ipcalc_uninstall

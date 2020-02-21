@@ -314,6 +314,43 @@ cloak2_client_config(){
 	EOF
 }
 
+# mos_tls_tunnel
+ss_mtt_tls_config(){
+	cat > ${SHADOWSOCKS_CONFIG}<<-EOF
+	{
+	    "server":${server_value},
+	    "server_port":${shadowsocksport},
+	    "password":"${shadowsockspwd}",
+	    "timeout":300,
+	    "user":"nobody",
+	    "method":"${shadowsockscipher}",
+	    "fast_open":${fast_open},
+	    "nameserver":"8.8.8.8",
+	    "mode":"tcp_only",
+	    "plugin":"mtt-server",
+	    "plugin_opts":"n=${serverName}"
+	}
+	EOF
+}
+
+ss_mtt_wss_config(){
+	cat > ${SHADOWSOCKS_CONFIG}<<-EOF
+	{
+	    "server":${server_value},
+	    "server_port":${shadowsocksport},
+	    "password":"${shadowsockspwd}",
+	    "timeout":300,
+	    "user":"nobody",
+	    "method":"${shadowsockscipher}",
+	    "fast_open":${fast_open},
+	    "nameserver":"8.8.8.8",
+	    "mode":"tcp_only",
+	    "plugin":"mtt-server",
+	    "plugin_opts":"wss;wss-path=${wssPath};n=${serverName}"
+	}
+	EOF
+}
+
 
 
 

@@ -95,6 +95,30 @@ ss_cloak_link_new(){
     ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
 }
 
+# ss + mos-tls-tunnel
+ss_mtt_tls_link(){
+    local link_head="ss://"
+    local cipher_pwd=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}")
+    local ip_port_plugin="@$(get_ip):${shadowsocksport}/?plugin=${plugin_client_name}"
+    if [[ ${isEnable} == disable ]]; then
+        local plugin_opts=$(get_str_replace ";sv;n=${serverName}")
+    elif [[ ${isEnable} == enable ]]; then
+        local plugin_opts=$(get_str_replace ";sv;n=${serverName};mux")
+    fi
+    ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
+}
+
+ss_mtt_wss_link(){
+    local link_head="ss://"
+    local cipher_pwd=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}")
+    local ip_port_plugin="@$(get_ip):${shadowsocksport}/?plugin=${plugin_client_name}"
+    if [[ ${isEnable} == disable ]]; then
+        local plugin_opts=$(get_str_replace ";sv;wss;wss-path=${wssPath};n=${serverName}")
+    elif [[ ${isEnable} == enable ]]; then
+        local plugin_opts=$(get_str_replace ";sv;wss;wss-path=${wssPath};n=${serverName};mux;mux-max-stream=${muxMaxStream}")
+    fi
+    ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
+}
 
 
 

@@ -102,6 +102,8 @@ Usage: ./ss-plugins.sh [options...] [args...]
   4. goquiet (unofficial)
   5. cloak (based goquiet)
   6. mos-tls-tunnel
+        1. tls
+        2. wss
 
 
 注意：

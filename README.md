@@ -119,7 +119,7 @@ Usage: ./ss-plugins.sh [options...] [args...]
     使用v2ray-plugin的选项5时，请将CloudFlare后台Crypto页面里的SSL设置，改为 Full 或 Full (strict) 模式（前者不验证
 服务器证书，后者则会），否则，在浏览器打开你的域名会提示 ”重定向的次数过多“ 的错误！！！
 	
-	使用mos-tls-tunnel时，client开启了跳过验证模式，通信过程中client不会验证server的certificate chain 和 host name，用于自签证书的域名可以随意（不需要自备域名）。
+    使用mos-tls-tunnel时，client开启了跳过验证模式，通信过程中client不会验证server的certificate chain 和 host name，用于自签证书的域名可以随意（不需要自备域名）。
 
 	 
 ~~~

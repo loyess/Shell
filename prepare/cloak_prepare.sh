@@ -41,6 +41,46 @@ get_input_domain_of_rediraddr(){
     done
 }
 
+get_cloak_encryption_method(){
+    while true
+    do
+        echo
+        echo -e "请为Cloak选择一个加密方式"
+ 
+        for ((i=1;i<=${#CLOAK_ENCRYPTION_METHOD[@]};i++ )); do
+            hint="${CLOAK_ENCRYPTION_METHOD[$i-1]}"
+            if [[ ${i} -le 9 ]]; then
+                echo -e "${Green}  ${i}.${suffix} ${hint}"
+            else
+                echo -e "${Green} ${i}.${suffix} ${hint}"
+            fi
+        done
+        
+        echo
+        read -e -p "(默认: ${CLOAK_ENCRYPTION_METHOD[0]}):" encryptionMethod
+        [ -z "$encryptionMethod" ] && encryptionMethod=1
+        expr ${encryptionMethod} + 1 &>/dev/null
+        if [ $? -ne 0 ]; then
+            echo
+            echo -e "${Error} 请输入一个数字."
+            echo
+            continue
+        fi
+        if [[ "$encryptionMethod" -lt 1 || "$encryptionMethod" -gt ${#CLOAK_ENCRYPTION_METHOD[@]} ]]; then
+            echo
+            echo -e "${Error} 请输入一个数字在 [1-${#CLOAK_ENCRYPTION_METHOD[@]}] 之间."
+            echo
+            continue
+        fi
+        encryptionMethod=${CLOAK_ENCRYPTION_METHOD[$encryptionMethod-1]}
+ 
+        echo
+        echo -e "${Red}  EncryptionMethod = ${encryptionMethod}${suffix}"
+        echo
+        break
+    done
+}
+
 
 install_prepare_libev_cloak(){
     if check_port_occupy "443"; then
@@ -48,4 +88,5 @@ install_prepare_libev_cloak(){
     fi
     get_input_rediraddr
     get_input_domain_of_rediraddr
+    get_cloak_encryption_method
 }

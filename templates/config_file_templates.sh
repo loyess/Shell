@@ -303,7 +303,7 @@ cloak2_client_config(){
 	{
 	    "Transport":"direct",
 	    "ProxyMethod":"shadowsocks",
-	    "EncryptionMethod":"plain",
+	    "EncryptionMethod":"${encryptionMethod}",
 	    "UID":"${ckauid}",
 	    "PublicKey":"${ckpub}",
 	    "ServerName":"${domain}",

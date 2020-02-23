@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.3.5"
+SHELL_VERSION="2.3.6"
 # ====================
 
 
@@ -167,6 +167,14 @@ xtea
 xor
 sm4
 none
+)
+
+
+# cloak encryption method
+CLOAK_ENCRYPTION_METHOD=(
+plain
+aes-gcm
+chacha20-poly1305
 )
 
 

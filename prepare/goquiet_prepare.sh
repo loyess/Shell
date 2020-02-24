@@ -1,10 +1,50 @@
-get_input_webaddr(){
+auto_get_ip_of_domain(){
+    local domain=$1
+    
+    domain_ip=`ping ${domain} -c 1 2>nul | sed '1{s/[^(]*(//;s/).*//;q}'`
+    rm -fr ./nul
+    if [[ ! -z "${domain_ip}" ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+get_input_domain(){
     while true
     do
         echo
-        echo -e "请为GoQuiet输入重定向ip:port [留空以将其设置为bing.com的204.79.197.200:443]"
-        read -e -p "(默认: 204.79.197.200:443):" gqwebaddr
-        [ -z "$gqwebaddr" ] && gqwebaddr="204.79.197.200:443"
+        echo -e "请为GoQuiet输入重定向域名"
+        read -e -p "(默认: www.bing.com):" domain
+        [ -z "$domain" ] && domain="www.bing.com"
+        if [ -z "$(echo $domain | grep -E ${DOMAIN_RE})" ]; then
+            echo
+            echo -e "${Error} 请输入正确合法的域名."
+            echo
+            continue
+        fi
+        
+        if ! auto_get_ip_of_domain ${domain}; then
+            echo
+            echo -e "${Error} 请输入正确合法的域名."
+            echo
+            continue
+        fi
+        
+        echo
+        echo -e "${Red}  ServerName = ${domain}${suffix}"
+        echo 
+        break
+    done
+}
+
+get_input_webaddr_of_domain(){
+    while true
+    do
+        echo
+        echo -e "请为GoQuiet输入与重定向域名对应的IP（默认为自动获取）"
+        read -e -p "(默认: ${domain_ip}:443):" gqwebaddr
+        [ -z "$gqwebaddr" ] && gqwebaddr="${domain_ip}:443"
         if [ -z "$(echo $gqwebaddr | grep -E ${IPV4_PORT_RE})" ]; then
             echo
             echo -e "${Error} 请输入正确合法的IP:443组合."
@@ -16,28 +56,6 @@ get_input_webaddr(){
         echo -e "${Red}  WebServerAddr = ${gqwebaddr}${suffix}"
         echo
         echo -e "${Tip} SS-libev端口已被重置为${Green}${shadowsocksport}${suffix}"
-        echo 
-        break
-    done
-}
-
-get_input_domain_of_webaddr(){
-    while true
-    do
-        echo
-        echo -e "请为GoQuiet输入重定向ip:port相对应的域名"
-        echo
-        read -e -p "(默认: www.bing.com):" domain
-        [ -z "$domain" ] && domain="www.bing.com"
-        if [ -z "$(echo $domain | grep -E ${DOMAIN_RE})" ]; then
-            echo
-            echo -e "${Error} 请输入正确合法的域名."
-            echo
-            continue
-        fi
-        
-        echo
-        echo -e "${Red}  ServerName = ${domain}${suffix}"
         echo 
         break
     done
@@ -60,8 +78,8 @@ install_prepare_libev_goquiet(){
     fi
     gen_random_str
     shadowsocksport=443
-    get_input_webaddr
-    get_input_domain_of_webaddr
+    get_input_domain
+    get_input_webaddr_of_domain
     get_input_gqkey
 }
 

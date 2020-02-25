@@ -49,6 +49,8 @@ get_input_server_name(){
         echo
     	echo -e "${Red}  n = ${serverName}${suffix}"
         echo
+        echo -e "${Tip} SS 端口已被重置为${Green}${shadowsocksport}${suffix}"
+        echo 
         break
    done
 }
@@ -136,6 +138,11 @@ is_enable_mux(){
 
 install_prepare_libev_mos_tls_tunnel(){
     transport_mode_menu
+    
+    shadowsocksport=443
+    if check_port_occupy "443"; then
+        echo -e "${Error} 检测到443端口被占用，请排查后重新运行." && exit 1
+    fi
     
     if [[ ${libev_mtt} = "1" ]]; then
         get_input_server_name

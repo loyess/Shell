@@ -1004,6 +1004,10 @@ config_ss(){
                 nginx_config
             fi 
         fi
+        # disable mux
+        if [[ ${isDisable} == disable ]] && [[ ${libev_v2ray} != "3" ]]; then
+            sed 's/"plugin_opts":"/"plugin_opts":"mux=0;/' -i ${SHADOWSOCKS_CONFIG}
+        fi
     elif [[ ${plugin_num} == "2" ]]; then
         if [ ! -d "$(dirname ${KCPTUN_CONFIG})" ]; then
             mkdir -p $(dirname ${KCPTUN_CONFIG})

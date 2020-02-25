@@ -377,6 +377,39 @@ get_input_mirror_site(){
     done
 }
 
+get_input_mux_max_stream() {
+    while true
+    do
+        echo
+        echo -e "请输入一个实际TCP连接中的最大复用流数"
+        read -e -p "(默认: 4):" mux
+        [ -z "${mux}" ] && mux=4
+        expr ${mux} + 1 &>/dev/null
+        if [ $? -ne 0 ]; then
+            echo
+            echo -e "${Error} 请输入一个有效数字."
+            echo
+            continue
+        fi
+        if [ ${mux:0:1} = 0 ]; then
+            echo
+            echo -e "${Error} 请输入一个非0开头的数字."
+            echo
+            continue
+        fi
+        if [ ${mux} -le 0 ]; then
+            echo
+            echo -e "${Error} 请输入一个大于0的数字."
+            echo
+            continue
+        fi
+        echo
+        echo -e "${Red}  mux = ${mux}${suffix}"
+        echo
+        break
+    done
+}
+
 is_disable_mux(){
     while true
     do
@@ -386,10 +419,10 @@ is_disable_mux(){
         [ -z "${yn}" ] && yn="N"
         case "${yn:0:1}" in
             y|Y)
-                mux=0
+                isDisable=disable
                 ;;
             n|N)
-                mux=1
+                isDisable=enable
                 ;;
             *)
                 echo
@@ -400,10 +433,16 @@ is_disable_mux(){
         esac
         
         echo
-        echo -e "${Red}  mux = ${mux}${suffix}"
+        echo -e "${Red}  mux ${isDisable}${suffix}"
         echo
         break
     done
+    
+    if [[ ${isDisable} == disable ]]; then
+        mux=0
+    elif [[ ${isDisable} == enable ]]; then
+        get_input_mux_max_stream
+    fi
 }
 
 print_error_info(){
@@ -466,9 +505,9 @@ install_prepare_libev_v2ray(){
         
         if [[ ${libev_v2ray} = "2" ]]; then
             get_input_ws_path
+            is_disable_mux
         fi
         
-        is_disable_mux
     elif [[ ${libev_v2ray} = "4" ]]; then
         if check_port_occupy "443"; then
             echo -e "${Error} 检测到443端口被占用，请排查后重新运行." && exit 1

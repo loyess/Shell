@@ -133,7 +133,7 @@ v2ray_plugin_prot_reset(){
 }
 
 get_domain_ip(){
-    domain_ip=`ping ${domain} -c 1 2>nul | sed '1{s/[^(]*(//;s/).*//;q}'`
+    domain_ip=`ping -4 ${domain} -c 1 2>nul | sed '1{s/[^(]*(//;s/).*//;q}'`
     rm -fr ./nul
     if [[ ! -z "${domain_ip}" ]]; then
         return 0

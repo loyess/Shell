@@ -1,18 +1,30 @@
+select_ss_version_auto(){
+    local totalRam=`free | awk '/Mem/ {print $2}'`
+    local numLogicalCpu=`cat /proc/cpuinfo | grep "processor" | wc -l`
+
+    if [ $totalRam -lt 1048576 ] && [ $numLogicalCpu -le 1 ]; then
+        versionDefault=2
+    else
+        versionDefault=1
+    fi
+}
+
 choose_ss_install_version(){
+    select_ss_version_auto
+
     while true
     do
+        echo
         echo -e "\n请选择Shadowsocks安装版本"
-
+        echo
         for ((i=1;i<=${#SS_DLV[@]};i++ )); do
             hint="${SS_DLV[$i-1]}"
             echo -e "${Green}  ${i}.${suffix} ${hint}"
         done
         
         echo
-        echo -e "${Tip} 弱性能，小内存的VPS，建议选择rust版本."
-        echo
-        read -e -p "(默认: ${SS_DLV[0]}):" pick
-        [ -z "$pick" ] && pick=1
+        read -e -p "(默认: ${versionDefault}):" pick
+        [ -z "$pick" ] && pick=${versionDefault}
         expr ${pick} + 1 &>/dev/null
         if [ $? -ne 0 ]; then
             echo

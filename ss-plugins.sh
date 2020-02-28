@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.3.8"
+SHELL_VERSION="2.3.9"
 # ====================
 
 
@@ -892,6 +892,28 @@ error_detect_deps_of_ubuntu(){
     done
 }
 
+error_asciidos_deps_of_ubuntu1901(){
+    local command=$1
+    local depend=$2
+
+    sleep 5
+    sudo dpkg --configure -a > /dev/null 2>&1
+    ${command} > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        if ls -l /var/lib/dpkg/info | grep -qi 'python-sympy'; then
+            sudo mv -f /var/lib/dpkg/info/python-sympy.* /tmp
+            sudo apt update > /dev/null 2>&1
+        fi
+
+        ${command} > /dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            echo -e "${Error} 依赖包${Red}${depend}${suffix}安装失败，请检查. "
+            echo "Checking the error message and run the script again."
+            exit 1
+        fi
+    fi
+}
+
 error_detect_depends(){
     local command=$1
     local depend=`echo "${command}" | awk '{print $4}'`
@@ -899,7 +921,11 @@ error_detect_depends(){
     ${command} > /dev/null 2>&1
     if [ $? -ne 0 ]; then
         if check_sys sysRelease ubuntu || check_sys sysRelease debian; then
-            error_detect_deps_of_ubuntu "${command}" "${depend}"
+            if [ $(get_version) == '19.10' ] && [ ${depend} == 'asciidoc' ]; then
+                  error_asciidos_deps_of_ubuntu1901 "${command}" "${depend}"
+            else
+                  error_detect_deps_of_ubuntu "${command}" "${depend}"
+            fi
         else
             echo -e "${Error} 依赖包${Red}${depend}${suffix}安装失败，请检查. "
             echo "Checking the error message and run the script again."

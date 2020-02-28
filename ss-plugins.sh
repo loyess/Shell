@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.3.7"
+SHELL_VERSION="2.3.8"
 # ====================
 
 
@@ -854,15 +854,57 @@ download_plugins_file(){
     fi
 }
 
+error_detect_deps_of_ubuntu(){
+    local command=$1
+    local depend=$2
+    local times=0
+    local failedNum=0
+
+    while true
+    do
+        if ! ps aux | grep -v grep | grep -qE 'apt|apt-get'; then
+            ${command} > /dev/null 2>&1
+            if [ $? -eq 0 ]; then
+                break
+            else
+                if [[ $failedNum == 3 ]]; then
+                   echo -e "${Error} 依赖包${Red}${depend}${suffix}安装失败，请检查. "
+                    echo "Checking the error message and run the script again."
+                    exit 1
+                fi
+                sleep 5
+                let "times++"
+                let "failedNum++"
+                continue
+            fi
+        fi
+        if [[ $times == 6 ]]; then
+            sudo killall -q apt apt-get
+            ${command} > /dev/null 2>&1
+            if [ $? -ne 0 ]; then
+                echo -e "${Error} 依赖包${Red}${depend}${suffix}安装失败，请检查. "
+                echo "Checking the error message and run the script again."
+                exit 1
+            fi
+        fi
+        sleep 5
+        let "times++"
+    done
+}
+
 error_detect_depends(){
     local command=$1
     local depend=`echo "${command}" | awk '{print $4}'`
     echo -e "${Info} 开始安装依赖包 ${depend}"
     ${command} > /dev/null 2>&1
     if [ $? -ne 0 ]; then
-        echo -e "${Error} 依赖包${Red}${depend}${suffix}安装失败，请检查. "
-        echo "Checking the error message and run the script again."
-        exit 1
+        if check_sys sysRelease ubuntu || check_sys sysRelease debian; then
+            error_detect_deps_of_ubuntu "${command}" "${depend}"
+        else
+            echo -e "${Error} 依赖包${Red}${depend}${suffix}安装失败，请检查. "
+            echo "Checking the error message and run the script again."
+            exit 1
+        fi
     fi
 }
 

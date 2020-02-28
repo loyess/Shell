@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.3.9"
+SHELL_VERSION="2.4.0"
 # ====================
 
 
@@ -857,46 +857,22 @@ download_plugins_file(){
 error_detect_deps_of_ubuntu(){
     local command=$1
     local depend=$2
-    local times=0
-    local failedNum=0
 
-    while true
-    do
-        if ! ps aux | grep -v grep | grep -qE 'apt|apt-get'; then
-            ${command} > /dev/null 2>&1
-            if [ $? -eq 0 ]; then
-                break
-            else
-                if [[ $failedNum == 3 ]]; then
-                   echo -e "${Error} 依赖包${Red}${depend}${suffix}安装失败，请检查. "
-                    echo "Checking the error message and run the script again."
-                    exit 1
-                fi
-                sleep 5
-                let "times++"
-                let "failedNum++"
-                continue
-            fi
-        fi
-        if [[ $times == 6 ]]; then
-            sudo killall -q apt apt-get
-            ${command} > /dev/null 2>&1
-            if [ $? -ne 0 ]; then
-                echo -e "${Error} 依赖包${Red}${depend}${suffix}安装失败，请检查. "
-                echo "Checking the error message and run the script again."
-                exit 1
-            fi
-        fi
-        sleep 5
-        let "times++"
-    done
+    sleep 3
+    sudo killall -q apt apt-get
+    ${command} > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        echo -e "${Error} 依赖包${Red}${depend}${suffix}安装失败，请检查. "
+        echo "Checking the error message and run the script again."
+        exit 1
+    fi
 }
 
 error_asciidos_deps_of_ubuntu1901(){
     local command=$1
     local depend=$2
 
-    sleep 5
+    sleep 3
     sudo dpkg --configure -a > /dev/null 2>&1
     ${command} > /dev/null 2>&1
     if [ $? -ne 0 ]; then
@@ -904,7 +880,6 @@ error_asciidos_deps_of_ubuntu1901(){
             sudo mv -f /var/lib/dpkg/info/python-sympy.* /tmp
             sudo apt update > /dev/null 2>&1
         fi
-
         ${command} > /dev/null 2>&1
         if [ $? -ne 0 ]; then
             echo -e "${Error} 依赖包${Red}${depend}${suffix}安装失败，请检查. "

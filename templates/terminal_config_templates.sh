@@ -277,8 +277,6 @@ ss_mtt_tls_show(){
     echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
-    echo -e " ${Tip} 插件${Red}mos-tls-tunnel${suffix}只支持${Red}安卓端${suffix}，Windows平台暂不支持。" >> ${HUMAN_CONFIG}
-    echo >> ${HUMAN_CONFIG}
     echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
     echo -e "        插件程序下载：https://github.com/IrineSistiana/mos-tls-tunnel/releases 下载 windows-amd64 版本" >> ${HUMAN_CONFIG}
     echo -e "        请解压将插件重命名为 ${plugin_client_name}.exe 并移动至 SS-Windows 客户端-安装目录的${Red}根目录${suffix}." >> ${HUMAN_CONFIG}
@@ -304,8 +302,6 @@ ss_mtt_wss_show(){
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
-    echo >> ${HUMAN_CONFIG}
-    echo -e " ${Tip} 插件${Red}mos-tls-tunnel${suffix}只支持${Red}安卓端${suffix}，Windows平台暂不支持。" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " ${Tip} SS链接${Red}不支持插件参数${suffix}导入，请手动填写。使用${Red}kcptun${suffix}插件时，该链接仅支持${Red}手机${suffix}导入." >> ${HUMAN_CONFIG}
     echo -e "        插件程序下载：https://github.com/IrineSistiana/mos-tls-tunnel/releases 下载 windows-amd64 版本" >> ${HUMAN_CONFIG}

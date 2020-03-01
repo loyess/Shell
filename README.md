@@ -168,7 +168,7 @@ Usage: ./ss-plugins.sh [options...] [args...]
 
 ~~v2ray-plugin 所要用到的域名，可以从 [freenom.com](https://www.freenom.com) 获取免费域名， 申请需要挂代理，代理是哪国ip 就填写哪国的资料，不然会导致无法申请。~~ (似乎失效了，有账号的仍能注册)
 
-另外，生成的 ss:// 链接，不支持插件参数导入，需要手动复制粘贴，使用 kcptun 插件时，该链接仅支持在手机上导入，使用 mos-tls-tunnel 插件时，暂只支持 Android 平台。
+另外，生成的 ss:// 链接，不支持插件参数导入，需要手动复制粘贴，使用 kcptun 插件时，该链接仅支持在手机上导入。
 
 &nbsp;
 

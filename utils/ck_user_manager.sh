@@ -348,6 +348,7 @@ download_ck_clinet(){
     cd ${CUR_DIR}
     chmod +x ${cloak_file}
     mv ${cloak_file} ${CLOAK_CLIENT_BIN_PATH}
+    [ -f ${CLOAK_CLIENT_BIN_PATH} ] && ln -fs ${CLOAK_CLIENT_BIN_PATH} /usr/bin
 }
 
 ck2_users_manager(){

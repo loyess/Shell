@@ -14,6 +14,7 @@ install_kcptun(){
         elif check_sys packageManager apt; then
             update-rc.d -f ${service_name} defaults
         fi
+        [ -f ${KCPTUN_BIN_PATH} ] && ln -fs ${KCPTUN_BIN_PATH} /usr/bin
         echo -e "${Info} kcptun安装成功."
     else
         echo
@@ -22,6 +23,4 @@ install_kcptun(){
         install_cleanup
         exit 1
     fi
-    [ -f ${KCPTUN_BIN_PATH} ] && ln -fs ${KCPTUN_BIN_PATH} /usr/bin
-    
 }

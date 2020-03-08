@@ -172,6 +172,7 @@ is_cdn_proxied(){
             exit 1
         fi
         chmod +x ${ipcalc_install_path}
+        [ -f ${ipcalc_install_path} ] && ln -fs ${ipcalc_install_path} /usr/bin
     fi
 
     for MASK in ${ipv4_text_list[@]}

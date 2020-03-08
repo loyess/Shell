@@ -9,6 +9,7 @@ install_mos_tls_tunnel(){
     chmod +x mtt-server
     mv mtt-server ${MTT_BIN_PATH}
     if [ $? -eq 0 ]; then
+        [ -f ${MTT_BIN_PATH} ] && ln -fs ${MTT_BIN_PATH} /usr/bin
         echo -e "${Info} mos-tls-tunnel安装成功."
     else
         echo

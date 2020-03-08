@@ -11,6 +11,7 @@ install_cloak(){
         elif check_sys packageManager apt; then
             update-rc.d -f ${service_name} defaults
         fi
+        [ -f ${CLOAK_SERVER_BIN_PATH} ] && ln -fs ${CLOAK_SERVER_BIN_PATH} /usr/bin
         echo -e "${Info} Cloak安装成功."
     else
         echo

@@ -12,6 +12,7 @@ install_shadowsocks_libev(){
         elif check_sys packageManager apt; then
             update-rc.d -f ${service_name} defaults
         fi
+        [ -f ${SHADOWSOCKS_LIBEV_BIN_PATH} ] && ln -fs ${SHADOWSOCKS_LIBEV_BIN_PATH} /usr/bin
         echo -e "${Info} shadowsocks-libev安装成功."
     else
         echo
@@ -36,6 +37,7 @@ install_shadowsocks_rust(){
         elif check_sys packageManager apt; then
             update-rc.d -f ${service_name} defaults
         fi
+        [ -f ${SHADOWSOCKS_RUST_BIN_PATH} ] && ln -fs ${SHADOWSOCKS_RUST_BIN_PATH} /usr/bin
         echo -e "${Info} shadowsocks-rust安装成功."
     else
         echo

@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.4.1"
+SHELL_VERSION="2.4.2"
 # ====================
 
 
@@ -1086,10 +1086,14 @@ config_ss(){
                 ss_mtt_wss_dns_only_or_cdn_config
             elif [[ ${isEnableWeb} = enable ]]; then
                 ss_mtt_wss_dns_only_or_cdn_web_config
-                if [[ ${web_flag} = "1" ]]; then
+                if [[ ${domainType} = DNS-Only ]] && [[ ${web_flag} = "1" ]]; then
                     domain=${serverName}
                     path=${wssPath}
                     caddy_config_none_cdn
+                elif [[ ${domainType} = CDN ]] && [[ ${web_flag} = "1" ]]; then
+                    domain=${serverName}
+                    path=${wssPath}
+                    caddy_config_with_cdn
                 elif [[ ${web_flag} = "2" ]]; then
                     domain=${serverName}
                     path=${wssPath}

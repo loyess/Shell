@@ -333,6 +333,24 @@ ss_mtt_tls_config(){
 	EOF
 }
 
+ss_mtt_tls_dns_only_config(){
+	cat > ${SHADOWSOCKS_CONFIG}<<-EOF
+	{
+	    "server":${server_value},
+	    "server_port":${shadowsocksport},
+	    "password":"${shadowsockspwd}",
+	    "timeout":300,
+	    "user":"nobody",
+	    "method":"${shadowsockscipher}",
+	    "fast_open":${fast_open},
+	    "nameserver":"8.8.8.8",
+	    "mode":"tcp_only",
+	    "plugin":"mtt-server",
+	    "plugin_opts":"key=${keyPath};cert=${cerPath}"
+	}
+	EOF
+}
+
 ss_mtt_wss_config(){
 	cat > ${SHADOWSOCKS_CONFIG}<<-EOF
 	{
@@ -347,6 +365,42 @@ ss_mtt_wss_config(){
 	    "mode":"tcp_only",
 	    "plugin":"mtt-server",
 	    "plugin_opts":"wss;wss-path=${wssPath};n=${serverName}"
+	}
+	EOF
+}
+
+ss_mtt_wss_dns_only_or_cdn_config(){
+	cat > ${SHADOWSOCKS_CONFIG}<<-EOF
+	{
+	    "server":${server_value},
+	    "server_port":${shadowsocksport},
+	    "password":"${shadowsockspwd}",
+	    "timeout":300,
+	    "user":"nobody",
+	    "method":"${shadowsockscipher}",
+	    "fast_open":${fast_open},
+	    "nameserver":"8.8.8.8",
+	    "mode":"tcp_only",
+	    "plugin":"mtt-server",
+	    "plugin_opts":"wss;wss-path=${wssPath};key=${keyPath};cert=${cerPath}"
+	}
+	EOF
+}
+
+ss_mtt_wss_dns_only_or_cdn_web_config(){
+	cat > ${SHADOWSOCKS_CONFIG}<<-EOF
+	{
+	    "server":${server_value},
+	    "server_port":${shadowsocksport},
+	    "password":"${shadowsockspwd}",
+	    "timeout":300,
+	    "user":"nobody",
+	    "method":"${shadowsockscipher}",
+	    "fast_open":${fast_open},
+	    "nameserver":"8.8.8.8",
+	    "mode":"tcp_only",
+	    "plugin":"mtt-server",
+	    "plugin_opts":"wss;wss-path=${wssPath};disable-tls"
 	}
 	EOF
 }

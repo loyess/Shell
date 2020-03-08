@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.4.0"
+SHELL_VERSION="2.4.1"
 # ====================
 
 
@@ -703,7 +703,7 @@ config_firewall(){
                 if [[ ${plugin_num} == "2" ]]; then
                     iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${listen_port} -j ACCEPT
                     iptables -I INPUT -m state --state NEW -m udp -p udp --dport ${listen_port} -j ACCEPT
-                elif [[ ${libev_v2ray} = "4" ]] || [[ ${libev_v2ray} = "5" ]] || [[ ${plugin_num} == "5" ]]; then
+                elif [[ ${libev_v2ray} = "4" ]] || [[ ${libev_v2ray} = "5" ]] || [[ ${plugin_num} == "5" ]] || [[ ${isEnableWeb} = enable ]]; then
                     iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 443 -j ACCEPT
                     iptables -I INPUT -m state --state NEW -m udp -p udp --dport 443 -j ACCEPT
                 else
@@ -1076,9 +1076,31 @@ config_ss(){
         cloak2_client_config
     elif [[ ${plugin_num} == "6" ]]; then
         if [[ ${libev_mtt} == "1" ]]; then
-           ss_mtt_tls_config
-        elif [[ ${libev_mtt} == "2" ]]; then    
-           ss_mtt_wss_config
+            if [[ ${domainType} = DNS-Only ]]; then
+                ss_mtt_tls_dns_only_config
+            else
+                ss_mtt_tls_config
+            fi
+        elif [[ ${libev_mtt} == "2" ]]; then
+            if [[ ${isEnableWeb} = disable ]]; then
+                ss_mtt_wss_dns_only_or_cdn_config
+            elif [[ ${isEnableWeb} = enable ]]; then
+                ss_mtt_wss_dns_only_or_cdn_web_config
+                if [[ ${web_flag} = "1" ]]; then
+                    domain=${serverName}
+                    path=${wssPath}
+                    caddy_config_none_cdn
+                elif [[ ${web_flag} = "2" ]]; then
+                    domain=${serverName}
+                    path=${wssPath}
+                    cerpath=${cerPath}
+                    keypath=${keyPath}
+                    mirror_domain=$(echo ${mirror_site} | sed 's/https:\/\///g')
+                    nginx_config
+                fi 
+            else
+                ss_mtt_wss_config
+            fi
         fi
         
         if [[ ${isEnable} == enable ]]; then
@@ -1118,9 +1140,19 @@ gen_ss_links(){
         ss_cloak_link_new
     elif [[ ${plugin_num} == "6" ]]; then
         if [[ ${libev_mtt} == "1" ]]; then
-           ss_mtt_tls_link
-        elif [[ ${libev_mtt} == "2" ]]; then    
-           ss_mtt_wss_link
+            if [[ ${domainType} = DNS-Only ]]; then
+                ss_mtt_tls_dns_only_link
+            else
+                ss_mtt_tls_link
+            fi
+        elif [[ ${libev_mtt} == "2" ]]; then
+            if [[ ${isEnableWeb} = disable ]]; then
+                ss_mtt_wss_dns_only_or_cdn_link
+            elif [[ ${isEnableWeb} = enable ]]; then
+                ss_mtt_wss_dns_only_or_cdn_web_link
+            else
+                ss_mtt_wss_link
+            fi
         fi
     else
         ss_link
@@ -1183,9 +1215,25 @@ install_completed(){
         ss_cloak_show_new
     elif [[ ${plugin_num} == "6" ]]; then
         if [[ ${libev_mtt} == "1" ]]; then
-           ss_mtt_tls_show
-        elif [[ ${libev_mtt} == "2" ]]; then    
-           ss_mtt_wss_show
+            if [[ ${domainType} = DNS-Only ]]; then
+                ss_mtt_tls_dns_only_show
+            else
+                ss_mtt_tls_show
+            fi
+        elif [[ ${libev_mtt} == "2" ]]; then
+            if [[ ${isEnableWeb} = disable ]]; then
+                ss_mtt_wss_dns_only_or_cdn_show
+            elif [[ ${isEnableWeb} = enable ]]; then
+                if [[ ${web_flag} = "1" ]]; then
+                    # start caddy
+                    /etc/init.d/caddy start > /dev/null 2>&1
+                elif [[ ${web_flag} = "2" ]]; then
+                    systemctl start nginx
+                fi 
+                ss_mtt_wss_dns_only_or_cdn_web_show
+            else
+                ss_mtt_wss_show
+            fi
         fi
     else
         ss_show
@@ -1290,6 +1338,17 @@ install_main(){
     elif [ "${plugin_num}" == "6" ]; then
         improt_package "plugins" "mos_tls_tunnel_install.sh"
         install_mos_tls_tunnel
+        if [[ ${web_flag} = "1" ]]; then
+            improt_package "tools" "caddy_install.sh"
+            if [[ ${domainType} = DNS-Only ]] && [[ ${isEnableWeb} = enable ]]; then
+                install_caddy
+            elif [[ ${domainType} = CDN ]] && [[ ${isEnableWeb} = enable ]]; then
+                install_caddy "tls.dns.cloudflare"
+            fi
+        elif [[ ${web_flag} = "2" ]]; then
+            improt_package "tools" "nginx_install.sh"
+            install_nginx
+        fi
         plugin_client_name="mostlstunnel"
     fi
 }

@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.4.2"
+SHELL_VERSION="2.4.3"
 # ====================
 
 
@@ -1502,29 +1502,12 @@ do_start(){
     fi
     
     improt_package "utils" "start.sh"
-    shadowsocks_start
-    sleep 0.1
-    v2ray_plugin_start
-    kcptun_start
-    simple_obfs_start
-    goquiet_start
-    cloak_start
-    mtt_start
-    caddy_start
-    nginx_start
+    start_services
 }
 
 do_stop(){
     improt_package "utils" "stop.sh"
-    shadowsocks_stop
-    v2ray_plugin_stop
-    kcptun_stop
-    simple_obfs_stop
-    goquiet_stop
-    cloak_stop
-    mtt_stop
-    caddy_stop
-    nginx_stop
+    stop_services
 }
 
 do_restart(){
@@ -1584,16 +1567,7 @@ do_uninstall(){
     
     # start uninstall
     improt_package "utils" "uninstall.sh"
-    shadowsocks_uninstall
-    v2ray_plugin_uninstall
-    kcptun_uninstall
-    simple_obfs_uninstall
-    goquiet_uninstall
-    cloak_uninstall
-    mtt_uninstall
-    caddy_uninstall
-    nginx_uninstall
-    ipcalc_uninstall
+    uninstall_services
     echo -e "${Info} Shadowsocks 卸载成功."
 }
 

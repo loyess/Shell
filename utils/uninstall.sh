@@ -176,6 +176,18 @@ ipcalc_uninstall(){
     rm -rf /usr/local/bin/ipcalc-0.41
 }
 
+uninstall_services(){
+    shadowsocks_uninstall
+    v2ray_plugin_uninstall
+    kcptun_uninstall
+    simple_obfs_uninstall
+    goquiet_uninstall
+    cloak_uninstall
+    mtt_uninstall
+    caddy_uninstall
+    nginx_uninstall
+    ipcalc_uninstall
+}
 
 
 

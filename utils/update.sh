@@ -180,14 +180,15 @@ update_mtt(){
     if [[ -e ${MTT_BIN_PATH} ]]; then
         mtt_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/IrineSistiana/mos-tls-tunnel/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
         [ -z ${mtt_ver} ] && echo -e "${Error} 获取 mos-tls-tunnel 最新版本失败." && exit 1
-        read current_goquiet_ver < ${MTT_VERSION_FILE}
-        if ! check_latest_version ${current_goquiet_ver} ${mtt_ver}; then
-            echo -e "${Point} mos-tls-tunnel当前已是最新版本${current_goquiet_ver}不需要更新."
-            echo
-            
-            install_cleanup
+        read current_mtt_ver < ${MTT_VERSION_FILE}
+        if ! check_latest_version ${current_mtt_ver} ${mtt_ver}; then
+            echo -e "${Point} mos-tls-tunnel当前已是最新版本${current_mtt_ver}不需要更新."
+            if [[ ! -e ${CADDY_BIN_PATH} ]]; then
+                echo
+                exit 1
+            fi
             update_caddy
-            exit 1
+            exit 0
         fi
         
         local plugin_num="6"

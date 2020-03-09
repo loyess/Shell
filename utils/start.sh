@@ -198,6 +198,19 @@ nginx_start(){
     fi
 }
 
+start_services(){
+    shadowsocks_start
+    sleep 0.1
+    v2ray_plugin_start
+    kcptun_start
+    simple_obfs_start
+    goquiet_start
+    cloak_start
+    mtt_start
+    caddy_start
+    nginx_start
+}
+
 
 
 

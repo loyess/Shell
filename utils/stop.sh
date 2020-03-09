@@ -84,3 +84,15 @@ nginx_stop(){
     fi
 }
 
+stop_services(){
+    shadowsocks_stop
+    v2ray_plugin_stop
+    kcptun_stop
+    simple_obfs_stop
+    goquiet_stop
+    cloak_stop
+    mtt_stop
+    caddy_stop
+    nginx_stop
+}
+

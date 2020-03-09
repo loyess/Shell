@@ -67,7 +67,7 @@ install_prepare_port() {
             echo
             continue
         fi
-        if [ ${shadowsocksport} -le 1 ] && [ ${shadowsocksport} -ge 65535 ]; then
+        if [ ${shadowsocksport} -lt 1 ] && [ ${shadowsocksport} -gt 65535 ]; then
             echo
             echo -e "${Error} 请输入一个在1-65535之间的数字."
             echo

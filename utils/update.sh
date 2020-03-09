@@ -184,6 +184,9 @@ update_mtt(){
         if ! check_latest_version ${current_goquiet_ver} ${mtt_ver}; then
             echo -e "${Point} mos-tls-tunnel当前已是最新版本${current_goquiet_ver}不需要更新."
             echo
+            
+            install_cleanup
+            update_caddy
             exit 1
         fi
         
@@ -200,6 +203,7 @@ update_mtt(){
         echo
         
         install_cleanup
+        update_caddy
     fi
 }
 

@@ -268,81 +268,102 @@ usage() {
 menu_status(){
     local BIN_PATH=$1
     local SS_PID=$2
+    local NoInstall=" 当前状态: ${Red}未安装${suffix}"
+    local InstallStart=" 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+    local InstallNoStart=" 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
     
     if [[ -e ${BIN_PATH} ]] && [[ -e ${V2RAY_PLUGIN_BIN_PATH} ]] && [[ -e ${CADDY_BIN_PATH}  ]]; then
         V2_PID=`ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}'`
         CADDY_PID=`ps -ef |grep -v grep | grep caddy |awk '{print $2}'`
         
         if [[ ! -z ${SS_PID} ]] && [[ ! -z ${V2_PID} ]] && [[ ! -z ${CADDY_PID} ]]; then
-            echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+            echo -e ${InstallStart}
         else
-            echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+            echo -e ${InstallNoStart}
         fi
     elif [[ -e ${BIN_PATH} ]] && [[ -e ${V2RAY_PLUGIN_BIN_PATH} ]] && [[ -e ${NGINX_BIN_PATH}  ]]; then
         V2_PID=`ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}'`
         NGINX_PID=`ps -ef |grep -v grep | grep nginx.conf |awk '{print $2}'`
         
         if [[ ! -z ${SS_PID} ]] && [[ ! -z ${V2_PID} ]] && [[ ! -z ${NGINX_PID} ]]; then
-            echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+            echo -e ${InstallStart}
         else
-            echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+            echo -e ${InstallNoStart}
         fi
     elif [[ -e ${BIN_PATH} ]] && [[ -e ${V2RAY_PLUGIN_BIN_PATH} ]]; then
         V2_PID=`ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}'`
         
         if [[ ! -z ${SS_PID} ]] && [[ ! -z ${V2_PID} ]]; then
-            echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+            echo -e ${InstallStart}
         else
-            echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+            echo -e ${InstallNoStart}
         fi
     elif [[ -e ${BIN_PATH} ]] && [[ -e ${KCPTUN_BIN_PATH} ]]; then
         KP_PID=`ps -ef |grep -v grep | grep kcptun-server |awk '{print $2}'`
         
         if [[ ! -z ${SS_PID} ]] && [[ ! -z ${KP_PID} ]]; then
-            echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+            echo -e ${InstallStart}
         else
-            echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+            echo -e ${InstallNoStart}
         fi
-     elif [[ -e ${BIN_PATH} ]] && [[ -e ${SIMPLE_OBFS_BIN_PATH} ]]; then
+    elif [[ -e ${BIN_PATH} ]] && [[ -e ${SIMPLE_OBFS_BIN_PATH} ]]; then
         OBFS_PID=`ps -ef |grep -v grep | grep obfs-server |awk '{print $2}'`
         
         if [[ ! -z ${SS_PID} ]] && [[ ! -z ${OBFS_PID} ]]; then
-            echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+            echo -e ${InstallStart}
         else
-            echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+            echo -e ${InstallNoStart}
         fi
-     elif [[ -e ${BIN_PATH} ]] && [[ -e ${GOQUIET_BIN_PATH} ]]; then    
+    elif [[ -e ${BIN_PATH} ]] && [[ -e ${GOQUIET_BIN_PATH} ]]; then    
         GQ_PID=`ps -ef |grep -v grep | grep gq-server |awk '{print $2}'`
         
         if [[ ! -z ${SS_PID} ]] && [[ ! -z ${GQ_PID} ]]; then
-            echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+            echo -e ${InstallStart}
         else
-            echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+            echo -e ${InstallNoStart}
         fi
-     elif [[ -e ${BIN_PATH} ]] && [[ -e ${CLOAK_SERVER_BIN_PATH} ]]; then
+    elif [[ -e ${BIN_PATH} ]] && [[ -e ${CLOAK_SERVER_BIN_PATH} ]]; then
         CK_PID=`ps -ef |grep -v grep | grep ck-server |awk '{print $2}'`
         
         if [[ ! -z ${SS_PID} ]] && [[ ! -z ${CK_PID} ]]; then
-            echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+            echo -e ${InstallStart}
         else
-            echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+            echo -e ${InstallNoStart}
+        fi
+    elif [[ -e ${BIN_PATH} ]] && [[ -e ${MTT_BIN_PATH} ]] && [[ -e ${CADDY_BIN_PATH}  ]]; then
+        MTT_PID=`ps -ef |grep -v grep | grep mtt-server |awk '{print $2}'`
+        CADDY_PID=`ps -ef |grep -v grep | grep caddy |awk '{print $2}'`
+        
+        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${MTT_PID} ]] && [[ ! -z ${CADDY_PID} ]]; then
+            echo -e ${InstallStart}
+        else
+            echo -e ${InstallNoStart}
+        fi
+    elif [[ -e ${BIN_PATH} ]] && [[ -e ${MTT_BIN_PATH} ]] && [[ -e ${NGINX_BIN_PATH}  ]]; then
+        MTT_PID=`ps -ef |grep -v grep | grep mtt-server |awk '{print $2}'`
+        NGINX_PID=`ps -ef |grep -v grep | grep nginx.conf |awk '{print $2}'`
+        
+        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${MTT_PID} ]] && [[ ! -z ${NGINX_PID} ]]; then
+            echo -e ${InstallStart}
+        else
+            echo -e ${InstallNoStart}
         fi
     elif [[ -e ${BIN_PATH} ]] && [[ -e ${MTT_BIN_PATH} ]]; then    
         MTT_PID=`ps -ef |grep -v grep | grep mtt-server |awk '{print $2}'`
         
         if [[ ! -z ${SS_PID} ]] && [[ ! -z ${MTT_PID} ]]; then
-            echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+            echo -e ${InstallStart}
         else
-            echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+            echo -e ${InstallNoStart}
         fi
     elif [[ -e ${BIN_PATH} ]]; then
         if [[ ! -z ${SS_PID} ]]; then
-            echo -e " 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+            echo -e ${InstallStart}
         else
-            echo -e " 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+            echo -e ${InstallNoStart}
         fi
     else
-        echo -e " 当前状态: ${Red}未安装${suffix}"
+        echo -e ${NoInstall}
     fi
 }
 
@@ -698,43 +719,62 @@ config_firewall(){
     if centosversion 6; then
         /etc/init.d/iptables status > /dev/null 2>&1
         if [ $? -eq 0 ]; then
-            iptables -L -n | grep -i ${shadowsocksport} > /dev/null 2>&1
-            if [ $? -ne 0 ]; then
-                if [[ ${plugin_num} == "2" ]]; then
+            if [[ ${plugin_num} == "2" ]]; then
+                if ! $(iptables -L -n | grep -q ${listen_port}); then
                     iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${listen_port} -j ACCEPT
                     iptables -I INPUT -m state --state NEW -m udp -p udp --dport ${listen_port} -j ACCEPT
-                elif [[ ${libev_v2ray} = "4" ]] || [[ ${libev_v2ray} = "5" ]] || [[ ${plugin_num} == "5" ]] || [[ ${isEnableWeb} = enable ]]; then
+                fi
+            elif [[ ${libev_v2ray} = "4" ]] || [[ ${libev_v2ray} = "5" ]] || [[ ${plugin_num} == "5" ]] || [[ ${isEnableWeb} = enable ]]; then
+                if ! $(iptables -L -n | grep -q 443); then
                     iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 443 -j ACCEPT
                     iptables -I INPUT -m state --state NEW -m udp -p udp --dport 443 -j ACCEPT
-                else
+                fi
+            else
+                if ! $(iptables -L -n | grep -q ${shadowsocksport}); then
                     iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${shadowsocksport} -j ACCEPT
                     iptables -I INPUT -m state --state NEW -m udp -p udp --dport ${shadowsocksport} -j ACCEPT
                 fi
-                
-                /etc/init.d/iptables save
-                /etc/init.d/iptables restart
-            else
-                echo -e "${Info} 端口 ${Green}${shadowsocksport}${suffix} 已经启用"
             fi
+            
+            /etc/init.d/iptables save
+            /etc/init.d/iptables restart
         else
-            echo -e "${Warning} iptables看起来没有运行或没有安装，请在必要时手动启用端口 ${shadowsocksport}"
+            if [[ ${plugin_num} == "2" ]]; then
+                echo -e "${Warning} iptables看起来没有运行或没有安装，请在必要时手动启用端口 ${listen_port}"
+            elif [[ ${libev_v2ray} = "4" ]] || [[ ${libev_v2ray} = "5" ]] || [[ ${plugin_num} == "5" ]] || [[ ${isEnableWeb} = enable ]]; then
+                echo -e "${Warning} iptables看起来没有运行或没有安装，请在必要时手动启用端口 443"
+            else
+                echo -e "${Warning} iptables看起来没有运行或没有安装，请在必要时手动启用端口 ${shadowsocksport}"
+            fi
         fi
     elif centosversion 7 || centosversion 8; then
         systemctl status firewalld > /dev/null 2>&1
         if [ $? -eq 0 ]; then
             if [[ ${plugin_num} == "2" ]]; then
-                firewall-cmd --permanent --zone=public --add-port=${listen_port}/tcp
-                firewall-cmd --permanent --zone=public --add-port=${listen_port}/udp
-            elif [[ ${libev_v2ray} = "4" ]] || [[ ${libev_v2ray} = "5" ]] || [[ ${plugin_num} == "5" ]]; then
-                firewall-cmd --permanent --zone=public --add-port=443/tcp
-                firewall-cmd --permanent --zone=public --add-port=443/udp
+                if ! $(firewall-cmd --list-all | grep -q ${listen_port}); then
+                    firewall-cmd --permanent --zone=public --add-port=${listen_port}/tcp
+                    firewall-cmd --permanent --zone=public --add-port=${listen_port}/udp
+                fi
+            elif [[ ${libev_v2ray} = "4" ]] || [[ ${libev_v2ray} = "5" ]] || [[ ${plugin_num} == "5" ]] || [[ ${isEnableWeb} = enable ]]; then
+                if ! $(firewall-cmd --list-all | grep -q 443); then
+                    firewall-cmd --permanent --zone=public --add-port=443/tcp
+                    firewall-cmd --permanent --zone=public --add-port=443/udp
+                fi
             else
-                firewall-cmd --permanent --zone=public --add-port=${shadowsocksport}/tcp
-                firewall-cmd --permanent --zone=public --add-port=${shadowsocksport}/udp
+                if ! $(firewall-cmd --list-all | grep -q ${shadowsocksport}); then
+                    firewall-cmd --permanent --zone=public --add-port=${shadowsocksport}/tcp
+                    firewall-cmd --permanent --zone=public --add-port=${shadowsocksport}/udp
+                fi
             fi
             firewall-cmd --reload
         else
-            echo -e "${Warning} firewalld看起来没有运行或没有安装，请在必要时手动启用端口 ${shadowsocksport}"
+            if [[ ${plugin_num} == "2" ]]; then
+                echo -e "${Warning} firewalld看起来没有运行或没有安装，请在必要时手动启用端口 ${listen_port}"
+            elif [[ ${libev_v2ray} = "4" ]] || [[ ${libev_v2ray} = "5" ]] || [[ ${plugin_num} == "5" ]] || [[ ${isEnableWeb} = enable ]]; then
+                echo -e "${Warning} firewalld看起来没有运行或没有安装，请在必要时手动启用端口 443"
+            else
+                echo -e "${Warning} firewalld看起来没有运行或没有安装，请在必要时手动启用端口 ${shadowsocksport}"
+            fi
         fi
     fi
 }

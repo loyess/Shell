@@ -51,6 +51,11 @@ Usage: ./ss-plugins.sh [options...] [args...]
     cloak启动文件：/etc/init.d/cloak
     cloak配置文件：/etc/cloak/ckserver.json
 
+    rabbit-tcp安装目录：/usr/local/bin
+    rabbit-tcp启动文件：/etc/init.d/rabbit-tcp
+    rabbit-tcp配置文件：/etc/rabbit-tcp/config.json
+    rabbit-tcp日志文件：/var/log/rabbit-tcp.log
+
     caddy安装目录：/usr/local/caddy
     caddy配置文件: /usr/local/caddy/Caddyfile
     caddy日志文件：/tmp/caddy.log
@@ -104,6 +109,7 @@ Usage: ./ss-plugins.sh [options...] [args...]
   6. mos-tls-tunnel
         1. tls
         2. wss
+  7. rabbit-tcp
 
 
 注意：
@@ -190,3 +196,5 @@ Usage: ./ss-plugins.sh [options...] [args...]
 - [Cloak-android](https://github.com/cbeuw/Cloak-android/releases)
 - [mos-tls-tunnel](https://github.com/IrineSistiana/mos-tls-tunnel/releases)
 - [mostunnel-android](https://github.com/IrineSistiana/mostunnel-android/releases)
+- [rabbit-tcp](https://github.com/ihciah/rabbit-tcp/releases)
+- [rabbit-plugin](https://github.com/ihciah/rabbit-plugin/releases)

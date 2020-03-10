@@ -208,6 +208,35 @@ update_mtt(){
     fi
 }
 
+update_cloak(){
+    cd ${CUR_DIR}
+    
+    if [[ -e ${RABBIT_BIN_PATH} ]]; then
+        rabbit_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/ihciah/rabbit-tcp/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        [ -z ${rabbit_ver} ] && echo -e "${Error} 获取 rabbit-tcp 最新版本失败." && exit 1
+        read current_rabbit_ver < ${RABBIT_VERSION_FILE}
+        if ! check_latest_version ${current_rabbit_ver} ${rabbit_ver}; then
+            echo -e "${Point} rabbit-tcp当前已是最新版本${current_rabbit_ver}不需要更新."
+            echo
+            exit 1
+        fi
+        
+        local plugin_num="7"
+        echo -e "${Info} 检测到rabbit-tcp有新版本，开始下载."
+        download_plugins_file
+        echo -e "${Info} 下载完成，开始安装."
+        improt_package "plugins" "rabbit_tcp_install.sh"
+        do_stop > /dev/null 2>&1
+        install_rabbit_tcp
+        do_restart > /dev/null 2>&1
+
+        echo -e "${Info} rabbit-tcp已成功升级为最新版本${rabbit_ver}"
+        echo
+        
+        install_cleanup
+    fi
+}
+
 update_caddy(){
     cd ${CUR_DIR}
     

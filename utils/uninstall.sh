@@ -138,6 +138,29 @@ mtt_uninstall(){
     rm -f /usr/local/bin/mtt-server
 }
 
+rabbit_tcp_uninstall(){
+    if [ -e ${RABBIT_INIT} ]; then
+        ${RABBIT_INIT} status > /dev/null 2>&1
+        if [ $? -eq 0 ]; then
+            ${RABBIT_INIT} stop > /dev/null 2>&1
+        fi
+        local rabbit_tcp_service_name=$(basename ${RABBIT_INIT})
+        if check_sys packageManager yum; then
+            chkconfig --del ${rabbit_tcp_service_name}
+        elif check_sys packageManager apt; then
+            update-rc.d -f ${rabbit_tcp_service_name} remove
+        fi
+    fi
+    
+    ps -ef |grep -v grep | grep rabbit-tcp |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+    
+    # uninstall rabbit-tcp
+    rm -f ${RABBIT_BIN_PATH}
+    rm -f ${RABBIT_INIT}
+    rm -f ${RABBIT_LOG_DIR}
+    rm -fr $(dirname ${RABBIT_CONFIG}) > /dev/null 2>&1
+}
+
 caddy_uninstall(){
     if [[ -e ${CADDY_BIN_PATH} ]]; then
         PID=`ps -ef |grep "caddy" |grep -v "grep" |grep -v "init.d" |grep -v "service" |grep -v "caddy_install" |awk '{print $2}'`
@@ -184,6 +207,7 @@ uninstall_services(){
     goquiet_uninstall
     cloak_uninstall
     mtt_uninstall
+    rabbit_tcp_uninstall
     caddy_uninstall
     nginx_uninstall
     ipcalc_uninstall

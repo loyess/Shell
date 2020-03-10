@@ -64,6 +64,14 @@ mtt_stop(){
     fi
 }
 
+rabbit_tcp_stop(){
+    ps -ef |grep -v grep | grep rabbit-tcp |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+
+    if [ "$(command -v rabbit-tcp)" ]; then
+        echo -e "Stopping rabbit-tcp success"
+    fi
+}
+
 caddy_stop(){
     ps -ef |grep -v grep | grep caddy |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
     
@@ -92,6 +100,7 @@ stop_services(){
     goquiet_stop
     cloak_stop
     mtt_stop
+    rabbit_tcp_stop
     caddy_stop
     nginx_stop
 }

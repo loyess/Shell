@@ -180,6 +180,12 @@ mtt_start(){
     fi
 }
 
+rabbit_tcp_start(){
+    if [[ -e "${RABBIT_INIT}" ]]; then
+        /etc/init.d/rabbit-tcp start
+    fi
+}
+
 caddy_start(){
     if [ -e "${CADDY_BIN_PATH}" ]; then
         /etc/init.d/caddy start
@@ -207,6 +213,7 @@ start_services(){
     goquiet_start
     cloak_start
     mtt_start
+    rabbit_tcp_start
     caddy_start
     nginx_start
 }

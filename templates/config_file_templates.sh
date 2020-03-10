@@ -405,6 +405,16 @@ ss_mtt_wss_dns_only_or_cdn_web_config(){
 	EOF
 }
 
+rabbit_tcp_config_standalone(){
+	cat > ${RABBIT_CONFIG}<<-EOF
+	{
+	    "mode":"s",
+	    "rabbit_addr":":${listen_port}",
+	    "password":"${rabbitKey}",
+	    "verbose":${rabbitLevel}
+	}
+	EOF
+}
 
 
 

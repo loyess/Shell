@@ -75,6 +75,16 @@ other_status(){
         fi
     fi
     
+    if [ "$(command -v rabbit-tcp)" ]; then
+        RABBIT_TCP_PID=`ps -ef |grep -v grep | grep rabbit-tcp |awk '{print $2}'`
+        
+        if [[ ! -z "${RABBIT_TCP_PID}" ]]; then
+            echo -e "${Info} rabbit-tcp (pid ${RABBIT_TCP_PID}) is already running."
+        else
+            echo -e "${Point} rabbit-tcp is already installed but not running."
+        fi
+    fi
+    
     if [ -e "${CADDY_BIN_PATH}" ]; then
         CADDY_PID=`ps -ef |grep -v grep | grep caddy |awk '{print $2}'`
         

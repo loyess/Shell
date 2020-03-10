@@ -111,6 +111,17 @@ MTT_INSTALL_PATH="/usr/local/bin"
 MTT_BIN_PATH="/usr/local/bin/mtt-server"
 
 
+# rabbit-tcp
+RABBIT_INSTALL_PATH="/usr/local/bin"
+RABBIT_BIN_PATH="/usr/local/bin/rabbit-tcp"
+RABBIT_INIT="/etc/init.d/rabbit-tcp"
+RABBIT_CONFIG="/etc/rabbit-tcp/config.json"
+RABBIT_VERSION_FILE="/etc/rabbit-tcp/rabbit-tcp.version"
+RABBIT_LOG_DIR="/var/log/rabbit-tcp.log"
+RABBIT_CENTOS="${BASE_URL}/service/rabbit-tcp_centos.sh"
+RABBIT_DEBIAN="${BASE_URL}/service/rabbit-tcp_debian.sh"
+
+
 # caddy
 CADDY_INSTALL_PATH="/usr/local/caddy"
 CADDY_BIN_PATH="/usr/local/caddy/caddy"
@@ -352,6 +363,14 @@ menu_status(){
         MTT_PID=`ps -ef |grep -v grep | grep mtt-server |awk '{print $2}'`
         
         if [[ ! -z ${SS_PID} ]] && [[ ! -z ${MTT_PID} ]]; then
+            echo -e ${InstallStart}
+        else
+            echo -e ${InstallNoStart}
+        fi
+    elif [[ -e ${BIN_PATH} ]] && [[ -e ${RABBIT_BIN_PATH} ]]; then
+        RABBIT_PID=`ps -ef |grep -v grep | grep rabbit-tcp |awk '{print $2}'`
+        
+        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${RABBIT_PID} ]]; then
             echo -e ${InstallStart}
         else
             echo -e ${InstallNoStart}
@@ -719,7 +738,7 @@ config_firewall(){
     if centosversion 6; then
         /etc/init.d/iptables status > /dev/null 2>&1
         if [ $? -eq 0 ]; then
-            if [[ ${plugin_num} == "2" ]]; then
+            if [[ ${plugin_num} == "2" ]] || [[ ${plugin_num} == "7" ]]; then
                 if ! $(iptables -L -n | grep -q ${listen_port}); then
                     iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${listen_port} -j ACCEPT
                     iptables -I INPUT -m state --state NEW -m udp -p udp --dport ${listen_port} -j ACCEPT
@@ -739,7 +758,7 @@ config_firewall(){
             /etc/init.d/iptables save
             /etc/init.d/iptables restart
         else
-            if [[ ${plugin_num} == "2" ]]; then
+            if [[ ${plugin_num} == "2" ]] || [[ ${plugin_num} == "7" ]]; then
                 echo -e "${Warning} iptables看起来没有运行或没有安装，请在必要时手动启用端口 ${listen_port}"
             elif [[ ${libev_v2ray} = "4" ]] || [[ ${libev_v2ray} = "5" ]] || [[ ${plugin_num} == "5" ]] || [[ ${isEnableWeb} = enable ]]; then
                 echo -e "${Warning} iptables看起来没有运行或没有安装，请在必要时手动启用端口 443"
@@ -750,7 +769,7 @@ config_firewall(){
     elif centosversion 7 || centosversion 8; then
         systemctl status firewalld > /dev/null 2>&1
         if [ $? -eq 0 ]; then
-            if [[ ${plugin_num} == "2" ]]; then
+            if [[ ${plugin_num} == "2" ]] || [[ ${plugin_num} == "7" ]]; then
                 if ! $(firewall-cmd --list-all | grep -q ${listen_port}); then
                     firewall-cmd --permanent --zone=public --add-port=${listen_port}/tcp
                     firewall-cmd --permanent --zone=public --add-port=${listen_port}/udp
@@ -768,7 +787,7 @@ config_firewall(){
             fi
             firewall-cmd --reload
         else
-            if [[ ${plugin_num} == "2" ]]; then
+            if [[ ${plugin_num} == "2" ]] || [[ ${plugin_num} == "7" ]]; then
                 echo -e "${Warning} firewalld看起来没有运行或没有安装，请在必要时手动启用端口 ${listen_port}"
             elif [[ ${libev_v2ray} = "4" ]] || [[ ${libev_v2ray} = "5" ]] || [[ ${plugin_num} == "5" ]] || [[ ${isEnableWeb} = enable ]]; then
                 echo -e "${Warning} firewalld看起来没有运行或没有安装，请在必要时手动启用端口 443"
@@ -891,6 +910,19 @@ download_plugins_file(){
         mtt_file="mos-tls-tunnel-linux-amd64"
         mtt_url="https://github.com/IrineSistiana/mos-tls-tunnel/releases/download/v${mtt_ver}/mos-tls-tunnel-linux-amd64.zip"
         download "${mtt_file}.zip" "${mtt_url}"
+    elif [[ "${plugin_num}" == "7" ]]; then
+        # Download rabbit-tcp
+        rabbit_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/ihciah/rabbit-tcp/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        [ -z ${rabbit_ver} ] && echo -e "${Error} 获取 rabbit-tcp 最新版本失败." && exit 1
+        # wriet version num
+        if [ ! -d "$(dirname ${RABBIT_VERSION_FILE})" ]; then
+            mkdir -p $(dirname ${RABBIT_VERSION_FILE})
+        fi
+        echo ${rabbit_ver} > ${RABBIT_VERSION_FILE}
+        rabbit_file="rabbit-linux-amd64"
+        rabbit_url="https://github.com/ihciah/rabbit-tcp/releases/download/v${rabbit_ver}/rabbit-linux-amd64.gz"
+        download "${rabbit_file}.gz" "${rabbit_url}"
+        download_service_file ${RABBIT_INIT} ${RABBIT_CENTOS} "./service/rabbit-tcp_centos.sh" ${RABBIT_DEBIAN} "./service/rabbit-tcp_debian.sh"
     fi
 }
 
@@ -1150,6 +1182,13 @@ config_ss(){
         if [[ ${isEnable} == enable ]]; then
             sed 's/"plugin_opts":"/"plugin_opts":"mux;/' -i ${SHADOWSOCKS_CONFIG}
         fi
+    elif [[ ${plugin_num} == "7" ]]; then
+        if [ ! -d "$(dirname ${RABBIT_CONFIG})" ]; then
+            mkdir -p $(dirname ${RABBIT_CONFIG})
+        fi
+        
+        ss_config_standalone
+        rabbit_tcp_config_standalone
     else
         ss_config_standalone
     fi
@@ -1198,6 +1237,8 @@ gen_ss_links(){
                 ss_mtt_wss_link
             fi
         fi
+    elif [[ ${plugin_num} == "7" ]]; then
+        ss_rabbit_tcp_link
     else
         ss_link
     fi
@@ -1279,6 +1320,10 @@ install_completed(){
                 ss_mtt_wss_show
             fi
         fi
+    elif [[ ${plugin_num} == "7" ]]; then
+        # start rabbit-tcp
+        ${RABBIT_INIT} start  > /dev/null 2>&1
+        ss_rabbit_tcp_show
     else
         ss_show
     fi
@@ -1298,6 +1343,7 @@ install_prepare(){
   ${Green}4.${suffix} goquiet (unofficial)
   ${Green}5.${suffix} cloak (based goquiet)
   ${Green}6.${suffix} mos-tls-tunnel
+  ${Green}7.${suffix} rabbit-tcp
   "
     echo && read -e -p "(默认: 不安装)：" plugin_num
     [[ -z "${plugin_num}" ]] && plugin_num="" && echo -e "\n${Tip} 当前未选择任何插件，仅安装${SS_VERSION}."
@@ -1319,10 +1365,13 @@ install_prepare(){
     elif [[ ${plugin_num} == "6" ]]; then
         improt_package "prepare" "mos_tls_tunnel_prepare.sh"
         install_prepare_libev_mos_tls_tunnel
+    elif [[ ${plugin_num} == "7" ]]; then
+        improt_package "prepare" "rabbit_tcp_prepare.sh"
+        install_prepare_libev_rabbit_tcp
     elif [[ ${plugin_num} == "" ]]; then
         :
     else
-        echo -e "${Error} 请输入正确的数字 [1-6]" && exit 1
+        echo -e "${Error} 请输入正确的数字 [1-7]" && exit 1
     fi
     
     echo
@@ -1394,6 +1443,10 @@ install_main(){
             install_nginx
         fi
         plugin_client_name="mostlstunnel"
+    elif [ "${plugin_num}" == "7" ]; then
+        improt_package "plugins" "rabbit_tcp_install.sh"
+        install_rabbit_tcp
+        plugin_client_name="rabbit-plugin"
     fi
 }
 
@@ -1405,7 +1458,7 @@ install_step_all(){
         install_dependencies
     elif [[ ${SS_VERSION} = "ss-rust" ]] && [[ "${plugin_num}" == "3" ]]; then
         install_dependencies
-    elif [[ ${SS_VERSION} = "ss-rust" ]] && [[ "${plugin_num}" == "5" ]]; then
+    elif [[ ${SS_VERSION} = "ss-rust" ]] && [[ "${plugin_num}" == "5" ]] || [[ "${plugin_num}" == "7" ]]; then
         if [ ! "$(command -v jq)" ]; then
             package_install "jq" > /dev/null 2>&1
         fi

@@ -208,7 +208,7 @@ update_mtt(){
     fi
 }
 
-update_cloak(){
+update_rabbit_tcp(){
     cd ${CUR_DIR}
     
     if [[ -e ${RABBIT_BIN_PATH} ]]; then
@@ -284,6 +284,7 @@ update_shadowsocks_libev(){
         update_goquiet
         update_cloak
         update_mtt
+        update_rabbit_tcp
         
         exit 1
     fi
@@ -305,6 +306,7 @@ update_shadowsocks_libev(){
     update_goquiet
     update_cloak
     update_mtt
+    update_rabbit_tcp
 }
 
 update_shadowsocks_rust(){
@@ -336,6 +338,7 @@ update_shadowsocks_rust(){
         update_goquiet
         update_cloak
         update_mtt
+        update_rabbit_tcp
         
         exit 1
     fi
@@ -357,4 +360,5 @@ update_shadowsocks_rust(){
     update_goquiet
     update_cloak
     update_mtt
+    update_rabbit_tcp
 }

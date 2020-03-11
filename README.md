@@ -1,4 +1,4 @@
-## ss-plugins.sh
+## ss-plugins.sh (注意：如果运行脚本出现意外报错，请执行 ./ss-plugins.sh script 升级脚本。)
 
 #### 下载安装:
 ``` bash

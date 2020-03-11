@@ -331,7 +331,7 @@ get_input_mux_max_stream() {
             echo
             continue
         fi
-        if [ ${muxMaxStream} -lt 1 || ${muxMaxStream} -gt 16 ]; then
+        if [ ${muxMaxStream} -lt 1 ] || [ ${muxMaxStream} -gt 16 ]; then
             echo
             echo -e "${Error} 请输入一个的数字在[1-16]之间."
             echo

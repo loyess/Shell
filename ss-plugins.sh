@@ -1456,13 +1456,16 @@ install_step_all(){
     install_prepare
     if [[ ${SS_VERSION} = "ss-libev" ]]; then
         install_dependencies
-    elif [[ ${SS_VERSION} = "ss-rust" ]]; then
+    fi
+    if [[ ${SS_VERSION} = "ss-rust" ]]; then
         if [ ! "$(command -v qrencode)" ]; then
             package_install "qrencode" > /dev/null 2>&1
         fi
-    elif [[ ${SS_VERSION} = "ss-rust" ]] && [[ "${plugin_num}" == "3" ]]; then
+    fi
+    if [[ ${SS_VERSION} = "ss-rust" ]] && [[ "${plugin_num}" == "3" ]]; then
         install_dependencies
-    elif [[ ${SS_VERSION} = "ss-rust" ]] && [[ "${plugin_num}" == "5" ]] || [[ "${plugin_num}" == "7" ]]; then
+    fi
+    if [[ ${SS_VERSION} = "ss-rust" ]] && [[ "${plugin_num}" == "5" ]] || [[ "${plugin_num}" == "7" ]]; then
         if [ ! "$(command -v jq)" ]; then
             package_install "jq" > /dev/null 2>&1
         fi

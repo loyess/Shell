@@ -1,7 +1,14 @@
+# Simple-obfs Obfuscation wrapper
+OBFUSCATION_WRAPPER=(
+http
+tls
+)
+
+
 get_input_obfs_mode(){
     while true
     do
-        echo -e "请为simple-obfs选择obfs\n"
+        echo && echo -e "请为simple-obfs选择obfs\n"
         for ((i=1;i<=${#OBFUSCATION_WRAPPER[@]};i++ )); do
             hint="${OBFUSCATION_WRAPPER[$i-1]}"
             echo -e "${Green}  ${i}.${suffix} ${hint}"
@@ -33,12 +40,9 @@ get_input_obfs_mode(){
 get_input_domain_of_obfs(){
     while true
     do
-    	echo
-    	echo -e "请为simple-obfs输入用于混淆的域名"
-    	echo
-    	read -e -p "(默认: www.bing.com):" domain
+        echo && read -e -p "请为simple-obfs输入用于混淆的域名 (默认: www.bing.com):" domain
    	 [ -z "$domain" ] && domain="www.bing.com"
-   	if [ -z "$(echo $domain | grep -E ${DOMAIN_RE})" ]; then
+   	 if [ -z "$(echo $domain | grep -E ${DOMAIN_RE})" ]; then
             echo
             echo -e "${Error} 请输入正确合法的域名."
             echo
@@ -53,12 +57,6 @@ get_input_domain_of_obfs(){
 }
 
 install_prepare_libev_obfs(){
-    if ! autoconf_version || centosversion 6; then
-        echo
-        echo -e "${Info} autoconf 版本小于 2.67，Shadowsocks-libev 插件 simple-obfs 的安装将被终止."
-        echo
-        exit 1
-    fi
     get_input_obfs_mode
     get_input_domain_of_obfs
 }

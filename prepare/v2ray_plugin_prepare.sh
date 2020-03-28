@@ -1,3 +1,13 @@
+# v2ray-plugin Transport mode
+V2RAY_PLUGIN_TRANSPORT_MODE=(
+ws+http
+ws+tls+[cdn]
+quic+tls+[cdn]
+ws+tls+web
+ws+tls+web+cdn
+)
+
+
 intall_acme_tool(){
     # Install certificate generator tools
     if [ ! -e ~/.acme.sh/acme.sh ]; then
@@ -18,7 +28,7 @@ intall_acme_tool(){
 transport_mode_menu(){
     while true
     do
-        echo -e "请为v2ray-plugin选择 Transport mode\n"
+        echo && echo -e "请为v2ray-plugin选择 Transport mode\n"
         for ((i=1;i<=${#V2RAY_PLUGIN_TRANSPORT_MODE[@]};i++ )); do
             hint="${V2RAY_PLUGIN_TRANSPORT_MODE[$i-1]}"
             echo -e "${Green}  ${i}.${suffix} ${hint}"

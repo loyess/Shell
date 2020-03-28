@@ -1,3 +1,11 @@
+# cloak encryption method
+CLOAK_ENCRYPTION_METHOD=(
+plain
+aes-gcm
+chacha20-poly1305
+)
+
+
 auto_get_ip_of_domain(){
     local domain=$1
     

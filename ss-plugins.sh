@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.4.4"
+SHELL_VERSION="2.4.5"
 # ====================
 
 
@@ -31,13 +31,6 @@ CHIAKGE_BBR_SCRIPT_URL="https://git.io/vxJ1I"
 
 # Humanization config PATH
 HUMAN_CONFIG="/etc/shadowsocks/humanization.conf"
-
-
-# ss development language version
-SS_DLV=(
-ss-libev
-ss-rust
-)
 
 
 # shadowsocks config
@@ -139,89 +132,6 @@ NGINX_BIN_PATH="/usr/sbin/nginx"
 NGINX_CONFIG="/etc/nginx/nginx.conf"
 
 
-# shadowsocks-libev Ciphers
-SHADOWSOCKS_CIPHERS=(
-rc4-md5
-salsa20
-chacha20
-chacha20-ietf
-aes-256-cfb
-aes-192-cfb
-aes-128-cfb
-aes-256-ctr
-aes-192-ctr
-aes-128-ctr
-bf-cfb
-camellia-128-cfb
-camellia-192-cfb
-camellia-256-cfb
-aes-256-gcm
-aes-192-gcm
-aes-128-gcm
-xchacha20-ietf-poly1305
-chacha20-ietf-poly1305
-)
-
-
-# kcptun crypt
-KCPTUN_CRYPT=(
-aes
-aes-128
-aes-192
-salsa20
-blowfish
-twofish
-cast5
-3des
-tea
-xtea
-xor
-sm4
-none
-)
-
-
-# cloak encryption method
-CLOAK_ENCRYPTION_METHOD=(
-plain
-aes-gcm
-chacha20-poly1305
-)
-
-
-# v2ray-plugin Transport mode
-V2RAY_PLUGIN_TRANSPORT_MODE=(
-ws+http
-ws+tls+[cdn]
-quic+tls+[cdn]
-ws+tls+web
-ws+tls+web+cdn
-)
-
-
-# kcptun mode(no manual)
-KCPTUN_MODE=(
-fast3
-fast2
-fast
-normal
-)
-
-
-# Simple-obfs Obfuscation wrapper
-OBFUSCATION_WRAPPER=(
-http
-tls
-)
-
-
-# mos-tls-tunnel Transport mode
-MTT_TRANSPORT_MODE=(
-tls
-wss
-)
-
-
 # RE
 EMAIL_RE="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$"
 DOMAIN_RE="^(www\.)?[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:\d+)*(\/\w+\.\w+)*$"
@@ -288,101 +198,101 @@ menu_status(){
         CADDY_PID=`ps -ef |grep -v grep | grep caddy |awk '{print $2}'`
         
         if [[ ! -z ${SS_PID} ]] && [[ ! -z ${V2_PID} ]] && [[ ! -z ${CADDY_PID} ]]; then
-            echo -e ${InstallStart}
+            echo -e "${InstallStart}"
         else
-            echo -e ${InstallNoStart}
+            echo -e "${InstallNoStart}"
         fi
     elif [[ -e ${BIN_PATH} ]] && [[ -e ${V2RAY_PLUGIN_BIN_PATH} ]] && [[ -e ${NGINX_BIN_PATH}  ]]; then
         V2_PID=`ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}'`
         NGINX_PID=`ps -ef |grep -v grep | grep nginx.conf |awk '{print $2}'`
         
         if [[ ! -z ${SS_PID} ]] && [[ ! -z ${V2_PID} ]] && [[ ! -z ${NGINX_PID} ]]; then
-            echo -e ${InstallStart}
+            echo -e "${InstallStart}"
         else
-            echo -e ${InstallNoStart}
+            echo -e "${InstallNoStart}"
         fi
     elif [[ -e ${BIN_PATH} ]] && [[ -e ${V2RAY_PLUGIN_BIN_PATH} ]]; then
         V2_PID=`ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}'`
         
         if [[ ! -z ${SS_PID} ]] && [[ ! -z ${V2_PID} ]]; then
-            echo -e ${InstallStart}
+            echo -e "${InstallStart}"
         else
-            echo -e ${InstallNoStart}
+            echo -e "${InstallNoStart}"
         fi
     elif [[ -e ${BIN_PATH} ]] && [[ -e ${KCPTUN_BIN_PATH} ]]; then
         KP_PID=`ps -ef |grep -v grep | grep kcptun-server |awk '{print $2}'`
         
         if [[ ! -z ${SS_PID} ]] && [[ ! -z ${KP_PID} ]]; then
-            echo -e ${InstallStart}
+            echo -e "${InstallStart}"
         else
-            echo -e ${InstallNoStart}
+            echo -e "${InstallNoStart}"
         fi
     elif [[ -e ${BIN_PATH} ]] && [[ -e ${SIMPLE_OBFS_BIN_PATH} ]]; then
         OBFS_PID=`ps -ef |grep -v grep | grep obfs-server |awk '{print $2}'`
         
         if [[ ! -z ${SS_PID} ]] && [[ ! -z ${OBFS_PID} ]]; then
-            echo -e ${InstallStart}
+            echo -e "${InstallStart}"
         else
-            echo -e ${InstallNoStart}
+            echo -e "${InstallNoStart}"
         fi
     elif [[ -e ${BIN_PATH} ]] && [[ -e ${GOQUIET_BIN_PATH} ]]; then    
         GQ_PID=`ps -ef |grep -v grep | grep gq-server |awk '{print $2}'`
         
         if [[ ! -z ${SS_PID} ]] && [[ ! -z ${GQ_PID} ]]; then
-            echo -e ${InstallStart}
+            echo -e "${InstallStart}"
         else
-            echo -e ${InstallNoStart}
+            echo -e "${InstallNoStart}"
         fi
     elif [[ -e ${BIN_PATH} ]] && [[ -e ${CLOAK_SERVER_BIN_PATH} ]]; then
         CK_PID=`ps -ef |grep -v grep | grep ck-server |awk '{print $2}'`
         
         if [[ ! -z ${SS_PID} ]] && [[ ! -z ${CK_PID} ]]; then
-            echo -e ${InstallStart}
+            echo -e "${InstallStart}"
         else
-            echo -e ${InstallNoStart}
+            echo -e "${InstallNoStart}"
         fi
     elif [[ -e ${BIN_PATH} ]] && [[ -e ${MTT_BIN_PATH} ]] && [[ -e ${CADDY_BIN_PATH}  ]]; then
         MTT_PID=`ps -ef |grep -v grep | grep mtt-server |awk '{print $2}'`
         CADDY_PID=`ps -ef |grep -v grep | grep caddy |awk '{print $2}'`
         
         if [[ ! -z ${SS_PID} ]] && [[ ! -z ${MTT_PID} ]] && [[ ! -z ${CADDY_PID} ]]; then
-            echo -e ${InstallStart}
+            echo -e "${InstallStart}"
         else
-            echo -e ${InstallNoStart}
+            echo -e "${InstallNoStart}"
         fi
     elif [[ -e ${BIN_PATH} ]] && [[ -e ${MTT_BIN_PATH} ]] && [[ -e ${NGINX_BIN_PATH}  ]]; then
         MTT_PID=`ps -ef |grep -v grep | grep mtt-server |awk '{print $2}'`
         NGINX_PID=`ps -ef |grep -v grep | grep nginx.conf |awk '{print $2}'`
         
         if [[ ! -z ${SS_PID} ]] && [[ ! -z ${MTT_PID} ]] && [[ ! -z ${NGINX_PID} ]]; then
-            echo -e ${InstallStart}
+            echo -e "${InstallStart}"
         else
-            echo -e ${InstallNoStart}
+            echo -e "${InstallNoStart}"
         fi
     elif [[ -e ${BIN_PATH} ]] && [[ -e ${MTT_BIN_PATH} ]]; then    
         MTT_PID=`ps -ef |grep -v grep | grep mtt-server |awk '{print $2}'`
         
         if [[ ! -z ${SS_PID} ]] && [[ ! -z ${MTT_PID} ]]; then
-            echo -e ${InstallStart}
+            echo -e "${InstallStart}"
         else
-            echo -e ${InstallNoStart}
+            echo -e "${InstallNoStart}"
         fi
     elif [[ -e ${BIN_PATH} ]] && [[ -e ${RABBIT_BIN_PATH} ]]; then
         RABBIT_PID=`ps -ef |grep -v grep | grep rabbit-tcp |awk '{print $2}'`
         
         if [[ ! -z ${SS_PID} ]] && [[ ! -z ${RABBIT_PID} ]]; then
-            echo -e ${InstallStart}
+            echo -e "${InstallStart}"
         else
-            echo -e ${InstallNoStart}
+            echo -e "${InstallNoStart}"
         fi
     elif [[ -e ${BIN_PATH} ]]; then
         if [[ ! -z ${SS_PID} ]]; then
-            echo -e ${InstallStart}
+            echo -e "${InstallStart}"
         else
-            echo -e ${InstallNoStart}
+            echo -e "${InstallNoStart}"
         fi
     else
-        echo -e ${NoInstall}
+        echo -e "${NoInstall}"
     fi
 }
 
@@ -1052,25 +962,6 @@ install_mbedtls(){
     fi
 }
 
-autoconf_version(){
-    if [ ! "$(command -v autoconf)" ]; then
-        echo -e "${Info} 开始安装autoconf 软件包."
-        if check_sys packageManager yum; then
-            yum install -y autoconf > /dev/null 2>&1 || echo -e "${Error} 安装autoconf失败."
-        elif check_sys packageManager apt; then
-            apt-get -y update > /dev/null 2>&1
-            apt-get -y install autoconf > /dev/null 2>&1 || echo -e "${Error} 安装autoconf失败."
-        fi
-        echo -e "${Info} autoconf 安装完成."
-    fi
-    local autoconf_ver=$(autoconf --version | grep autoconf | grep -oE "[0-9.]+")
-    if version_ge ${autoconf_ver} 2.67; then
-        return 0
-    else
-        return 1
-    fi
-}
-
 config_ss(){
 
     if check_kernel_version && check_kernel_headers; then
@@ -1335,7 +1226,7 @@ install_prepare(){
     install_prepare_port
     install_prepare_password
     install_prepare_cipher
-    echo -e "请选择要安装的SS插件
+    echo && echo -e "请选择要安装的SS插件
     
   ${Green}1.${suffix} v2ray-plugin
   ${Green}2.${suffix} kcptun

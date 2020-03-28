@@ -1,3 +1,54 @@
+# ss development language version
+SS_DLV=(
+ss-libev
+ss-rust
+)
+
+# shadowsocks-libev Ciphers
+SHADOWSOCKS_LIBEV_CIPHERS=(
+rc4-md5
+salsa20
+chacha20
+chacha20-ietf
+aes-256-cfb
+aes-192-cfb
+aes-128-cfb
+aes-256-ctr
+aes-192-ctr
+aes-128-ctr
+bf-cfb
+camellia-128-cfb
+camellia-192-cfb
+camellia-256-cfb
+aes-256-gcm
+aes-192-gcm
+aes-128-gcm
+xchacha20-ietf-poly1305
+chacha20-ietf-poly1305
+)
+
+SHADOWSOCKS_RUST_CIPHERS=(
+rc4-md5
+salsa20
+chacha20
+chacha20-ietf
+aes-256-cfb
+aes-192-cfb
+aes-128-cfb
+aes-256-ctr
+aes-192-ctr
+aes-128-ctr
+bf-cfb
+camellia-128-cfb
+camellia-192-cfb
+camellia-256-cfb
+aes-256-gcm
+aes-128-gcm
+xchacha20-ietf-poly1305
+chacha20-ietf-poly1305
+)
+
+
 select_ss_version_auto(){
     local totalRam=`free | awk '/Mem/ {print $2}'`
     local numLogicalCpu=`cat /proc/cpuinfo | grep "processor" | wc -l`
@@ -101,6 +152,12 @@ install_prepare_cipher(){
     do
         echo -e "\n请选择Shadowsocks加密方式"
 
+        if [[ ${SS_VERSION} = "ss-libev" ]]; then
+            SHADOWSOCKS_CIPHERS=( ${SHADOWSOCKS_LIBEV_CIPHERS[@]} )
+        elif [[ ${SS_VERSION} = "ss-rust" ]]; then
+            SHADOWSOCKS_CIPHERS=( ${SHADOWSOCKS_RUST_CIPHERS[@]} )
+        fi
+
         for ((i=1;i<=${#SHADOWSOCKS_CIPHERS[@]};i++ )); do
             hint="${SHADOWSOCKS_CIPHERS[$i-1]}"
             if [[ ${i} -le 9 ]]; then
@@ -110,9 +167,6 @@ install_prepare_cipher(){
             fi
         done
         
-        echo
-        echo -e "${Tip} rust版本的ss，当中有些加密方式不支持，如：aes-192-gcm"
-        echo -e "${Tip} 如果安装成功后，出现无法连接的状况，请换个加密方式再次尝试."
         echo
         read -e -p "(默认: ${SHADOWSOCKS_CIPHERS[14]}):" pick
         [ -z "$pick" ] && pick=15

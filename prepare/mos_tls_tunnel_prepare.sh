@@ -1,3 +1,10 @@
+# mos-tls-tunnel Transport mode
+MTT_TRANSPORT_MODE=(
+tls
+wss
+)
+
+
 intall_acme_tool(){
     # Install certificate generator tools
     if [ ! -e ~/.acme.sh/acme.sh ]; then
@@ -122,7 +129,7 @@ get_input_api_info(){
 transport_mode_menu(){
     while true
     do
-        echo -e "请为mos-tls-tunnel选择 Transport mode\n"
+        echo && echo -e "请为mos-tls-tunnel选择 Transport mode\n"
         for ((i=1;i<=${#MTT_TRANSPORT_MODE[@]};i++ )); do
             hint="${MTT_TRANSPORT_MODE[$i-1]}"
             echo -e "${Green}  ${i}.${suffix} ${hint}"

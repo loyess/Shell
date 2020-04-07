@@ -85,6 +85,16 @@ other_status(){
         fi
     fi
     
+    if [ "$(command -v simple-tls)" ]; then
+        SIMPLE_TLS_PID=`ps -ef | grep -v grep | grep simple-tls |awk '{print $2}'`
+
+        if [[ ! -z "${SIMPLE_TLS_PID}" ]]; then
+            echo -e "${Info} simple-tls (pid ${SIMPLE_TLS_PID}) is already running."
+        else
+            echo -e "${Point} simple-tls is already installed but not running."
+        fi
+    fi
+
     if [ -e "${CADDY_BIN_PATH}" ]; then
         CADDY_PID=`ps -ef |grep -v grep | grep caddy |awk '{print $2}'`
         

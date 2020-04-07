@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.4.5"
+SHELL_VERSION="2.4.6"
 # ====================
 
 
@@ -113,6 +113,12 @@ RABBIT_VERSION_FILE="/etc/rabbit-tcp/rabbit-tcp.version"
 RABBIT_LOG_DIR="/var/log/rabbit-tcp.log"
 RABBIT_CENTOS="${BASE_URL}/service/rabbit-tcp_centos.sh"
 RABBIT_DEBIAN="${BASE_URL}/service/rabbit-tcp_debian.sh"
+
+
+# simple-tls
+SIMPLE_TLS_INSTALL_PATH="/usr/local/bin"
+SIMPLE_TLS_BIN_PATH="/usr/local/bin/simple-tls"
+SIMPLE_TLS_VERSION_FILE="/etc/shadowsocks/simple-tls.version"
 
 
 # caddy
@@ -281,6 +287,14 @@ menu_status(){
         RABBIT_PID=`ps -ef |grep -v grep | grep rabbit-tcp |awk '{print $2}'`
         
         if [[ ! -z ${SS_PID} ]] && [[ ! -z ${RABBIT_PID} ]]; then
+            echo -e "${InstallStart}"
+        else
+            echo -e "${InstallNoStart}"
+        fi
+    elif [[ -e ${BIN_PATH} ]] && [[ -e ${SIMPLE_TLS_BIN_PATH} ]]; then
+        SIMPLE_TLS_PID=`ps -ef |grep -v grep | grep simple-tls |awk '{print $2}'`
+
+        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${SIMPLE_TLS_PID} ]]; then
             echo -e "${InstallStart}"
         else
             echo -e "${InstallNoStart}"
@@ -621,6 +635,19 @@ gen_credentials(){
     done
 }
 
+gen_credentials_cca(){
+    local domain=$1
+    if [[ ${domainType} = Other ]]; then
+        cerPath="/etc/simple-tls/${domain}.cert"
+        keyPath="/etc/simple-tls/${domain}.key"
+        if [ ! -d "$(dirname ${cerPath})" ]; then
+            mkdir -p $(dirname ${cerPath})
+        fi
+        simple-tls -gen-cert -n ${domain} -key ${keyPath} -cert ${cerPath}
+        base64Cert=$(cat ${cerPath} | base64 -w0 | sed 's/=//g')
+    fi
+}
+
 get_version(){
     if [[ -s /etc/redhat-release ]]; then
         grep -oE  "[0-9.]+" /etc/redhat-release
@@ -833,6 +860,18 @@ download_plugins_file(){
         rabbit_url="https://github.com/ihciah/rabbit-tcp/releases/download/v${rabbit_ver}/rabbit-linux-amd64.gz"
         download "${rabbit_file}.gz" "${rabbit_url}"
         download_service_file ${RABBIT_INIT} ${RABBIT_CENTOS} "./service/rabbit-tcp_centos.sh" ${RABBIT_DEBIAN} "./service/rabbit-tcp_debian.sh"
+    elif [[ "${plugin_num}" == "8" ]]; then
+        # Download simple-tls
+        simple_tls_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/IrineSistiana/simple-tls/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        [ -z ${simple_tls_ver} ] && echo -e "${Error} 获取 simple-tls 最新版本失败." && exit 1
+        # wriet version num
+        if [ ! -d "$(dirname ${SIMPLE_TLS_VERSION_FILE})" ]; then
+            mkdir -p $(dirname ${SIMPLE_TLS_VERSION_FILE})
+        fi
+        echo ${simple_tls_ver} > ${SIMPLE_TLS_VERSION_FILE}
+        simple_tls_file="simple-tls-linux-amd64"
+        simple_tls_url="https://github.com/IrineSistiana/simple-tls/releases/download/v${simple_tls_ver}/simple-tls-linux-amd64.zip"
+        download "${simple_tls_file}.zip" "${simple_tls_url}"
     fi
 }
 
@@ -1080,6 +1119,8 @@ config_ss(){
         
         ss_config_standalone
         rabbit_tcp_config_standalone
+    elif [[ ${plugin_num} == "8" ]]; then
+        ss_simple_tls_config
     else
         ss_config_standalone
     fi
@@ -1130,6 +1171,8 @@ gen_ss_links(){
         fi
     elif [[ ${plugin_num} == "7" ]]; then
         ss_rabbit_tcp_link
+    elif [[ ${plugin_num} == "8" ]]; then
+        ss_simple_tls_link
     else
         ss_link
     fi
@@ -1215,6 +1258,8 @@ install_completed(){
         # start rabbit-tcp
         ${RABBIT_INIT} start  > /dev/null 2>&1
         ss_rabbit_tcp_show
+    elif [[ ${plugin_num} == "8" ]]; then
+        ss_simple_tls_show
     else
         ss_show
     fi
@@ -1235,6 +1280,7 @@ install_prepare(){
   ${Green}5.${suffix} cloak (based goquiet)
   ${Green}6.${suffix} mos-tls-tunnel
   ${Green}7.${suffix} rabbit-tcp
+  ${Green}8.${suffix} simple-tls
   "
     echo && read -e -p "(默认: 不安装)：" plugin_num
     [[ -z "${plugin_num}" ]] && plugin_num="" && echo -e "\n${Tip} 当前未选择任何插件，仅安装${SS_VERSION}."
@@ -1259,6 +1305,9 @@ install_prepare(){
     elif [[ ${plugin_num} == "7" ]]; then
         improt_package "prepare" "rabbit_tcp_prepare.sh"
         install_prepare_libev_rabbit_tcp
+    elif [[ ${plugin_num} == "8" ]]; then
+        improt_package "prepare" "simple_tls_prepare.sh"
+        install_prepare_libev_simple_tls
     elif [[ ${plugin_num} == "" ]]; then
         :
     else
@@ -1338,6 +1387,11 @@ install_main(){
         improt_package "plugins" "rabbit_tcp_install.sh"
         install_rabbit_tcp
         plugin_client_name="rabbit-plugin"
+    elif [ "${plugin_num}" == "8" ]; then
+        improt_package "plugins" "simple_tls_install.sh"
+        install_simple_tls
+        gen_credentials_cca "${serverName}"
+        plugin_client_name="simple-tls"
     fi
 }
 
@@ -1403,6 +1457,9 @@ install_cleanup(){
     
     # mos-tls-tunnel
     rm -rf ${mtt_file}.zip LICENSE README.md mtt-client
+
+    #simple-tls
+    rm -rf ${simple_tls_file}.zip LICENSE  README.md
 }
 
 do_uid(){

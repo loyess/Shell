@@ -25,6 +25,7 @@ dos2unix ./prepare/goquiet_prepare.sh
 dos2unix ./prepare/cloak_prepare.sh
 dos2unix ./prepare/mos_tls_tunnel_prepare.sh
 dos2unix ./prepare/rabbit_tcp_prepare.sh
+dos2unix ./prepare/simple_tls_prepare.sh
 
 
 dos2unix ./tools/shadowsocks_install.sh
@@ -40,6 +41,7 @@ dos2unix ./plugins/goquiet_install.sh
 dos2unix ./plugins/cloak_install.sh
 dos2unix ./plugins/mos_tls_tunnel_install.sh
 dos2unix ./plugins/rabbit_tcp_install.sh
+dos2unix ./plugins/simple_tls_install.sh
 
 
 dos2unix ./templates/config_file_templates.sh

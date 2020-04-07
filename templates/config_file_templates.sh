@@ -416,7 +416,24 @@ rabbit_tcp_config_standalone(){
 	EOF
 }
 
-
+# simple-tls
+ss_simple_tls_config(){
+	cat > ${SHADOWSOCKS_CONFIG}<<-EOF
+	{
+	    "server":${server_value},
+	    "server_port":${shadowsocksport},
+	    "password":"${shadowsockspwd}",
+	    "timeout":300,
+	    "user":"nobody",
+	    "method":"${shadowsockscipher}",
+	    "fast_open":${fast_open},
+	    "nameserver":"8.8.8.8",
+	    "mode":"tcp_only",
+	    "plugin":"simple-tls",
+	    "plugin_opts":"s;key=${keyPath};cert=${cerPath}"
+	}
+	EOF
+}
 
 
 

@@ -164,6 +164,7 @@ ss_mtt_wss_dns_only_or_cdn_web_link(){
     ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
 }
 
+# ss + rabbit-tcp
 ss_rabbit_tcp_link(){
     local link_head="ss://"
     local cipher_pwd=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}")
@@ -172,6 +173,18 @@ ss_rabbit_tcp_link(){
     ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"    
 }
 
+# ss + simple-tls
+ss_simple_tls_link(){
+    local link_head="ss://"
+    local cipher_pwd=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}")
+    local ip_port_plugin="@$(get_ip):443/?plugin=${plugin_client_name}"
+    if [[ ${domainType} = DNS-Only ]]; then
+        local plugin_opts=$(get_str_replace ";n=${serverName}")
+    elif [[ ${domainType} = Other ]]; then
+        local plugin_opts=$(get_str_replace ";n=${serverName};cca=${base64Cert}")
+    fi
+    ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
+}
 
 
 

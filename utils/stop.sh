@@ -72,6 +72,14 @@ rabbit_tcp_stop(){
     fi
 }
 
+simple_tls_stop(){
+    ps -ef |grep -v grep | grep simple-tls |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+
+    if [ "$(command -v simple-tls)" ]; then
+        echo -e "Stopping simple-tls success"
+    fi
+}
+
 caddy_stop(){
     ps -ef |grep -v grep | grep caddy |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
     
@@ -101,6 +109,7 @@ stop_services(){
     cloak_stop
     mtt_stop
     rabbit_tcp_stop
+    simple_tls_stop
     caddy_stop
     nginx_stop
 }

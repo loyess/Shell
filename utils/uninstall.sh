@@ -161,6 +161,15 @@ rabbit_tcp_uninstall(){
     rm -fr $(dirname ${RABBIT_CONFIG}) > /dev/null 2>&1
 }
 
+simple_tls_uninstall(){
+    ps -ef |grep -v grep | grep simple-tls |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+
+    # uninstall mos-tls-tunnel
+    rm -f /var/run/simple-tls.pid
+    rm -f /usr/local/bin/simple-tls
+    rm -rf /etc/simple-tls
+}
+
 caddy_uninstall(){
     if [[ -e ${CADDY_BIN_PATH} ]]; then
         PID=`ps -ef |grep "caddy" |grep -v "grep" |grep -v "init.d" |grep -v "service" |grep -v "caddy_install" |awk '{print $2}'`
@@ -208,6 +217,7 @@ uninstall_services(){
     cloak_uninstall
     mtt_uninstall
     rabbit_tcp_uninstall
+    simple_tls_uninstall
     caddy_uninstall
     nginx_uninstall
     ipcalc_uninstall

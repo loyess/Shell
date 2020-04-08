@@ -672,66 +672,41 @@ centosversion(){
 }
 
 config_firewall(){
+    local PORT=$1
+
     if centosversion 6; then
         /etc/init.d/iptables status > /dev/null 2>&1
         if [ $? -eq 0 ]; then
-            if [[ ${plugin_num} == "2" ]] || [[ ${plugin_num} == "7" ]]; then
-                if ! $(iptables -L -n | grep -q ${listen_port}); then
-                    iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${listen_port} -j ACCEPT
-                    iptables -I INPUT -m state --state NEW -m udp -p udp --dport ${listen_port} -j ACCEPT
-                fi
-            elif [[ ${libev_v2ray} = "4" ]] || [[ ${libev_v2ray} = "5" ]] || [[ ${plugin_num} == "5" ]] || [[ ${isEnableWeb} = enable ]]; then
-                if ! $(iptables -L -n | grep -q 443); then
-                    iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport 443 -j ACCEPT
-                    iptables -I INPUT -m state --state NEW -m udp -p udp --dport 443 -j ACCEPT
-                fi
-            else
-                if ! $(iptables -L -n | grep -q ${shadowsocksport}); then
-                    iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${shadowsocksport} -j ACCEPT
-                    iptables -I INPUT -m state --state NEW -m udp -p udp --dport ${shadowsocksport} -j ACCEPT
-                fi
+            if ! $(iptables -L -n | grep -q ${PORT}); then
+                iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${PORT} -j ACCEPT
+                iptables -I INPUT -m state --state NEW -m udp -p udp --dport ${PORT} -j ACCEPT
+                /etc/init.d/iptables save
+                /etc/init.d/iptables restart
             fi
-            
-            /etc/init.d/iptables save
-            /etc/init.d/iptables restart
         else
-            if [[ ${plugin_num} == "2" ]] || [[ ${plugin_num} == "7" ]]; then
-                echo -e "${Warning} iptables看起来没有运行或没有安装，请在必要时手动启用端口 ${listen_port}"
-            elif [[ ${libev_v2ray} = "4" ]] || [[ ${libev_v2ray} = "5" ]] || [[ ${plugin_num} == "5" ]] || [[ ${isEnableWeb} = enable ]]; then
-                echo -e "${Warning} iptables看起来没有运行或没有安装，请在必要时手动启用端口 443"
-            else
-                echo -e "${Warning} iptables看起来没有运行或没有安装，请在必要时手动启用端口 ${shadowsocksport}"
-            fi
+            echo -e "${Warning} iptables看起来没有运行或没有安装，请在必要时手动启用端口 ${PORT}"
         fi
     elif centosversion 7 || centosversion 8; then
         systemctl status firewalld > /dev/null 2>&1
         if [ $? -eq 0 ]; then
-            if [[ ${plugin_num} == "2" ]] || [[ ${plugin_num} == "7" ]]; then
-                if ! $(firewall-cmd --list-all | grep -q ${listen_port}); then
-                    firewall-cmd --permanent --zone=public --add-port=${listen_port}/tcp
-                    firewall-cmd --permanent --zone=public --add-port=${listen_port}/udp
-                fi
-            elif [[ ${libev_v2ray} = "4" ]] || [[ ${libev_v2ray} = "5" ]] || [[ ${plugin_num} == "5" ]] || [[ ${isEnableWeb} = enable ]]; then
-                if ! $(firewall-cmd --list-all | grep -q 443); then
-                    firewall-cmd --permanent --zone=public --add-port=443/tcp
-                    firewall-cmd --permanent --zone=public --add-port=443/udp
-                fi
-            else
-                if ! $(firewall-cmd --list-all | grep -q ${shadowsocksport}); then
-                    firewall-cmd --permanent --zone=public --add-port=${shadowsocksport}/tcp
-                    firewall-cmd --permanent --zone=public --add-port=${shadowsocksport}/udp
-                fi
+            if ! $(firewall-cmd --list-all | grep -q ${PORT}); then
+                firewall-cmd --permanent --zone=public --add-port=${PORT}/tcp
+                firewall-cmd --permanent --zone=public --add-port=${PORT}/udp
+                firewall-cmd --reload
             fi
-            firewall-cmd --reload
         else
-            if [[ ${plugin_num} == "2" ]] || [[ ${plugin_num} == "7" ]]; then
-                echo -e "${Warning} firewalld看起来没有运行或没有安装，请在必要时手动启用端口 ${listen_port}"
-            elif [[ ${libev_v2ray} = "4" ]] || [[ ${libev_v2ray} = "5" ]] || [[ ${plugin_num} == "5" ]] || [[ ${isEnableWeb} = enable ]]; then
-                echo -e "${Warning} firewalld看起来没有运行或没有安装，请在必要时手动启用端口 443"
-            else
-                echo -e "${Warning} firewalld看起来没有运行或没有安装，请在必要时手动启用端口 ${shadowsocksport}"
-            fi
+            echo -e "${Warning} firewalld看起来没有运行或没有安装，请在必要时手动启用端口 ${PORT}"
         fi
+    fi
+}
+
+config_firewall_logic(){
+    if [[ ${plugin_num} == "2" ]] || [[ ${plugin_num} == "7" ]]; then
+        config_firewall "${listen_port}"
+    elif [[ ${libev_v2ray} = "4" ]] || [[ ${libev_v2ray} = "5" ]] || [[ ${plugin_num} == "5" ]] || [[ ${isEnableWeb} = enable ]]; then
+        config_firewall 443
+    else
+        config_firewall "${shadowsocksport}"
     fi
 }
 
@@ -1417,9 +1392,7 @@ install_step_all(){
     fi
     download_ss_file
     download_plugins_file
-    if check_sys packageManager yum; then
-        config_firewall
-    fi
+    config_firewall_logic
     install_main
     add_more_entropy
     install_cleanup

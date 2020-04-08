@@ -42,6 +42,10 @@ Usage: ./ss-plugins.sh [options...] [args...]
     SS-rust安装目录：/usr/local/bin
     SS-rust启动文件：/etc/init.d/shadowsocks-rust
     SS-rust配置文件：/etc/shadowsocks/config.json
+    
+    Go-ss2安装目录：/usr/local/bin
+    Go-ss2启动文件：/etc/init.d/go-shadowsocks2
+    Go-ss2配置文件：/etc/shadowsocks/config.json
 
     kcptun安装目录：/usr/local/kcptun
     kcptun启动文件：/etc/init.d/kcptun
@@ -183,6 +187,7 @@ Usage: ./ss-plugins.sh [options...] [args...]
 
 - [shadowsocks-libev](https://github.com/shadowsocks/shadowsocks-libev)
 - [shadowsocks-rust](https://github.com/shadowsocks/shadowsocks-rust)
+- [go-shadowsocks2](https://github.com/shadowsocks/go-shadowsocks2)
 - [shadowsocks-windows](<https://github.com/shadowsocks/shadowsocks-windows/releases>)
 - [shadowsocks-android](<https://github.com/shadowsocks/shadowsocks-android/releases>)
 - [v2ray-plugin](<https://github.com/shadowsocks/v2ray-plugin/releases>)

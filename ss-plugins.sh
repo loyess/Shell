@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.4.6"
+SHELL_VERSION="2.4.7"
 # ====================
 
 
@@ -49,6 +49,14 @@ SHADOWSOCKS_RUST_BIN_PATH="/usr/local/bin/ssserver"
 SHADOWSOCKS_RUST_INIT="/etc/init.d/shadowsocks-rust"
 SHADOWSOCKS_RUST_CENTOS="${BASE_URL}/service/shadowsocks-rust_centos.sh"
 SHADOWSOCKS_RUST_DEBIAN="${BASE_URL}/service/shadowsocks-rust_debian.sh"
+
+# go-shadowsocks2 config and init
+GO_SHADOWSOCKS2_INSTALL_PATH="/usr/local/bin"
+GO_SHADOWSOCKS2_BIN_PATH="/usr/local/bin/go-shadowsocks2"
+GO_SHADOWSOCKS2_INIT="/etc/init.d/go-shadowsocks2"
+GO_SHADOWSOCKS2_CENTOS="${BASE_URL}/service/go-shadowsocks2_centos.sh"
+GO_SHADOWSOCKS2_DEBIAN="${BASE_URL}/service/go-shadowsocks2_debian.sh"
+GO_SHADOWSOCKS2_VERSION_FILE="/etc/shadowsocks/go-shadowsocks2.version"
 
 
 # shadowsocks-libev dependencies
@@ -770,6 +778,22 @@ download_ss_file(){
         shadowsocks_rust_url="https://github.com/shadowsocks/shadowsocks-rust/releases/download/v${rust_ver}/shadowsocks-v${rust_ver}-stable.x86_64-unknown-linux-musl.tar.xz"
         download "${shadowsocks_rust_file}.tar.xz" "${shadowsocks_rust_url}"
         download_service_file ${SHADOWSOCKS_RUST_INIT} ${SHADOWSOCKS_RUST_CENTOS} ${SS_INIT_CENTOS} ${SHADOWSOCKS_RUST_DEBIAN} ${SS_INIT_DEBIAN}
+    elif [[ ${SS_VERSION} = "go-ss2" ]]; then
+        # Download Go-shadowsocks2
+        go_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/go-shadowsocks2/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        [ -z ${go_ver} ] && echo -e "${Error} 获取 shadowsocks-rust 最新版本失败." && exit 1
+        local SS_INIT_CENTOS="./service/go-shadowsocks2_centos.sh"
+        local SS_INIT_DEBIAN="./service/go-shadowsocks2_debian.sh"
+
+        # wriet version num
+        if [ ! -d "$(dirname ${GO_SHADOWSOCKS2_VERSION_FILE})" ]; then
+            mkdir -p $(dirname ${GO_SHADOWSOCKS2_VERSION_FILE})
+        fi
+        echo ${go_ver} > ${GO_SHADOWSOCKS2_VERSION_FILE}
+        go_shadowsocks2_file="shadowsocks2-linux"
+        go_shadowsocks2_url="https://github.com/shadowsocks/go-shadowsocks2/releases/download/v${go_ver}/shadowsocks2-linux.gz"
+        download "${go_shadowsocks2_file}.gz" "${go_shadowsocks2_url}"
+        download_service_file ${GO_SHADOWSOCKS2_INIT} ${GO_SHADOWSOCKS2_CENTOS} ${SS_INIT_CENTOS} ${GO_SHADOWSOCKS2_DEBIAN} ${SS_INIT_DEBIAN}
     fi
 }
 
@@ -1159,6 +1183,8 @@ install_completed(){
         ${SHADOWSOCKS_LIBEV_INIT} start > /dev/null 2>&1
     elif [[ ${SS_VERSION} = "ss-rust" ]]; then
         ${SHADOWSOCKS_RUST_INIT} start > /dev/null 2>&1
+    elif [[ ${SS_VERSION} = "go-ss2" ]]; then
+        ${GO_SHADOWSOCKS2_INIT} start > /dev/null 2>&1
     fi
     
     clear -x
@@ -1293,7 +1319,7 @@ install_prepare(){
     echo "按任意键开始…或按Ctrl+C取消"
     char=`get_char`
     
-    if [[ ${SS_VERSION} = "ss-rust" ]] && [[ "${plugin_num}" != "3" ]]; then
+    if [[ ${SS_VERSION} = "ss-rust" ]] || [[ ${SS_VERSION} = "go-ss2" ]] && [[ "${plugin_num}" != "3" ]]; then
         echo
         echo -e "${Info} 即将开始下载相关文件请稍等."
     fi
@@ -1314,6 +1340,8 @@ install_main(){
         install_shadowsocks_libev
     elif [[ ${SS_VERSION} = "ss-rust" ]]; then
         install_shadowsocks_rust
+    elif [[ ${SS_VERSION} = "go-ss2" ]]; then
+        install_go_shadowsocks2
     fi
     
     if [ "${plugin_num}" == "1" ]; then
@@ -1371,21 +1399,23 @@ install_main(){
 }
 
 install_step_all(){
-    [[ -e ${SHADOWSOCKS_LIBEV_BIN_PATH} ]] || [[ -e ${SHADOWSOCKS_RUST_BIN_PATH} ]] && echo -e "${Info} Shadowsocks 已经安装." && exit 1
+    [[ -e ${SHADOWSOCKS_LIBEV_BIN_PATH} ]] && echo -e "${Info} Shadowsocks-libev 已经安装." && exit 1
+    [[ -e ${SHADOWSOCKS_RUST_BIN_PATH} ]] && echo -e "${Info} Shadowsocks-rust 已经安装." && exit 1
+    [[ -e ${GO_SHADOWSOCKS2_BIN_PATH} ]] && echo -e "${Info} Go-shadowsocks2 已经安装." && exit 1
     disable_selinux
     install_prepare
     if [[ ${SS_VERSION} = "ss-libev" ]]; then
         install_dependencies
     fi
-    if [[ ${SS_VERSION} = "ss-rust" ]]; then
+    if [[ ${SS_VERSION} = "ss-rust" ]] || [[ ${SS_VERSION} = "go-ss2" ]]; then
         if [ ! "$(command -v qrencode)" ]; then
             package_install "qrencode" > /dev/null 2>&1
         fi
     fi
-    if [[ ${SS_VERSION} = "ss-rust" ]] && [[ "${plugin_num}" == "3" ]]; then
+    if [[ ${SS_VERSION} = "ss-rust" ]] || [[ ${SS_VERSION} = "go-ss2" ]] && [[ "${plugin_num}" == "3" ]]; then
         install_dependencies
     fi
-    if [[ ${SS_VERSION} = "ss-rust" ]] && [[ "${plugin_num}" == "5" ]] || [[ "${plugin_num}" == "7" ]]; then
+    if [[ ${SS_VERSION} = "ss-rust" ]] || [[ ${SS_VERSION} = "go-ss2" ]] && [[ "${plugin_num}" == "5" ]] || [[ "${plugin_num}" == "7" ]]; then
         if [ ! "$(command -v jq)" ]; then
             package_install "jq" > /dev/null 2>&1
         fi
@@ -1475,7 +1505,7 @@ do_show(){
 }
 
 do_start(){
-    if [[ ! "$(command -v ss-server)" ]] && [[ ! "$(command -v ssserver)" ]]; then
+    if [[ ! "$(command -v ss-server)" ]] && [[ ! "$(command -v ssserver)" ]] && [[ ! "$(command -v go-shadowsocks2)" ]]; then
         echo
         echo -e " ${Red} Shadowsocks 未安装，请尝试安装后，再来执行此操作。${suffix}"
         echo
@@ -1506,6 +1536,10 @@ do_status(){
         RUST_PID=`ps -ef |grep -v grep | grep ssserver |awk '{print $2}'`
         local BIN_PATH=${SHADOWSOCKS_RUST_BIN_PATH}
         local SS_PID=${RUST_PID}
+    elif [ "$(command -v go-shadowsocks2)" ]; then
+        GO_PID=`ps -ef |grep -v grep | grep go-shadowsocks2 |awk '{print $2}'`
+        local BIN_PATH=${GO_SHADOWSOCKS2_BIN_PATH}
+        local SS_PID=${GO_PID}
     fi
     
     if [[ ${mark} == "menu" ]]; then
@@ -1513,7 +1547,7 @@ do_status(){
     else
         if [[ ! -e ${BIN_PATH} ]]; then
             echo
-            echo -e "${Error} shadowsocklibev-libev and related plugins are not installed."
+            echo -e "${Error} shadowsocks and related plugins are not installed."
             echo
             exit 1
         fi
@@ -1532,6 +1566,8 @@ do_update(){
         update_shadowsocks_libev
     elif [[ -e ${SHADOWSOCKS_RUST_BIN_PATH} ]]; then
         update_shadowsocks_rust
+    elif [[ -e ${GO_SHADOWSOCKS2_BIN_PATH} ]]; then
+        update_go_shadowsocks2
     fi
 }
 
@@ -1566,6 +1602,8 @@ do_install(){
         FLAG="Shadowsocks-libev"
     elif [[ -e ${SHADOWSOCKS_RUST_BIN_PATH} ]]; then
         FLAG="Shadowsocks-rust"
+    elif [[ -e ${GO_SHADOWSOCKS2_BIN_PATH} ]]; then
+        FLAG="Go-shadowsocks2"
     else
         FLAG="Shadowsocks"
     fi

@@ -2,6 +2,7 @@
 SS_DLV=(
 ss-libev
 ss-rust
+go-ss2
 )
 
 # shadowsocks-libev Ciphers
@@ -48,13 +49,19 @@ xchacha20-ietf-poly1305
 chacha20-ietf-poly1305
 )
 
+GO_SHADOWSOCKS2_CIPHERS=(
+AEAD_AES_128_GCM
+AEAD_AES_256_GCM
+AEAD_CHACHA20_POLY1305
+)
+
 
 select_ss_version_auto(){
     local totalRam=`free | awk '/Mem/ {print $2}'`
     local numLogicalCpu=`cat /proc/cpuinfo | grep "processor" | wc -l`
 
     if [ $totalRam -lt 1048576 ] && [ $numLogicalCpu -le 1 ]; then
-        versionDefault=2
+        versionDefault=$(shuf -i 2-3 -n 1)
     else
         versionDefault=1
     fi
@@ -156,6 +163,8 @@ install_prepare_cipher(){
             SHADOWSOCKS_CIPHERS=( ${SHADOWSOCKS_LIBEV_CIPHERS[@]} )
         elif [[ ${SS_VERSION} = "ss-rust" ]]; then
             SHADOWSOCKS_CIPHERS=( ${SHADOWSOCKS_RUST_CIPHERS[@]} )
+        elif [[ ${SS_VERSION} = "go-ss2" ]]; then
+            SHADOWSOCKS_CIPHERS=( ${GO_SHADOWSOCKS2_CIPHERS[@]} )
         fi
 
         for ((i=1;i<=${#SHADOWSOCKS_CIPHERS[@]};i++ )); do
@@ -168,8 +177,13 @@ install_prepare_cipher(){
         done
         
         echo
-        read -e -p "(默认: ${SHADOWSOCKS_CIPHERS[14]}):" pick
-        [ -z "$pick" ] && pick=15
+        if [[ ${SS_VERSION} = "go-ss2" ]]; then
+            read -e -p "(默认: ${SHADOWSOCKS_CIPHERS[2]}):" pick
+            [ -z "$pick" ] && pick=3
+        else
+            read -e -p "(默认: ${SHADOWSOCKS_CIPHERS[14]}):" pick
+            [ -z "$pick" ] && pick=15
+        fi
         expr ${pick} + 1 &>/dev/null
         if [ $? -ne 0 ]; then
             echo
@@ -188,6 +202,16 @@ install_prepare_cipher(){
         echo
         echo -e "${Red}  cipher = ${shadowsockscipher}${suffix}"
         echo
+
+        if [[ ${SS_VERSION} = "go-ss2" ]]; then
+            if [[ ${shadowsockscipher} == "AEAD_AES_128_GCM" ]]; then
+                shadowsockscipher="aes-128-gcm"
+            elif [[ ${shadowsockscipher} == "AEAD_AES_256_GCM" ]]; then
+                shadowsockscipher="aes-256-gcm"
+            elif [[ ${shadowsockscipher} == "AEAD_CHACHA20_POLY1305" ]]; then
+                shadowsockscipher="chacha20-ietf-poly1305"
+            fi
+        fi
         break
     done
 }

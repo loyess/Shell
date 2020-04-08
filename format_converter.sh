@@ -61,4 +61,6 @@ dos2unix ./service/shadowsocks-libev_centos.sh
 dos2unix ./service/shadowsocks-libev_debian.sh
 dos2unix ./service/shadowsocks-rust_centos.sh
 dos2unix ./service/shadowsocks-rust_debian.sh
+dos2unix ./service/go-shadowsocks2_centos.sh
+dos2unix ./service/go-shadowsocks2_debian.sh
 

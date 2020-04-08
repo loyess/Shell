@@ -23,6 +23,18 @@ shadowsocks_uninstall(){
         elif check_sys packageManager apt; then
             update-rc.d -f ${ss_service_name} remove
         fi
+     elif [ "$(command -v go-shadowsocks2)" ]; then
+        # check Go-shadowsocks status
+        ${GO_SHADOWSOCKS2_INIT} status > /dev/null 2>&1
+        if [ $? -eq 0 ]; then
+            ${GO_SHADOWSOCKS2_INIT} stop > /dev/null 2>&1
+        fi
+        local ss_service_name=$(basename ${GO_SHADOWSOCKS2_INIT})
+        if check_sys packageManager yum; then
+            chkconfig --del ${ss_service_name}
+        elif check_sys packageManager apt; then
+            update-rc.d -f ${ss_service_name} remove
+        fi
     fi
     
     # uninstall ss-libev
@@ -55,6 +67,10 @@ shadowsocks_uninstall(){
     rm -f /usr/local/bin/ssmanager
     rm -f /usr/local/bin/ssredir
     rm -f ${SHADOWSOCKS_RUST_INIT}
+
+    # uninstall go-ss2
+    rm -rf /usr/local/bin/go-shadowsocks2
+    rm -rf ${GO_SHADOWSOCKS2_INIT}
 }
 
 v2ray_plugin_uninstall(){

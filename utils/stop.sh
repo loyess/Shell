@@ -2,6 +2,7 @@ shadowsocks_stop(){
     # kill v2ray-plugin 、obfs-server、gq-server ck-server
     ps -ef |grep -v grep | grep ss-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
     ps -ef |grep -v grep | grep ssserver |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+    ps -ef |grep -v grep | grep go-shadowsocks2 |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
 
     if [ "$(command -v ss-server)" ]; then
         echo -e "Stopping Shadowsocks-libev success"
@@ -9,6 +10,10 @@ shadowsocks_stop(){
     
     if [ "$(command -v ssserver)" ]; then
         echo -e "Stopping Shadowsocks-rust success"
+    fi
+
+    if [ "$(command -v go-shadowsocks2)" ]; then
+        echo -e "Stopping Go-shadowsocks success"
     fi
 }
 

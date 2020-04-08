@@ -22,6 +22,10 @@ shadowsocks_start(){
     if [[ "$(command -v ssserver)" ]]; then
         ${SHADOWSOCKS_RUST_INIT} start
     fi
+
+    if [[ "$(command -v go-shadowsocks2)" ]]; then
+        ${GO_SHADOWSOCKS2_INIT} start
+    fi
 }
 
 v2ray_plugin_start(){
@@ -29,7 +33,7 @@ v2ray_plugin_start(){
         local NAME="v2ray-plugin"
         local PID_DIR=/var/run
         local PID_FILE=$PID_DIR/$NAME.pid
-        local V2_PID=`ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}'`
+        local V2_PID=`ps -ef |grep -Ev 'grep|-plugin-opts' | grep v2ray-plugin |awk '{print $2}'`
         
         if [ -z ${V2_PID} ]; then
             if [ -e ${PID_FILE} ]; then
@@ -71,7 +75,7 @@ simple_obfs_start(){
         local NAME="simple-obfs"
         local PID_DIR=/var/run
         local PID_FILE=$PID_DIR/$NAME.pid
-        local OBFS_PID=`ps -ef |grep -v grep | grep obfs-server |awk '{print $2}'`
+        local OBFS_PID=`ps -ef |grep -Ev 'grep|-plugin-opts' | grep obfs-server |awk '{print $2}'`
         
         if [ -z ${OBFS_PID} ]; then
             if [ -e ${PID_FILE} ]; then
@@ -107,7 +111,7 @@ goquiet_start(){
         local NAME="goquiet"
         local PID_DIR=/var/run
         local PID_FILE=$PID_DIR/$NAME.pid
-        local GQ_PID=`ps -ef |grep -v grep | grep gq-server |awk '{print $2}'`
+        local GQ_PID=`ps -ef |grep -Ev 'grep|-plugin-opts' | grep gq-server |awk '{print $2}'`
         
         if [ -z ${GQ_PID} ]; then
             if [ -e ${PID_FILE} ]; then
@@ -149,7 +153,7 @@ mtt_start(){
         local NAME="mos-tls-tunnel"
         local PID_DIR=/var/run
         local PID_FILE=$PID_DIR/$NAME.pid
-        local MTT_PID=`ps -ef |grep -v grep | grep mtt-server |awk '{print $2}'`
+        local MTT_PID=`ps -ef |grep -Ev 'grep|-plugin-opts' | grep mtt-server |awk '{print $2}'`
         
         if [ -z ${MTT_PID} ]; then
             if [ -e ${PID_FILE} ]; then
@@ -191,7 +195,7 @@ simple_tls_start(){
         local NAME="simple-tls"
         local PID_DIR=/var/run
         local PID_FILE=$PID_DIR/$NAME.pid
-        local SIMPLE_TLS_PID=`ps -ef |grep -v grep | grep simple-tls |awk '{print $2}'`
+        local SIMPLE_TLS_PID=`ps -ef |grep -Ev 'grep|-plugin-opts' | grep simple-tls |awk '{print $2}'`
 
         if [ -z ${SIMPLE_TLS_PID} ]; then
             if [ -e ${PID_FILE} ]; then

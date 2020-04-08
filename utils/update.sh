@@ -394,3 +394,46 @@ update_shadowsocks_rust(){
     update_rabbit_tcp
     update_simple_tls
 }
+
+update_go_shadowsocks2(){
+    local SS_VERSION="go-ss2"
+
+    echo -e "${Info} 正在进行版本比对请稍等."
+    go_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/go-shadowsocks2/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+    [ -z ${go_ver} ] && echo -e "${Error} 获取 go-shadowsocks2 最新版本失败." && exit 1
+    read current_go_ver < ${GO_SHADOWSOCKS2_VERSION_FILE}
+    if ! check_latest_version ${current_go_ver} ${go_ver}; then
+        echo -e "${Point} go-shadowsocks2当前已是最新版本${current_go_ver}不需要更新."
+
+        update_v2ray_plugin
+        update_kcptun
+        update_simple_obfs
+        update_goquiet
+        update_cloak
+        update_mtt
+        update_rabbit_tcp
+        update_simple_tls
+
+        exit 1
+    fi
+
+    echo -e "${Info} 检测到SS有新版本，开始下载."
+    download_ss_file
+    echo -e "${Info} 下载完成，开始执行编译安装."
+    improt_package "tools" "shadowsocks_install.sh"
+    do_stop > /dev/null 2>&1
+    install_go_shadowsocks2
+    do_restart > /dev/null 2>&1
+    echo -e "${Info} go-shadowsocks2已成功升级为最新版本${go_ver}"
+
+    install_cleanup
+
+    update_v2ray_plugin
+    update_kcptun
+    update_simple_obfs
+    update_goquiet
+    update_cloak
+    update_mtt
+    update_rabbit_tcp
+    update_simple_tls
+}

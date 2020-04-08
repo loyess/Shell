@@ -110,6 +110,7 @@ Usage: ./ss-plugins.sh [options...] [args...]
         1. tls
         2. wss
   7. rabbit-tcp
+  8. simple-tls
 
 
 注意：
@@ -198,3 +199,4 @@ Usage: ./ss-plugins.sh [options...] [args...]
 - [mostunnel-android](https://github.com/IrineSistiana/mostunnel-android/releases)
 - [rabbit-tcp](https://github.com/ihciah/rabbit-tcp/releases)
 - [rabbit-plugin](https://github.com/ihciah/rabbit-plugin/releases)
+- [simple-tls](https://github.com/IrineSistiana/simple-tls/releases)

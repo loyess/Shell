@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.4.7"
+SHELL_VERSION="2.4.8"
 # ====================
 
 
@@ -1415,7 +1415,12 @@ install_step_all(){
     if [[ ${SS_VERSION} = "ss-rust" ]] || [[ ${SS_VERSION} = "go-ss2" ]] && [[ "${plugin_num}" == "3" ]]; then
         install_dependencies
     fi
-    if [[ ${SS_VERSION} = "ss-rust" ]] || [[ ${SS_VERSION} = "go-ss2" ]] && [[ "${plugin_num}" == "5" ]] || [[ "${plugin_num}" == "7" ]]; then
+    if [[ ${SS_VERSION} = "ss-rust" ]] && [[ "${plugin_num}" == "5" ]] || [[ "${plugin_num}" == "7" ]]; then
+        if [ ! "$(command -v jq)" ]; then
+            package_install "jq" > /dev/null 2>&1
+        fi
+    fi
+    if [[ ${SS_VERSION} = "go-ss2" ]]; then
         if [ ! "$(command -v jq)" ]; then
             package_install "jq" > /dev/null 2>&1
         fi

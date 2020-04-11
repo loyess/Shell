@@ -878,6 +878,10 @@ error_detect_deps_of_ubuntu(){
     local command=$1
     local depend=$2
 
+    if [ ! "$(command -v killall)" ]; then
+        # psmisc contains killall & fuser & pstree commands.
+        package_install "psmisc" > /dev/null 2>&1
+    fi
     sleep 3
     sudo killall -q apt apt-get
     ${command} > /dev/null 2>&1

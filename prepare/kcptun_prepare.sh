@@ -119,7 +119,7 @@ install_prepare_libev_kcptun(){
     # 设置 Kcptun 加速模式 mode
     while true
     do
-        echo -e "请选择加速模式(mode)\n${Tip} 加速模式和发送窗口大小共同决定了流量的损耗大小. ${Red}未支持(手动模式 manual)${suffix}”"
+        echo -e "请选择加速模式(mode)\n${Tip} 加速模式和发送窗口大小共同决定了流量的损耗大小. ${Red}未支持(手动模式 manual)${suffix}"
 
         for ((i=1;i<=${#KCPTUN_MODE[@]};i++ )); do
             hint="${KCPTUN_MODE[$i-1]}"

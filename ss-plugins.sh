@@ -64,7 +64,7 @@ LIBSODIUM_VERSION="1.0.18"
 LIBSODIUM_FILE="libsodium-${LIBSODIUM_VERSION}"
 LIBSODIUM_URL="https://github.com/jedisct1/libsodium/releases/download/${LIBSODIUM_VERSION}-RELEASE/libsodium-${LIBSODIUM_VERSION}.tar.gz"
 
-MBEDTLS_VERSION="2.16.5"
+MBEDTLS_VERSION="2.16.6"
 MBEDTLS_FILE="mbedtls-${MBEDTLS_VERSION}"
 MBEDTLS_URL="https://tls.mbed.org/download/mbedtls-${MBEDTLS_VERSION}-gpl.tgz"
 

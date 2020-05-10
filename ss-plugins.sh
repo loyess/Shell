@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.4.8"
+SHELL_VERSION="2.4.9"
 # ====================
 
 
@@ -1123,7 +1123,11 @@ config_ss(){
         ss_config_standalone
         rabbit_tcp_config_standalone
     elif [[ ${plugin_num} == "8" ]]; then
-        ss_simple_tls_config
+        if [[ ${libev_simple_tls} == "1" ]]; then
+            ss_simple_tls_config
+        elif [[ ${libev_simple_tls} == "2" ]]; then
+            ss_simple_tls_wss_config
+        fi
     else
         ss_config_standalone
     fi
@@ -1175,7 +1179,11 @@ gen_ss_links(){
     elif [[ ${plugin_num} == "7" ]]; then
         ss_rabbit_tcp_link
     elif [[ ${plugin_num} == "8" ]]; then
-        ss_simple_tls_link
+        if [[ ${libev_simple_tls} == "1" ]]; then
+            ss_simple_tls_link
+        elif [[ ${libev_simple_tls} == "2" ]]; then
+            ss_simple_tls_wss_link
+        fi
     else
         ss_link
     fi
@@ -1264,7 +1272,11 @@ install_completed(){
         ${RABBIT_INIT} start  > /dev/null 2>&1
         ss_rabbit_tcp_show
     elif [[ ${plugin_num} == "8" ]]; then
-        ss_simple_tls_show
+        if [[ ${libev_simple_tls} == "1" ]]; then
+            ss_simple_tls_show
+        elif [[ ${libev_simple_tls} == "2" ]]; then
+            ss_simple_tls_wss_show
+        fi
     else
         ss_show
     fi

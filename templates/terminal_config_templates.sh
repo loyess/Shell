@@ -24,7 +24,7 @@ ss_v2ray_ws_http_show(){
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件选项 : ${Red}host=${domain};path=${path};mux=${mux}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件参数 : " >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
@@ -46,7 +46,7 @@ ss_v2ray_ws_tls_cdn_show(){
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件选项 : ${Red}tls;host=${domain};path=${path};mux=${mux}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件参数 : " >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
@@ -68,7 +68,7 @@ ss_v2ray_quic_tls_cdn_show(){
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件选项 : ${Red}mode=quic;host=${domain}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件参数 : " >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
@@ -90,7 +90,7 @@ ss_v2ray_ws_tls_web_show(){
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件选项 : ${Red}tls;host=${domain};path=${path};mux=${mux}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件参数 : " >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
@@ -112,7 +112,7 @@ ss_v2ray_ws_tls_web_cdn_show(){
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件选项 : ${Red}tls;host=${domain};path=${path};mux=${mux}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件参数 : " >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
@@ -170,7 +170,7 @@ ss_obfs_http_show(){
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件选项 : ${Red}obfs=${shadowsocklibev_obfs}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " 插件参数 : ${Red}obfs-host=${domain};fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件参数 : ${Red}obfs-host=${domain}${suffix}" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
@@ -192,7 +192,7 @@ ss_obfs_tls_show(){
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件选项 : ${Red}obfs=${shadowsocklibev_obfs}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " 插件参数 : ${Red}obfs-host=${domain};fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件参数 : ${Red}obfs-host=${domain}${suffix}" >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
@@ -215,7 +215,7 @@ ss_goquiet_show(){
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件选项 : ${Red}ServerName=${domain};Key=${gqkey};TicketTimeHint=3600;Browser=chrome${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件参数 : " >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
@@ -240,7 +240,7 @@ ss_cloak_show_new(){
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件选项 : ${Red}Transport=direct;ProxyMethod=shadowsocks;EncryptionMethod=${encryptionMethod};UID=${ckauid};PublicKey=${ckpub};ServerName=${domain};NumConn=4;BrowserSig=chrome;StreamTimeout=300${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件参数 : " >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " AdminUID : ${ckauid}" >> ${HUMAN_CONFIG}
     echo -e " CK  公钥 : ${ckpub}" >> ${HUMAN_CONFIG}
@@ -271,7 +271,7 @@ ss_mtt_tls_show(){
     elif [[ ${isEnable} == enable ]]; then
         echo -e " 插件选项 : ${Red}sv;n=${serverName};mux${suffix}" >> ${HUMAN_CONFIG}
     fi
-    echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件参数 : " >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
@@ -297,7 +297,7 @@ ss_mtt_tls_dns_only_show(){
     elif [[ ${isEnable} == enable ]]; then
         echo -e " 插件选项 : ${Red}n=${serverName};mux${suffix}" >> ${HUMAN_CONFIG}
     fi
-    echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件参数 : " >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
@@ -323,7 +323,7 @@ ss_mtt_wss_show(){
     elif [[ ${isEnable} == enable ]]; then
         echo -e " 插件选项 : ${Red}sv;wss;wss-path=${wssPath};n=${serverName};mux;mux-max-stream=${muxMaxStream}${suffix}" >> ${HUMAN_CONFIG}
     fi
-    echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件参数 : " >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
@@ -353,7 +353,7 @@ ss_mtt_wss_dns_only_or_cdn_show(){
     elif [[ ${isEnable} == enable ]]; then
         echo -e " 插件选项 : ${Red}wss;wss-path=${wssPath};n=${serverName};mux;mux-max-stream=${muxMaxStream}${suffix}" >> ${HUMAN_CONFIG}
     fi
-    echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件参数 : " >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
@@ -383,7 +383,7 @@ ss_mtt_wss_dns_only_or_cdn_web_show(){
     elif [[ ${isEnable} == enable ]]; then
         echo -e " 插件选项 : ${Red}wss;wss-path=${wssPath};n=${serverName};mux;mux-max-stream=${muxMaxStream}${suffix}" >> ${HUMAN_CONFIG}
     fi
-    echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件参数 : " >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
@@ -405,7 +405,7 @@ ss_rabbit_tcp_show(){
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件选项 : ${Red}serviceAddr=$(get_ip):${shadowsocksport};password=${rabbitKey};tunnelN=4${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件参数 : " >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
@@ -431,7 +431,7 @@ ss_simple_tls_show(){
     elif [[ ${domainType} = Other ]]; then
         echo -e " 插件选项 : ${Red}n=${serverName};cca=${base64Cert}${suffix}" >> ${HUMAN_CONFIG}
     fi
-    echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件参数 : " >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
@@ -461,7 +461,7 @@ ss_simple_tls_wss_show(){
     elif [[ ${domainType} = Other ]]; then
         echo -e " 插件选项 : ${Red}wss;path=${wssPath};n=${serverName};cca=${base64Cert}${suffix}" >> ${HUMAN_CONFIG}
     fi
-    echo -e " 插件参数 : ${Red}fast-open=${fast_open}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件参数 : " >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}

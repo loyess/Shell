@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.4.9"
+SHELL_VERSION="2.5.0"
 # ====================
 
 
@@ -433,32 +433,6 @@ check_sys(){
             return 1
         fi
     fi
-}
-
-check_kernel_version(){
-    local kernel_version=$(uname -r | cut -d- -f1)
-    if version_gt ${kernel_version} 3.7.0; then
-        return 0
-    else
-        return 1
-    fi
-}
-
-check_kernel_headers(){
-    if check_sys packageManager yum; then
-        if rpm -qa | grep -q headers-$(uname -r); then
-            return 0
-        else
-            return 1
-        fi
-    elif check_sys packageManager apt; then
-        if dpkg -s linux-headers-$(uname -r) > /dev/null 2>&1; then
-            return 0
-        else
-            return 1
-        fi
-    fi
-    return 1
 }
 
 check_latest_version(){
@@ -1005,14 +979,8 @@ install_mbedtls(){
 }
 
 config_ss(){
-
-    if check_kernel_version && check_kernel_headers; then
-        fast_open="true"
-    else
-        fast_open="false"
-    fi
-
     local server_value="\"0.0.0.0\""
+
     if get_ipv6; then
         local V=${SS_VERSION}
         local N=${plugin_num}

@@ -29,6 +29,7 @@ chacha20-ietf-poly1305
 )
 
 SHADOWSOCKS_RUST_CIPHERS=(
+plain
 rc4-md5
 salsa20
 chacha20
@@ -160,11 +161,14 @@ install_prepare_cipher(){
         echo -e "\n请选择Shadowsocks加密方式"
 
         if [[ ${SS_VERSION} = "ss-libev" ]]; then
-            SHADOWSOCKS_CIPHERS=( ${SHADOWSOCKS_LIBEV_CIPHERS[@]} )
+            local tempNum=14
+            local SHADOWSOCKS_CIPHERS=( ${SHADOWSOCKS_LIBEV_CIPHERS[@]} )
         elif [[ ${SS_VERSION} = "ss-rust" ]]; then
-            SHADOWSOCKS_CIPHERS=( ${SHADOWSOCKS_RUST_CIPHERS[@]} )
+            local tempNum=15
+            local SHADOWSOCKS_CIPHERS=( ${SHADOWSOCKS_RUST_CIPHERS[@]} )
         elif [[ ${SS_VERSION} = "go-ss2" ]]; then
-            SHADOWSOCKS_CIPHERS=( ${GO_SHADOWSOCKS2_CIPHERS[@]} )
+            local tempNum=2
+            local SHADOWSOCKS_CIPHERS=( ${GO_SHADOWSOCKS2_CIPHERS[@]} )
         fi
 
         for ((i=1;i<=${#SHADOWSOCKS_CIPHERS[@]};i++ )); do
@@ -175,15 +179,10 @@ install_prepare_cipher(){
                 echo -e "${Green} ${i}.${suffix} ${hint}"
             fi
         done
-        
+
         echo
-        if [[ ${SS_VERSION} = "go-ss2" ]]; then
-            read -e -p "(默认: ${SHADOWSOCKS_CIPHERS[2]}):" pick
-            [ -z "$pick" ] && pick=3
-        else
-            read -e -p "(默认: ${SHADOWSOCKS_CIPHERS[14]}):" pick
-            [ -z "$pick" ] && pick=15
-        fi
+        read -e -p "(默认: ${SHADOWSOCKS_CIPHERS[${tempNum}]}):" pick
+        [ -z "$pick" ] && pick=$(expr ${tempNum} + 1)
         expr ${pick} + 1 &>/dev/null
         if [ $? -ne 0 ]; then
             echo
@@ -203,14 +202,12 @@ install_prepare_cipher(){
         echo -e "${Red}  cipher = ${shadowsockscipher}${suffix}"
         echo
 
-        if [[ ${SS_VERSION} = "go-ss2" ]]; then
-            if [[ ${shadowsockscipher} == "AEAD_AES_128_GCM" ]]; then
-                shadowsockscipher="aes-128-gcm"
-            elif [[ ${shadowsockscipher} == "AEAD_AES_256_GCM" ]]; then
-                shadowsockscipher="aes-256-gcm"
-            elif [[ ${shadowsockscipher} == "AEAD_CHACHA20_POLY1305" ]]; then
-                shadowsockscipher="chacha20-ietf-poly1305"
-            fi
+        if [[ ${shadowsockscipher} == "AEAD_AES_128_GCM" ]]; then
+            shadowsockscipher="aes-128-gcm"
+        elif [[ ${shadowsockscipher} == "AEAD_AES_256_GCM" ]]; then
+            shadowsockscipher="aes-256-gcm"
+        elif [[ ${shadowsockscipher} == "AEAD_CHACHA20_POLY1305" ]]; then
+            shadowsockscipher="chacha20-ietf-poly1305"
         fi
         break
     done

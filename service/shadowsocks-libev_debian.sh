@@ -18,11 +18,16 @@ elif [ -f /usr/bin/ss-server ]; then
 fi
 NAME=Shadowsocks-libev
 CONF=/etc/shadowsocks/config.json
+LOG=/var/log/shadowsocks-libev.log
 PID_DIR=/var/run
 PID_FILE=$PID_DIR/shadowsocks-libev.pid
 RET_VAL=0
 
 [ -x $DAEMON ] || exit 0
+
+if [ ! -d "$(dirname ${LOG})" ]; then
+    mkdir -p $(dirname ${LOG})
+fi
 
 check_pid(){
 	get_pid=`ps -ef |grep -v grep | grep ss-server |awk '{print $2}'`
@@ -82,7 +87,8 @@ do_start() {
         echo "$NAME (pid $PID) is already running."
         return 0
     fi
-    $DAEMON -c $CONF > /dev/null 2>&1 &
+    ulimit -n 51200
+    nohup $DAEMON -c $CONF -v > $LOG 2>&1 &
     check_pid
     echo $get_pid > $PID_FILE
     if check_running; then

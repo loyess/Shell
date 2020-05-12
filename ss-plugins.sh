@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.5.0"
+SHELL_VERSION="2.5.1"
 # ====================
 
 
@@ -79,7 +79,6 @@ KCPTUN_INSTALL_PATH="/usr/local/kcptun"
 KCPTUN_BIN_PATH="/usr/local/kcptun/kcptun-server"
 KCPTUN_INIT="/etc/init.d/kcptun"
 KCPTUN_CONFIG="/etc/kcptun/config.json"
-KCPTUN_LOG_DIR="/var/log/kcptun-server.log"
 KCPTUN_CENTOS="${BASE_URL}/service/kcptun_centos.sh"
 KCPTUN_DEBIAN="${BASE_URL}/service/kcptun_debian.sh"
 
@@ -118,7 +117,6 @@ RABBIT_BIN_PATH="/usr/local/bin/rabbit-tcp"
 RABBIT_INIT="/etc/init.d/rabbit-tcp"
 RABBIT_CONFIG="/etc/rabbit-tcp/config.json"
 RABBIT_VERSION_FILE="/etc/rabbit-tcp/rabbit-tcp.version"
-RABBIT_LOG_DIR="/var/log/rabbit-tcp.log"
 RABBIT_CENTOS="${BASE_URL}/service/rabbit-tcp_centos.sh"
 RABBIT_DEBIAN="${BASE_URL}/service/rabbit-tcp_debian.sh"
 
@@ -187,6 +185,7 @@ usage() {
         status           查看状态
         script           升级脚本
         show             显示可视化配置
+        log              查看日志文件
         uid              为cloak添加一个新的uid用户
         link             用新添加的uid生成一个新的SS://链接
         scan             用ss://链接在当前终端上生成一个可供扫描的二维码
@@ -1493,6 +1492,11 @@ do_show(){
     show_config "standalone"
 }
 
+do_log(){
+    improt_package "utils" "view_log.sh"
+    show_log
+}
+
 do_start(){
     if [[ ! "$(command -v ss-server)" ]] && [[ ! "$(command -v ssserver)" ]] && [[ ! "$(command -v go-shadowsocks2)" ]]; then
         echo
@@ -1646,6 +1650,9 @@ case ${action} in
         do_${action}  "${2}"
         ;;
     show)
+        do_${action}
+        ;;
+    log)
         do_${action}
         ;;
     help)

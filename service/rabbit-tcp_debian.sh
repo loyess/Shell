@@ -104,7 +104,8 @@ do_start() {
         echo "$NAME (pid $PID) is already running."
         return 0
     fi
-    $DAEMON -mode $Mode -rabbit-addr $RabbitAddr -password $PassWord -verbose $Verbose >> $LOG 2>&1 &
+    ulimit -n 51200
+    nohup $DAEMON -mode $Mode -rabbit-addr $RabbitAddr -password $PassWord -verbose $Verbose > $LOG 2>&1 &
     check_pid
     echo $get_pid > $PID_FILE
     if check_running; then

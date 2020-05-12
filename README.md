@@ -22,6 +22,7 @@ Usage: ./ss-plugins.sh [options...] [args...]
         status           查看状态
         script           升级脚本
         show             显示可视化配置
+        log              查看日志文件
         uid              为cloak添加一个新的uid用户
         link             用新添加的uid生成一个新的SS://链接
         scan             用ss://链接在当前终端上生成一个可供扫描的二维码
@@ -58,17 +59,23 @@ Usage: ./ss-plugins.sh [options...] [args...]
     rabbit-tcp安装目录：/usr/local/bin
     rabbit-tcp启动文件：/etc/init.d/rabbit-tcp
     rabbit-tcp配置文件：/etc/rabbit-tcp/config.json
-    rabbit-tcp日志文件：/var/log/rabbit-tcp.log
 
     caddy安装目录：/usr/local/caddy
     caddy配置文件: /usr/local/caddy/Caddyfile
-    caddy日志文件：/tmp/caddy.log
     caddy生成证书目录：~/.caddy/acme/acme-v02.api.letsencrypt.org/sites/xxx.xxx(域名)/
     
     nginx二进制文件：/usr/sbin/nginx
     nginx配置文件：/etc/nginx/nginx.conf
-    nginx错误日志：/var/log/nginx/error.log
-    nginx访问日志：/var/log/nginx/access.log
+
+    SS-libev日志文件：/var/log/shadowsocks-libev.log
+    SS-rust日志文件：/var/log/shadowsocks-rust.log
+    Go-ss2日志文件：/var/log/go-shadowsocks2.log
+    kcptun日志文件：/var/log/kcptun.log
+    cloak日志文件：/var/log/cloak.log
+    rabbit-tcp日志文件：/var/log/rabbit-tcp.log
+    caddy日志文件：/var/log/caddy.log
+    nginx错误日志文件：/var/log/nginx/error.log
+    nginx访问日志文件：/var/log/nginx/access.log
 
     acme.sh安装目录：~/.acme.sh
     acme.sh生成证书目录：~/.acme.sh/xxx.xxx(域名)/

@@ -17,6 +17,7 @@ fi
 
 NAME=ck-server
 CONF=/etc/cloak/ckserver.json
+LOG=/var/log/cloak.log
 PID_DIR=/var/run
 PID_FILE=$PID_DIR/$NAME.pid
 RET_VAL=0
@@ -26,6 +27,10 @@ RET_VAL=0
 check_pid(){
 	get_pid=`ps -ef |grep -v grep | grep $NAME |awk '{print $2}'`
 }
+
+if [ ! -d "$(dirname ${LOG})" ]; then
+    mkdir -p $(dirname ${LOG})
+fi
 
 check_pid
 if [ -z $get_pid ]; then
@@ -82,7 +87,8 @@ do_start() {
         echo "$NAME (pid $PID) is already running."
         return 0
     fi
-    $DAEMON -c $CONF > /dev/null 2>&1 &
+    ulimit -n 51200
+    nohup $DAEMON -c $CONF -verbosity debug >  $LOG 2>&1 &
     check_pid
     echo $get_pid > $PID_FILE
     if check_running; then

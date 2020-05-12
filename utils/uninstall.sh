@@ -99,7 +99,6 @@ kcptun_uninstall(){
     # uninstall kcptun
     rm -fr ${KCPTUN_INSTALL_PATH} > /dev/null 2>&1
     rm -fr $(dirname ${KCPTUN_CONFIG}) > /dev/null 2>&1
-    rm -fr ${KCPTUN_LOG_DIR} > /dev/null 2>&1
     rm -f ${KCPTUN_INIT} > /dev/null 2>&1
 }
 
@@ -171,7 +170,6 @@ rabbit_tcp_uninstall(){
     # uninstall rabbit-tcp
     rm -f ${RABBIT_BIN_PATH}
     rm -f ${RABBIT_INIT}
-    rm -f ${RABBIT_LOG_DIR}
     rm -fr $(dirname ${RABBIT_CONFIG}) > /dev/null 2>&1
 }
 
@@ -193,7 +191,6 @@ caddy_uninstall(){
         elif check_sys packageManager apt; then
             update-rc.d -f caddy remove
         fi
-        [[ -s /tmp/caddy.log ]] && rm -rf /tmp/caddy.log
         rm -rf $(dirname ${CADDY_BIN_PATH})
         rm -rf /etc/init.d/caddy
         rm -rf /usr/bin/caddy
@@ -222,6 +219,18 @@ ipcalc_uninstall(){
     rm -rf /usr/local/bin/ipcalc-0.41
 }
 
+log_file_remove(){
+    rm -f /var/log/shadowsocks-libev.log
+    rm -f /var/log/shadowsocks-rust.log
+    rm -f /var/log/go-shadowsocks2.log
+    rm -f /var/log/kcptun.log
+    rm -f /var/log/cloak.log
+    rm -f /var/log/rabbit-tcp.log
+    rm -f /var/log/caddy.log
+    rm -f /var/log/nginx/error.log
+    rm -f /var/log/nginx/access.log
+}
+
 uninstall_services(){
     shadowsocks_uninstall
     v2ray_plugin_uninstall
@@ -235,6 +244,7 @@ uninstall_services(){
     caddy_uninstall
     nginx_uninstall
     ipcalc_uninstall
+    log_file_remove
 }
 
 

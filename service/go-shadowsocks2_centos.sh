@@ -137,6 +137,7 @@ do_start() {
         echo "$NAME (pid $PID) is already running."
         return 0
     fi
+    ulimit -n 51200
     if $(cat ${CONF} | grep -qE 'plugin|plugin_opts'); then
         nohup $DAEMON -s "ss://${Method}:${Password}@:${ServerPort}" -verbose -plugin ${Plugin} -plugin-opts "${PluginOpts}" > $LOG 2>&1 &
     else

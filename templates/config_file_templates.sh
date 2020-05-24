@@ -88,7 +88,11 @@ caddy_config_none_cdn(){
 	cat > ${CADDY_CONF_FILE}<<-EOF
 	${domain}:443 {
 	    gzip
-	    tls ${email}
+	    log /var/log/caddy-access.log
+	    errors /var/log/caddy-error.log
+	    tls ${email} {
+	        protocols tls1.3
+	    {
 	    timeouts none
 	    proxy ${path} localhost:${shadowsocksport} {
 	        websocket
@@ -122,8 +126,11 @@ caddy_config_with_cdn(){
 	cat > ${CADDY_CONF_FILE}<<-EOF
 	${domain}:443 {
 	    gzip
+	    log /var/log/caddy-access.log
+	    errors /var/log/caddy-error.log
 	    tls {
 	        dns cloudflare
+	        protocols tls1.3
 	    }
 	    timeouts none
 	    proxy ${path} localhost:${shadowsocksport} {
@@ -141,7 +148,7 @@ nginx_config(){
 	cat > /etc/nginx/nginx.conf<<-EOF
 	user nginx;
 	worker_processes auto;
-	error_log /var/log/nginx/error.log info;
+	error_log /var/log/nginx-error.log info;
 	pid /var/run/nginx.pid;
 
 	events {
@@ -152,7 +159,7 @@ nginx_config(){
 
 	http {
 	    keepalive_timeout 60;
-	    access_log /var/log/nginx/access.log combined;
+	    access_log /var/log/nginx-access.log combined;
 
 	    server {
 	        listen 80;

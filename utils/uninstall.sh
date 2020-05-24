@@ -226,9 +226,10 @@ log_file_remove(){
     rm -f /var/log/kcptun.log
     rm -f /var/log/cloak.log
     rm -f /var/log/rabbit-tcp.log
-    rm -f /var/log/caddy.log
-    rm -f /var/log/nginx/error.log
-    rm -f /var/log/nginx/access.log
+    rm -f /var/log/caddy-error.log
+    rm -f /var/log/caddy-access.log
+    rm -f /var/log/nginx-error.log
+    rm -f /var/log/nginx-access.log
 }
 
 uninstall_services(){

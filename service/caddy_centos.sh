@@ -19,7 +19,6 @@ fi
 
 NAME=caddy
 CONF=/usr/local/caddy/Caddyfile
-LOG=/var/log/caddy.log
 PID_DIR=/var/run
 PID_FILE=$PID_DIR/$NAME.pid
 RET_VAL=0
@@ -29,10 +28,6 @@ RET_VAL=0
 check_pid(){
 	get_pid=`ps -ef |grep -v grep |grep -v "init.d" |grep -v "service" |grep $NAME |awk '{print $2}'`
 }
-
-if [ ! -d "$(dirname ${LOG})" ]; then
-    mkdir -p $(dirname ${LOG})
-fi
 
 check_pid
 if [ -z $get_pid ]; then
@@ -95,7 +90,7 @@ do_start() {
         return 0
     fi
     ulimit -n 51200
-    nohup "$DAEMON" --conf="$CONF" -agree >> $LOG 2>&1 &
+    nohup "$DAEMON" --conf="$CONF" -agree > /dev/null 2>&1 &
     check_pid
     echo $get_pid > $PID_FILE
     if check_running; then

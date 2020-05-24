@@ -14,9 +14,10 @@ show_log(){
     local kcptunLog="/var/log/kcptun.log"
     local cloakLog="/var/log/cloak.log"
     local rabbitLog="/var/log/rabbit-tcp.log"
-    local caddyLog="/var/log/caddy.log"
-    local nginxErrorLog="/var/log/nginx/error.log"
-    local nginxAccessLog="/var/log/nginx/access.log"
+    local caddyErrorLog="/var/log/caddy-error.log"
+    local caddyAccessLog="/var/log/caddy-access.log"
+    local nginxErrorLog="/var/log/nginx-error.log"
+    local nginxAccessLog="/var/log/nginx-access.log"
 
     if [[ -e ${ssLibevLog} ]]; then
         local ssLog=${ssLibevLog}
@@ -32,8 +33,12 @@ show_log(){
         dynamic_display_log "${ssLog}" "${cloakLog}"
     elif [[ -e ${ssLog} ]] && [[ -e ${rabbitLog} ]]; then
         dynamic_display_log "${ssLog}" "${rabbitLog}"
-    elif [[ -e ${ssLog} ]] && [[ -e ${caddyLog} ]]; then
-        dynamic_display_log "${ssLog}" "${caddyLog}"
+    elif [[ -e ${ssLog} ]] && [[ -e ${caddyErrorLog} ]] && [[ -e ${caddyAccessLog} ]]; then
+        dynamic_display_log "${ssLog}" "${caddyErrorLog}" "${caddyAccessLog}"
+    elif [[ -e ${ssLog} ]] && [[ -e ${caddyErrorLog} ]]; then
+        dynamic_display_log "${ssLog}" "${caddyErrorLog}"
+    elif [[ -e ${ssLog} ]] && [[ -e ${caddyAccessLog} ]]; then
+        dynamic_display_log "${ssLog}" "${caddyAccessLog}"
     elif [[ -e ${ssLog} ]] && [[ -e ${nginxErrorLog} ]] && [[ -e ${nginxAccessLog} ]]; then
         dynamic_display_log "${ssLog}" "${nginxErrorLog}" "${nginxAccessLog}"
     elif [[ -e ${ssLog} ]] && [[ -e ${nginxErrorLog} ]]; then

@@ -73,9 +73,10 @@ Usage: ./ss-plugins.sh [options...] [args...]
     kcptun日志文件：/var/log/kcptun.log
     cloak日志文件：/var/log/cloak.log
     rabbit-tcp日志文件：/var/log/rabbit-tcp.log
-    caddy日志文件：/var/log/caddy.log
-    nginx错误日志文件：/var/log/nginx/error.log
-    nginx访问日志文件：/var/log/nginx/access.log
+    caddy错误日志文件：/var/log/caddy-error.log
+    caddy访问日志文件：/var/log/caddy-access.log
+    nginx错误日志文件：/var/log/nginx-error.log
+    nginx访问日志文件：/var/log/nginx-access.log
 
     acme.sh安装目录：~/.acme.sh
     acme.sh生成证书目录：~/.acme.sh/xxx.xxx(域名)/

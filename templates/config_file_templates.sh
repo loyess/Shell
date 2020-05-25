@@ -92,7 +92,7 @@ caddy_config_none_cdn(){
 	    errors /var/log/caddy-error.log
 	    tls ${email} {
 	        protocols tls1.3
-	    {
+	    }
 	    timeouts none
 	    proxy ${path} localhost:${shadowsocksport} {
 	        websocket

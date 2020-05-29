@@ -29,7 +29,7 @@ chacha20-ietf-poly1305
 )
 
 SHADOWSOCKS_RUST_CIPHERS=(
-plain
+none
 rc4-md5
 salsa20
 chacha20

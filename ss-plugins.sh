@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.5.2"
+SHELL_VERSION="2.5.3"
 # ====================
 
 
@@ -1415,9 +1415,6 @@ install_step_all(){
     add_more_entropy
     install_cleanup
     config_ss
-    if [[ ${shadowsockscipher} == "plain" ]]; then
-        shadowsockscipher="none"
-    fi
     gen_ss_links
     install_completed
     improt_package "utils" "view_config.sh"

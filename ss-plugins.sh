@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.5.3"
+SHELL_VERSION="2.5.4"
 # ====================
 
 
@@ -741,14 +741,14 @@ download_ss_file(){
         download "${shadowsocks_libev_file}.tar.gz" "${shadowsocks_libev_url}"
         download_service_file ${SHADOWSOCKS_LIBEV_INIT} ${SHADOWSOCKS_LIBEV_CENTOS} ${SS_INIT_CENTOS} ${SHADOWSOCKS_LIBEV_DEBIAN} ${SS_INIT_DEBIAN}
     elif [[ ${SS_VERSION} = "ss-rust" ]]; then
-        # Download Shadowsocks-libev
+        # Download Shadowsocks-rust
         rust_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/shadowsocks-rust/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
         [ -z ${rust_ver} ] && echo -e "${Error} 获取 shadowsocks-rust 最新版本失败." && exit 1
         local SS_INIT_CENTOS="./service/shadowsocks-rust_centos.sh"
         local SS_INIT_DEBIAN="./service/shadowsocks-rust_debian.sh"
         
-        shadowsocks_rust_file="shadowsocks-v${rust_ver}-stable.x86_64-unknown-linux-musl"
-        shadowsocks_rust_url="https://github.com/shadowsocks/shadowsocks-rust/releases/download/v${rust_ver}/shadowsocks-v${rust_ver}-stable.x86_64-unknown-linux-musl.tar.xz"
+        shadowsocks_rust_file="shadowsocks-v${rust_ver}.x86_64-unknown-linux-musl"
+        shadowsocks_rust_url="https://github.com/shadowsocks/shadowsocks-rust/releases/download/v${rust_ver}/shadowsocks-v${rust_ver}.x86_64-unknown-linux-musl.tar.xz"
         download "${shadowsocks_rust_file}.tar.xz" "${shadowsocks_rust_url}"
         download_service_file ${SHADOWSOCKS_RUST_INIT} ${SHADOWSOCKS_RUST_CENTOS} ${SS_INIT_CENTOS} ${SHADOWSOCKS_RUST_DEBIAN} ${SS_INIT_DEBIAN}
     elif [[ ${SS_VERSION} = "go-ss2" ]]; then

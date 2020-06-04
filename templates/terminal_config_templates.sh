@@ -426,10 +426,15 @@ ss_simple_tls_show(){
     echo -e " 密码     : ${Red}${shadowsockspwd}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
+    if [[ ${isEnable} == disable ]]; then
+        local rhArgs=''
+    elif [[ ${isEnable} == enable ]]; then
+        local rhArgs='rh;'
+    fi
     if [[ ${domainType} = DNS-Only ]]; then
-        echo -e " 插件选项 : ${Red}n=${serverName}${suffix}" >> ${HUMAN_CONFIG}
+        echo -e " 插件选项 : ${Red}${rhArgs}n=${serverName}${suffix}" >> ${HUMAN_CONFIG}
     elif [[ ${domainType} = Other ]]; then
-        echo -e " 插件选项 : ${Red}n=${serverName};cca=${base64Cert}${suffix}" >> ${HUMAN_CONFIG}
+        echo -e " 插件选项 : ${Red}${rhArgs}n=${serverName};cca=${base64Cert}${suffix}" >> ${HUMAN_CONFIG}
     fi
     echo -e " 插件参数 : " >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
@@ -456,10 +461,15 @@ ss_simple_tls_wss_show(){
     echo -e " 密码     : ${Red}${shadowsockspwd}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
+    if [[ ${isEnable} == disable ]]; then
+        local rhArgs=''
+    elif [[ ${isEnable} == enable ]]; then
+        local rhArgs='rh;'
+    fi
     if [[ ${domainType} = DNS-Only ]] || [[ ${domainType} = CDN ]]; then
-        echo -e " 插件选项 : ${Red}wss;path=${wssPath};n=${serverName}${suffix}" >> ${HUMAN_CONFIG}
+        echo -e " 插件选项 : ${Red}${rhArgs}wss;path=${wssPath};n=${serverName}${suffix}" >> ${HUMAN_CONFIG}
     elif [[ ${domainType} = Other ]]; then
-        echo -e " 插件选项 : ${Red}wss;path=${wssPath};n=${serverName};cca=${base64Cert}${suffix}" >> ${HUMAN_CONFIG}
+        echo -e " 插件选项 : ${Red}${rhArgs}wss;path=${wssPath};n=${serverName};cca=${base64Cert}${suffix}" >> ${HUMAN_CONFIG}
     fi
     echo -e " 插件参数 : " >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}

@@ -299,6 +299,35 @@ get_input_wss_path(){
     done
 }
 
+is_add_random_header(){
+    while true
+    do
+        echo
+        echo -e "是否启用 random header(512b~16Kb)，以防止流量分析(rh)"
+        read -p "(默认: n) [y/n]: " yn
+        [ -z "${yn}" ] && yn="N"
+        case "${yn:0:1}" in
+            y|Y)
+                isEnable=enable
+                ;;
+            n|N)
+                isEnable=disable
+                ;;
+            *)
+                echo
+                echo -e "${Error} 输入有误，请重新输入!"
+                echo
+                continue
+                ;;
+        esac
+
+        echo
+        echo -e "${Red}  rh = ${isEnable}${suffix}"
+        echo
+        break
+    done
+}
+
 check_port_for_simple_tls(){
     shadowsocksport=443
 
@@ -310,6 +339,7 @@ check_port_for_simple_tls(){
 install_prepare_libev_simple_tls(){
     transport_mode_menu
     get_input_server_name
+    is_add_random_header
     check_port_for_simple_tls
 
     if [[ ${libev_simple_tls} = "1" ]]; then
@@ -318,7 +348,6 @@ install_prepare_libev_simple_tls(){
         fi
     elif [[ ${libev_simple_tls} = "2" ]]; then
         get_input_wss_path
-        check_port_for_simple_tls
 
         if [[ ${domainType} = DNS-Only ]]; then
             acme_get_certificate_by_force "${serverName}"

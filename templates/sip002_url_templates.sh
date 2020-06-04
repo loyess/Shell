@@ -178,10 +178,15 @@ ss_simple_tls_link(){
     local link_head="ss://"
     local cipher_pwd=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}")
     local ip_port_plugin="@$(get_ip):443/?plugin=${plugin_client_name}"
+    if [[ ${isEnable} == disable ]]; then
+        local rhArgs=''
+    elif [[ ${isEnable} == enable ]]; then
+        local rhArgs=';rh'
+    fi
     if [[ ${domainType} = DNS-Only ]]; then
-        local plugin_opts=$(get_str_replace ";n=${serverName}")
+        local plugin_opts=$(get_str_replace "${rhArgs};n=${serverName}")
     elif [[ ${domainType} = Other ]]; then
-        local plugin_opts=$(get_str_replace ";n=${serverName};cca=${base64Cert}")
+        local plugin_opts=$(get_str_replace "${rhArgs};n=${serverName};cca=${base64Cert}")
     fi
     ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
 }
@@ -194,10 +199,15 @@ ss_simple_tls_wss_link(){
     else
         local ip_port_plugin="@$(get_ip):443/?plugin=${plugin_client_name}"
     fi
+    if [[ ${isEnable} == disable ]]; then
+        local rhArgs=''
+    elif [[ ${isEnable} == enable ]]; then
+        local rhArgs=';rh'
+    fi
     if [[ ${domainType} = DNS-Only ]] || [[ ${domainType} = CDN ]]; then
-        local plugin_opts=$(get_str_replace ";wss;path=${wssPath};n=${serverName}")
+        local plugin_opts=$(get_str_replace "${rhArgs};wss;path=${wssPath};n=${serverName}")
     elif [[ ${domainType} = Other ]]; then
-        local plugin_opts=$(get_str_replace ";wss;path=${wssPath};n=${serverName};cca=${base64Cert}")
+        local plugin_opts=$(get_str_replace "${rhArgs};wss;path=${wssPath};n=${serverName};cca=${base64Cert}")
     fi
     ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
 }

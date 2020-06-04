@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.5.4"
+SHELL_VERSION="2.5.5"
 # ====================
 
 
@@ -1094,6 +1094,10 @@ config_ss(){
             ss_simple_tls_config
         elif [[ ${libev_simple_tls} == "2" ]]; then
             ss_simple_tls_wss_config
+        fi
+
+        if [[ ${isEnable} == enable ]]; then
+            sed 's/"plugin_opts":"s/"plugin_opts":"s;rh/' -i ${SHADOWSOCKS_CONFIG}
         fi
     else
         ss_config_standalone

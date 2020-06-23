@@ -23,6 +23,7 @@ Usage: ./ss-plugins.sh [options...] [args...]
         script           升级脚本
         show             显示可视化配置
         log              查看日志文件
+        cert             手动申请.cf .ga .gq .ml .tk域名CF CDN证书(有效期3个月)
         uid              为cloak添加一个新的uid用户
         link             用新添加的uid生成一个新的SS://链接
         scan             用ss://链接在当前终端上生成一个可供扫描的二维码

@@ -44,7 +44,7 @@ ss_v2ray_ws_tls_cdn_config(){
 	    "nameserver":"8.8.8.8",
 	    "mode":"tcp_and_udp",
 	    "plugin":"v2ray-plugin",
-	    "plugin_opts":"server;tls;host=${domain};cert=${cerpath};key=${keypath};path=${path}"
+	    "plugin_opts":"server;tls;host=${domain};cert=${cerPath};key=${keyPath};path=${path}"
 	}
 	EOF
 }
@@ -62,7 +62,7 @@ ss_v2ray_quic_tls_cdn_config(){
 	    "nameserver":"8.8.8.8",
 	    "mode":"tcp_only",
 	    "plugin":"v2ray-plugin",
-	    "plugin_opts":"server;mode=quic;host=${domain};cert=${cerpath};key=${keypath}"
+	    "plugin_opts":"server;mode=quic;host=${domain};cert=${cerPath};key=${keyPath}"
 	}
 	EOF
 }
@@ -172,8 +172,8 @@ nginx_config(){
 	        listen 443 ssl;
 	        listen [::]:443 ssl;
 	        server_name ${domain};
-	        ssl_certificate ${cerpath};
-	        ssl_certificate_key ${keypath};
+	        ssl_certificate ${cerPath};
+	        ssl_certificate_key ${keyPath};
 	        ssl_ciphers HIGH:!aNULL:!MD5;
 	        ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
 	        ssl_session_cache shared:SSL:10m;

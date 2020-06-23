@@ -6,7 +6,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.5.5"
+SHELL_VERSION="2.5.6"
 # ====================
 
 
@@ -186,6 +186,7 @@ usage() {
         script           升级脚本
         show             显示可视化配置
         log              查看日志文件
+        cert             手动申请.cf .ga .gq .ml .tk域名CF CDN证书(有效期3个月)
         uid              为cloak添加一个新的uid用户
         link             用新添加的uid生成一个新的SS://链接
         scan             用ss://链接在当前终端上生成一个可供扫描的二维码
@@ -1069,8 +1070,6 @@ config_ss(){
                 elif [[ ${web_flag} = "2" ]]; then
                     domain=${serverName}
                     path=${wssPath}
-                    cerpath=${cerPath}
-                    keypath=${keyPath}
                     mirror_domain=$(echo ${mirror_site} | sed 's/https:\/\///g')
                     nginx_config
                 fi 
@@ -1501,6 +1500,20 @@ do_log(){
     show_log
 }
 
+do_cert(){
+    local domain=$1
+
+    improt_package "utils" "gen_certificates.sh"
+    get_domain_ip "${domain}"
+    if ! (echo ${domain} | grep -qE '.cf$|.ga$|.gq$|.ml$|.tk$' && is_cdn_proxied "${domain_ip}"); then
+        echo
+        echo -e "${Error} 此选项为手动申请Cloudflare CDN模式 证书(有效期3个月)，仅支持后缀为.cf .ga .gq .ml .tk的域名。"
+        echo
+        exit 1
+    fi
+    acme_get_certificate_by_manual "${domain}" "--force"
+}
+
 do_start(){
     if [[ ! "$(command -v ss-server)" ]] && [[ ! "$(command -v ssserver)" ]] && [[ ! "$(command -v go-shadowsocks2)" ]]; then
         echo
@@ -1658,6 +1671,9 @@ case ${action} in
         ;;
     log)
         do_${action}
+        ;;
+    cert)
+        do_${action} "${2}"
         ;;
     help)
         usage 0

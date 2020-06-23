@@ -8,6 +8,7 @@ dos2unix ./ss-plugins.sh
 
 dos2unix ./utils/ck_sslink.sh
 dos2unix ./utils/ck_user_manager.sh
+dos2unix ./utils/gen_certificates.sh
 dos2unix ./utils/qr_code.sh
 dos2unix ./utils/view_config.sh
 dos2unix ./utils/view_log.sh

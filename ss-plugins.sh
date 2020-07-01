@@ -3,10 +3,9 @@ PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 
 
-
 # shell version
 # ====================
-SHELL_VERSION="2.5.9"
+SHELL_VERSION="2.6.0"
 # ====================
 
 
@@ -23,8 +22,133 @@ if [ -e plugins ] && [ -e prepare ] && [ -e service ] && [ -e templates ] && [ -
 fi
 
 
-# Root permission
-[[ $EUID -ne 0 ]] && echo -e "[${Red}Error${suffix}] This script must be run as root!" && exit 1
+# bbr
+TEDDYSUN_BBR_SCRIPT_URL="https://git.io/vbUk0"
+CHIAKGE_BBR_SCRIPT_URL="https://git.io/vxJ1I"
+
+
+# Humanization config PATH
+HUMAN_CONFIG="/etc/shadowsocks/humanization.conf"
+
+
+# shadowsocks config
+SHADOWSOCKS_CONFIG="/etc/shadowsocks/config.json"
+
+# shadowsocks-libev config and init
+SHADOWSOCKS_LIBEV_INSTALL_PATH="/usr/local/bin"
+SHADOWSOCKS_LIBEV_BIN_PATH="/usr/local/bin/ss-server"
+SHADOWSOCKS_LIBEV_INIT="/etc/init.d/shadowsocks-libev"
+SHADOWSOCKS_LIBEV_CENTOS="${BASE_URL}/service/shadowsocks-libev_centos.sh"
+SHADOWSOCKS_LIBEV_DEBIAN="${BASE_URL}/service/shadowsocks-libev_debian.sh"
+
+# shadowsocks-rust config and init
+SHADOWSOCKS_RUST_INSTALL_PATH="/usr/local/bin"
+SHADOWSOCKS_RUST_BIN_PATH="/usr/local/bin/ssserver"
+SHADOWSOCKS_RUST_INIT="/etc/init.d/shadowsocks-rust"
+SHADOWSOCKS_RUST_CENTOS="${BASE_URL}/service/shadowsocks-rust_centos.sh"
+SHADOWSOCKS_RUST_DEBIAN="${BASE_URL}/service/shadowsocks-rust_debian.sh"
+
+# go-shadowsocks2 config and init
+GO_SHADOWSOCKS2_INSTALL_PATH="/usr/local/bin"
+GO_SHADOWSOCKS2_BIN_PATH="/usr/local/bin/go-shadowsocks2"
+GO_SHADOWSOCKS2_INIT="/etc/init.d/go-shadowsocks2"
+GO_SHADOWSOCKS2_CENTOS="${BASE_URL}/service/go-shadowsocks2_centos.sh"
+GO_SHADOWSOCKS2_DEBIAN="${BASE_URL}/service/go-shadowsocks2_debian.sh"
+GO_SHADOWSOCKS2_VERSION_FILE="/etc/shadowsocks/go-shadowsocks2.version"
+
+
+# shadowsocks-libev dependencies
+LIBSODIUM_VERSION="1.0.18"
+LIBSODIUM_FILE="libsodium-${LIBSODIUM_VERSION}"
+LIBSODIUM_URL="https://github.com/jedisct1/libsodium/releases/download/${LIBSODIUM_VERSION}-RELEASE/libsodium-${LIBSODIUM_VERSION}.tar.gz"
+
+MBEDTLS_VERSION="2.16.6"
+MBEDTLS_FILE="mbedtls-${MBEDTLS_VERSION}"
+MBEDTLS_URL="https://tls.mbed.org/download/mbedtls-${MBEDTLS_VERSION}-gpl.tgz"
+
+
+# v2ray-plugin
+V2RAY_PLUGIN_INSTALL_PATH="/usr/local/bin"
+V2RAY_PLUGIN_BIN_PATH="/usr/local/bin/v2ray-plugin"
+
+
+# kcptun
+KCPTUN_INSTALL_PATH="/usr/local/kcptun"
+KCPTUN_BIN_PATH="/usr/local/kcptun/kcptun-server"
+KCPTUN_INIT="/etc/init.d/kcptun"
+KCPTUN_CONFIG="/etc/kcptun/config.json"
+KCPTUN_CENTOS="${BASE_URL}/service/kcptun_centos.sh"
+KCPTUN_DEBIAN="${BASE_URL}/service/kcptun_debian.sh"
+
+
+# simple-obfs
+SIMPLE_OBFS_INSTALL_PATH="/usr/local/bin"
+SIMPLE_OBFS_BIN_PATH="/usr/local/bin/obfs-server"
+
+
+# goquiet
+GOQUIET_INSTALL_PATH="/usr/local/bin"
+GOQUIET_BIN_PATH="/usr/local/bin/gq-server"
+
+
+# cloak
+CLOAK_INSTALL_PATH="/usr/local/bin"
+CLOAK_SERVER_BIN_PATH="/usr/local/bin/ck-server"
+CLOAK_CLIENT_BIN_PATH="/usr/local/bin/ck-client"
+CLOAK_INIT="/etc/init.d/cloak"
+CLOAK_CENTOS="${BASE_URL}/service/cloak_centos.sh"
+CLOAK_DEBIAN="${BASE_URL}/service/cloak_debian.sh"
+CK_DB_PATH="/etc/cloak"
+CK_CLIENT_CONFIG="/etc/cloak/ckclient.json"
+CK_SERVER_CONFIG="/etc/cloak/ckserver.json"
+
+
+# mos-tls-tunnel
+MTT_VERSION_FILE="/etc/shadowsocks/mtt.version"
+MTT_INSTALL_PATH="/usr/local/bin"
+MTT_BIN_PATH="/usr/local/bin/mtt-server"
+
+
+# rabbit-tcp
+RABBIT_INSTALL_PATH="/usr/local/bin"
+RABBIT_BIN_PATH="/usr/local/bin/rabbit-tcp"
+RABBIT_INIT="/etc/init.d/rabbit-tcp"
+RABBIT_CONFIG="/etc/rabbit-tcp/config.json"
+RABBIT_VERSION_FILE="/etc/rabbit-tcp/rabbit-tcp.version"
+RABBIT_CENTOS="${BASE_URL}/service/rabbit-tcp_centos.sh"
+RABBIT_DEBIAN="${BASE_URL}/service/rabbit-tcp_debian.sh"
+
+
+# simple-tls
+SIMPLE_TLS_INSTALL_PATH="/usr/local/bin"
+SIMPLE_TLS_BIN_PATH="/usr/local/bin/simple-tls"
+SIMPLE_TLS_VERSION_FILE="/etc/shadowsocks/simple-tls.version"
+
+
+# caddy
+CADDY_INSTALL_PATH="/usr/local/caddy"
+CADDY_BIN_PATH="/usr/local/caddy/caddy"
+CADDY_CONF_FILE="/usr/local/caddy/Caddyfile"
+CADDY_BASE_URL="https://caddyserver.com/download/linux/amd64"
+CADDY_INIT="/etc/init.d/caddy"
+ONLINE_CADDY_CENTOS_INIT_URL="${BASE_URL}/service/caddy_centos.sh"
+LOCAL_CADDY_DEBIAN_INIT_PATH="./service/caddy_centos.sh"
+ONLINE_CADDY_DEBIAN_INIT_URL="${BASE_URL}/service/caddy_debian.sh"
+LOCAL_CADDY_DEBIAN_INIT_PATH="./service/caddy_debian.sh"
+
+
+# nginx
+NGINX_BIN_PATH="/usr/sbin/nginx"
+NGINX_CONFIG="/etc/nginx/nginx.conf"
+
+
+# RE
+EMAIL_RE="^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,6}$"
+DOMAIN_RE="^(www\.)?[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:\d+)*(\/\w+\.\w+)*$"
+IPV4_RE="^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])$"
+IPV4_PORT_RE="^((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\:443$"
+HTTPS_DOMAIN_RE="^(https:\/\/)?(www\.)?[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+(:\d+)*(\/\w+\.\w+)*$"
+IPV6_RE="^\s*((([0-9A-Fa-f]{1,4}:){7}(([0-9A-Fa-f]{1,4})|:))|(([0-9A-Fa-f]{1,4}:){6}(:|((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})|(:[0-9A-Fa-f]{1,4})))|(([0-9A-Fa-f]{1,4}:){5}((:((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(([0-9A-Fa-f]{1,4}:){4}(:[0-9A-Fa-f]{1,4}){0,1}((:((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(([0-9A-Fa-f]{1,4}:){3}(:[0-9A-Fa-f]{1,4}){0,2}((:((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(([0-9A-Fa-f]{1,4}:){2}(:[0-9A-Fa-f]{1,4}){0,3}((:((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(([0-9A-Fa-f]{1,4}:)(:[0-9A-Fa-f]{1,4}){0,4}((:((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(:(:[0-9A-Fa-f]{1,4}){0,5}((:((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})?)|((:[0-9A-Fa-f]{1,4}){1,2})))|(((25[0-5]|2[0-4]\d|[01]?\d{1,2})(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})))(%.+)?\s*$"
 
 
 # Font color and background color
@@ -37,6 +161,154 @@ Warning="${Yellow}[警告]${suffix}"
 Separator_1="——————————————————————————————"
 
 
+# Root permission
+[[ $EUID -ne 0 ]] && echo -e "[${Red}Error${suffix}] This script must be run as root!" && exit 1
+
+
+usage() {
+	cat >&1 <<-EOF
+Usage: 
+  ./ss-plugins.sh [options...] [args...]
+    
+Available Options:
+  install          安装
+  uninstall        卸载
+  update           升级
+  start            启动
+  stop             关闭
+  restart          重启
+  status           查看状态
+  script           升级脚本
+  show             显示可视化配置
+  log              查看日志文件
+  cert             手动申请Cloudflare CDN证书(仅 .cf .ga .gq .ml .tk，有效期90天)
+  uid              为cloak添加一个新的uid用户(仅 Cloak)
+  link             用新添加的uid生成一个新的SS://链接(仅 Cloak)
+  scan             用ss://链接在当前终端上生成一个可供扫描的二维码
+  help             打印帮助信息并退出
+
+	EOF
+
+    exit $1
+}
+
+menu_status(){
+    local BIN_PATH=$1
+    local SS_PID=$2
+    local NoInstall=" 当前状态: ${Red}未安装${suffix}"
+    local InstallStart=" 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
+    local InstallNoStart=" 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
+    
+    if [[ -e ${BIN_PATH} ]] && [[ -e ${V2RAY_PLUGIN_BIN_PATH} ]] && [[ -e ${CADDY_BIN_PATH}  ]]; then
+        V2_PID=`ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}'`
+        CADDY_PID=`ps -ef |grep -v grep | grep caddy |awk '{print $2}'`
+        
+        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${V2_PID} ]] && [[ ! -z ${CADDY_PID} ]]; then
+            echo -e "${InstallStart}"
+        else
+            echo -e "${InstallNoStart}"
+        fi
+    elif [[ -e ${BIN_PATH} ]] && [[ -e ${V2RAY_PLUGIN_BIN_PATH} ]] && [[ -e ${NGINX_BIN_PATH}  ]]; then
+        V2_PID=`ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}'`
+        NGINX_PID=`ps -ef |grep -v grep | grep nginx.conf |awk '{print $2}'`
+        
+        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${V2_PID} ]] && [[ ! -z ${NGINX_PID} ]]; then
+            echo -e "${InstallStart}"
+        else
+            echo -e "${InstallNoStart}"
+        fi
+    elif [[ -e ${BIN_PATH} ]] && [[ -e ${V2RAY_PLUGIN_BIN_PATH} ]]; then
+        V2_PID=`ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}'`
+        
+        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${V2_PID} ]]; then
+            echo -e "${InstallStart}"
+        else
+            echo -e "${InstallNoStart}"
+        fi
+    elif [[ -e ${BIN_PATH} ]] && [[ -e ${KCPTUN_BIN_PATH} ]]; then
+        KP_PID=`ps -ef |grep -v grep | grep kcptun-server |awk '{print $2}'`
+        
+        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${KP_PID} ]]; then
+            echo -e "${InstallStart}"
+        else
+            echo -e "${InstallNoStart}"
+        fi
+    elif [[ -e ${BIN_PATH} ]] && [[ -e ${SIMPLE_OBFS_BIN_PATH} ]]; then
+        OBFS_PID=`ps -ef |grep -v grep | grep obfs-server |awk '{print $2}'`
+        
+        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${OBFS_PID} ]]; then
+            echo -e "${InstallStart}"
+        else
+            echo -e "${InstallNoStart}"
+        fi
+    elif [[ -e ${BIN_PATH} ]] && [[ -e ${GOQUIET_BIN_PATH} ]]; then    
+        GQ_PID=`ps -ef |grep -v grep | grep gq-server |awk '{print $2}'`
+        
+        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${GQ_PID} ]]; then
+            echo -e "${InstallStart}"
+        else
+            echo -e "${InstallNoStart}"
+        fi
+    elif [[ -e ${BIN_PATH} ]] && [[ -e ${CLOAK_SERVER_BIN_PATH} ]]; then
+        CK_PID=`ps -ef |grep -v grep | grep ck-server |awk '{print $2}'`
+        
+        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${CK_PID} ]]; then
+            echo -e "${InstallStart}"
+        else
+            echo -e "${InstallNoStart}"
+        fi
+    elif [[ -e ${BIN_PATH} ]] && [[ -e ${MTT_BIN_PATH} ]] && [[ -e ${CADDY_BIN_PATH}  ]]; then
+        MTT_PID=`ps -ef |grep -v grep | grep mtt-server |awk '{print $2}'`
+        CADDY_PID=`ps -ef |grep -v grep | grep caddy |awk '{print $2}'`
+        
+        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${MTT_PID} ]] && [[ ! -z ${CADDY_PID} ]]; then
+            echo -e "${InstallStart}"
+        else
+            echo -e "${InstallNoStart}"
+        fi
+    elif [[ -e ${BIN_PATH} ]] && [[ -e ${MTT_BIN_PATH} ]] && [[ -e ${NGINX_BIN_PATH}  ]]; then
+        MTT_PID=`ps -ef |grep -v grep | grep mtt-server |awk '{print $2}'`
+        NGINX_PID=`ps -ef |grep -v grep | grep nginx.conf |awk '{print $2}'`
+        
+        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${MTT_PID} ]] && [[ ! -z ${NGINX_PID} ]]; then
+            echo -e "${InstallStart}"
+        else
+            echo -e "${InstallNoStart}"
+        fi
+    elif [[ -e ${BIN_PATH} ]] && [[ -e ${MTT_BIN_PATH} ]]; then    
+        MTT_PID=`ps -ef |grep -v grep | grep mtt-server |awk '{print $2}'`
+        
+        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${MTT_PID} ]]; then
+            echo -e "${InstallStart}"
+        else
+            echo -e "${InstallNoStart}"
+        fi
+    elif [[ -e ${BIN_PATH} ]] && [[ -e ${RABBIT_BIN_PATH} ]]; then
+        RABBIT_PID=`ps -ef |grep -v grep | grep rabbit-tcp |awk '{print $2}'`
+        
+        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${RABBIT_PID} ]]; then
+            echo -e "${InstallStart}"
+        else
+            echo -e "${InstallNoStart}"
+        fi
+    elif [[ -e ${BIN_PATH} ]] && [[ -e ${SIMPLE_TLS_BIN_PATH} ]]; then
+        SIMPLE_TLS_PID=`ps -ef |grep -v grep | grep simple-tls |awk '{print $2}'`
+
+        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${SIMPLE_TLS_PID} ]]; then
+            echo -e "${InstallStart}"
+        else
+            echo -e "${InstallNoStart}"
+        fi
+    elif [[ -e ${BIN_PATH} ]]; then
+        if [[ ! -z ${SS_PID} ]]; then
+            echo -e "${InstallStart}"
+        else
+            echo -e "${InstallNoStart}"
+        fi
+    else
+        echo -e "${NoInstall}"
+    fi
+}
 
 check_sys(){
     local checkType=$1
@@ -116,6 +388,227 @@ improt_package(){
     else
         cd ${CUR_DIR}
         source ${BASE_URL}/${package}/${sh_file}
+    fi
+}
+
+disable_selinux(){
+    if [ -s /etc/selinux/config ] && grep -q 'SELINUX=enforcing' /etc/selinux/config; then
+        sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+        setenforce 0
+    fi
+}
+
+install_check(){
+    if check_sys packageManager yum || check_sys packageManager apt; then
+        if centosversion 5; then
+            return 1
+        fi
+        return 0
+    else
+        return 1
+    fi
+}
+
+is_ipv4_or_ipv6(){
+    ip=$1
+    
+    if [ -n "$(echo $ip | grep -E $IPV4_RE)" ] || [ -n "$(echo $ip | grep -E $IPV6_RE)" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+version_ge(){
+    test "$(echo "$@" | tr " " "\n" | sort -rV | head -n 1)" == "$1"
+}
+
+version_gt(){
+    test "$(echo "$@" | tr " " "\n" | sort -V | head -n 1)" != "$1"
+}
+
+check_latest_version(){
+    local current_v=$1
+    local latest_v=$2
+    if version_gt ${latest_v} ${current_v}; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+check_port_occupy(){
+    local PROT=$1
+    
+    if [ ! "$(command -v lsof)" ]; then
+        package_install "lsof" > /dev/null 2>&1
+    fi
+    
+    if [[ `lsof -i:"${PROT}" | grep -v google_ | grep -v COMMAND | wc -l` -ne 0 ]];then
+        # Occupied
+        return 0
+    else
+        # Unoccupied
+        return 1
+    fi
+}
+
+check_script_update(){
+    SHELL_VERSION_NEW=$(wget --no-check-certificate -qO- "https://git.io/fjlbl"|grep 'SHELL_VERSION="'|awk -F "=" '{print $NF}'|sed 's/\"//g'|head -1)
+    [[ -z ${SHELL_VERSION_NEW} ]] && echo -e "${Error} 无法链接到 Github !" && exit 0
+    if version_gt ${SHELL_VERSION_NEW} ${SHELL_VERSION}; then
+        echo
+        echo -e "${Green}当前脚本版本为：${SHELL_VERSION} 检测到有新版本可更新.${suffix}"
+        echo -e "按任意键开始…或按Ctrl+C取消"
+        char=`get_char`
+        wget -N --no-check-certificate -O ss-plugins.sh "https://git.io/fjlbl" && chmod +x ss-plugins.sh
+        echo -e "脚本已更新为最新版本[ ${SHELL_VERSION_NEW} ] !(注意：因为更新方式为直接覆盖当前运行的脚本，所以可能下面会提示一些报错，无视即可)" && exit 0
+    else
+        echo
+        echo -e "${Info} 当前脚本版本为: ${SHELL_VERSION} 未检测到更新版本."
+        echo
+    fi
+}
+
+check_ss_port(){
+    local SS_PORT=$1
+    while true
+    do
+        if [[ ${SS_PORT} -ne "443" ]]; then
+            echo -e "${Tip} SS-libev端口为${Green}${shadowsocksport}${suffix}"
+            echo
+            break
+        fi
+        
+        gen_random_prot
+        if check_port_occupy ${ran_prot}; then
+            continue
+        fi
+        
+        shadowsocksport=${ran_prot}
+        echo -e "${Tip} SS-libev端口已由${Red}443${suffix}重置为${Green}${shadowsocksport}${suffix}"
+        echo  
+        break
+    done
+}
+
+choose_script_bbr(){
+    echo
+    echo -e "请选择BBR的安装脚本"
+    echo
+    echo -e "    ${Green}1.${suffix} 秋水逸冰-BBR"
+    echo -e "    ${Green}2.${suffix} BBR|BBR魔改|BBRplus|Lotserver版本"
+    echo && read -e -p "请输入数字 [1-2]：" bbr_menu_num
+    case "${bbr_menu_num}" in
+        1)
+            source <(curl -sL ${TEDDYSUN_BBR_SCRIPT_URL})
+            ;;
+        2)
+            source <(curl -sL ${CHIAKGE_BBR_SCRIPT_URL})
+            ;;
+        *)
+            echo -e "${Error} 请输入正确的数字 [1-2]"
+            ;;
+    esac
+}
+
+choose_caddy_extension(){
+    local libev_v2ray=$1
+    
+    improt_package "tools" "caddy_install.sh"
+    if [[ ${libev_v2ray} == "4" ]]; then
+        install_caddy
+    elif [[ ${libev_v2ray} == "5" ]]; then
+        install_caddy "tls.dns.cloudflare"
+    fi
+}
+
+get_ip(){
+    local IP=$( ip addr | egrep -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | egrep -v "^192\.168|^172\.1[6-9]\.|^172\.2[0-9]\.|^172\.3[0-2]\.|^10\.|^127\.|^255\.|^0\." | head -n 1 )
+    [ -z ${IP} ] && IP=$( wget -qO- -t1 -T2 ipv4.icanhazip.com )
+    [ -z ${IP} ] && IP=$( wget -qO- -t1 -T2 ipinfo.io/ip )
+    echo ${IP}
+}
+
+get_ipv6(){
+    local ipv6=$(wget -qO- -t1 -T2 ipv6.icanhazip.com)
+    [ -z ${ipv6} ] && return 1 || return 0
+}
+
+get_char(){
+    SAVEDSTTY=$(stty -g)
+    stty -echo
+    stty cbreak
+    dd if=/dev/tty bs=1 count=1 2> /dev/null
+    stty -raw
+    stty echo
+    stty $SAVEDSTTY
+}
+
+get_str_base64_encode(){
+    echo -n $1 | base64 -w0
+}
+
+get_str_replace(){
+    echo -n $1 | sed 's/:/%3A/g;s/;/%3B/g;s/=/%3D/g;s/\//%2F/g'
+}
+
+gen_random_prot(){
+    ran_prot=$(shuf -i 9000-19999 -n 1)
+}
+
+gen_random_str(){
+    ran_str8=$(head -c 100 /dev/urandom | tr -dc a-z0-9A-Z |head -c 12)
+    ran_str16=$(head -c 100 /dev/urandom | tr -dc a-z0-9A-Z |head -c 16)
+}
+
+gen_credentials(){
+    while true
+    do
+        ckauid=$(ck-server -u)
+        IFS=, read ckpub ckpv <<< $(ck-server -k)
+        
+        # filter "+" from ckauid and ckpub
+        if [[ $(echo ${ckauid} | grep "+") || $(echo ${ckpub} | grep "+") ]]; then
+            continue
+        fi
+        break
+    done
+}
+
+gen_credentials_cca(){
+    local domain=$1
+    if [[ ${domainType} = Other ]]; then
+        cerPath="/etc/simple-tls/${domain}.cert"
+        keyPath="/etc/simple-tls/${domain}.key"
+        if [ ! -d "$(dirname ${cerPath})" ]; then
+            mkdir -p $(dirname ${cerPath})
+        fi
+        simple-tls -gen-cert -n ${domain} -key ${keyPath} -cert ${cerPath}
+        base64Cert=$(cat ${cerPath} | base64 -w0 | sed 's/=//g')
+    fi
+}
+
+get_version(){
+    if [[ -s /etc/redhat-release ]]; then
+        grep -oE  "[0-9.]+" /etc/redhat-release
+    else
+        grep -oE  "[0-9.]+" /etc/issue
+    fi
+}
+
+centosversion(){
+    if check_sys sysRelease centos; then
+        local code=$1
+        local version="$(get_version)"
+        local main_ver=${version%%.*}
+        if [ "$main_ver" == "$code" ]; then
+            return 0
+        else
+            return 1
+        fi
+    else
+        return 1
     fi
 }
 
@@ -592,6 +1085,7 @@ install_step_all(){
     [[ -e ${GO_SHADOWSOCKS2_BIN_PATH} ]] && echo -e "${Info} Go-shadowsocks2 已经安装." && exit 1
     disable_selinux
     install_prepare
+    improt_package "utils" "dependencies.sh"
     if [[ ${SS_VERSION} = "ss-libev" ]]; then
         install_dependencies
     fi
@@ -613,8 +1107,10 @@ install_step_all(){
             package_install "jq" > /dev/null 2>&1
         fi
     fi
+    improt_package "utils" "downloads.sh"
     download_ss_file
     download_plugins_file
+    improt_package "utils" "firewalls.sh"
     config_firewall_logic
     install_main
     add_more_entropy
@@ -848,9 +1344,6 @@ do_install(){
 
 # install and tools
 action=${1:-"install"}
-
-improt_package "utils" "constants.sh"
-improt_package "utils" "common.sh"
 
 case ${action} in
     install|uninstall|update|start|stop|restart)

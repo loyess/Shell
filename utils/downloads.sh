@@ -143,7 +143,9 @@ download_plugins_file(){
         # Download simple-tls
         simple_tls_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/IrineSistiana/simple-tls/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
         [ -z ${simple_tls_ver} ] && echo -e "${Error} 获取 simple-tls 最新版本失败." && exit 1
-        simple_tls_ver="0.3.4"
+        if [[ ${SimpleTlsVer} = "1" ]]; then
+            simple_tls_ver="0.3.4"
+        fi
         # wriet version num
         if [ ! -d "$(dirname ${SIMPLE_TLS_VERSION_FILE})" ]; then
             mkdir -p $(dirname ${SIMPLE_TLS_VERSION_FILE})

@@ -217,14 +217,14 @@ check_port_for_simple_tls(){
 
 install_prepare_libev_simple_tls(){
     simple_tls_version
-    #  LatestRelease
+    # v0.3.4
     if [[ ${SimpleTlsVer} = "1" ]]; then
         transport_mode_menu
         get_input_server_name
         is_add_random_header
     fi
 
-    # v0.3.4
+    # LatestRelease
     if [[ ${SimpleTlsVer} = "2" ]]; then
         libev_simple_tls=1
         get_input_server_name

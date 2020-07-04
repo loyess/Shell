@@ -201,6 +201,7 @@ Available Options:
 - [v2ray-plugin](<https://github.com/shadowsocks/v2ray-plugin/releases>)
 - [v2ray-plugin (teddysun)](<https://github.com/teddysun/v2ray-plugin/releases>)
 - [v2ray-plugin-android](<https://github.com/shadowsocks/v2ray-plugin-android/releases>)
+- [v2ray-plugin-android (teddysun)](<https://github.com/teddysun/v2ray-plugin-android/releases>)
 - [kcptun](https://github.com/xtaci/kcptun/releases)
 - [kcptun-android](https://github.com/shadowsocks/kcptun-android/releases)
 - [simple-obfs(Deprecated)](https://github.com/shadowsocks/simple-obfs/releases)

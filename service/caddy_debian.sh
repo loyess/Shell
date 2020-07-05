@@ -47,11 +47,6 @@ if [ ! -f $CONF ]; then
     exit 1
 fi
 
-if $(grep -q 'cloudflare' $CONF); then
-    export CLOUDFLARE_EMAIL=$(cat ~/.api/cf.api | grep "CLOUDFLARE_EMAIL" | cut -d= -f2)
-    export CLOUDFLARE_API_KEY=$(cat ~/.api/cf.api | grep "CLOUDFLARE_API_KEY" | cut -d= -f2)
-fi
-
 check_running() {
     if [ -e $PID_FILE ]; then
         if [ -r $PID_FILE ]; then

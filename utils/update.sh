@@ -287,15 +287,10 @@ update_caddy(){
             exit 1
         fi
         
-        if ! $(grep -q 'cloudflare' /usr/local/caddy/Caddyfile); then
-            libev_v2ray=4
-        else
-            libev_v2ray=5
-        fi
-        
         echo -e "${Info} 检测到caddy有新版本，开始下载并安装."
         do_stop > /dev/null 2>&1
-        choose_caddy_extension ${libev_v2ray}
+        improt_package "tools" "caddy_install.sh"
+        install_caddy
         do_restart > /dev/null 2>&1
 
         echo -e "${Info} caddy已成功升级为最新版本${caddy_ver}"

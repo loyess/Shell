@@ -84,15 +84,13 @@ ss_v2ray_ws_tls_web_config(){
 	EOF
 }
 
-caddy_config_none_cdn(){
+caddy_config(){
 	cat > ${CADDY_CONF_FILE}<<-EOF
 	${domain}:443 {
 	    gzip
 	    log /var/log/caddy-access.log
 	    errors /var/log/caddy-error.log
-	    tls ${email} {
-	        protocols tls1.3
-	    }
+	    tls ${cerPath} ${keyPath}
 	    timeouts none
 	    proxy ${path} localhost:${shadowsocksport} {
 	        websocket
@@ -118,28 +116,6 @@ ss_v2ray_ws_tls_web_cdn_config(){
 	    "mode":"tcp_and_udp",
 	    "plugin":"v2ray-plugin",
 	    "plugin_opts":"server;path=${path}"
-	}
-	EOF
-}
-
-caddy_config_with_cdn(){
-	cat > ${CADDY_CONF_FILE}<<-EOF
-	${domain}:443 {
-	    gzip
-	    log /var/log/caddy-access.log
-	    errors /var/log/caddy-error.log
-	    tls {
-	        dns cloudflare
-	        protocols tls1.3
-	    }
-	    timeouts none
-	    proxy ${path} localhost:${shadowsocksport} {
-	        websocket
-	        header_upstream -Origin
-	    }
-	    proxy / ${mirror_site} {
-	        except ${path}
-	    }
 	}
 	EOF
 }

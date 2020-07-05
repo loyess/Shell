@@ -5,7 +5,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.6.1"
+SHELL_VERSION="2.6.2"
 # ====================
 
 
@@ -512,17 +512,6 @@ choose_script_bbr(){
     esac
 }
 
-choose_caddy_extension(){
-    local libev_v2ray=$1
-    
-    improt_package "tools" "caddy_install.sh"
-    if [[ ${libev_v2ray} == "4" ]]; then
-        install_caddy
-    elif [[ ${libev_v2ray} == "5" ]]; then
-        install_caddy "tls.dns.cloudflare"
-    fi
-}
-
 get_ip(){
     local IP=$( ip addr | egrep -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | egrep -v "^192\.168|^172\.1[6-9]\.|^172\.2[0-9]\.|^172\.3[0-2]\.|^10\.|^127\.|^255\.|^0\." | head -n 1 )
     [ -z ${IP} ] && IP=$( wget -qO- -t1 -T2 ipv4.icanhazip.com )
@@ -646,7 +635,7 @@ config_ss(){
         elif [[ ${libev_v2ray} == "4" ]]; then
             ss_v2ray_ws_tls_web_config
             if [[ ${web_flag} = "1" ]]; then
-                caddy_config_none_cdn
+                caddy_config
             elif [[ ${web_flag} = "2" ]]; then
                 mirror_domain=$(echo ${mirror_site} | sed 's/https:\/\///g')
                 nginx_config
@@ -654,7 +643,7 @@ config_ss(){
         elif [[ ${libev_v2ray} == "5" ]]; then
             ss_v2ray_ws_tls_web_cdn_config
             if [[ ${web_flag} = "1" ]]; then
-                caddy_config_with_cdn
+                caddy_config
             elif [[ ${web_flag} = "2" ]]; then
                 mirror_domain=$(echo ${mirror_site} | sed 's/https:\/\///g')
                 nginx_config
@@ -714,10 +703,8 @@ config_ss(){
                 ss_mtt_wss_dns_only_or_cdn_web_config
                 domain=${serverName}
                 path=${wssPath}
-                if [[ ${domainType} = DNS-Only ]] && [[ ${web_flag} = "1" ]]; then
-                    caddy_config_none_cdn
-                elif [[ ${domainType} = CDN ]] && [[ ${web_flag} = "1" ]]; then
-                    caddy_config_with_cdn
+                if [[ ${web_flag} = "1" ]]; then
+                    caddy_config
                 elif [[ ${web_flag} = "2" ]]; then
                     mirror_domain=$(echo ${mirror_site} | sed 's/https:\/\///g')
                     nginx_config
@@ -1031,7 +1018,8 @@ install_main(){
         improt_package "plugins" "v2ray_plugin_install.sh"
         install_v2ray_plugin
         if [[ ${web_flag} = "1" ]]; then
-            choose_caddy_extension ${libev_v2ray}
+            improt_package "tools" "caddy_install.sh"
+            install_caddy
         elif [[ ${web_flag} = "2" ]]; then
             improt_package "tools" "nginx_install.sh"
             install_nginx
@@ -1059,11 +1047,7 @@ install_main(){
         install_mos_tls_tunnel
         if [[ ${web_flag} = "1" ]]; then
             improt_package "tools" "caddy_install.sh"
-            if [[ ${domainType} = DNS-Only ]] && [[ ${isEnableWeb} = enable ]]; then
-                install_caddy
-            elif [[ ${domainType} = CDN ]] && [[ ${isEnableWeb} = enable ]]; then
-                install_caddy "tls.dns.cloudflare"
-            fi
+            install_caddy
         elif [[ ${web_flag} = "2" ]]; then
             improt_package "tools" "nginx_install.sh"
             install_nginx

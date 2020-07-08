@@ -91,7 +91,6 @@ caddy_config(){
 	    log /var/log/caddy-access.log
 	    errors /var/log/caddy-error.log
 	    tls ${cerPath} ${keyPath}
-	    timeouts none
 	    proxy ${path} localhost:${shadowsocksport} {
 	        websocket
 	        header_upstream -Origin

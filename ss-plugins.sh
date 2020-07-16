@@ -3,16 +3,14 @@ PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:~/bin
 export PATH
 
 
-
 # shell version
 # ====================
-SHELL_VERSION="2.5.7"
+SHELL_VERSION="2.6.2"
 # ====================
 
 
 # current path
 CUR_DIR=$( pwd )
-
 
 
 # base url
@@ -163,38 +161,32 @@ Warning="${Yellow}[警告]${suffix}"
 Separator_1="——————————————————————————————"
 
 
-
-
-
-
+# Root permission
 [[ $EUID -ne 0 ]] && echo -e "[${Red}Error${suffix}] This script must be run as root!" && exit 1
 
 
 usage() {
 	cat >&1 <<-EOF
+Usage: 
+  ./ss-plugins.sh [options...] [args...]
+    
+Available Options:
+  install          安装
+  uninstall        卸载
+  update           升级
+  start            启动
+  stop             关闭
+  restart          重启
+  status           查看状态
+  script           升级脚本
+  show             显示可视化配置
+  log              查看日志文件
+  cert             手动申请Cloudflare CDN证书(仅 .cf .ga .gq .ml .tk，有效期90天)
+  uid              为cloak添加一个新的uid用户(仅 Cloak)
+  link             用新添加的uid生成一个新的SS://链接(仅 Cloak)
+  scan             用ss://链接在当前终端上生成一个可供扫描的二维码
+  help             打印帮助信息并退出
 
-  请使用: ./ss-plugins.sh [options...] [args...]
-    
-    选项<options>包括:
-        install          安装
-        uninstall        卸载
-        update           升级
-        start            启动
-        stop             关闭
-        restart          重启
-        status           查看状态
-        script           升级脚本
-        show             显示可视化配置
-        log              查看日志文件
-        cert             手动申请.cf .ga .gq .ml .tk域名CF CDN证书(有效期3个月)
-        uid              为cloak添加一个新的uid用户
-        link             用新添加的uid生成一个新的SS://链接
-        scan             用ss://链接在当前终端上生成一个可供扫描的二维码
-        help             打印帮助信息并退出
-    
-  [注意] uid和link选项仅在搭配安装cloak的情况下使用.
-  
-  
 	EOF
 
     exit $1
@@ -318,78 +310,6 @@ menu_status(){
     fi
 }
 
-improt_package(){
-    local package=$1
-    local sh_file=$2
-    
-    if [ ! "$(command -v curl)" ]; then
-        package_install "curl" > /dev/null 2>&1
-    fi
-    
-    if [[ ${methods} == "Online" ]]; then
-        source <(curl -sL ${BASE_URL}/${package}/${sh_file})
-    else
-        cd ${CUR_DIR}
-        source ${BASE_URL}/${package}/${sh_file}
-    fi
-}
-
-package_install(){
-    local package_name=$1
-    
-    if check_sys packageManager yum; then
-        yum install -y $1 > /dev/null 2>&1
-        if [ $? -ne 0 ]; then
-            echo -e "${Error} 安装 $1 失败."
-            exit 1
-        fi
-    elif check_sys packageManager apt; then
-        apt-get -y update > /dev/null 2>&1
-        apt-get -y install $1 > /dev/null 2>&1
-        if [ $? -ne 0 ]; then
-            echo -e "${Error} 安装 $1 失败."
-            exit 1
-        fi
-    fi
-    echo -e "${Info} $1 安装完成."
-}
-
-disable_selinux(){
-    if [ -s /etc/selinux/config ] && grep -q 'SELINUX=enforcing' /etc/selinux/config; then
-        sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
-        setenforce 0
-    fi
-}
-
-install_check(){
-    if check_sys packageManager yum || check_sys packageManager apt; then
-        if centosversion 5; then
-            return 1
-        fi
-        return 0
-    else
-        return 1
-    fi
-}
-
-is_ipv4_or_ipv6(){
-    ip=$1
-    
-    if [ -n "$(echo $ip | grep -E $IPV4_RE)" ] || [ -n "$(echo $ip | grep -E $IPV6_RE)" ]; then
-        return 0
-    else
-        return 1
-    fi
-}
-
-version_ge(){
-    test "$(echo "$@" | tr " " "\n" | sort -rV | head -n 1)" == "$1"
-}
-
-version_gt(){
-    test "$(echo "$@" | tr " " "\n" | sort -V | head -n 1)" != "$1"
-}
-
 check_sys(){
     local checkType=$1
     local value=$2
@@ -433,6 +353,78 @@ check_sys(){
             return 1
         fi
     fi
+}
+
+package_install(){
+    local package_name=$1
+    
+    if check_sys packageManager yum; then
+        yum install -y $1 > /dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            echo -e "${Error} 安装 $1 失败."
+            exit 1
+        fi
+    elif check_sys packageManager apt; then
+        apt-get -y update > /dev/null 2>&1
+        apt-get -y install $1 > /dev/null 2>&1
+        if [ $? -ne 0 ]; then
+            echo -e "${Error} 安装 $1 失败."
+            exit 1
+        fi
+    fi
+    echo -e "${Info} $1 安装完成."
+}
+
+improt_package(){
+    local package=$1
+    local sh_file=$2
+    
+    if [ ! "$(command -v curl)" ]; then
+        package_install "curl" > /dev/null 2>&1
+    fi
+    
+    if [[ ${methods} == "Online" ]]; then
+        source <(curl -sL ${BASE_URL}/${package}/${sh_file})
+    else
+        cd ${CUR_DIR}
+        source ${BASE_URL}/${package}/${sh_file}
+    fi
+}
+
+disable_selinux(){
+    if [ -s /etc/selinux/config ] && grep -q 'SELINUX=enforcing' /etc/selinux/config; then
+        sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+        setenforce 0
+    fi
+}
+
+install_check(){
+    if check_sys packageManager yum || check_sys packageManager apt; then
+        if centosversion 5; then
+            return 1
+        fi
+        return 0
+    else
+        return 1
+    fi
+}
+
+is_ipv4_or_ipv6(){
+    ip=$1
+    
+    if [ -n "$(echo $ip | grep -E $IPV4_RE)" ] || [ -n "$(echo $ip | grep -E $IPV6_RE)" ]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+version_ge(){
+    test "$(echo "$@" | tr " " "\n" | sort -rV | head -n 1)" == "$1"
+}
+
+version_gt(){
+    test "$(echo "$@" | tr " " "\n" | sort -V | head -n 1)" != "$1"
 }
 
 check_latest_version(){
@@ -520,48 +512,6 @@ choose_script_bbr(){
     esac
 }
 
-choose_caddy_extension(){
-    local libev_v2ray=$1
-    
-    improt_package "tools" "caddy_install.sh"
-    if [[ ${libev_v2ray} == "4" ]]; then
-        install_caddy
-    elif [[ ${libev_v2ray} == "5" ]]; then
-        install_caddy "tls.dns.cloudflare"
-    fi
-}
-
-add_more_entropy(){
-    # Ubuntu series is started by default after installation
-    # Debian series needs to add configuration to start after installation
-    # CentOS 6 is installed by default but not started. CentOS 7 is not started by default after installation. CentOS 8 is installed and started by default.
-    local ENTROPY_SIZE_BEFORE=$(cat /proc/sys/kernel/random/entropy_avail)
-    if [[ ${ENTROPY_SIZE_BEFORE} -lt 1000 ]]; then
-        echo -e "${Info} 安装rng-tools之前熵池的熵值为${Green}${ENTROPY_SIZE_BEFORE}${suffix}"
-        if [[ ! $(command -v rngd) ]]; then
-            package_install "rng-tools"
-        fi
-        if centosversion 6; then
-            chkconfig --add rngd
-            chkconfig rngd on
-            service rngd start > /dev/null 2>&1
-        elif centosversion 7 || centosversion 8; then
-            systemctl enable rngd
-            systemctl start rngd > /dev/null 2>&1
-        elif check_sys sysRelease debian; then
-            update-rc.d -f rng-tools defaults
-            sed -i '/^HRNGDEVICE/'d /etc/default/rng-tools
-            echo "HRNGDEVICE=/dev/urandom" >> /etc/default/rng-tools
-            systemctl start rng-tools > /dev/null 2>&1
-        fi
-        sleep 5
-        local ENTROPY_SIZE_BEHIND=$(cat /proc/sys/kernel/random/entropy_avail)
-        echo -e "${Info} 安装rng-tools之后熵池的熵值为${Green}${ENTROPY_SIZE_BEHIND}${suffix}"
-    else
-        echo -e "${Info} 当前熵池熵值大于或等于1000，未进行更多添加."
-    fi 
-}
-
 get_ip(){
     local IP=$( ip addr | egrep -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | egrep -v "^192\.168|^172\.1[6-9]\.|^172\.2[0-9]\.|^172\.3[0-2]\.|^10\.|^127\.|^255\.|^0\." | head -n 1 )
     [ -z ${IP} ] && IP=$( wget -qO- -t1 -T2 ipv4.icanhazip.com )
@@ -573,8 +523,6 @@ get_ipv6(){
     local ipv6=$(wget -qO- -t1 -T2 ipv6.icanhazip.com)
     [ -z ${ipv6} ] && return 1 || return 0
 }
-
-
 
 get_char(){
     SAVEDSTTY=$(stty -g)
@@ -653,332 +601,6 @@ centosversion(){
     fi
 }
 
-config_firewall(){
-    local PORT=$1
-
-    if centosversion 6; then
-        /etc/init.d/iptables status > /dev/null 2>&1
-        if [ $? -eq 0 ]; then
-            if ! $(iptables -L -n | grep -q ${PORT}); then
-                iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${PORT} -j ACCEPT
-                iptables -I INPUT -m state --state NEW -m udp -p udp --dport ${PORT} -j ACCEPT
-                /etc/init.d/iptables save
-                /etc/init.d/iptables restart
-            fi
-        else
-            echo -e "${Warning} iptables看起来没有运行或没有安装，请在必要时手动启用端口 ${PORT}"
-        fi
-    elif centosversion 7 || centosversion 8; then
-        systemctl status firewalld > /dev/null 2>&1
-        if [ $? -eq 0 ]; then
-            if ! $(firewall-cmd --list-all | grep -q ${PORT}); then
-                firewall-cmd --permanent --zone=public --add-port=${PORT}/tcp
-                firewall-cmd --permanent --zone=public --add-port=${PORT}/udp
-                firewall-cmd --reload
-            fi
-        else
-            echo -e "${Warning} firewalld看起来没有运行或没有安装，请在必要时手动启用端口 ${PORT}"
-        fi
-    fi
-}
-
-config_firewall_logic(){
-    if [[ ${plugin_num} == "2" ]] || [[ ${plugin_num} == "7" ]]; then
-        config_firewall "${listen_port}"
-    elif [[ ${libev_v2ray} = "4" ]] || [[ ${libev_v2ray} = "5" ]] || [[ ${plugin_num} == "5" ]] || [[ ${isEnableWeb} = enable ]]; then
-        config_firewall 443
-    else
-        config_firewall "${shadowsocksport}"
-    fi
-}
-
-download(){
-    local filename=$(basename $1)
-    if [ -e ${1} ]; then
-        echo "${filename} [已存在.]"
-    else
-        echo "${filename} 当前目录中不存在, 现在开始下载."
-        wget --no-check-certificate -c -t3 -T60 -O ${1} ${2}
-        if [ $? -ne 0 ]; then
-            echo -e "${Error} 下载 ${filename} 失败."
-            exit 1
-        fi
-    fi
-}
-
-download_service_file(){
-    local filename_path=$1
-    local online_centos_url=$2
-    local local_centos_file_path=$3
-    local online_debian_url=$4
-    local local_debian_file_path=$5
-    
-    if check_sys packageManager yum; then
-        if [[ ${methods} == "Online" ]]; then
-            download ${filename_path} ${online_centos_url}
-        else
-            cp -rf ${local_centos_file_path} ${filename_path}
-        fi
-    elif check_sys packageManager apt; then
-        if [[ ${methods} == "Online" ]]; then
-            download ${filename_path} ${online_debian_url}
-        else
-            cp -rf ${local_debian_file_path} ${filename_path}
-        fi
-    fi
-}
-
-download_ss_file(){
-    cd ${CUR_DIR}
-    if [[ ${SS_VERSION} = "ss-libev" ]]; then
-        # Download Shadowsocks-libev
-        libev_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/shadowsocks-libev/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
-        [ -z ${libev_ver} ] && echo -e "${Error} 获取 shadowsocks-libev 最新版本失败." && exit 1
-        local SS_INIT_CENTOS="./service/shadowsocks-libev_centos.sh"
-        local SS_INIT_DEBIAN="./service/shadowsocks-libev_debian.sh"
-        
-        shadowsocks_libev_file="shadowsocks-libev-${libev_ver}"
-        shadowsocks_libev_url="https://github.com/shadowsocks/shadowsocks-libev/releases/download/v${libev_ver}/shadowsocks-libev-${libev_ver}.tar.gz"
-        download "${shadowsocks_libev_file}.tar.gz" "${shadowsocks_libev_url}"
-        download_service_file ${SHADOWSOCKS_LIBEV_INIT} ${SHADOWSOCKS_LIBEV_CENTOS} ${SS_INIT_CENTOS} ${SHADOWSOCKS_LIBEV_DEBIAN} ${SS_INIT_DEBIAN}
-    elif [[ ${SS_VERSION} = "ss-rust" ]]; then
-        # Download Shadowsocks-rust
-        rust_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/shadowsocks-rust/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
-        [ -z ${rust_ver} ] && echo -e "${Error} 获取 shadowsocks-rust 最新版本失败." && exit 1
-        local SS_INIT_CENTOS="./service/shadowsocks-rust_centos.sh"
-        local SS_INIT_DEBIAN="./service/shadowsocks-rust_debian.sh"
-        
-        shadowsocks_rust_file="shadowsocks-v${rust_ver}.x86_64-unknown-linux-musl"
-        shadowsocks_rust_url="https://github.com/shadowsocks/shadowsocks-rust/releases/download/v${rust_ver}/shadowsocks-v${rust_ver}.x86_64-unknown-linux-musl.tar.xz"
-        download "${shadowsocks_rust_file}.tar.xz" "${shadowsocks_rust_url}"
-        download_service_file ${SHADOWSOCKS_RUST_INIT} ${SHADOWSOCKS_RUST_CENTOS} ${SS_INIT_CENTOS} ${SHADOWSOCKS_RUST_DEBIAN} ${SS_INIT_DEBIAN}
-    elif [[ ${SS_VERSION} = "go-ss2" ]]; then
-        # Download Go-shadowsocks2
-        go_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/go-shadowsocks2/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
-        [ -z ${go_ver} ] && echo -e "${Error} 获取 shadowsocks-rust 最新版本失败." && exit 1
-        local SS_INIT_CENTOS="./service/go-shadowsocks2_centos.sh"
-        local SS_INIT_DEBIAN="./service/go-shadowsocks2_debian.sh"
-
-        # wriet version num
-        if [ ! -d "$(dirname ${GO_SHADOWSOCKS2_VERSION_FILE})" ]; then
-            mkdir -p $(dirname ${GO_SHADOWSOCKS2_VERSION_FILE})
-        fi
-        echo ${go_ver} > ${GO_SHADOWSOCKS2_VERSION_FILE}
-        go_shadowsocks2_file="shadowsocks2-linux"
-        go_shadowsocks2_url="https://github.com/shadowsocks/go-shadowsocks2/releases/download/v${go_ver}/shadowsocks2-linux.gz"
-        download "${go_shadowsocks2_file}.gz" "${go_shadowsocks2_url}"
-        download_service_file ${GO_SHADOWSOCKS2_INIT} ${GO_SHADOWSOCKS2_CENTOS} ${SS_INIT_CENTOS} ${GO_SHADOWSOCKS2_DEBIAN} ${SS_INIT_DEBIAN}
-    fi
-}
-
-download_plugins_file(){
-    cd ${CUR_DIR}
-    if [[ "${plugin_num}" == "1" ]]; then        
-        # Download v2ray-plugin
-        v2ray_plugin_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/v2ray-plugin/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
-        [ -z ${v2ray_plugin_ver} ] && echo -e "${Error} 获取 v2ray-plugin 最新版本失败." && exit 1
-        v2ray_plugin_file="v2ray-plugin-linux-amd64-v${v2ray_plugin_ver}"
-        v2ray_plugin_url="https://github.com/shadowsocks/v2ray-plugin/releases/download/v${v2ray_plugin_ver}/v2ray-plugin-linux-amd64-v${v2ray_plugin_ver}.tar.gz"
-        download "${v2ray_plugin_file}.tar.gz" "${v2ray_plugin_url}"
-        
-    elif [[ "${plugin_num}" == "2" ]]; then        
-        # Download kcptun
-        kcptun_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/xtaci/kcptun/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
-        [ -z ${kcptun_ver} ] && echo -e "${Error} 获取 kcptun 最新版本失败." && exit 1
-        kcptun_file="kcptun-linux-amd64-${kcptun_ver}"
-        kcptun_url="https://github.com/xtaci/kcptun/releases/download/v${kcptun_ver}/kcptun-linux-amd64-${kcptun_ver}.tar.gz"
-        download "${kcptun_file}.tar.gz" "${kcptun_url}"
-        download_service_file ${KCPTUN_INIT} ${KCPTUN_CENTOS} "./service/kcptun_centos.sh" ${KCPTUN_DEBIAN} "./service/kcptun_debian.sh"
-        
-    elif [[ "${plugin_num}" == "4" ]]; then        
-        # Download goquiet
-        goquiet_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/cbeuw/GoQuiet/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
-        [ -z ${goquiet_ver} ] && echo -e "${Error} 获取 goquiet 最新版本失败." && exit 1
-        goquiet_file="gq-server-linux-amd64-${goquiet_ver}"
-        goquiet_url="https://github.com/cbeuw/GoQuiet/releases/download/v${goquiet_ver}/gq-server-linux-amd64-${goquiet_ver}"
-        download "${goquiet_file}" "${goquiet_url}"
-        
-    elif [[ "${plugin_num}" == "5" ]]; then
-        # Download cloak server
-        cloak_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/cbeuw/Cloak/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
-        [ -z ${cloak_ver} ] && echo -e "${Error} 获取 cloak 最新版本失败." && exit 1
-        # cloak_ver="2.1.1"
-        cloak_file="ck-server-linux-amd64-${cloak_ver}"
-        cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${cloak_ver}/ck-server-linux-amd64-${cloak_ver}"
-        download "${cloak_file}" "${cloak_url}"
-        download_service_file ${CLOAK_INIT} ${CLOAK_CENTOS} "./service/cloak_centos.sh" ${CLOAK_DEBIAN} "./service/cloak_debian.sh"
-    
-    elif [[ "${plugin_num}" == "6" ]]; then
-        # Download mos-tls-tunnel
-        mtt_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/IrineSistiana/mos-tls-tunnel/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
-        [ -z ${mtt_ver} ] && echo -e "${Error} 获取 mos-tls-tunnel 最新版本失败." && exit 1
-        # wriet version num
-        if [ ! -d "$(dirname ${SHADOWSOCKS_CONFIG})" ]; then
-            mkdir -p $(dirname ${SHADOWSOCKS_CONFIG})
-        fi
-        echo ${mtt_ver} > ${MTT_VERSION_FILE}
-        mtt_file="mos-tls-tunnel-linux-amd64"
-        mtt_url="https://github.com/IrineSistiana/mos-tls-tunnel/releases/download/v${mtt_ver}/mos-tls-tunnel-linux-amd64.zip"
-        download "${mtt_file}.zip" "${mtt_url}"
-    elif [[ "${plugin_num}" == "7" ]]; then
-        # Download rabbit-tcp
-        rabbit_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/ihciah/rabbit-tcp/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
-        [ -z ${rabbit_ver} ] && echo -e "${Error} 获取 rabbit-tcp 最新版本失败." && exit 1
-        # wriet version num
-        if [ ! -d "$(dirname ${RABBIT_VERSION_FILE})" ]; then
-            mkdir -p $(dirname ${RABBIT_VERSION_FILE})
-        fi
-        echo ${rabbit_ver} > ${RABBIT_VERSION_FILE}
-        rabbit_file="rabbit-linux-amd64"
-        rabbit_url="https://github.com/ihciah/rabbit-tcp/releases/download/v${rabbit_ver}/rabbit-linux-amd64.gz"
-        download "${rabbit_file}.gz" "${rabbit_url}"
-        download_service_file ${RABBIT_INIT} ${RABBIT_CENTOS} "./service/rabbit-tcp_centos.sh" ${RABBIT_DEBIAN} "./service/rabbit-tcp_debian.sh"
-    elif [[ "${plugin_num}" == "8" ]]; then
-        # Download simple-tls
-        simple_tls_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/IrineSistiana/simple-tls/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
-        [ -z ${simple_tls_ver} ] && echo -e "${Error} 获取 simple-tls 最新版本失败." && exit 1
-        simple_tls_ver="0.3.4"
-        # wriet version num
-        if [ ! -d "$(dirname ${SIMPLE_TLS_VERSION_FILE})" ]; then
-            mkdir -p $(dirname ${SIMPLE_TLS_VERSION_FILE})
-        fi
-        echo ${simple_tls_ver} > ${SIMPLE_TLS_VERSION_FILE}
-        simple_tls_file="simple-tls-linux-amd64"
-        simple_tls_url="https://github.com/IrineSistiana/simple-tls/releases/download/v${simple_tls_ver}/simple-tls-linux-amd64.zip"
-        download "${simple_tls_file}.zip" "${simple_tls_url}"
-    fi
-}
-
-error_detect_deps_of_ubuntu(){
-    local command=$1
-    local depend=$2
-
-    if [ ! "$(command -v killall)" ]; then
-        # psmisc contains killall & fuser & pstree commands.
-        package_install "psmisc" > /dev/null 2>&1
-    fi
-    sleep 3
-    sudo killall -q apt apt-get
-    ${command} > /dev/null 2>&1
-    if [ $? -ne 0 ]; then
-        echo -e "${Error} 依赖包${Red}${depend}${suffix}安装失败，请检查. "
-        echo "Checking the error message and run the script again."
-        exit 1
-    fi
-}
-
-error_asciidos_deps_of_ubuntu1901(){
-    local command=$1
-    local depend=$2
-
-    sleep 3
-    sudo dpkg --configure -a > /dev/null 2>&1
-    ${command} > /dev/null 2>&1
-    if [ $? -ne 0 ]; then
-        if ls -l /var/lib/dpkg/info | grep -qi 'python-sympy'; then
-            sudo mv -f /var/lib/dpkg/info/python-sympy.* /tmp
-            sudo apt update > /dev/null 2>&1
-        fi
-        ${command} > /dev/null 2>&1
-        if [ $? -ne 0 ]; then
-            echo -e "${Error} 依赖包${Red}${depend}${suffix}安装失败，请检查. "
-            echo "Checking the error message and run the script again."
-            exit 1
-        fi
-    fi
-}
-
-error_detect_depends(){
-    local command=$1
-    local depend=`echo "${command}" | awk '{print $4}'`
-    echo -e "${Info} 开始安装依赖包 ${depend}"
-    ${command} > /dev/null 2>&1
-    if [ $? -ne 0 ]; then
-        if check_sys sysRelease ubuntu || check_sys sysRelease debian; then
-            if [ $(get_version) == '19.10' ] && [ ${depend} == 'asciidoc' ]; then
-                  error_asciidos_deps_of_ubuntu1901 "${command}" "${depend}"
-            else
-                  error_detect_deps_of_ubuntu "${command}" "${depend}"
-            fi
-        else
-            echo -e "${Error} 依赖包${Red}${depend}${suffix}安装失败，请检查. "
-            echo "Checking the error message and run the script again."
-            exit 1
-        fi
-    fi
-}
-
-install_dependencies(){
-    if check_sys packageManager yum; then
-        echo -e "${Info} 检查EPEL存储库."
-        if [ ! -f /etc/yum.repos.d/epel.repo ]; then
-            yum install -y epel-release > /dev/null 2>&1
-        fi
-        [ ! -f /etc/yum.repos.d/epel.repo ] && echo -e "${Error} 安装EPEL存储库失败，请检查它。" && exit 1
-        [ ! "$(command -v yum-config-manager)" ] && yum install -y yum-utils > /dev/null 2>&1
-        [ x"$(yum-config-manager epel | grep -w enabled | awk '{print $3}')" != x"True" ] && yum-config-manager --enable epel > /dev/null 2>&1
-        echo -e "${Info} EPEL存储库检查完成."
-
-        yum_depends=(
-            gettext gcc pcre pcre-devel autoconf libtool automake make asciidoc xmlto c-ares-devel libev-devel zlib-devel openssl-devel git qrencode jq
-        )
-        for depend in ${yum_depends[@]}; do
-            error_detect_depends "yum -y install ${depend}"
-        done
-    elif check_sys packageManager apt; then
-        apt_depends=(
-            gettext gcc build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libc-ares-dev automake libssl-dev git qrencode jq
-        )
-
-        apt-get -y update
-        for depend in ${apt_depends[@]}; do
-            error_detect_depends "apt-get -y install ${depend}"
-        done
-    fi
-}
-
-install_libsodium(){    
-    if [ ! -f /usr/lib/libsodium.a ]; then
-        cd ${CUR_DIR}
-        echo -e "${Info} 下载${LIBSODIUM_FILE}."
-        download "${LIBSODIUM_FILE}.tar.gz" "${LIBSODIUM_URL}"
-        echo -e "${Info} 解压${LIBSODIUM_FILE}."
-        tar zxf ${LIBSODIUM_FILE}.tar.gz && cd ${LIBSODIUM_FILE}
-        echo -e "${Info} 编译安装${LIBSODIUM_FILE}."
-        ./configure --prefix=/usr && make && make install
-        if [ $? -ne 0 ]; then
-            echo -e "${Error} ${LIBSODIUM_FILE} 安装失败 !"
-            install_cleanup
-            exit 1
-        fi
-        echo -e "${Info} ${LIBSODIUM_FILE} 安装成功 !"    
-    else
-        echo -e "${Info} ${LIBSODIUM_FILE} 已经安装."
-    fi
-}
-
-install_mbedtls(){
-    if [ ! -f /usr/lib/libmbedtls.a ]; then
-        cd ${CUR_DIR}
-        echo -e "${Info} 下载${MBEDTLS_FILE}."
-        download "${MBEDTLS_FILE}-gpl.tgz" "${MBEDTLS_URL}"
-        echo -e "${Info} 解压${MBEDTLS_FILE}."
-        tar xf ${MBEDTLS_FILE}-gpl.tgz
-        cd ${MBEDTLS_FILE}
-        echo -e "${Info} 编译安装${MBEDTLS_FILE}."
-        make SHARED=1 CFLAGS=-fPIC
-        make DESTDIR=/usr install
-        if [ $? -ne 0 ]; then
-            echo -e "${Error} ${MBEDTLS_FILE} 安装失败."
-            install_cleanup
-            exit 1
-        fi
-        echo -e "${Info} ${MBEDTLS_FILE} 安装成功 !"
-    else
-        echo -e "${Info} ${MBEDTLS_FILE} 已经安装."
-    fi
-}
-
 config_ss(){
     local server_value="\"0.0.0.0\""
 
@@ -996,7 +618,13 @@ config_ss(){
 
     # start wriet config
     improt_package "templates" "config_file_templates.sh"
-    
+
+    # Only SS
+    if [[ ${plugin_num} == "" ]]; then
+        ss_config_standalone
+    fi
+
+    # SS + V2ray-plugin
     if [[ ${plugin_num} == "1" ]]; then
         if [[ ${libev_v2ray} == "1" ]]; then
            ss_v2ray_ws_http_config
@@ -1007,7 +635,7 @@ config_ss(){
         elif [[ ${libev_v2ray} == "4" ]]; then
             ss_v2ray_ws_tls_web_config
             if [[ ${web_flag} = "1" ]]; then
-                caddy_config_none_cdn
+                caddy_config
             elif [[ ${web_flag} = "2" ]]; then
                 mirror_domain=$(echo ${mirror_site} | sed 's/https:\/\///g')
                 nginx_config
@@ -1015,7 +643,7 @@ config_ss(){
         elif [[ ${libev_v2ray} == "5" ]]; then
             ss_v2ray_ws_tls_web_cdn_config
             if [[ ${web_flag} = "1" ]]; then
-                caddy_config_with_cdn
+                caddy_config
             elif [[ ${web_flag} = "2" ]]; then
                 mirror_domain=$(echo ${mirror_site} | sed 's/https:\/\///g')
                 nginx_config
@@ -1025,30 +653,43 @@ config_ss(){
         if [[ ${isDisable} == disable ]] && [[ ${libev_v2ray} != "3" ]]; then
             sed 's/"plugin_opts":"/"plugin_opts":"mux=0;/' -i ${SHADOWSOCKS_CONFIG}
         fi
-    elif [[ ${plugin_num} == "2" ]]; then
+    fi
+
+    # SS + KcpTun
+    if [[ ${plugin_num} == "2" ]]; then
         if [ ! -d "$(dirname ${KCPTUN_CONFIG})" ]; then
             mkdir -p $(dirname ${KCPTUN_CONFIG})
         fi
-        
         ss_config_standalone
         kcptun_config_standalone
-    elif [[ ${plugin_num} == "3" ]]; then
+    fi
+
+    # SS + Simple-obfs
+    if [[ ${plugin_num} == "3" ]]; then
         if [[ ${libev_obfs} == "1" ]]; then
            ss_obfs_http_config
         elif [[ ${libev_obfs} == "2" ]]; then    
            ss_obfs_tls_config
         fi
-    elif [[ ${plugin_num} == "4" ]]; then
+    fi
+
+    # SS + Goquite
+    if [[ ${plugin_num} == "4" ]]; then
         ss_goquiet_config
-    elif [[ ${plugin_num} == "5" ]]; then
+    fi
+
+    # SS + Cloak
+    if [[ ${plugin_num} == "5" ]]; then
         if [ ! -d "$(dirname ${CK_SERVER_CONFIG})" ]; then
             mkdir -p $(dirname ${CK_SERVER_CONFIG})
         fi
-        
         ss_config_standalone
         cloak2_server_config
         cloak2_client_config
-    elif [[ ${plugin_num} == "6" ]]; then
+    fi
+
+    # SS + Mos-tls-tunnel
+    if [[ ${plugin_num} == "6" ]]; then
         if [[ ${libev_mtt} == "1" ]]; then
             if [[ ${domainType} = DNS-Only ]]; then
                 ss_mtt_tls_dns_only_config
@@ -1060,17 +701,11 @@ config_ss(){
                 ss_mtt_wss_dns_only_or_cdn_config
             elif [[ ${isEnableWeb} = enable ]]; then
                 ss_mtt_wss_dns_only_or_cdn_web_config
-                if [[ ${domainType} = DNS-Only ]] && [[ ${web_flag} = "1" ]]; then
-                    domain=${serverName}
-                    path=${wssPath}
-                    caddy_config_none_cdn
-                elif [[ ${domainType} = CDN ]] && [[ ${web_flag} = "1" ]]; then
-                    domain=${serverName}
-                    path=${wssPath}
-                    caddy_config_with_cdn
+                domain=${serverName}
+                path=${wssPath}
+                if [[ ${web_flag} = "1" ]]; then
+                    caddy_config
                 elif [[ ${web_flag} = "2" ]]; then
-                    domain=${serverName}
-                    path=${wssPath}
                     mirror_domain=$(echo ${mirror_site} | sed 's/https:\/\///g')
                     nginx_config
                 fi 
@@ -1082,31 +717,42 @@ config_ss(){
         if [[ ${isEnable} == enable ]]; then
             sed 's/"plugin_opts":"/"plugin_opts":"mux;/' -i ${SHADOWSOCKS_CONFIG}
         fi
-    elif [[ ${plugin_num} == "7" ]]; then
+    fi
+
+    # SS + Rabbit-tcp
+    if [[ ${plugin_num} == "7" ]]; then
         if [ ! -d "$(dirname ${RABBIT_CONFIG})" ]; then
             mkdir -p $(dirname ${RABBIT_CONFIG})
         fi
-        
         ss_config_standalone
         rabbit_tcp_config_standalone
-    elif [[ ${plugin_num} == "8" ]]; then
+    fi
+
+    # SS + Simple-tls
+    if [[ ${plugin_num} == "8" ]]; then
         if [[ ${libev_simple_tls} == "1" ]]; then
             ss_simple_tls_config
         elif [[ ${libev_simple_tls} == "2" ]]; then
             ss_simple_tls_wss_config
         fi
 
-        if [[ ${isEnable} == enable ]]; then
+        if [[ ${SimpleTlsVer} = "1" ]] && [[ ${isEnable} == enable ]]; then
             sed 's/"plugin_opts":"s/"plugin_opts":"s;rh/' -i ${SHADOWSOCKS_CONFIG}
+        elif [[ ${SimpleTlsVer} = "2" ]] && [[ ${isEnable} == enable ]]; then
+            sed 's/"plugin_opts":"s/"plugin_opts":"s;pd/' -i ${SHADOWSOCKS_CONFIG}
         fi
-    else
-        ss_config_standalone
     fi
 }
 
 gen_ss_links(){
     improt_package "templates" "sip002_url_templates.sh"
-    
+
+    # Only SS
+    if [[ ${plugin_num} == "" ]]; then
+        ss_link
+    fi
+
+    # SS + V2ray-plugin
     if [[ ${plugin_num} == "1" ]]; then
         if [[ ${libev_v2ray} == "1" ]]; then
             ss_v2ray_ws_http_link
@@ -1119,19 +765,34 @@ gen_ss_links(){
         elif [[ ${libev_v2ray} == "5" ]]; then
             ss_v2ray_ws_tls_web_cdn_link
         fi
-    elif [[ ${plugin_num} == "2" ]]; then
+    fi
+
+    # SS + KcpTun
+    if [[ ${plugin_num} == "2" ]]; then
         ss_kcptun_link
-    elif [[ ${plugin_num} == "3" ]]; then
+    fi
+
+    # SS + Simple-obfs
+    if [[ ${plugin_num} == "3" ]]; then
         if [[ ${libev_obfs} == "1" ]]; then
            ss_obfs_http_link
         elif [[ ${libev_obfs} == "2" ]]; then    
            ss_obfs_tls_link
         fi
-    elif [[ ${plugin_num} == "4" ]]; then
+    fi
+
+    # SS + Goquite
+    if [[ ${plugin_num} == "4" ]]; then
         ss_goquiet_link
-    elif [[ ${plugin_num} == "5" ]]; then
+    fi
+
+    # SS + Cloak
+    if [[ ${plugin_num} == "5" ]]; then
         ss_cloak_link_new
-    elif [[ ${plugin_num} == "6" ]]; then
+    fi
+
+    # SS + Mos-tls-tunnel
+    if [[ ${plugin_num} == "6" ]]; then
         if [[ ${libev_mtt} == "1" ]]; then
             if [[ ${domainType} = DNS-Only ]]; then
                 ss_mtt_tls_dns_only_link
@@ -1147,16 +808,20 @@ gen_ss_links(){
                 ss_mtt_wss_link
             fi
         fi
-    elif [[ ${plugin_num} == "7" ]]; then
+    fi
+
+    # SS + Rabbit-tcp
+    if [[ ${plugin_num} == "7" ]]; then
         ss_rabbit_tcp_link
-    elif [[ ${plugin_num} == "8" ]]; then
+    fi
+
+    # SS + Simple-tls
+    if [[ ${plugin_num} == "8" ]]; then
         if [[ ${libev_simple_tls} == "1" ]]; then
             ss_simple_tls_link
         elif [[ ${libev_simple_tls} == "2" ]]; then
             ss_simple_tls_wss_link
         fi
-    else
-        ss_link
     fi
 }
 
@@ -1173,7 +838,13 @@ install_completed(){
     clear -x
     
     improt_package "templates" "terminal_config_templates.sh"
-    
+
+    # Only SS
+    if [[ ${plugin_num} == "" ]]; then
+        ss_show
+    fi
+
+    # SS + V2ray-plugin
     if [[ ${plugin_num} == "1" ]]; then
         if [[ ${libev_v2ray} == "1" ]]; then
             ss_v2ray_ws_http_show
@@ -1191,32 +862,41 @@ install_completed(){
             ss_v2ray_ws_tls_web_show
         elif [[ ${libev_v2ray} == "5" ]]; then
             if [[ ${web_flag} = "1" ]]; then
-                # start caddy
                 /etc/init.d/caddy start > /dev/null 2>&1
             elif [[ ${web_flag} = "2" ]]; then
                 systemctl start nginx
             fi 
             ss_v2ray_ws_tls_web_cdn_show
         fi
-    elif [[ ${plugin_num} == "2" ]]; then
-        # start kcptun
+    fi
+
+    if [[ ${plugin_num} == "2" ]]; then
         ${KCPTUN_INIT} start  > /dev/null 2>&1
-        
         ss_kcptun_show
-    elif [[ ${plugin_num} == "3" ]]; then
+    fi
+
+    # SS + Simple-obfs
+    if [[ ${plugin_num} == "3" ]]; then
         if [[ ${libev_obfs} == "1" ]]; then
            ss_obfs_http_show
         elif [[ ${libev_obfs} == "2" ]]; then    
            ss_obfs_tls_show
         fi
-    elif [[ ${plugin_num} == "4" ]]; then
+    fi
+
+    # SS + Goquite
+    if [[ ${plugin_num} == "4" ]]; then
         ss_goquiet_show
-    elif [[ ${plugin_num} == "5" ]]; then
-        # start cloak
+    fi
+
+    # SS + Cloak
+    if [[ ${plugin_num} == "5" ]]; then
         ${CLOAK_INIT} start  > /dev/null 2>&1
-        
         ss_cloak_show_new
-    elif [[ ${plugin_num} == "6" ]]; then
+    fi
+
+    # SS + Mos-tls-tunnel
+    if [[ ${plugin_num} == "6" ]]; then
         if [[ ${libev_mtt} == "1" ]]; then
             if [[ ${domainType} = DNS-Only ]]; then
                 ss_mtt_tls_dns_only_show
@@ -1238,18 +918,21 @@ install_completed(){
                 ss_mtt_wss_show
             fi
         fi
-    elif [[ ${plugin_num} == "7" ]]; then
-        # start rabbit-tcp
+    fi
+
+    # SS + Rabbit-tcp
+    if [[ ${plugin_num} == "7" ]]; then
         ${RABBIT_INIT} start  > /dev/null 2>&1
         ss_rabbit_tcp_show
-    elif [[ ${plugin_num} == "8" ]]; then
+    fi
+
+    # SS + Simple-tls
+    if [[ ${plugin_num} == "8" ]]; then
         if [[ ${libev_simple_tls} == "1" ]]; then
             ss_simple_tls_show
         elif [[ ${libev_simple_tls} == "2" ]]; then
             ss_simple_tls_wss_show
         fi
-    else
-        ss_show
     fi
 }
 
@@ -1335,7 +1018,8 @@ install_main(){
         improt_package "plugins" "v2ray_plugin_install.sh"
         install_v2ray_plugin
         if [[ ${web_flag} = "1" ]]; then
-            choose_caddy_extension ${libev_v2ray}
+            improt_package "tools" "caddy_install.sh"
+            install_caddy
         elif [[ ${web_flag} = "2" ]]; then
             improt_package "tools" "nginx_install.sh"
             install_nginx
@@ -1363,11 +1047,7 @@ install_main(){
         install_mos_tls_tunnel
         if [[ ${web_flag} = "1" ]]; then
             improt_package "tools" "caddy_install.sh"
-            if [[ ${domainType} = DNS-Only ]] && [[ ${isEnableWeb} = enable ]]; then
-                install_caddy
-            elif [[ ${domainType} = CDN ]] && [[ ${isEnableWeb} = enable ]]; then
-                install_caddy "tls.dns.cloudflare"
-            fi
+            install_caddy
         elif [[ ${web_flag} = "2" ]]; then
             improt_package "tools" "nginx_install.sh"
             install_nginx
@@ -1391,6 +1071,7 @@ install_step_all(){
     [[ -e ${GO_SHADOWSOCKS2_BIN_PATH} ]] && echo -e "${Info} Go-shadowsocks2 已经安装." && exit 1
     disable_selinux
     install_prepare
+    improt_package "utils" "dependencies.sh"
     if [[ ${SS_VERSION} = "ss-libev" ]]; then
         install_dependencies
     fi
@@ -1412,8 +1093,10 @@ install_step_all(){
             package_install "jq" > /dev/null 2>&1
         fi
     fi
+    improt_package "utils" "downloads.sh"
     download_ss_file
     download_plugins_file
+    improt_package "utils" "firewalls.sh"
     config_firewall_logic
     install_main
     add_more_entropy

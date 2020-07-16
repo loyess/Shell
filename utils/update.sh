@@ -1,8 +1,11 @@
+improt_package "utils" "downloads.sh"
+
+
 update_v2ray_plugin(){
     cd ${CUR_DIR}
     
     if [[ -e ${V2RAY_PLUGIN_BIN_PATH} ]]; then
-        v2ray_plugin_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/v2ray-plugin/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        v2ray_plugin_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/teddysun/v2ray-plugin/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
         [ -z ${v2ray_plugin_ver} ] && echo -e "${Error} 获取 v2ray-plugin 最新版本失败." && exit 1
         current_v2ray_plugin_ver=$(v2ray-plugin -version | grep v2ray-plugin | cut -d\  -f2 | sed 's/v//g')
         
@@ -244,6 +247,12 @@ update_simple_tls(){
         simple_tls_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/IrineSistiana/simple-tls/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
         [ -z ${simple_tls_ver} ] && echo -e "${Error} 获取 simple-tls 最新版本失败." && exit 1
         read current_simple_tls_ver < ${SIMPLE_TLS_VERSION_FILE}
+
+        if ! check_latest_version "0.3.4" ${current_simple_tls_ver}; then
+            echo -e "${Point} simple-tls当前版本是${current_simple_tls_ver}及以下版本，与最新版本不兼容，脚本不提供更新."
+            exit 0
+        fi
+
         if ! check_latest_version ${current_simple_tls_ver} ${simple_tls_ver}; then
             echo -e "${Point} simple-tls当前已是最新版本${current_simple_tls_ver}不需要更新."
             exit 0
@@ -278,15 +287,10 @@ update_caddy(){
             exit 1
         fi
         
-        if ! $(grep -q 'cloudflare' /usr/local/caddy/Caddyfile); then
-            libev_v2ray=4
-        else
-            libev_v2ray=5
-        fi
-        
         echo -e "${Info} 检测到caddy有新版本，开始下载并安装."
         do_stop > /dev/null 2>&1
-        choose_caddy_extension ${libev_v2ray}
+        improt_package "tools" "caddy_install.sh"
+        install_caddy
         do_restart > /dev/null 2>&1
 
         echo -e "${Info} caddy已成功升级为最新版本${caddy_ver}"
@@ -419,7 +423,7 @@ update_go_shadowsocks2(){
 
     echo -e "${Info} 检测到SS有新版本，开始下载."
     download_ss_file
-    echo -e "${Info} 下载完成，开始执行编译安装."
+    echo -e "${Info} 下载完成，开始执行覆盖安装."
     improt_package "tools" "shadowsocks_install.sh"
     do_stop > /dev/null 2>&1
     install_go_shadowsocks2

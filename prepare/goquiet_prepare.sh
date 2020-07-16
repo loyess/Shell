@@ -64,7 +64,6 @@ get_input_webaddr_of_domain(){
 get_input_gqkey(){
     echo
     echo -e "请为GoQuiet输入密钥 [留空以将其设置为16位随机字符串]"
-    echo
     read -e -p "(默认: ${ran_str16}):" gqkey
     [ -z "$gqkey" ] && gqkey=${ran_str16}
     echo

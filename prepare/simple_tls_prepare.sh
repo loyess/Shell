@@ -1,11 +1,51 @@
 improt_package "utils" "gen_certificates.sh"
 
+# simple-tls version
+SIMPLE_TLS_VERSION=(
+v0.3.4
+LatestRelease
+)
+
 # simple-tls Transport mode
 SIMPLE_TLS_MODE=(
 tls
 wss
 )
 
+
+simple_tls_version(){
+    while true
+    do
+        echo && echo -e "请选择simple-tls安装版本\n"
+        for ((i=1;i<=${#SIMPLE_TLS_VERSION[@]};i++ )); do
+            hint="${SIMPLE_TLS_VERSION[$i-1]}"
+            echo -e "${Green}  ${i}.${suffix} ${hint}"
+        done
+        echo
+        read -e -p "(默认: ${SIMPLE_TLS_VERSION[0]}):" SimpleTlsVer
+        [ -z "$SimpleTlsVer" ] && SimpleTlsVer=1
+        expr ${SimpleTlsVer} + 1 &>/dev/null
+        if [ $? -ne 0 ]; then
+            echo
+            echo -e "${Error} 请输入一个数字"
+            echo
+            continue
+        fi
+        if [[ "$SimpleTlsVer" -lt 1 || "$SimpleTlsVer" -gt ${#SIMPLE_TLS_VERSION[@]} ]]; then
+            echo
+            echo -e "${Error} 请输入一个数字在 [1-${#SIMPLE_TLS_VERSION[@]}] 之间"
+            echo
+            continue
+        fi
+
+        stVer=${SIMPLE_TLS_VERSION[$SimpleTlsVer-1]}
+        echo
+        echo -e "${Red}  version = ${stVer}${suffix}"
+        echo
+
+        break
+    done
+}
 
 transport_mode_menu(){
     while true
@@ -138,6 +178,35 @@ is_add_random_header(){
     done
 }
 
+is_enable_padding_data(){
+    while true
+    do
+        echo
+        echo -e "是否启用 padding-data 模式，以防止流量分析(pd)"
+        read -p "(默认: n) [y/n]: " yn
+        [ -z "${yn}" ] && yn="N"
+        case "${yn:0:1}" in
+            y|Y)
+                isEnable=enable
+                ;;
+            n|N)
+                isEnable=disable
+                ;;
+            *)
+                echo
+                echo -e "${Error} 输入有误，请重新输入!"
+                echo
+                continue
+                ;;
+        esac
+
+        echo
+        echo -e "${Red}  pd = ${isEnable}${suffix}"
+        echo
+        break
+    done
+}
+
 check_port_for_simple_tls(){
     shadowsocksport=443
 
@@ -147,9 +216,21 @@ check_port_for_simple_tls(){
 }
 
 install_prepare_libev_simple_tls(){
-    transport_mode_menu
-    get_input_server_name
-    is_add_random_header
+    simple_tls_version
+    # v0.3.4
+    if [[ ${SimpleTlsVer} = "1" ]]; then
+        transport_mode_menu
+        get_input_server_name
+        is_add_random_header
+    fi
+
+    # LatestRelease
+    if [[ ${SimpleTlsVer} = "2" ]]; then
+        libev_simple_tls=1
+        get_input_server_name
+        is_enable_padding_data
+    fi
+
     check_port_for_simple_tls
 
     if [[ ${libev_simple_tls} = "1" ]]; then

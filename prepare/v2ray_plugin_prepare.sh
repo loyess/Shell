@@ -157,25 +157,6 @@ get_input_host(){
    done
 }
 
-get_input_email_for_caddy(){
-    while true
-    do
-        echo 
-        read -e -p "请输入供于域名证书生成所需的 Email：" email
-        if [ -z "$(echo $email | grep -E ${EMAIL_RE})" ]; then
-            echo
-            echo -e "${Error} 请输入正确合法的邮箱."
-            echo
-            continue
-        fi
-        
-        echo
-        echo -e "${Red}  email = ${email}${suffix}"
-        echo 
-        break
-    done
-}
-
 get_input_ws_path(){
     while true
     do 
@@ -362,12 +343,7 @@ install_prepare_libev_v2ray(){
             fi
             
             if is_dns_only ${domain_ip}; then
-                if [[ ${web_flag} = "1" ]]; then
-                    get_input_email_for_caddy
-                elif [[ ${web_flag} = "2" ]]; then
-                    acme_get_certificate_by_force ${domain}
-                fi
-                
+                acme_get_certificate_by_force ${domain}
                 get_input_ws_path
                 get_input_mirror_site
                 is_disable_mux
@@ -392,12 +368,7 @@ install_prepare_libev_v2ray(){
             fi
             
             if is_cdn_proxied ${domain_ip}; then
-                if [[ ${web_flag} = "1" ]]; then
-                    choose_api_get_mode
-                elif [[ ${web_flag} = "2" ]]; then
-                    acme_get_certificate_by_api_or_manual ${domain}
-                fi
-                
+                acme_get_certificate_by_api_or_manual ${domain}
                 get_input_ws_path
                 get_input_mirror_site
                 is_disable_mux

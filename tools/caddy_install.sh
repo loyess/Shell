@@ -12,19 +12,15 @@ service_caddy(){
 }
 
 install_caddy(){
-    local extension=$1
-    
-    if [[ ! -z ${extension} ]]; then
-		extension_all="?plugins=${extension}&license=personal"
-	else
-		extension_all="?license=personal"
-	fi
-    
-    download "caddy_linux.tar.gz" "https://caddyserver.com/download/linux/amd64${extension_all}"
-    tar zxf "caddy_linux.tar.gz"
+    caddy_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/caddyserver/caddy/releases | grep -o '"tag_name": ".*"' | sed 's/"//g;s/v//g' | sed 's/tag_name: //g' | grep -E '^1' | head -n 1)
+    [ -z ${caddy_ver} ] && echo -e "${Error} 获取 caddy 最新版本失败." && exit 1
+    caddy_file="caddy_v${caddy_ver}_linux_amd64"
+    caddy_url="https://github.com/caddyserver/caddy/releases/download/v${caddy_ver}/caddy_v${caddy_ver}_linux_amd64.tar.gz"
+    download "${caddy_file}.tar.gz" "${caddy_url}"
+    tar zxf "caddy_v1.0.4_linux_amd64.tar.gz"
     
     # installed clear
-	rm -rf "caddy_linux.tar.gz"
+	rm -rf "${caddy_file}.tar.gz"
     rm -rf LICENSES.txt
 	rm -rf README.txt 
 	rm -rf CHANGES.txt

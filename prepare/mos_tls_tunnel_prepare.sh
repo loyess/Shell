@@ -1,4 +1,3 @@
-improt_package "utils" "web.sh"
 improt_package "utils" "gen_certificates.sh"
 
 # mos-tls-tunnel Transport mode
@@ -223,6 +222,7 @@ install_prepare_libev_mos_tls_tunnel(){
         is_enable_mux
 
         if [[ ${domainType} != Other ]]; then
+            improt_package "utils" "web.sh"
             is_enable_web_server
             if [[ ${isEnableWeb} == enable ]]; then
                 web_server_menu

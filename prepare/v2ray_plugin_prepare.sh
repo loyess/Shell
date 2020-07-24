@@ -1,4 +1,3 @@
-improt_package "utils" "web.sh"
 improt_package "utils" "gen_certificates.sh"
 
 # v2ray-plugin Transport mode
@@ -208,6 +207,7 @@ error_info_text(){
 install_prepare_libev_v2ray(){
     error_info_text
     transport_mode_menu
+    improt_package "utils" "web.sh"
     if [[ ${libev_v2ray} = "4" || ${libev_v2ray} = "5" ]]; then
         web_server_menu
     fi

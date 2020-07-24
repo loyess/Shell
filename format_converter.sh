@@ -20,6 +20,7 @@ dos2unix ./utils/start.sh
 dos2unix ./utils/stop.sh
 dos2unix ./utils/status.sh
 dos2unix ./utils/uninstall.sh
+dos2unix ./utils/web.sh
 
 
 dos2unix ./prepare/shadowsocks_prepare.sh

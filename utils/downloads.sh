@@ -13,24 +13,14 @@ download(){
 }
 
 download_service_file(){
-    local filename_path=$1
-    local online_centos_url=$2
-    local local_centos_file_path=$3
-    local online_debian_url=$4
-    local local_debian_file_path=$5
+    local filePath=$1
+    local onlineServiceFileUrl=$2
+    local localServiceFilePath=$3
     
-    if check_sys packageManager yum; then
-        if [[ ${methods} == "Online" ]]; then
-            download ${filename_path} ${online_centos_url}
-        else
-            cp -rf ${local_centos_file_path} ${filename_path}
-        fi
-    elif check_sys packageManager apt; then
-        if [[ ${methods} == "Online" ]]; then
-            download ${filename_path} ${online_debian_url}
-        else
-            cp -rf ${local_debian_file_path} ${filename_path}
-        fi
+    if [[ ${methods} == "Online" ]]; then
+        download ${filePath} ${onlineServiceFileUrl}
+    else
+        cp -rf ${localServiceFilePath} ${filePath}
     fi
 }
 
@@ -40,30 +30,24 @@ download_ss_file(){
         # Download Shadowsocks-libev
         libev_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/shadowsocks-libev/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
         [ -z ${libev_ver} ] && echo -e "${Error} 获取 shadowsocks-libev 最新版本失败." && exit 1
-        local SS_INIT_CENTOS="./service/shadowsocks-libev_centos.sh"
-        local SS_INIT_DEBIAN="./service/shadowsocks-libev_debian.sh"
         
         shadowsocks_libev_file="shadowsocks-libev-${libev_ver}"
         shadowsocks_libev_url="https://github.com/shadowsocks/shadowsocks-libev/releases/download/v${libev_ver}/shadowsocks-libev-${libev_ver}.tar.gz"
         download "${shadowsocks_libev_file}.tar.gz" "${shadowsocks_libev_url}"
-        download_service_file ${SHADOWSOCKS_LIBEV_INIT} ${SHADOWSOCKS_LIBEV_CENTOS} ${SS_INIT_CENTOS} ${SHADOWSOCKS_LIBEV_DEBIAN} ${SS_INIT_DEBIAN}
+        download_service_file ${SHADOWSOCKS_LIBEV_INIT} ${SHADOWSOCKS_LIBEV_INIT_ONLINE} ${SHADOWSOCKS_LIBEV_INIT_LOCAL}
     elif [[ ${SS_VERSION} = "ss-rust" ]]; then
         # Download Shadowsocks-rust
         rust_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/shadowsocks-rust/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
         [ -z ${rust_ver} ] && echo -e "${Error} 获取 shadowsocks-rust 最新版本失败." && exit 1
-        local SS_INIT_CENTOS="./service/shadowsocks-rust_centos.sh"
-        local SS_INIT_DEBIAN="./service/shadowsocks-rust_debian.sh"
         
         shadowsocks_rust_file="shadowsocks-v${rust_ver}.x86_64-unknown-linux-musl"
         shadowsocks_rust_url="https://github.com/shadowsocks/shadowsocks-rust/releases/download/v${rust_ver}/shadowsocks-v${rust_ver}.x86_64-unknown-linux-musl.tar.xz"
         download "${shadowsocks_rust_file}.tar.xz" "${shadowsocks_rust_url}"
-        download_service_file ${SHADOWSOCKS_RUST_INIT} ${SHADOWSOCKS_RUST_CENTOS} ${SS_INIT_CENTOS} ${SHADOWSOCKS_RUST_DEBIAN} ${SS_INIT_DEBIAN}
+        download_service_file ${SHADOWSOCKS_RUST_INIT} ${SHADOWSOCKS_RUST_INIT_ONLINE} ${SHADOWSOCKS_RUST_INIT_LOCAL}
     elif [[ ${SS_VERSION} = "go-ss2" ]]; then
         # Download Go-shadowsocks2
         go_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/go-shadowsocks2/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
         [ -z ${go_ver} ] && echo -e "${Error} 获取 shadowsocks-rust 最新版本失败." && exit 1
-        local SS_INIT_CENTOS="./service/go-shadowsocks2_centos.sh"
-        local SS_INIT_DEBIAN="./service/go-shadowsocks2_debian.sh"
 
         # wriet version num
         if [ ! -d "$(dirname ${GO_SHADOWSOCKS2_VERSION_FILE})" ]; then
@@ -73,7 +57,7 @@ download_ss_file(){
         go_shadowsocks2_file="shadowsocks2-linux"
         go_shadowsocks2_url="https://github.com/shadowsocks/go-shadowsocks2/releases/download/v${go_ver}/shadowsocks2-linux.gz"
         download "${go_shadowsocks2_file}.gz" "${go_shadowsocks2_url}"
-        download_service_file ${GO_SHADOWSOCKS2_INIT} ${GO_SHADOWSOCKS2_CENTOS} ${SS_INIT_CENTOS} ${GO_SHADOWSOCKS2_DEBIAN} ${SS_INIT_DEBIAN}
+        download_service_file ${GO_SHADOWSOCKS2_INIT} ${GO_SHADOWSOCKS2_INIT_ONLINE} ${GO_SHADOWSOCKS2_INIT_LOCAL}
     fi
 }
 
@@ -94,7 +78,7 @@ download_plugins_file(){
         kcptun_file="kcptun-linux-amd64-${kcptun_ver}"
         kcptun_url="https://github.com/xtaci/kcptun/releases/download/v${kcptun_ver}/kcptun-linux-amd64-${kcptun_ver}.tar.gz"
         download "${kcptun_file}.tar.gz" "${kcptun_url}"
-        download_service_file ${KCPTUN_INIT} ${KCPTUN_CENTOS} "./service/kcptun_centos.sh" ${KCPTUN_DEBIAN} "./service/kcptun_debian.sh"
+        download_service_file ${KCPTUN_INIT} ${KCPTUN_INIT_ONLINE} ${KCPTUN_INIT_LOCAL}
         
     elif [[ "${plugin_num}" == "4" ]]; then        
         # Download goquiet
@@ -112,7 +96,7 @@ download_plugins_file(){
         cloak_file="ck-server-linux-amd64-${cloak_ver}"
         cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${cloak_ver}/ck-server-linux-amd64-${cloak_ver}"
         download "${cloak_file}" "${cloak_url}"
-        download_service_file ${CLOAK_INIT} ${CLOAK_CENTOS} "./service/cloak_centos.sh" ${CLOAK_DEBIAN} "./service/cloak_debian.sh"
+        download_service_file ${CLOAK_INIT} ${CLOAK_INIT_ONLINE} ${CLOAK_INIT_LOCAL}
     
     elif [[ "${plugin_num}" == "6" ]]; then
         # Download mos-tls-tunnel
@@ -138,7 +122,7 @@ download_plugins_file(){
         rabbit_file="rabbit-linux-amd64"
         rabbit_url="https://github.com/ihciah/rabbit-tcp/releases/download/v${rabbit_ver}/rabbit-linux-amd64.gz"
         download "${rabbit_file}.gz" "${rabbit_url}"
-        download_service_file ${RABBIT_INIT} ${RABBIT_CENTOS} "./service/rabbit-tcp_centos.sh" ${RABBIT_DEBIAN} "./service/rabbit-tcp_debian.sh"
+        download_service_file ${RABBIT_INIT} ${RABBIT_INIT_ONLINE} ${RABBIT_INIT_LOCAL}
     elif [[ "${plugin_num}" == "8" ]]; then
         # Download simple-tls
         simple_tls_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/IrineSistiana/simple-tls/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')

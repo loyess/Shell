@@ -5,7 +5,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.6.2"
+SHELL_VERSION="2.6.3"
 # ====================
 
 
@@ -38,22 +38,22 @@ SHADOWSOCKS_CONFIG="/etc/shadowsocks/config.json"
 SHADOWSOCKS_LIBEV_INSTALL_PATH="/usr/local/bin"
 SHADOWSOCKS_LIBEV_BIN_PATH="/usr/local/bin/ss-server"
 SHADOWSOCKS_LIBEV_INIT="/etc/init.d/shadowsocks-libev"
-SHADOWSOCKS_LIBEV_CENTOS="${BASE_URL}/service/shadowsocks-libev_centos.sh"
-SHADOWSOCKS_LIBEV_DEBIAN="${BASE_URL}/service/shadowsocks-libev_debian.sh"
+SHADOWSOCKS_LIBEV_INIT_LOCAL="./service/shadowsocks-libev.sh"
+SHADOWSOCKS_LIBEV_INIT_ONLINE="${BASE_URL}/service/shadowsocks-libev.sh"
 
 # shadowsocks-rust config and init
 SHADOWSOCKS_RUST_INSTALL_PATH="/usr/local/bin"
 SHADOWSOCKS_RUST_BIN_PATH="/usr/local/bin/ssserver"
 SHADOWSOCKS_RUST_INIT="/etc/init.d/shadowsocks-rust"
-SHADOWSOCKS_RUST_CENTOS="${BASE_URL}/service/shadowsocks-rust_centos.sh"
-SHADOWSOCKS_RUST_DEBIAN="${BASE_URL}/service/shadowsocks-rust_debian.sh"
+SHADOWSOCKS_RUST_INIT_LOCAL="./service/shadowsocks-rust.sh"
+SHADOWSOCKS_RUST_INIT_ONLINE="${BASE_URL}/service/shadowsocks-rust.sh"
 
 # go-shadowsocks2 config and init
 GO_SHADOWSOCKS2_INSTALL_PATH="/usr/local/bin"
 GO_SHADOWSOCKS2_BIN_PATH="/usr/local/bin/go-shadowsocks2"
 GO_SHADOWSOCKS2_INIT="/etc/init.d/go-shadowsocks2"
-GO_SHADOWSOCKS2_CENTOS="${BASE_URL}/service/go-shadowsocks2_centos.sh"
-GO_SHADOWSOCKS2_DEBIAN="${BASE_URL}/service/go-shadowsocks2_debian.sh"
+GO_SHADOWSOCKS2_INIT_LOCAL="./service/go-shadowsocks2.sh"
+GO_SHADOWSOCKS2_INIT_ONLINE="${BASE_URL}/service/go-shadowsocks2.sh"
 GO_SHADOWSOCKS2_VERSION_FILE="/etc/shadowsocks/go-shadowsocks2.version"
 
 
@@ -77,8 +77,8 @@ KCPTUN_INSTALL_PATH="/usr/local/kcptun"
 KCPTUN_BIN_PATH="/usr/local/kcptun/kcptun-server"
 KCPTUN_INIT="/etc/init.d/kcptun"
 KCPTUN_CONFIG="/etc/kcptun/config.json"
-KCPTUN_CENTOS="${BASE_URL}/service/kcptun_centos.sh"
-KCPTUN_DEBIAN="${BASE_URL}/service/kcptun_debian.sh"
+KCPTUN_INIT_LOCAL="./service/kcptun.sh"
+KCPTUN_INIT_ONLINE="${BASE_URL}/service/kcptun.sh"
 
 
 # simple-obfs
@@ -96,8 +96,8 @@ CLOAK_INSTALL_PATH="/usr/local/bin"
 CLOAK_SERVER_BIN_PATH="/usr/local/bin/ck-server"
 CLOAK_CLIENT_BIN_PATH="/usr/local/bin/ck-client"
 CLOAK_INIT="/etc/init.d/cloak"
-CLOAK_CENTOS="${BASE_URL}/service/cloak_centos.sh"
-CLOAK_DEBIAN="${BASE_URL}/service/cloak_debian.sh"
+CLOAK_INIT_LOCAL="./service/cloak.sh"
+CLOAK_INIT_ONLINE="${BASE_URL}/service/cloak.sh"
 CK_DB_PATH="/etc/cloak"
 CK_CLIENT_CONFIG="/etc/cloak/ckclient.json"
 CK_SERVER_CONFIG="/etc/cloak/ckserver.json"
@@ -115,8 +115,8 @@ RABBIT_BIN_PATH="/usr/local/bin/rabbit-tcp"
 RABBIT_INIT="/etc/init.d/rabbit-tcp"
 RABBIT_CONFIG="/etc/rabbit-tcp/config.json"
 RABBIT_VERSION_FILE="/etc/rabbit-tcp/rabbit-tcp.version"
-RABBIT_CENTOS="${BASE_URL}/service/rabbit-tcp_centos.sh"
-RABBIT_DEBIAN="${BASE_URL}/service/rabbit-tcp_debian.sh"
+RABBIT_INIT_LOCAL="./service/rabbit-tcp.sh"
+RABBIT_INIT_ONLINE="${BASE_URL}/service/rabbit-tcp.sh"
 
 
 # simple-tls
@@ -131,10 +131,8 @@ CADDY_BIN_PATH="/usr/local/caddy/caddy"
 CADDY_CONF_FILE="/usr/local/caddy/Caddyfile"
 CADDY_BASE_URL="https://caddyserver.com/download/linux/amd64"
 CADDY_INIT="/etc/init.d/caddy"
-ONLINE_CADDY_CENTOS_INIT_URL="${BASE_URL}/service/caddy_centos.sh"
-LOCAL_CADDY_DEBIAN_INIT_PATH="./service/caddy_centos.sh"
-ONLINE_CADDY_DEBIAN_INIT_URL="${BASE_URL}/service/caddy_debian.sh"
-LOCAL_CADDY_DEBIAN_INIT_PATH="./service/caddy_debian.sh"
+CADDY_INIT_LOCAL="./service/caddy.sh"
+CADDY_INIT_ONLINE="${BASE_URL}/service/caddy.sh"
 
 
 # nginx

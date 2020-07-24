@@ -1,5 +1,5 @@
 service_caddy(){
-    download_service_file ${CADDY_INIT} ${ONLINE_CADDY_CENTOS_INIT_URL} ${LOCAL_CADDY_DEBIAN_INIT_PATH} ${ONLINE_CADDY_DEBIAN_INIT_URL} ${LOCAL_CADDY_DEBIAN_INIT_PATH}
+    download_service_file ${CADDY_INIT} ${CADDY_INIT_ONLINE} ${CADDY_INIT_LOCAL}
     
     if check_sys packageManager yum; then
         chmod +x ${CADDY_INIT}

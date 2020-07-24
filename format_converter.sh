@@ -55,18 +55,11 @@ dos2unix ./templates/sip002_url_templates.sh
 dos2unix ./templates/terminal_config_templates.sh
 
 
-dos2unix ./service/caddy_centos.sh
-dos2unix ./service/caddy_debian.sh
-dos2unix ./service/cloak_centos.sh
-dos2unix ./service/cloak_debian.sh
-dos2unix ./service/kcptun_centos.sh
-dos2unix ./service/kcptun_debian.sh
-dos2unix ./service/rabbit-tcp_centos.sh
-dos2unix ./service/rabbit-tcp_debian.sh
-dos2unix ./service/shadowsocks-libev_centos.sh
-dos2unix ./service/shadowsocks-libev_debian.sh
-dos2unix ./service/shadowsocks-rust_centos.sh
-dos2unix ./service/shadowsocks-rust_debian.sh
-dos2unix ./service/go-shadowsocks2_centos.sh
-dos2unix ./service/go-shadowsocks2_debian.sh
+dos2unix ./service/caddy.sh
+dos2unix ./service/cloak.sh
+dos2unix ./service/kcptun.sh
+dos2unix ./service/rabbit-tcp.sh
+dos2unix ./service/shadowsocks-libev.sh
+dos2unix ./service/shadowsocks-rust.sh
+dos2unix ./service/go-shadowsocks2.sh
 

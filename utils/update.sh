@@ -279,7 +279,7 @@ update_caddy_v1(){
     
     caddy_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/caddyserver/caddy/releases | grep -o '"tag_name": ".*"' | sed 's/"//g;s/v//g' | sed 's/tag_name: //g' | grep -E '^1' | head -n 1)
     [ -z ${caddy_ver} ] && echo -e "${Error} 获取 caddy 最新版本失败." && exit 1
-    current_caddy_ver=$(${CADDY_BIN_PATH} -version | grep Caddy | cut -d\  -f2 | sed 's/v//g')
+    current_caddy_ver=${caddyCurrentVer}
     if ! check_latest_version ${current_caddy_ver} ${caddy_ver}; then
         echo -e "${Point} caddy当前已是最新版本${current_caddy_ver}不需要更新."
         echo
@@ -300,10 +300,10 @@ update_caddy_v1(){
 
 update_caddy_v2(){
     cd ${CUR_DIR}
-
+    
     caddy_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/caddyserver/caddy/releases | grep -o '"tag_name": ".*"' | sed 's/"//g;s/v//g' | sed 's/tag_name: //g' | grep -E '^2' | head -n 1)
     [ -z ${caddy_ver} ] && echo -e "${Error} 获取 caddy2 最新版本失败." && exit 1
-    current_caddy_ver=$(${CADDY_BIN_PATH} version | cut -d\  -f1 | sed 's/v//g')
+    current_caddy_ver=${caddyCurrentVer}
     if ! check_latest_version ${current_caddy_ver} ${caddy_ver}; then
         echo -e "${Point} caddy2当前已是最新版本${current_caddy_ver}不需要更新."
         echo
@@ -324,10 +324,10 @@ update_caddy_v2(){
 
 update_caddy(){
     if [[ -e ${CADDY_BIN_PATH} ]]; then
-        read  caddyVerFlag < ${CADDY_VERSION_FILE}
+        IFS=, read caddyVerFlag caddyCurrentVer < ${CADDY_VERSION_FILE}
         
         if [[ ${caddyVerFlag} = "1" ]]; then
-            update_caddy_v2
+            update_caddy_v1
         elif [[ ${caddyVerFlag} = "2" ]]; then
             update_caddy_v2
         fi

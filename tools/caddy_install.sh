@@ -36,7 +36,7 @@ install_caddy_v1(){
     mv caddy ${CADDY_BIN_PATH}
     [ -f ${CADDY_BIN_PATH} ] && ln -fs ${CADDY_BIN_PATH} /usr/bin
 
-    echo ${caddyVerFlag} > ${CADDY_VERSION_FILE}
+    echo ${caddyVerFlag},${caddy_ver} > ${CADDY_VERSION_FILE}
     
     service_caddy ${CADDY_INIT_ONLINE} ${CADDY_INIT_LOCAL}
     echo && echo -e " Caddy 使用命令：${CADDY_CONF_FILE}
@@ -66,7 +66,7 @@ install_caddy_v2(){
     mv caddy ${CADDY_BIN_PATH}
     [ -f ${CADDY_BIN_PATH} ] && ln -fs ${CADDY_BIN_PATH} /usr/bin
 
-    echo ${caddyVerFlag} > ${CADDY_VERSION_FILE}
+    echo ${caddyVerFlag},${caddy_ver} > ${CADDY_VERSION_FILE}
 
     service_caddy ${CADDY_V2_INIT_ONLINE} ${CADDY_V2_INIT_LOCAL}
     echo && echo -e " Caddy 使用命令：${CADDY_CONF_FILE}

@@ -84,7 +84,7 @@ ss_v2ray_ws_tls_web_config(){
 	EOF
 }
 
-caddy_config(){
+caddy_v1_config(){
 	cat > ${CADDY_CONF_FILE}<<-EOF
 	${domain}:443 {
 	    gzip
@@ -100,6 +100,29 @@ caddy_config(){
 	    }
 	}
 	EOF
+}
+
+caddy_v2_config(){
+	cat > ${CADDY_CONF_FILE}<<-EOF
+	${domain}:443 {
+	    encode gzip
+	    log {
+	        output file /var/log/caddy-access.log
+	        format json
+	    }
+	    tls ${cerPath} ${keyPath}
+	    reverse_proxy ${path} localhost:${shadowsocksport}
+	    reverse_proxy ${mirror_site}
+	}
+	EOF
+}
+
+caddy_config(){
+    if [[ ${caddyVerFlag} = "1" ]]; then
+        caddy_v1_config
+    elif [[ ${caddyVerFlag} = "2" ]]; then
+        caddy_v2_config
+    fi
 }
 
 ss_v2ray_ws_tls_web_cdn_config(){

@@ -54,7 +54,7 @@ GO_SHADOWSOCKS2_BIN_PATH="/usr/local/bin/go-shadowsocks2"
 GO_SHADOWSOCKS2_INIT="/etc/init.d/go-shadowsocks2"
 GO_SHADOWSOCKS2_INIT_LOCAL="./service/go-shadowsocks2.sh"
 GO_SHADOWSOCKS2_INIT_ONLINE="${BASE_URL}/service/go-shadowsocks2.sh"
-GO_SHADOWSOCKS2_VERSION_FILE="/etc/shadowsocks/go-shadowsocks2.version"
+GO_SHADOWSOCKS2_VERSION_FILE="/etc/shadowsocks/go-shadowsocks2.v"
 
 
 # shadowsocks-libev dependencies
@@ -104,7 +104,7 @@ CK_SERVER_CONFIG="/etc/cloak/ckserver.json"
 
 
 # mos-tls-tunnel
-MTT_VERSION_FILE="/etc/shadowsocks/mtt.version"
+MTT_VERSION_FILE="/etc/shadowsocks/mtt.v"
 MTT_INSTALL_PATH="/usr/local/bin"
 MTT_BIN_PATH="/usr/local/bin/mtt-server"
 
@@ -114,7 +114,7 @@ RABBIT_INSTALL_PATH="/usr/local/bin"
 RABBIT_BIN_PATH="/usr/local/bin/rabbit-tcp"
 RABBIT_INIT="/etc/init.d/rabbit-tcp"
 RABBIT_CONFIG="/etc/rabbit-tcp/config.json"
-RABBIT_VERSION_FILE="/etc/rabbit-tcp/rabbit-tcp.version"
+RABBIT_VERSION_FILE="/etc/rabbit-tcp/rabbit-tcp.v"
 RABBIT_INIT_LOCAL="./service/rabbit-tcp.sh"
 RABBIT_INIT_ONLINE="${BASE_URL}/service/rabbit-tcp.sh"
 
@@ -122,17 +122,19 @@ RABBIT_INIT_ONLINE="${BASE_URL}/service/rabbit-tcp.sh"
 # simple-tls
 SIMPLE_TLS_INSTALL_PATH="/usr/local/bin"
 SIMPLE_TLS_BIN_PATH="/usr/local/bin/simple-tls"
-SIMPLE_TLS_VERSION_FILE="/etc/shadowsocks/simple-tls.version"
+SIMPLE_TLS_VERSION_FILE="/etc/shadowsocks/simple-tls.v"
 
 
 # caddy
 CADDY_INSTALL_PATH="/usr/local/caddy"
 CADDY_BIN_PATH="/usr/local/caddy/caddy"
 CADDY_CONF_FILE="/usr/local/caddy/Caddyfile"
-CADDY_BASE_URL="https://caddyserver.com/download/linux/amd64"
+CADDY_VERSION_FILE="/usr/local/caddy/caddy.v"
 CADDY_INIT="/etc/init.d/caddy"
 CADDY_INIT_LOCAL="./service/caddy.sh"
 CADDY_INIT_ONLINE="${BASE_URL}/service/caddy.sh"
+CADDY_V2_INIT_LOCAL="./service/caddy2.sh"
+CADDY_V2_INIT_ONLINE="${BASE_URL}/service/caddy2.sh"
 
 
 # nginx

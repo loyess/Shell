@@ -97,3 +97,38 @@ choose_nginx_version_menu(){
         break
     done
 }
+
+choose_caddy_version_menu(){
+    local CADDY_PACKAGES_V=(Caddy Caddy2)
+
+    while true
+    do
+        echo -e "请选择Caddy软件包版本\n"
+        for ((i=1;i<=${#CADDY_PACKAGES_V[@]};i++)); do
+            hint="${CADDY_PACKAGES_V[$i-1]}"
+            echo -e "${Green}  ${i}.${suffix} ${hint}"
+        done
+        echo
+        read -e -p "(默认：${CADDY_PACKAGES_V[0]}):" caddyVerFlag
+        [ -z "$caddyVerFlag" ] && caddyVerFlag=1
+        expr ${caddyVerFlag} + 1 &>/dev/null
+        if [ $? -ne 0 ]; then
+            echo
+            echo -e "${Error} 请输入一个数字"
+            echo
+            continue
+        fi
+        if [[ "$caddyVerFlag" -lt 1 || "$caddyVerFlag" -gt ${#CADDY_PACKAGES_V[@]} ]]; then
+            echo
+            echo -e "${Error} 请输入一个数字在 [1-${#CADDY_PACKAGES_V[@]}] 之间"
+            echo
+            continue
+        fi
+
+        echo
+        echo -e "${Red}  version = ${CADDY_PACKAGES_V[$caddyVerFlag-1]}${suffix}"
+        echo
+
+        break
+    done
+}

@@ -274,29 +274,63 @@ update_simple_tls(){
     fi
 }
 
-update_caddy(){
+update_caddy_v1(){
     cd ${CUR_DIR}
     
-    if [[ -e ${CADDY_BIN_PATH} ]]; then
-        caddy_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/caddyserver/caddy/releases | grep -o '"tag_name": ".*"' | sed 's/"//g;s/v//g' | sed 's/tag_name: //g' | grep -E '^1' | head -n 1)
-        [ -z ${caddy_ver} ] && echo -e "${Error} 获取 caddy 最新版本失败." && exit 1
-        current_caddy_ver=$(${CADDY_BIN_PATH} -version | grep Caddy | cut -d\  -f2 | sed 's/v//g')
-        if ! check_latest_version ${current_caddy_ver} ${caddy_ver}; then
-            echo -e "${Point} caddy当前已是最新版本${current_caddy_ver}不需要更新."
-            echo
-            exit 1
-        fi
-        
-        echo -e "${Info} 检测到caddy有新版本，开始下载并安装."
-        do_stop > /dev/null 2>&1
-        improt_package "tools" "caddy_install.sh"
-        install_caddy
-        do_restart > /dev/null 2>&1
-
-        echo -e "${Info} caddy已成功升级为最新版本${caddy_ver}"
+    caddy_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/caddyserver/caddy/releases | grep -o '"tag_name": ".*"' | sed 's/"//g;s/v//g' | sed 's/tag_name: //g' | grep -E '^1' | head -n 1)
+    [ -z ${caddy_ver} ] && echo -e "${Error} 获取 caddy 最新版本失败." && exit 1
+    current_caddy_ver=$(${CADDY_BIN_PATH} -version | grep Caddy | cut -d\  -f2 | sed 's/v//g')
+    if ! check_latest_version ${current_caddy_ver} ${caddy_ver}; then
+        echo -e "${Point} caddy当前已是最新版本${current_caddy_ver}不需要更新."
         echo
+        exit 1
+    fi
+
+    echo -e "${Info} 检测到caddy有新版本，开始下载并安装."
+    do_stop > /dev/null 2>&1
+    improt_package "tools" "caddy_install.sh"
+    install_caddy
+    do_restart > /dev/null 2>&1
+
+    echo -e "${Info} caddy已成功升级为最新版本${caddy_ver}"
+    echo
+
+    install_cleanup
+}
+
+update_caddy_v2(){
+    cd ${CUR_DIR}
+
+    caddy_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/caddyserver/caddy/releases | grep -o '"tag_name": ".*"' | sed 's/"//g;s/v//g' | sed 's/tag_name: //g' | grep -E '^2' | head -n 1)
+    [ -z ${caddy_ver} ] && echo -e "${Error} 获取 caddy2 最新版本失败." && exit 1
+    current_caddy_ver=$(${CADDY_BIN_PATH} version | cut -d\  -f1 | sed 's/v//g')
+    if ! check_latest_version ${current_caddy_ver} ${caddy_ver}; then
+        echo -e "${Point} caddy2当前已是最新版本${current_caddy_ver}不需要更新."
+        echo
+        exit 1
+    fi
+
+    echo -e "${Info} 检测到caddy2有新版本，开始下载并安装."
+    do_stop > /dev/null 2>&1
+    improt_package "tools" "caddy_install.sh"
+    install_caddy
+    do_restart > /dev/null 2>&1
+
+    echo -e "${Info} caddy2已成功升级为最新版本${caddy_ver}"
+    echo
+
+    install_cleanup
+}
+
+update_caddy(){
+    if [[ -e ${CADDY_BIN_PATH} ]]; then
+        read  caddyVerFlag < ${CADDY_VERSION_FILE}
         
-        install_cleanup
+        if [[ ${caddyVerFlag} = "1" ]]; then
+            update_caddy_v2
+        elif [[ ${caddyVerFlag} = "2" ]]; then
+            update_caddy_v2
+        fi
     fi
 }
 

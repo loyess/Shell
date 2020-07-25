@@ -211,7 +211,9 @@ install_prepare_libev_v2ray(){
     if [[ ${libev_v2ray} = "4" || ${libev_v2ray} = "5" ]]; then
         web_server_menu
     fi
-    if [[ ${web_flag} = "2" ]]; then
+    if [[ ${web_flag} = "1" ]]; then
+        choose_caddy_version_menu
+    elif [[ ${web_flag} = "2" ]]; then
         choose_nginx_version_menu
     fi
     

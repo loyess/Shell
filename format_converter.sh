@@ -56,6 +56,7 @@ dos2unix ./templates/terminal_config_templates.sh
 
 
 dos2unix ./service/caddy.sh
+dos2unix ./service/caddy2.sh
 dos2unix ./service/cloak.sh
 dos2unix ./service/kcptun.sh
 dos2unix ./service/rabbit-tcp.sh

@@ -5,7 +5,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.6.3"
+SHELL_VERSION="2.6.4"
 # ====================
 
 
@@ -55,16 +55,6 @@ GO_SHADOWSOCKS2_INIT="/etc/init.d/go-shadowsocks2"
 GO_SHADOWSOCKS2_INIT_LOCAL="./service/go-shadowsocks2.sh"
 GO_SHADOWSOCKS2_INIT_ONLINE="${BASE_URL}/service/go-shadowsocks2.sh"
 GO_SHADOWSOCKS2_VERSION_FILE="/etc/shadowsocks/go-shadowsocks2.v"
-
-
-# shadowsocks-libev dependencies
-LIBSODIUM_VERSION="1.0.18"
-LIBSODIUM_FILE="libsodium-${LIBSODIUM_VERSION}"
-LIBSODIUM_URL="https://github.com/jedisct1/libsodium/releases/download/${LIBSODIUM_VERSION}-RELEASE/libsodium-${LIBSODIUM_VERSION}.tar.gz"
-
-MBEDTLS_VERSION="2.16.7"
-MBEDTLS_FILE="mbedtls-${MBEDTLS_VERSION}"
-MBEDTLS_URL="https://tls.mbed.org/download/mbedtls-${MBEDTLS_VERSION}-gpl.tgz"
 
 
 # v2ray-plugin
@@ -1112,7 +1102,7 @@ install_cleanup(){
     cd ${CUR_DIR}
     # ss-libev
     rm -rf ${LIBSODIUM_FILE} ${LIBSODIUM_FILE}.tar.gz
-    rm -rf ${MBEDTLS_FILE} ${MBEDTLS_FILE}-gpl.tgz
+    rm -rf ${MBEDTLS_FILE} ${MBEDTLS_FILE}.tar.gz
     rm -rf ${shadowsocks_libev_file} ${shadowsocks_libev_file}.tar.gz
     
     # ss-rust

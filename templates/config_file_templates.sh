@@ -96,6 +96,7 @@ caddy_v1_config(){
 	        header_upstream -Origin
 	    }
 	    proxy / ${mirror_site} {
+	        transparent
 	        except ${path}
 	    }
 	}
@@ -112,7 +113,13 @@ caddy_v2_config(){
 	    }
 	    tls ${cerPath} ${keyPath}
 	    reverse_proxy ${path} localhost:${shadowsocksport}
-	    reverse_proxy ${mirror_site}
+	    reverse_proxy ${mirror_site} {
+	        header_up Host {http.reverse_proxy.upstream.hostport}
+	        header_up X-Real-IP {http.request.remote}
+	        header_up X-Forwarded-For {http.request.remote}
+	        header_up X-Forwarded-Port {http.request.port}
+	        header_up X-Forwarded-Proto {http.request.scheme}
+	    }
 	}
 	EOF
 }

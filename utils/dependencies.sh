@@ -1,3 +1,16 @@
+# shadowsocks-libev dependencies
+LIBSODIUM_VERSION="1.0.18"
+LIBSODIUM_FILE="libsodium-${LIBSODIUM_VERSION}"
+LIBSODIUM_VERSION_FILE=~/.deps-ver/libsodium.v
+LIBSODIUM_URL="https://github.com/jedisct1/libsodium/releases/download/${LIBSODIUM_VERSION}-RELEASE/libsodium-${LIBSODIUM_VERSION}.tar.gz"
+
+MBEDTLS_VERSION="2.16.7"
+MBEDTLS_FILE="mbedtls-${MBEDTLS_VERSION}"
+MBEDTLS_VERSION_FILE=~/.deps-ver/mbedtls.v
+MBEDTLS_URL="https://github.com/ARMmbed/mbedtls/archive/${MBEDTLS_FILE}.tar.gz"
+
+
+
 error_detect_deps_of_ubuntu(){
     local command=$1
     local depend=$2
@@ -87,7 +100,7 @@ install_dependencies(){
 }
 
 install_libsodium(){    
-    if [ ! -f /usr/lib/libsodium.a ]; then
+    if [ ! -f ${LIBSODIUM_VERSION_FILE} ]; then
         cd ${CUR_DIR}
         echo -e "${Info} 下载${LIBSODIUM_FILE}."
         download "${LIBSODIUM_FILE}.tar.gz" "${LIBSODIUM_URL}"
@@ -100,19 +113,49 @@ install_libsodium(){
             install_cleanup
             exit 1
         fi
-        echo -e "${Info} ${LIBSODIUM_FILE} 安装成功 !"    
+        # wriet version num
+        if [ ! -d "$(dirname ${LIBSODIUM_VERSION_FILE})" ]; then
+            mkdir -p $(dirname ${LIBSODIUM_VERSION_FILE})
+        fi
+        echo ${LIBSODIUM_VERSION} > ${LIBSODIUM_VERSION_FILE}
+        echo -e "${Info} ${LIBSODIUM_FILE} 安装成功 !"
     else
-        echo -e "${Info} ${LIBSODIUM_FILE} 已经安装."
+        read  currentLibsodiumVer < ${LIBSODIUM_VERSION_FILE}
+        latestLibsodiumVer=${LIBSODIUM_VERSION}
+
+        if check_latest_version ${currentLibsodiumVer} ${latestLibsodiumVer}; then
+            cd ${CUR_DIR}
+            echo -e "${Info} 下载${LIBSODIUM_FILE}."
+            download "${LIBSODIUM_FILE}.tar.gz" "${LIBSODIUM_URL}"
+            echo -e "${Info} 解压${LIBSODIUM_FILE}."
+            tar zxf ${LIBSODIUM_FILE}.tar.gz && cd ${LIBSODIUM_FILE}
+            echo -e "${Info} 编译安装${LIBSODIUM_FILE}."
+            ./configure --prefix=/usr && make && make install
+            if [ $? -ne 0 ]; then
+                echo -e "${Error} ${LIBSODIUM_FILE} 更新失败 !"
+                install_cleanup
+                exit 1
+            fi
+            # wriet version num
+            if [ ! -d "$(dirname ${LIBSODIUM_VERSION_FILE})" ]; then
+                mkdir -p $(dirname ${LIBSODIUM_VERSION_FILE})
+            fi
+            echo ${LIBSODIUM_VERSION} > ${LIBSODIUM_VERSION_FILE}
+            echo -e "${Info} ${LIBSODIUM_FILE} 更新成功 !"
+        else
+            echo -e "${Info} ${LIBSODIUM_FILE} 已经安装最新版本."
+        fi
     fi
 }
 
 install_mbedtls(){
-    if [ ! -f /usr/lib/libmbedtls.a ]; then
+    if [ ! -f ${MBEDTLS_VERSION_FILE} ]; then
         cd ${CUR_DIR}
         echo -e "${Info} 下载${MBEDTLS_FILE}."
-        download "${MBEDTLS_FILE}-gpl.tgz" "${MBEDTLS_URL}"
+        download "${MBEDTLS_FILE}.tar.gz" "${MBEDTLS_URL}"
         echo -e "${Info} 解压${MBEDTLS_FILE}."
-        tar xf ${MBEDTLS_FILE}-gpl.tgz
+        tar zxf ${MBEDTLS_FILE}.tar.gz
+        mv "mbedtls-${MBEDTLS_FILE}" ${MBEDTLS_FILE}
         cd ${MBEDTLS_FILE}
         echo -e "${Info} 编译安装${MBEDTLS_FILE}."
         make SHARED=1 CFLAGS=-fPIC
@@ -122,9 +165,41 @@ install_mbedtls(){
             install_cleanup
             exit 1
         fi
+        # wriet version num
+        if [ ! -d "$(dirname ${MBEDTLS_VERSION_FILE})" ]; then
+            mkdir -p $(dirname ${MBEDTLS_VERSION_FILE})
+        fi
+        echo ${MBEDTLS_VERSION} > ${MBEDTLS_VERSION_FILE}
         echo -e "${Info} ${MBEDTLS_FILE} 安装成功 !"
     else
-        echo -e "${Info} ${MBEDTLS_FILE} 已经安装."
+        read  currentMbedtlsVer < ${MBEDTLS_VERSION_FILE}
+        latestMbedtlsVer=${MBEDTLS_VERSION}
+
+        if check_latest_version ${currentMbedtlsVer} ${latestMbedtlsVer}; then
+            cd ${CUR_DIR}
+            echo -e "${Info} 下载${MBEDTLS_FILE}."
+            download "${MBEDTLS_FILE}.tar.gz" "${MBEDTLS_URL}"
+            echo -e "${Info} 解压${MBEDTLS_FILE}."
+            tar zxf ${MBEDTLS_FILE}.tar.gz
+            mv "mbedtls-${MBEDTLS_FILE}" ${MBEDTLS_FILE}
+            cd ${MBEDTLS_FILE}
+            echo -e "${Info} 编译安装${MBEDTLS_FILE}."
+            make SHARED=1 CFLAGS=-fPIC
+            make DESTDIR=/usr install
+            if [ $? -ne 0 ]; then
+                echo -e "${Error} ${MBEDTLS_FILE} 更新失败."
+                install_cleanup
+                exit 1
+            fi
+            # wriet version num
+            if [ ! -d "$(dirname ${MBEDTLS_VERSION_FILE})" ]; then
+                mkdir -p $(dirname ${MBEDTLS_VERSION_FILE})
+            fi
+            echo ${MBEDTLS_VERSION} > ${MBEDTLS_VERSION_FILE}
+            echo -e "${Info} ${MBEDTLS_FILE} 更新成功 !"
+        else
+            echo -e "${Info} ${MBEDTLS_FILE} 已经安装最新版本."
+        fi
     fi
 }
 

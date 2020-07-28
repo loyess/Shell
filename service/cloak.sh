@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# chkconfig: 2345 90 10
+# description: A censorship circumvention tool to evade detection against state adversaries
 
 ### BEGIN INIT INFO
 # Provides:          cloak
@@ -6,7 +8,7 @@
 # Required-Stop:     $network
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: A Stable & Secure Tunnel Based On KCP with N:M Multiplexing
+# Short-Description: It can help you improve network speed
 # Description:       Start or stop the  cloak server
 ### END INIT INFO
 

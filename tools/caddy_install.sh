@@ -1,47 +1,85 @@
 service_caddy(){
-    download_service_file ${CADDY_INIT} ${ONLINE_CADDY_CENTOS_INIT_URL} ${LOCAL_CADDY_DEBIAN_INIT_PATH} ${ONLINE_CADDY_DEBIAN_INIT_URL} ${LOCAL_CADDY_DEBIAN_INIT_PATH}
+    local caddyInitOnline=$1
+    local caddyInitLocal=$2
+
+    download_service_file ${CADDY_INIT} ${caddyInitOnline} ${caddyInitLocal}
     
     if check_sys packageManager yum; then
         chmod +x ${CADDY_INIT}
-		chkconfig --add $(basename ${CADDY_INIT})
-		chkconfig $(basename ${CADDY_INIT}) on
+        chkconfig --add $(basename ${CADDY_INIT})
+        chkconfig $(basename ${CADDY_INIT}) on
     elif check_sys packageManager apt; then
         chmod +x ${CADDY_INIT}
-		update-rc.d -f $(basename ${CADDY_INIT}) defaults
+        update-rc.d -f $(basename ${CADDY_INIT}) defaults
     fi
 }
 
-install_caddy(){
-    local extension=$1
-    
-    if [[ ! -z ${extension} ]]; then
-		extension_all="?plugins=${extension}&license=personal"
-	else
-		extension_all="?license=personal"
-	fi
-    
-    download "caddy_linux.tar.gz" "https://caddyserver.com/download/linux/amd64${extension_all}"
-    tar zxf "caddy_linux.tar.gz"
+install_caddy_v1(){
+    caddy_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/caddyserver/caddy/releases | grep -o '"tag_name": ".*"' | sed 's/"//g;s/v//g' | sed 's/tag_name: //g' | grep -E '^1' | head -n 1)
+    [ -z ${caddy_ver} ] && echo -e "${Error} 获取 caddy 最新版本失败." && exit 1
+    caddy_file="caddy_v${caddy_ver}_linux_amd64"
+    caddy_url="https://github.com/caddyserver/caddy/releases/download/v${caddy_ver}/caddy_v${caddy_ver}_linux_amd64.tar.gz"
+    download "${caddy_file}.tar.gz" "${caddy_url}"
+    tar zxf "${caddy_file}.tar.gz"
     
     # installed clear
-	rm -rf "caddy_linux.tar.gz"
+    rm -rf "${caddy_file}.tar.gz"
     rm -rf LICENSES.txt
-	rm -rf README.txt 
-	rm -rf CHANGES.txt
-	rm -rf "init/"
+    rm -rf README.txt
+    rm -rf CHANGES.txt
+    rm -rf "init/"
     
-	chmod +x caddy
+    chmod +x caddy
     if [ ! -e ${CADDY_INSTALL_PATH} ]; then
         mkdir -p ${CADDY_INSTALL_PATH}
     fi
     mv caddy ${CADDY_BIN_PATH}
     [ -f ${CADDY_BIN_PATH} ] && ln -fs ${CADDY_BIN_PATH} /usr/bin
+
+    echo ${caddyVerFlag},${caddy_ver} > ${CADDY_VERSION_FILE}
     
-    service_caddy
+    service_caddy ${CADDY_INIT_ONLINE} ${CADDY_INIT_LOCAL}
     echo && echo -e " Caddy 使用命令：${CADDY_CONF_FILE}
- 日志文件：cat /tmp/caddy.log
+ 日志文件：/var/log/caddy-error.log | /var/log/caddy-access.log
  使用说明：service caddy start | stop | restart | status
  或者使用：/etc/init.d/caddy start | stop | restart | status
 ${Info} Caddy 安装完成！"
 }
 
+install_caddy_v2(){
+    caddy_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/caddyserver/caddy/releases | grep -o '"tag_name": ".*"' | sed 's/"//g;s/v//g' | sed 's/tag_name: //g' | grep -E '^2' | head -n 1)
+    [ -z ${caddy_ver} ] && echo -e "${Error} 获取 caddy 最新版本失败." && exit 1
+    caddy_file="caddy_${caddy_ver}_linux_amd64"
+    caddy_url="https://github.com/caddyserver/caddy/releases/download/v${caddy_ver}/caddy_${caddy_ver}_linux_amd64.tar.gz"
+    download "${caddy_file}.tar.gz" "${caddy_url}"
+    tar zxf "${caddy_file}.tar.gz"
+
+    # installed clear
+    rm -rf "${caddy_file}.tar.gz"
+    rm -rf LICENSES.txt
+    rm -rf README.txt
+
+    chmod +x caddy
+    if [ ! -e ${CADDY_INSTALL_PATH} ]; then
+        mkdir -p ${CADDY_INSTALL_PATH}
+    fi
+    mv caddy ${CADDY_BIN_PATH}
+    [ -f ${CADDY_BIN_PATH} ] && ln -fs ${CADDY_BIN_PATH} /usr/bin
+
+    echo ${caddyVerFlag},${caddy_ver} > ${CADDY_VERSION_FILE}
+
+    service_caddy ${CADDY_V2_INIT_ONLINE} ${CADDY_V2_INIT_LOCAL}
+    echo && echo -e " Caddy 使用命令：${CADDY_CONF_FILE}
+ 日志文件：/var/log/caddy-access.log
+ 使用说明：service caddy start | stop | restart | status
+ 或者使用：/etc/init.d/caddy start | stop | restart | status
+${Info} Caddy2 安装完成！"
+}
+
+install_caddy(){
+    if [[ ${caddyVerFlag} = "1" ]]; then
+        install_caddy_v1
+    elif [[ ${caddyVerFlag} = "2" ]]; then
+        install_caddy_v2
+    fi
+}

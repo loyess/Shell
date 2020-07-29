@@ -5,7 +5,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.6.4"
+SHELL_VERSION="2.6.5"
 # ====================
 
 
@@ -606,212 +606,82 @@ config_ss(){
         mkdir -p $(dirname ${SHADOWSOCKS_CONFIG})
     fi
 
-    # start wriet config
-    improt_package "templates" "config_file_templates.sh"
-
-    # Only SS
-    if [[ ${plugin_num} == "" ]]; then
-        ss_config_standalone
-    fi
-
     # SS + V2ray-plugin
     if [[ ${plugin_num} == "1" ]]; then
-        if [[ ${libev_v2ray} == "1" ]]; then
-           ss_v2ray_ws_http_config
-        elif [[ ${libev_v2ray} == "2" ]]; then    
-           ss_v2ray_ws_tls_cdn_config
-        elif [[ ${libev_v2ray} == "3" ]]; then
-            ss_v2ray_quic_tls_cdn_config
-        elif [[ ${libev_v2ray} == "4" ]]; then
-            ss_v2ray_ws_tls_web_config
-            if [[ ${web_flag} = "1" ]]; then
-                caddy_config
-            elif [[ ${web_flag} = "2" ]]; then
-                mirror_domain=$(echo ${mirror_site} | sed 's/https:\/\///g')
-                nginx_config
-            fi 
-        elif [[ ${libev_v2ray} == "5" ]]; then
-            ss_v2ray_ws_tls_web_cdn_config
-            if [[ ${web_flag} = "1" ]]; then
-                caddy_config
-            elif [[ ${web_flag} = "2" ]]; then
-                mirror_domain=$(echo ${mirror_site} | sed 's/https:\/\///g')
-                nginx_config
-            fi 
-        fi
-        # disable mux
-        if [[ ${isDisable} == disable ]] && [[ ${libev_v2ray} != "3" ]]; then
-            sed 's/"plugin_opts":"/"plugin_opts":"mux=0;/' -i ${SHADOWSOCKS_CONFIG}
-        fi
-    fi
-
+        improt_package "templates/config" "v2ray_plugin_config.sh"
+        config_ss_v2ray_plugin
     # SS + KcpTun
-    if [[ ${plugin_num} == "2" ]]; then
-        if [ ! -d "$(dirname ${KCPTUN_CONFIG})" ]; then
-            mkdir -p $(dirname ${KCPTUN_CONFIG})
-        fi
-        ss_config_standalone
-        kcptun_config_standalone
-    fi
-
+    elif [[ ${plugin_num} == "2" ]]; then
+        improt_package "templates/config" "kcptun_config.sh"
+        config_ss_kcptun
     # SS + Simple-obfs
-    if [[ ${plugin_num} == "3" ]]; then
-        if [[ ${libev_obfs} == "1" ]]; then
-           ss_obfs_http_config
-        elif [[ ${libev_obfs} == "2" ]]; then    
-           ss_obfs_tls_config
-        fi
-    fi
-
+    elif [[ ${plugin_num} == "3" ]]; then
+        improt_package "templates/config" "simple_obfs_config.sh"
+        config_ss_simple_obfs
     # SS + Goquite
-    if [[ ${plugin_num} == "4" ]]; then
+    elif [[ ${plugin_num} == "4" ]]; then
+        improt_package "templates/config" "goquiet_config.sh"
         ss_goquiet_config
-    fi
-
     # SS + Cloak
-    if [[ ${plugin_num} == "5" ]]; then
-        if [ ! -d "$(dirname ${CK_SERVER_CONFIG})" ]; then
-            mkdir -p $(dirname ${CK_SERVER_CONFIG})
-        fi
-        ss_config_standalone
-        cloak2_server_config
-        cloak2_client_config
-    fi
-
+    elif [[ ${plugin_num} == "5" ]]; then
+        improt_package "templates/config" "cloak_config.sh"
+        config_ss_cloak
     # SS + Mos-tls-tunnel
-    if [[ ${plugin_num} == "6" ]]; then
-        if [[ ${libev_mtt} == "1" ]]; then
-            if [[ ${domainType} = DNS-Only ]]; then
-                ss_mtt_tls_dns_only_config
-            else
-                ss_mtt_tls_config
-            fi
-        elif [[ ${libev_mtt} == "2" ]]; then
-            if [[ ${isEnableWeb} = disable ]]; then
-                ss_mtt_wss_dns_only_or_cdn_config
-            elif [[ ${isEnableWeb} = enable ]]; then
-                ss_mtt_wss_dns_only_or_cdn_web_config
-                domain=${serverName}
-                path=${wssPath}
-                if [[ ${web_flag} = "1" ]]; then
-                    caddy_config
-                elif [[ ${web_flag} = "2" ]]; then
-                    mirror_domain=$(echo ${mirror_site} | sed 's/https:\/\///g')
-                    nginx_config
-                fi 
-            else
-                ss_mtt_wss_config
-            fi
-        fi
-        
-        if [[ ${isEnable} == enable ]]; then
-            sed 's/"plugin_opts":"/"plugin_opts":"mux;/' -i ${SHADOWSOCKS_CONFIG}
-        fi
-    fi
-
+    elif [[ ${plugin_num} == "6" ]]; then
+        improt_package "templates/config" "mos_tls_tunnel_config.sh"
+        config_ss_mos_tls_tunnel
     # SS + Rabbit-tcp
-    if [[ ${plugin_num} == "7" ]]; then
-        if [ ! -d "$(dirname ${RABBIT_CONFIG})" ]; then
-            mkdir -p $(dirname ${RABBIT_CONFIG})
-        fi
-        ss_config_standalone
-        rabbit_tcp_config_standalone
-    fi
-
+    elif [[ ${plugin_num} == "7" ]]; then
+        improt_package "templates/config" "rabbit_tcp_config.sh"
+        config_ss_rabbit_tcp
     # SS + Simple-tls
-    if [[ ${plugin_num} == "8" ]]; then
-        if [[ ${libev_simple_tls} == "1" ]]; then
-            ss_simple_tls_config
-        elif [[ ${libev_simple_tls} == "2" ]]; then
-            ss_simple_tls_wss_config
-        fi
-
-        if [[ ${SimpleTlsVer} = "1" ]] && [[ ${isEnable} == enable ]]; then
-            sed 's/"plugin_opts":"s/"plugin_opts":"s;rh/' -i ${SHADOWSOCKS_CONFIG}
-        elif [[ ${SimpleTlsVer} = "2" ]] && [[ ${isEnable} == enable ]]; then
-            sed 's/"plugin_opts":"s/"plugin_opts":"s;pd/' -i ${SHADOWSOCKS_CONFIG}
-        fi
+    elif [[ ${plugin_num} == "8" ]]; then
+        improt_package "templates/config" "simple_tls_config.sh"
+        config_ss_simple_tls
+    # Only SS
+    else
+        improt_package "templates" "ss_config.sh"
+        ss_config_standalone
     fi
 }
 
 gen_ss_links(){
-    improt_package "templates" "sip002_url_templates.sh"
-
-    # Only SS
-    if [[ ${plugin_num} == "" ]]; then
-        ss_link
-    fi
-
     # SS + V2ray-plugin
     if [[ ${plugin_num} == "1" ]]; then
-        if [[ ${libev_v2ray} == "1" ]]; then
-            ss_v2ray_ws_http_link
-        elif [[ ${libev_v2ray} == "2" ]]; then
-            ss_v2ray_ws_tls_cdn_link
-        elif [[ ${libev_v2ray} == "3" ]]; then
-            ss_v2ray_quic_tls_cdn_link
-        elif [[ ${libev_v2ray} == "4" ]]; then
-            ss_v2ray_ws_tls_web_link
-        elif [[ ${libev_v2ray} == "5" ]]; then
-            ss_v2ray_ws_tls_web_cdn_link
-        fi
-    fi
-
+        improt_package "templates/links" "v2ray_plugin_link.sh"
+        gen_ss_v2ray_plugin_link
     # SS + KcpTun
-    if [[ ${plugin_num} == "2" ]]; then
+    elif [[ ${plugin_num} == "2" ]]; then
+        improt_package "templates/links" "kcptun_link.sh"
         ss_kcptun_link
-    fi
-
     # SS + Simple-obfs
-    if [[ ${plugin_num} == "3" ]]; then
-        if [[ ${libev_obfs} == "1" ]]; then
-           ss_obfs_http_link
-        elif [[ ${libev_obfs} == "2" ]]; then    
-           ss_obfs_tls_link
-        fi
-    fi
-
+    elif [[ ${plugin_num} == "3" ]]; then
+        improt_package "templates/links" "simple_obfs_link.sh"
+        gen_ss_simple_obfs_link
     # SS + Goquite
-    if [[ ${plugin_num} == "4" ]]; then
+    elif [[ ${plugin_num} == "4" ]]; then
+        improt_package "templates/links" "goquiet_link.sh"
         ss_goquiet_link
-    fi
-
     # SS + Cloak
-    if [[ ${plugin_num} == "5" ]]; then
+    elif [[ ${plugin_num} == "5" ]]; then
+        improt_package "templates/links" "cloak_link.sh"
         ss_cloak_link_new
-    fi
-
     # SS + Mos-tls-tunnel
-    if [[ ${plugin_num} == "6" ]]; then
-        if [[ ${libev_mtt} == "1" ]]; then
-            if [[ ${domainType} = DNS-Only ]]; then
-                ss_mtt_tls_dns_only_link
-            else
-                ss_mtt_tls_link
-            fi
-        elif [[ ${libev_mtt} == "2" ]]; then
-            if [[ ${isEnableWeb} = disable ]]; then
-                ss_mtt_wss_dns_only_or_cdn_link
-            elif [[ ${isEnableWeb} = enable ]]; then
-                ss_mtt_wss_dns_only_or_cdn_web_link
-            else
-                ss_mtt_wss_link
-            fi
-        fi
-    fi
-
+    elif [[ ${plugin_num} == "6" ]]; then
+        improt_package "templates/links" "mos_tls_tunnel_link.sh"
+        gen_ss_mos_tls_tunnel_link
     # SS + Rabbit-tcp
-    if [[ ${plugin_num} == "7" ]]; then
+    elif [[ ${plugin_num} == "7" ]]; then
+        improt_package "templates/links" "rabbit_tcp_link.sh"
         ss_rabbit_tcp_link
-    fi
-
     # SS + Simple-tls
-    if [[ ${plugin_num} == "8" ]]; then
-        if [[ ${libev_simple_tls} == "1" ]]; then
-            ss_simple_tls_link
-        elif [[ ${libev_simple_tls} == "2" ]]; then
-            ss_simple_tls_wss_link
-        fi
+    elif [[ ${plugin_num} == "8" ]]; then
+        improt_package "templates/links" "simple_tls_link.sh"
+        gen_ss_simple_tls_link
+    # Only SS
+    else
+        improt_package "templates" "ss_link.sh"
+        ss_link
     fi
 }
 
@@ -826,103 +696,42 @@ install_completed(){
     fi
     
     clear -x
-    
-    improt_package "templates" "terminal_config_templates.sh"
-
-    # Only SS
-    if [[ ${plugin_num} == "" ]]; then
-        ss_show
-    fi
-
     # SS + V2ray-plugin
     if [[ ${plugin_num} == "1" ]]; then
-        if [[ ${libev_v2ray} == "1" ]]; then
-            ss_v2ray_ws_http_show
-        elif [[ ${libev_v2ray} == "2" ]]; then
-            ss_v2ray_ws_tls_cdn_show
-        elif [[ ${libev_v2ray} == "3" ]]; then
-            ss_v2ray_quic_tls_cdn_show
-        elif [[ ${libev_v2ray} == "4" ]]; then
-            if [[ ${web_flag} = "1" ]]; then
-                # start caddy
-                /etc/init.d/caddy start > /dev/null 2>&1
-            elif [[ ${web_flag} = "2" ]]; then
-                systemctl start nginx
-            fi 
-            ss_v2ray_ws_tls_web_show
-        elif [[ ${libev_v2ray} == "5" ]]; then
-            if [[ ${web_flag} = "1" ]]; then
-                /etc/init.d/caddy start > /dev/null 2>&1
-            elif [[ ${web_flag} = "2" ]]; then
-                systemctl start nginx
-            fi 
-            ss_v2ray_ws_tls_web_cdn_show
-        fi
-    fi
-
-    if [[ ${plugin_num} == "2" ]]; then
-        ${KCPTUN_INIT} start  > /dev/null 2>&1
-        ss_kcptun_show
-    fi
-
+        improt_package "templates/visible" "v2ray_plugin_visible.sh"
+        ss_v2ray_plugin_visible
+    # SS + KcpTun
+    elif [[ ${plugin_num} == "2" ]]; then
+        improt_package "templates/visible" "kcptun_visible.sh"
+        ss_kcptun_visible
     # SS + Simple-obfs
-    if [[ ${plugin_num} == "3" ]]; then
-        if [[ ${libev_obfs} == "1" ]]; then
-           ss_obfs_http_show
-        elif [[ ${libev_obfs} == "2" ]]; then    
-           ss_obfs_tls_show
-        fi
-    fi
-
+    elif [[ ${plugin_num} == "3" ]]; then
+        improt_package "templates/visible" "simple_obfs_visible.sh"
+        ss_simple_obfs_visible
     # SS + Goquite
-    if [[ ${plugin_num} == "4" ]]; then
+    elif [[ ${plugin_num} == "4" ]]; then
+        improt_package "templates/visible" "goquiet_visible.sh"
         ss_goquiet_show
-    fi
-
     # SS + Cloak
-    if [[ ${plugin_num} == "5" ]]; then
-        ${CLOAK_INIT} start  > /dev/null 2>&1
-        ss_cloak_show_new
-    fi
-
+    elif [[ ${plugin_num} == "5" ]]; then
+        improt_package "templates/visible" "cloak_visible.sh"
+        ss_cloak_visible
     # SS + Mos-tls-tunnel
-    if [[ ${plugin_num} == "6" ]]; then
-        if [[ ${libev_mtt} == "1" ]]; then
-            if [[ ${domainType} = DNS-Only ]]; then
-                ss_mtt_tls_dns_only_show
-            else
-                ss_mtt_tls_show
-            fi
-        elif [[ ${libev_mtt} == "2" ]]; then
-            if [[ ${isEnableWeb} = disable ]]; then
-                ss_mtt_wss_dns_only_or_cdn_show
-            elif [[ ${isEnableWeb} = enable ]]; then
-                if [[ ${web_flag} = "1" ]]; then
-                    # start caddy
-                    /etc/init.d/caddy start > /dev/null 2>&1
-                elif [[ ${web_flag} = "2" ]]; then
-                    systemctl start nginx
-                fi 
-                ss_mtt_wss_dns_only_or_cdn_web_show
-            else
-                ss_mtt_wss_show
-            fi
-        fi
-    fi
-
+    elif [[ ${plugin_num} == "6" ]]; then
+        improt_package "templates/visible" "mos_tls_tunnel_visible.sh"
+        ss_mos_tls_tunnel_visible
     # SS + Rabbit-tcp
-    if [[ ${plugin_num} == "7" ]]; then
-        ${RABBIT_INIT} start  > /dev/null 2>&1
-        ss_rabbit_tcp_show
-    fi
-
+    elif [[ ${plugin_num} == "7" ]]; then
+        improt_package "templates/visible" "rabbit_tcp_visible.sh"
+        ss_rabbit_tcp_visible
     # SS + Simple-tls
-    if [[ ${plugin_num} == "8" ]]; then
-        if [[ ${libev_simple_tls} == "1" ]]; then
-            ss_simple_tls_show
-        elif [[ ${libev_simple_tls} == "2" ]]; then
-            ss_simple_tls_wss_show
-        fi
+    elif [[ ${plugin_num} == "8" ]]; then
+        improt_package "templates/visible" "simple_tls_visible.sh"
+        ss_simple_tls_visible
+    # Only SS
+    else
+        improt_package "templates" "ss_visible.sh"
+        ss_show
     fi
 }
 

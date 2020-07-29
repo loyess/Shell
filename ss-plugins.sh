@@ -695,7 +695,6 @@ install_completed(){
         ${GO_SHADOWSOCKS2_INIT} start > /dev/null 2>&1
     fi
     
-    clear -x
     # SS + V2ray-plugin
     if [[ ${plugin_num} == "1" ]]; then
         improt_package "templates/visible" "v2ray_plugin_visible.sh"
@@ -903,8 +902,7 @@ install_step_all(){
     config_ss
     gen_ss_links
     install_completed
-    improt_package "utils" "view_config.sh"
-    show_config "all"
+    do_show
 }
 
 install_cleanup(){
@@ -974,8 +972,16 @@ do_scan(){
 }
 
 do_show(){
-    improt_package "utils" "view_config.sh"
-    show_config "standalone"
+    local mark=$1
+
+    if [ -e $HUMAN_CONFIG ]; then
+        if [[ ${mark} == "cleanScreen" ]]; then
+            clear -x
+        fi
+        cat $HUMAN_CONFIG
+    else
+        echo "The visible config not found."
+    fi
 }
 
 do_log(){
@@ -1150,7 +1156,7 @@ case ${action} in
         do_${action}  "${2}"
         ;;
     show)
-        do_${action}
+        do_${action} "cleanScreen"
         ;;
     log)
         do_${action}

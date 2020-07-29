@@ -158,15 +158,15 @@ is_disable_mux(){
     while true
     do
         echo
-        echo -e "是否禁用多路复用(mux)"
+        echo -e "是否启用多路复用(mux)"
 		read -p "(默认: n) [y/n]: " yn
         [ -z "${yn}" ] && yn="N"
         case "${yn:0:1}" in
             y|Y)
-                isDisable=disable
+                isDisable=enable
                 ;;
             n|N)
-                isDisable=enable
+                isDisable=disable
                 ;;
             *)
                 echo

@@ -157,29 +157,29 @@ Separator_1="——————————————————————�
 
 usage() {
 	cat >&1 <<-EOF
-Usage: 
-  ./ss-plugins.sh [options...] [args...]
-    
-Available Options:
-  install          安装
-  uninstall        卸载
-  update           升级
-  start            启动
-  stop             关闭
-  restart          重启
-  status           查看状态
-  script           升级脚本
-  show             显示可视化配置
-  log              查看日志文件
-  cert             手动申请Cloudflare CDN证书(仅 .cf .ga .gq .ml .tk，有效期90天)
-  uid              为cloak添加一个新的uid用户(仅 Cloak)
-  link             用新添加的uid生成一个新的SS://链接(仅 Cloak)
-  scan             用ss://链接在当前终端上生成一个可供扫描的二维码
-  help             打印帮助信息并退出
+	Usage:
+	  ./ss-plugins.sh [options...] [args...]
+
+	Available Options:
+	  install          安装
+	  uninstall        卸载
+	  update           升级
+	  start            启动
+	  stop             关闭
+	  restart          重启
+	  status           查看状态
+	  script           升级脚本
+	  show             可视化配置
+	  log              查看日志文件
+	  uid              添加一个新的uid用户(Cloak)
+	  cert             为.cf .ga .gq .ml .tk申请证书(90天)
+	  link             用新添加的uid生成一个新的SS://链接(Cloak)
+	  scan             用ss://链接在当前终端上生成一个可供扫描的二维码
+	  help             打印帮助信息并退出
 
 	EOF
 
-    exit $1
+	exit $1
 }
 
 menu_status(){
@@ -745,8 +745,8 @@ install_prepare(){
   ${Green}1.${suffix} v2ray-plugin
   ${Green}2.${suffix} kcptun
   ${Green}3.${suffix} simple-obfs
-  ${Green}4.${suffix} goquiet (unofficial)
-  ${Green}5.${suffix} cloak (based goquiet)
+  ${Green}4.${suffix} goquiet
+  ${Green}5.${suffix} cloak
   ${Green}6.${suffix} mos-tls-tunnel
   ${Green}7.${suffix} rabbit-tcp
   ${Green}8.${suffix} simple-tls

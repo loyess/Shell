@@ -22,11 +22,11 @@ Available Options:
   restart          重启
   status           查看状态
   script           升级脚本
-  show             显示可视化配置
+  show             可视化配置
   log              查看日志文件
-  cert             手动申请Cloudflare CDN证书(仅 .cf .ga .gq .ml .tk，有效期90天)
-  uid              为cloak添加一个新的uid用户(仅 Cloak)
-  link             用新添加的uid生成一个新的SS://链接(仅 Cloak)
+  uid              添加一个新的uid用户(Cloak)
+  cert             为.cf .ga .gq .ml .tk申请证书(90天)
+  link             用新添加的uid生成一个新的SS://链接(Cloak)
   scan             用ss://链接在当前终端上生成一个可供扫描的二维码
   help             打印帮助信息并退出
 ```
@@ -62,7 +62,6 @@ Available Options:
 
   caddy安装目录：/usr/local/caddy
   caddy配置文件: /usr/local/caddy/Caddyfile
-  caddy生成证书目录：~/.caddy/acme/acme-v02.api.letsencrypt.org/sites/xxx.xxx(域名)/
 
   nginx二进制文件：/usr/sbin/nginx
   nginx配置文件：/etc/nginx/nginx.conf
@@ -140,6 +139,8 @@ Available Options:
 	
     使用mos-tls-tunnel时，client开启了跳过验证模式，通信过程中client不会验证server的certificate chain 和 host name，用于自签证书的域名可以随意（不需要自备域名）。
 
+    使用simple-tls时，由于v0.3.4版本和最新版本只有部分兼容，请注意使用对应版本的客户端。
+
 	 
 ~~~
 
@@ -204,11 +205,12 @@ Available Options:
 - [v2ray-plugin-android (teddysun)](<https://github.com/teddysun/v2ray-plugin-android/releases>)
 - [kcptun](https://github.com/xtaci/kcptun/releases)
 - [kcptun-android](https://github.com/shadowsocks/kcptun-android/releases)
-- [simple-obfs(Deprecated)](https://github.com/shadowsocks/simple-obfs/releases)
+- [simple-obfs](https://github.com/shadowsocks/simple-obfs/releases)
 - [simple-obfs-android](https://github.com/shadowsocks/simple-obfs-android/releases)
-- [GoQuiet (unofficial)](https://github.com/cbeuw/GoQuiet/releases)
+- [GoQuiet](https://github.com/cbeuw/GoQuiet/releases)
 - [GoQuiet-android](https://github.com/cbeuw/GoQuiet-android/releases)
-- [Cloak (based goquiet)](https://github.com/cbeuw/Cloak/releases)
+- [GoQuiet-android (Support Android10)](https://github.com/notsure2/GoQuiet-android/releases)
+- [Cloak](https://github.com/cbeuw/Cloak/releases)
 - [Cloak-android](https://github.com/cbeuw/Cloak-android/releases)
 - [mos-tls-tunnel](https://github.com/IrineSistiana/mos-tls-tunnel/releases)
 - [mostunnel-android](https://github.com/IrineSistiana/mostunnel-android/releases)

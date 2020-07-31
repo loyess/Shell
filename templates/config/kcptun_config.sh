@@ -23,7 +23,7 @@ config_ss_kcptun(){
     if [ ! -d "$(dirname ${KCPTUN_CONFIG})" ]; then
         mkdir -p $(dirname ${KCPTUN_CONFIG})
     fi
-    improt_package "templates" "ss_config.sh"
+    improt_package "templates/config" "ss_original_config.sh"
     ss_config_standalone
     kcptun_config_standalone
 }

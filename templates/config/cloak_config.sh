@@ -36,7 +36,7 @@ config_ss_cloak(){
     if [ ! -d "$(dirname ${CK_SERVER_CONFIG})" ]; then
         mkdir -p $(dirname ${CK_SERVER_CONFIG})
     fi
-    improt_package "templates" "ss_config.sh"
+    improt_package "templates/config" "ss_original_config.sh"
     ss_config_standalone
     cloak2_server_config
     cloak2_client_config

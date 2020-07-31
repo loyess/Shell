@@ -5,7 +5,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.6.5"
+SHELL_VERSION="2.6.6"
 # ====================
 
 
@@ -606,81 +606,63 @@ config_ss(){
         mkdir -p $(dirname ${SHADOWSOCKS_CONFIG})
     fi
 
-    # SS + V2ray-plugin
     if [[ ${plugin_num} == "1" ]]; then
         improt_package "templates/config" "v2ray_plugin_config.sh"
         config_ss_v2ray_plugin
-    # SS + KcpTun
     elif [[ ${plugin_num} == "2" ]]; then
         improt_package "templates/config" "kcptun_config.sh"
         config_ss_kcptun
-    # SS + Simple-obfs
     elif [[ ${plugin_num} == "3" ]]; then
         improt_package "templates/config" "simple_obfs_config.sh"
         config_ss_simple_obfs
-    # SS + Goquite
     elif [[ ${plugin_num} == "4" ]]; then
         improt_package "templates/config" "goquiet_config.sh"
         ss_goquiet_config
-    # SS + Cloak
     elif [[ ${plugin_num} == "5" ]]; then
         improt_package "templates/config" "cloak_config.sh"
         config_ss_cloak
-    # SS + Mos-tls-tunnel
     elif [[ ${plugin_num} == "6" ]]; then
         improt_package "templates/config" "mos_tls_tunnel_config.sh"
         config_ss_mos_tls_tunnel
-    # SS + Rabbit-tcp
     elif [[ ${plugin_num} == "7" ]]; then
         improt_package "templates/config" "rabbit_tcp_config.sh"
         config_ss_rabbit_tcp
-    # SS + Simple-tls
     elif [[ ${plugin_num} == "8" ]]; then
         improt_package "templates/config" "simple_tls_config.sh"
         config_ss_simple_tls
-    # Only SS
     else
-        improt_package "templates" "ss_config.sh"
+        improt_package "templates/config" "ss_original_config.sh"
         ss_config_standalone
     fi
 }
 
 gen_ss_links(){
-    # SS + V2ray-plugin
     if [[ ${plugin_num} == "1" ]]; then
         improt_package "templates/links" "v2ray_plugin_link.sh"
         gen_ss_v2ray_plugin_link
-    # SS + KcpTun
     elif [[ ${plugin_num} == "2" ]]; then
         improt_package "templates/links" "kcptun_link.sh"
         ss_kcptun_link
-    # SS + Simple-obfs
     elif [[ ${plugin_num} == "3" ]]; then
         improt_package "templates/links" "simple_obfs_link.sh"
         gen_ss_simple_obfs_link
-    # SS + Goquite
     elif [[ ${plugin_num} == "4" ]]; then
         improt_package "templates/links" "goquiet_link.sh"
         ss_goquiet_link
-    # SS + Cloak
     elif [[ ${plugin_num} == "5" ]]; then
         improt_package "templates/links" "cloak_link.sh"
         ss_cloak_link_new
-    # SS + Mos-tls-tunnel
     elif [[ ${plugin_num} == "6" ]]; then
         improt_package "templates/links" "mos_tls_tunnel_link.sh"
         gen_ss_mos_tls_tunnel_link
-    # SS + Rabbit-tcp
     elif [[ ${plugin_num} == "7" ]]; then
         improt_package "templates/links" "rabbit_tcp_link.sh"
         ss_rabbit_tcp_link
-    # SS + Simple-tls
     elif [[ ${plugin_num} == "8" ]]; then
         improt_package "templates/links" "simple_tls_link.sh"
         gen_ss_simple_tls_link
-    # Only SS
     else
-        improt_package "templates" "ss_link.sh"
+        improt_package "templates/links" "ss_original_link.sh"
         ss_link
     fi
 }
@@ -694,42 +676,33 @@ install_completed(){
     elif [[ ${SS_VERSION} = "go-ss2" ]]; then
         ${GO_SHADOWSOCKS2_INIT} start > /dev/null 2>&1
     fi
-    
-    # SS + V2ray-plugin
+
     if [[ ${plugin_num} == "1" ]]; then
         improt_package "templates/visible" "v2ray_plugin_visible.sh"
         ss_v2ray_plugin_visible
-    # SS + KcpTun
     elif [[ ${plugin_num} == "2" ]]; then
         improt_package "templates/visible" "kcptun_visible.sh"
         ss_kcptun_visible
-    # SS + Simple-obfs
     elif [[ ${plugin_num} == "3" ]]; then
         improt_package "templates/visible" "simple_obfs_visible.sh"
         ss_simple_obfs_visible
-    # SS + Goquite
     elif [[ ${plugin_num} == "4" ]]; then
         improt_package "templates/visible" "goquiet_visible.sh"
         ss_goquiet_show
-    # SS + Cloak
     elif [[ ${plugin_num} == "5" ]]; then
         improt_package "templates/visible" "cloak_visible.sh"
         ss_cloak_visible
-    # SS + Mos-tls-tunnel
     elif [[ ${plugin_num} == "6" ]]; then
         improt_package "templates/visible" "mos_tls_tunnel_visible.sh"
         ss_mos_tls_tunnel_visible
-    # SS + Rabbit-tcp
     elif [[ ${plugin_num} == "7" ]]; then
         improt_package "templates/visible" "rabbit_tcp_visible.sh"
         ss_rabbit_tcp_visible
-    # SS + Simple-tls
     elif [[ ${plugin_num} == "8" ]]; then
         improt_package "templates/visible" "simple_tls_visible.sh"
         ss_simple_tls_visible
-    # Only SS
     else
-        improt_package "templates" "ss_visible.sh"
+        improt_package "templates/visible" "ss_original_visible.sh"
         ss_show
     fi
 }

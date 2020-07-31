@@ -16,6 +16,3 @@ dos2unix ./templates/links/*
 dos2unix ./templates/visible/*
 dos2unix ./templates/caddy_config.sh
 dos2unix ./templates/nginx_config.sh
-dos2unix ./templates/ss_config.sh
-dos2unix ./templates/ss_link.sh
-dos2unix ./templates/ss_visible.sh

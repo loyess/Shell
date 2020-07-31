@@ -13,7 +13,7 @@ config_ss_rabbit_tcp(){
     if [ ! -d "$(dirname ${RABBIT_CONFIG})" ]; then
         mkdir -p $(dirname ${RABBIT_CONFIG})
     fi
-    improt_package "templates" "ss_config.sh"
+    improt_package "templates/config" "ss_original_config.sh"
     ss_config_standalone
     rabbit_tcp_config_standalone
 }

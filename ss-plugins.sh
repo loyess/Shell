@@ -5,7 +5,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.6.6"
+SHELL_VERSION="2.6.7"
 # ====================
 
 
@@ -444,6 +444,8 @@ check_port_occupy(){
 }
 
 check_script_update(){
+    local isShow=${1:-"show"}
+
     SHELL_VERSION_NEW=$(wget --no-check-certificate -qO- "https://git.io/fjlbl"|grep 'SHELL_VERSION="'|awk -F "=" '{print $NF}'|sed 's/\"//g'|head -1)
     [[ -z ${SHELL_VERSION_NEW} ]] && echo -e "${Error} 无法链接到 Github !" && exit 0
     if version_gt ${SHELL_VERSION_NEW} ${SHELL_VERSION}; then
@@ -454,9 +456,11 @@ check_script_update(){
         wget -N --no-check-certificate -O ss-plugins.sh "https://git.io/fjlbl" && chmod +x ss-plugins.sh
         echo -e "脚本已更新为最新版本[ ${SHELL_VERSION_NEW} ] !(注意：因为更新方式为直接覆盖当前运行的脚本，所以可能下面会提示一些报错，无视即可)" && exit 0
     else
-        echo
-        echo -e "${Info} 当前脚本版本为: ${SHELL_VERSION} 未检测到更新版本."
-        echo
+        if [[ ${isShow} == "show" ]]; then
+            echo
+            echo -e "${Info} 当前脚本版本为: ${SHELL_VERSION} 未检测到更新版本."
+            echo
+        fi
     fi
 }
 
@@ -708,6 +712,7 @@ install_completed(){
 }
 
 install_prepare(){
+    check_script_update "notShow"
     improt_package "prepare" "shadowsocks_prepare.sh"
     choose_ss_install_version
     install_prepare_port

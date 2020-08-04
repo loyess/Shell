@@ -5,7 +5,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.6.7"
+SHELL_VERSION="2.6.8"
 # ====================
 
 
@@ -182,115 +182,87 @@ usage() {
 	exit $1
 }
 
-menu_status(){
-    local BIN_PATH=$1
-    local SS_PID=$2
+status_init(){
+    if [[ -e ${SHADOWSOCKS_LIBEV_BIN_PATH} ]]; then
+        ssName="Shadowsocks-libev"
+        ssPath=${SHADOWSOCKS_LIBEV_BIN_PATH}
+        ssPid=`ps -ef | grep -v grep | grep ss-server | awk '{print $2}'`
+    elif [[ -e ${SHADOWSOCKS_RUST_BIN_PATH} ]]; then
+        ssName="Shadowsocks-rust"
+        ssPath=${SHADOWSOCKS_RUST_BIN_PATH}
+        ssPid=`ps -ef | grep -v grep | grep ssserver | awk '{print $2}'`
+    elif [[ -e ${GO_SHADOWSOCKS2_BIN_PATH} ]]; then
+        ssName="Go-shadowsocks2"
+        ssPath=${GO_SHADOWSOCKS2_BIN_PATH}
+        ssPid=`ps -ef | grep -v grep | grep go-shadowsocks2 | awk '{print $2}'`
+    fi
+
+    if [[ -e ${V2RAY_PLUGIN_BIN_PATH} ]]; then
+        pluginName="V2ray-plugin"
+        pluginPath=${V2RAY_PLUGIN_BIN_PATH}
+        pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep v2ray-plugin | awk '{print $2}'`
+    elif [[ -e ${KCPTUN_BIN_PATH} ]]; then
+        pluginName="KcpTun"
+        pluginPath=${KCPTUN_BIN_PATH}
+        pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep kcptun-server | awk '{print $2}'`
+    elif [[ -e ${SIMPLE_OBFS_BIN_PATH} ]]; then
+        pluginName="Simple-obfs"
+        pluginPath=${SIMPLE_OBFS_BIN_PATH}
+        pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep obfs-server | awk '{print $2}'`
+    elif [[ -e ${GOQUIET_BIN_PATH} ]]; then
+        pluginName="GoQuiet"
+        pluginPath=${GOQUIET_BIN_PATH}
+        pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep gq-server | awk '{print $2}'`
+    elif [[ -e ${CLOAK_SERVER_BIN_PATH} ]]; then
+        pluginName="Cloak"
+        pluginPath=${CLOAK_SERVER_BIN_PATH}
+        pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep ck-server | awk '{print $2}'`
+    elif [[ -e ${MTT_BIN_PATH} ]]; then
+        pluginName="Mos-tls-tunnel"
+        pluginPath=${MTT_BIN_PATH}
+        pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep mtt-server | awk '{print $2}'`
+    elif [[ -e ${RABBIT_BIN_PATH} ]]; then
+        pluginName="Rabbit-Tcp"
+        pluginPath=${RABBIT_BIN_PATH}
+        pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep rabbit-tcp | awk '{print $2}'`
+    elif [[ -e ${SIMPLE_TLS_BIN_PATH} ]]; then
+        pluginName="Simple-tls"
+        pluginPath=${SIMPLE_TLS_BIN_PATH}
+        pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep simple-tls | awk '{print $2}'`
+    fi
+
+    if [[ -e ${CADDY_BIN_PATH} ]]; then
+        webName="Caddy"
+        webPath=${CADDY_BIN_PATH}
+        webPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep caddy | awk '{print $2}'`
+    elif [[ -e ${NGINX_BIN_PATH} ]]; then
+        webName="Nginx"
+        webPath=${NGINX_BIN_PATH}
+        webPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep nginx.conf | awk '{print $2}'`
+    fi
+}
+
+status_menu(){
     local NoInstall=" 当前状态: ${Red}未安装${suffix}"
     local InstallStart=" 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
     local InstallNoStart=" 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
-    
-    if [[ -e ${BIN_PATH} ]] && [[ -e ${V2RAY_PLUGIN_BIN_PATH} ]] && [[ -e ${CADDY_BIN_PATH}  ]]; then
-        V2_PID=`ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}'`
-        CADDY_PID=`ps -ef |grep -v grep | grep caddy |awk '{print $2}'`
-        
-        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${V2_PID} ]] && [[ ! -z ${CADDY_PID} ]]; then
-            echo -e "${InstallStart}"
-        else
-            echo -e "${InstallNoStart}"
-        fi
-    elif [[ -e ${BIN_PATH} ]] && [[ -e ${V2RAY_PLUGIN_BIN_PATH} ]] && [[ -e ${NGINX_BIN_PATH}  ]]; then
-        V2_PID=`ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}'`
-        NGINX_PID=`ps -ef |grep -v grep | grep nginx.conf |awk '{print $2}'`
-        
-        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${V2_PID} ]] && [[ ! -z ${NGINX_PID} ]]; then
-            echo -e "${InstallStart}"
-        else
-            echo -e "${InstallNoStart}"
-        fi
-    elif [[ -e ${BIN_PATH} ]] && [[ -e ${V2RAY_PLUGIN_BIN_PATH} ]]; then
-        V2_PID=`ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}'`
-        
-        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${V2_PID} ]]; then
-            echo -e "${InstallStart}"
-        else
-            echo -e "${InstallNoStart}"
-        fi
-    elif [[ -e ${BIN_PATH} ]] && [[ -e ${KCPTUN_BIN_PATH} ]]; then
-        KP_PID=`ps -ef |grep -v grep | grep kcptun-server |awk '{print $2}'`
-        
-        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${KP_PID} ]]; then
-            echo -e "${InstallStart}"
-        else
-            echo -e "${InstallNoStart}"
-        fi
-    elif [[ -e ${BIN_PATH} ]] && [[ -e ${SIMPLE_OBFS_BIN_PATH} ]]; then
-        OBFS_PID=`ps -ef |grep -v grep | grep obfs-server |awk '{print $2}'`
-        
-        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${OBFS_PID} ]]; then
-            echo -e "${InstallStart}"
-        else
-            echo -e "${InstallNoStart}"
-        fi
-    elif [[ -e ${BIN_PATH} ]] && [[ -e ${GOQUIET_BIN_PATH} ]]; then    
-        GQ_PID=`ps -ef |grep -v grep | grep gq-server |awk '{print $2}'`
-        
-        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${GQ_PID} ]]; then
-            echo -e "${InstallStart}"
-        else
-            echo -e "${InstallNoStart}"
-        fi
-    elif [[ -e ${BIN_PATH} ]] && [[ -e ${CLOAK_SERVER_BIN_PATH} ]]; then
-        CK_PID=`ps -ef |grep -v grep | grep ck-server |awk '{print $2}'`
-        
-        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${CK_PID} ]]; then
-            echo -e "${InstallStart}"
-        else
-            echo -e "${InstallNoStart}"
-        fi
-    elif [[ -e ${BIN_PATH} ]] && [[ -e ${MTT_BIN_PATH} ]] && [[ -e ${CADDY_BIN_PATH}  ]]; then
-        MTT_PID=`ps -ef |grep -v grep | grep mtt-server |awk '{print $2}'`
-        CADDY_PID=`ps -ef |grep -v grep | grep caddy |awk '{print $2}'`
-        
-        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${MTT_PID} ]] && [[ ! -z ${CADDY_PID} ]]; then
-            echo -e "${InstallStart}"
-        else
-            echo -e "${InstallNoStart}"
-        fi
-    elif [[ -e ${BIN_PATH} ]] && [[ -e ${MTT_BIN_PATH} ]] && [[ -e ${NGINX_BIN_PATH}  ]]; then
-        MTT_PID=`ps -ef |grep -v grep | grep mtt-server |awk '{print $2}'`
-        NGINX_PID=`ps -ef |grep -v grep | grep nginx.conf |awk '{print $2}'`
-        
-        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${MTT_PID} ]] && [[ ! -z ${NGINX_PID} ]]; then
-            echo -e "${InstallStart}"
-        else
-            echo -e "${InstallNoStart}"
-        fi
-    elif [[ -e ${BIN_PATH} ]] && [[ -e ${MTT_BIN_PATH} ]]; then    
-        MTT_PID=`ps -ef |grep -v grep | grep mtt-server |awk '{print $2}'`
-        
-        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${MTT_PID} ]]; then
-            echo -e "${InstallStart}"
-        else
-            echo -e "${InstallNoStart}"
-        fi
-    elif [[ -e ${BIN_PATH} ]] && [[ -e ${RABBIT_BIN_PATH} ]]; then
-        RABBIT_PID=`ps -ef |grep -v grep | grep rabbit-tcp |awk '{print $2}'`
-        
-        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${RABBIT_PID} ]]; then
-            echo -e "${InstallStart}"
-        else
-            echo -e "${InstallNoStart}"
-        fi
-    elif [[ -e ${BIN_PATH} ]] && [[ -e ${SIMPLE_TLS_BIN_PATH} ]]; then
-        SIMPLE_TLS_PID=`ps -ef |grep -v grep | grep simple-tls |awk '{print $2}'`
 
-        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${SIMPLE_TLS_PID} ]]; then
+    status_init
+
+    if [[ -e ${ssPath} ]] && [[ -e ${pluginPath} ]] && [[ -e ${webPath} ]]; then
+        if [[ -n ${ssPid} ]] && [[ -n ${pluginPid} ]] && [[ -n ${webPid} ]]; then
             echo -e "${InstallStart}"
         else
             echo -e "${InstallNoStart}"
         fi
-    elif [[ -e ${BIN_PATH} ]]; then
-        if [[ ! -z ${SS_PID} ]]; then
+    elif [[ -e ${ssPath} ]] && [[ -e ${pluginPath} ]]; then
+        if [[ -n ${ssPid} ]] && [[ -n ${pluginPid} ]]; then
+            echo -e "${InstallStart}"
+        else
+            echo -e "${InstallNoStart}"
+        fi
+    elif [[ -e ${ssPath} ]]; then
+        if [[ -n ${ssPid} ]]; then
             echo -e "${InstallStart}"
         else
             echo -e "${InstallNoStart}"
@@ -712,25 +684,37 @@ install_completed(){
 }
 
 install_prepare(){
+    local plugin
+    local pluginName=(
+        v2ray-plugin
+        kcptun
+        simple-obfs
+        goquiet
+        cloak
+        mos-tls-tunnel
+        rabbit-tcp
+        simple-tls
+    )
+
     check_script_update "notShow"
     improt_package "prepare" "shadowsocks_prepare.sh"
     choose_ss_install_version
     install_prepare_port
     install_prepare_password
     install_prepare_cipher
-    echo && echo -e "请选择要安装的SS插件
-    
-  ${Green}1.${suffix} v2ray-plugin
-  ${Green}2.${suffix} kcptun
-  ${Green}3.${suffix} simple-obfs
-  ${Green}4.${suffix} goquiet
-  ${Green}5.${suffix} cloak
-  ${Green}6.${suffix} mos-tls-tunnel
-  ${Green}7.${suffix} rabbit-tcp
-  ${Green}8.${suffix} simple-tls
-  "
+
+    echo -e "\n请选择要安装的Shadowsocks插件\n"
+    for ((i=1;i<=${#pluginName[@]};i++ )); do
+        plugin="${pluginName[$i-1]}"
+        if [[ ${i} -le 9 ]]; then
+            echo -e "${Green}  ${i}.${suffix} ${plugin}"
+        else
+            echo -e "${Green} ${i}.${suffix} ${plugin}"
+        fi
+    done
     echo && read -e -p "(默认: 不安装)：" plugin_num
     [[ -z "${plugin_num}" ]] && plugin_num="" && echo -e "\n${Tip} 当前未选择任何插件，仅安装${SS_VERSION}."
+
     if [[ ${plugin_num} == "1" ]]; then
         improt_package "prepare" "v2ray_plugin_prepare.sh"
         install_prepare_libev_v2ray
@@ -758,27 +742,22 @@ install_prepare(){
     elif [[ ${plugin_num} == "" ]]; then
         :
     else
-        echo -e "${Error} 请输入正确的数字 [1-7]" && exit 1
+        echo -e "${Error} 请输入正确的数字 [1-8]" && exit 1
     fi
     
     echo
     echo "按任意键开始…或按Ctrl+C取消"
     char=`get_char`
-    
-    if [[ ${SS_VERSION} = "ss-rust" ]] || [[ ${SS_VERSION} = "go-ss2" ]] && [[ "${plugin_num}" != "3" ]]; then
-        echo
-        echo -e "${Info} 即将开始下载相关文件请稍等."
-    fi
 }
 
 install_main(){
     if [[ ${SS_VERSION} = "ss-libev" ]]; then
-        install_libsodium
+        install_libsodium_logic
         if ! ldconfig -p | grep -wq "/usr/lib"; then
             echo "/usr/lib" > /etc/ld.so.conf.d/lib.conf
         fi
         ldconfig
-        install_mbedtls
+        install_mbedtls_logic
     fi
     
     improt_package "tools" "shadowsocks_install.sh"
@@ -841,34 +820,27 @@ install_main(){
     fi
 }
 
+status_install(){
+    status_init
+
+    if [[ -e ${ssPath} ]] && [[ -e ${pluginPath} ]] && [[ -e ${webPath} ]]; then
+        echo -e "\n${Info} ${ssName} ${pluginName} ${webName} 已经安装.\n"
+        exit 1
+    elif [[ -e ${ssPath} ]] && [[ -e ${pluginPath} ]]; then
+        echo -e "\n${Info} ${ssName} ${pluginName} 已经安装.\n"
+        exit 1
+    elif [[ -e ${ssPath} ]]; then
+        echo -e "\n${Info} ${ssName} 已经安装.\n"
+        exit 1
+    fi
+}
+
 install_step_all(){
-    [[ -e ${SHADOWSOCKS_LIBEV_BIN_PATH} ]] && echo -e "${Info} Shadowsocks-libev 已经安装." && exit 1
-    [[ -e ${SHADOWSOCKS_RUST_BIN_PATH} ]] && echo -e "${Info} Shadowsocks-rust 已经安装." && exit 1
-    [[ -e ${GO_SHADOWSOCKS2_BIN_PATH} ]] && echo -e "${Info} Go-shadowsocks2 已经安装." && exit 1
+    status_install
     disable_selinux
     install_prepare
     improt_package "utils" "dependencies.sh"
-    if [[ ${SS_VERSION} = "ss-libev" ]]; then
-        install_dependencies
-    fi
-    if [[ ${SS_VERSION} = "ss-rust" ]] || [[ ${SS_VERSION} = "go-ss2" ]]; then
-        if [ ! "$(command -v qrencode)" ]; then
-            package_install "qrencode" > /dev/null 2>&1
-        fi
-    fi
-    if [[ ${SS_VERSION} = "ss-rust" ]] || [[ ${SS_VERSION} = "go-ss2" ]] && [[ "${plugin_num}" == "3" ]]; then
-        install_dependencies
-    fi
-    if [[ ${SS_VERSION} = "ss-rust" ]] && [[ "${plugin_num}" == "5" ]] || [[ "${plugin_num}" == "7" ]]; then
-        if [ ! "$(command -v jq)" ]; then
-            package_install "jq" > /dev/null 2>&1
-        fi
-    fi
-    if [[ ${SS_VERSION} = "go-ss2" ]]; then
-        if [ ! "$(command -v jq)" ]; then
-            package_install "jq" > /dev/null 2>&1
-        fi
-    fi
+    install_dependencies_logic
     improt_package "utils" "downloads.sh"
     download_ss_file
     download_plugins_file
@@ -916,50 +888,31 @@ install_cleanup(){
 }
 
 do_uid(){
-    if [ "$(command -v ck-server)" ]; then
-        improt_package "utils" "ck_user_manager.sh"
-        ck2_users_manager
-        sleep 0.5
-        
-        is_the_api_open "stop"
-    else
-        echo
-        echo -e "${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行."
-        echo
-    fi
+    improt_package "utils" "ck_user_manager.sh"
+    user_manager_by_uid
 }
 
 do_link(){
-    local CK_UID=$1
-    
-    if [ "$(command -v ck-server)" ]; then
-        improt_package "utils" "ck_sslink.sh"
-        get_link_of_ck2 "${CK_UID}"
-    else
-        echo
-        echo -e "${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行."
-        echo
-    fi
+    improt_package "utils" "ck_sslink.sh"
+    gen_ssurl_by_uid "$1"
 }
 
 do_scan(){
-    local SS_URL=$1
-    
     improt_package "utils" "qr_code.sh"
-    gen_qr_code "${SS_URL}"
+    gen_qr_code "$1"
 }
 
 do_show(){
     local mark=$1
 
-    if [ -e $HUMAN_CONFIG ]; then
-        if [[ ${mark} == "cleanScreen" ]]; then
-            clear -x
-        fi
-        cat $HUMAN_CONFIG
-    else
+    if [ ! -e $HUMAN_CONFIG ]; then
         echo "The visible config not found."
+        exit 1
     fi
+    if [[ ${mark} == "cleanScreen" ]]; then
+        clear -x
+    fi
+    cat $HUMAN_CONFIG
 }
 
 do_log(){
@@ -968,27 +921,16 @@ do_log(){
 }
 
 do_cert(){
-    local domain=$1
-
     improt_package "utils" "gen_certificates.sh"
-    get_domain_ip "${domain}"
-    if ! (echo ${domain} | grep -qE '.cf$|.ga$|.gq$|.ml$|.tk$' && is_cdn_proxied "${domain_ip}"); then
-        echo
-        echo -e "${Error} 此选项为手动申请Cloudflare CDN模式 证书(有效期3个月)，仅支持后缀为.cf .ga .gq .ml .tk的域名。"
-        echo
-        exit 1
-    fi
-    acme_get_certificate_by_manual "${domain}" "--force"
+    acme_get_certificate_by_manual_force "$1"
 }
 
 do_start(){
-    if [[ ! "$(command -v ss-server)" ]] && [[ ! "$(command -v ssserver)" ]] && [[ ! "$(command -v go-shadowsocks2)" ]]; then
-        echo
-        echo -e " ${Red} Shadowsocks 未安装，请尝试安装后，再来执行此操作。${suffix}"
-        echo
+    status_init
+    if [[ -z "${ssPath}" ]]; then
+        echo -e "\n ${Red} Shadowsocks 未安装，请尝试安装后，再来执行此操作。${suffix}\n"
         exit 1
     fi
-    
     improt_package "utils" "start.sh"
     start_services
 }
@@ -1004,65 +946,40 @@ do_restart(){
 }
 
 do_status(){
-    local mark=$1
-    if [ "$(command -v ss-server)" ]; then
-        PID=`ps -ef |grep -v grep | grep ss-server |awk '{print $2}'`
-        local BIN_PATH=${SHADOWSOCKS_LIBEV_BIN_PATH}
-        local SS_PID=${PID}
-    elif [ "$(command -v ssserver)" ]; then
-        RUST_PID=`ps -ef |grep -v grep | grep ssserver |awk '{print $2}'`
-        local BIN_PATH=${SHADOWSOCKS_RUST_BIN_PATH}
-        local SS_PID=${RUST_PID}
-    elif [ "$(command -v go-shadowsocks2)" ]; then
-        GO_PID=`ps -ef |grep -v grep | grep go-shadowsocks2 |awk '{print $2}'`
-        local BIN_PATH=${GO_SHADOWSOCKS2_BIN_PATH}
-        local SS_PID=${GO_PID}
-    fi
-    
-    if [[ ${mark} == "menu" ]]; then
-        menu_status ${BIN_PATH} ${SS_PID}
-    else
-        if [[ ! -e ${BIN_PATH} ]]; then
-            echo
-            echo -e "${Error} shadowsocks and related plugins are not installed."
-            echo
-            exit 1
-        fi
-        
-        improt_package "utils" "status.sh"
-        other_status
-    fi
+    improt_package "utils" "status.sh"
+    other_status
 }
 
 do_update(){
     cd ${CUR_DIR}
-    
     improt_package "utils" "update.sh"
-    
-    if [[ -e ${SHADOWSOCKS_LIBEV_BIN_PATH} ]]; then
-        update_shadowsocks_libev
-    elif [[ -e ${SHADOWSOCKS_RUST_BIN_PATH} ]]; then
-        update_shadowsocks_rust
-    elif [[ -e ${GO_SHADOWSOCKS2_BIN_PATH} ]]; then
-        update_go_shadowsocks2
-    fi
+    update_logic
 }
 
 do_uninstall(){
-    printf "你确定要卸载Shadowsocks吗? [y/n]\n"
+    status_init
+
+    if [[ -e ${ssPath} ]] && [[ -e ${pluginPath} ]] && [[ -e ${webPath} ]]; then
+        local pkgName="${ssName} ${pluginName} ${webName}"
+    elif [[ -e ${ssPath} ]] && [[ -e ${pluginPath} ]]; then
+        local pkgName="${ssName} ${pluginName}"
+    elif [[ -e ${ssPath} ]]; then
+        local pkgName="${ssName}"
+    else
+        local pkgName="Shadowsocks"
+    fi
+    echo -e "\n你确定要卸载 ${pkgName} 吗? [y/n]\n"
     read -e -p "(默认: n):" answer
     [ -z ${answer} ] && answer="n"
     if [ "${answer}" != "y" ] && [ "${answer}" != "Y" ]; then
-        echo
-        echo -e "${Info} Shadowsocks 卸载取消."
-        echo
+        echo -e "\n${Info} ${pkgName} 卸载取消.\n"
         exit 1
     fi
     
     # start uninstall
     improt_package "utils" "uninstall.sh"
     uninstall_services
-    echo -e "${Info} Shadowsocks 卸载成功."
+    echo -e "\n${Info} ${pkgName} 卸载成功.\n"
 }
 
 do_install(){
@@ -1091,7 +1008,7 @@ do_install(){
     ${Green}2.${suffix} Install
     ${Green}3.${suffix} Uninstall
      "
-    do_status "menu"
+    status_menu
     echo && read -e -p "请输入数字 [1-3]：" menu_num
     case "${menu_num}" in
         1)   
@@ -1119,7 +1036,7 @@ case ${action} in
         do_${action}
         ;;
     status)
-        do_${action} "status"
+        do_${action}
         ;;
     script)
         check_script_update

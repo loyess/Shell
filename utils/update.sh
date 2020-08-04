@@ -475,3 +475,13 @@ update_go_shadowsocks2(){
     update_rabbit_tcp
     update_simple_tls
 }
+
+update_logic(){
+    if [[ -e ${SHADOWSOCKS_LIBEV_BIN_PATH} ]]; then
+        update_shadowsocks_libev
+    elif [[ -e ${SHADOWSOCKS_RUST_BIN_PATH} ]]; then
+        update_shadowsocks_rust
+    elif [[ -e ${GO_SHADOWSOCKS2_BIN_PATH} ]]; then
+        update_go_shadowsocks2
+    fi
+}

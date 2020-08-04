@@ -450,3 +450,14 @@ ck2_users_manager(){
             ;;
     esac
 }
+
+user_manager_by_uid(){
+    if [ ! "$(command -v ck-server)" ]; then
+        echo -e "\n${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行.\n"
+        exit 1
+    fi
+
+    ck2_users_manager
+    sleep 0.5
+    is_the_api_open "stop"
+}

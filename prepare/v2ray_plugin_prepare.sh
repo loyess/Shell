@@ -105,8 +105,8 @@ get_input_mirror_site(){
     do 
         echo
         echo -e "${Tip} 该站点建议满足(位于海外、支持HTTPS协议、会用来传输大流量... )的条件，默认站点，随意找的，不建议使用"
-        read -e -p "请输入你需要镜像到的站点(默认：https://www.bostonusa.com)：" mirror_site
-        [ -z "${mirror_site}" ] && mirror_site="https://www.bostonusa.com"
+        read -e -p "请输入你需要镜像到的站点(默认：https://www.bing.com)：" mirror_site
+        [ -z "${mirror_site}" ] && mirror_site="https://www.bing.com"
         if [ -z "$(echo $mirror_site | grep -E ${HTTPS_DOMAIN_RE})" ]; then
             echo
             echo -e "${Error} 请输入以${Red} https:// ${suffix}开头，以${Red} 域名 ${suffix}结尾的URL."

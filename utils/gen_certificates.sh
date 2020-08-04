@@ -232,3 +232,16 @@ acme_get_certificate_by_api_or_manual(){
         acme_get_certificate_by_api "${domain}"
     fi
 }
+
+acme_get_certificate_by_manual_force(){
+    local domain=$1
+
+    get_domain_ip "${domain}"
+    if ! (echo ${domain} | grep -qE '.cf$|.ga$|.gq$|.ml$|.tk$' && is_cdn_proxied "${domain_ip}"); then
+        echo
+        echo -e "${Error} 此选项为手动申请Cloudflare CDN模式 证书(有效期3个月)，仅支持后缀为.cf .ga .gq .ml .tk的域名。"
+        echo
+        exit 1
+    fi
+    acme_get_certificate_by_manual "${domain}" "--force"
+}

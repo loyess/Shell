@@ -8,10 +8,18 @@ chacha20-poly1305
 
 auto_get_ip_of_domain(){
     local domain=$1
+    local ipv4Re="((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])"
     
-    domain_ip=`ping ${domain} -c 1 2>nul | sed '1{s/[^(]*(//;s/).*//;q}'`
-    rm -fr ./nul
-    if [[ ! -z "${domain_ip}" ]]; then
+    if [ ! "$(command -v nslookup)" ]; then
+        if check_sys packageManager yum; then
+            package_install "bind-utils" > /dev/null 2>&1
+        elif check_sys packageManager apt; then
+            package_install "dnsutils" > /dev/null 2>&1
+        fi
+    fi
+
+    domain_ip=`nslookup ${domain} | grep -E 'Name:' -A 1 | grep -oE $ipv4Re | tail -1`
+    if [[ -n "${domain_ip}" ]]; then
         return 0
     else
         return 1
@@ -51,11 +59,11 @@ get_input_rediraddr_of_domain(){
     do
         echo
         echo -e "请为Cloak输入与重定向域名对应的IP（默认为自动获取）"
-        read -e -p "(默认: ${domain_ip}):" ckwebaddr
-        [ -z "$ckwebaddr" ] && ckwebaddr=${domain_ip}
-        if ! is_ipv4_or_ipv6 ${ckwebaddr}; then
+        read -e -p "(默认: ${domain_ip}:443):" ckwebaddr
+        [ -z "$ckwebaddr" ] && ckwebaddr="${domain_ip}:443"
+        if [ -z "$(echo $ckwebaddr | grep -E ${IPV4_PORT_RE})" ]; then
             echo
-            echo -e "${Error} 请输入正确合法的IP地址."
+            echo -e "${Error} 请输入正确合法的IP:443组合."
             echo
             continue
         fi

@@ -340,8 +340,8 @@ download_ck_clinet(){
     local CK_CLIENT_V=$1
     
     # Download cloak client
-    local cloak_file="ck-client-linux-amd64-${CK_CLIENT_V}"
-    local cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${CK_CLIENT_V}/ck-client-linux-amd64-${CK_CLIENT_V}"
+    local cloak_file="ck-client-linux-amd64-v${CK_CLIENT_V}"
+    local cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${CK_CLIENT_V}/ck-client-linux-amd64-v${CK_CLIENT_V}"
     improt_package "utils" "downloads.sh"
     download "${cloak_file}" "${cloak_url}"
     

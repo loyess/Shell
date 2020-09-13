@@ -154,7 +154,7 @@ update_cloak(){
     if [[ -e ${CLOAK_SERVER_BIN_PATH} ]]; then
         cloak_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/cbeuw/Cloak/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
         [ -z ${cloak_ver} ] && echo -e "${Error} 获取 cloak 最新版本失败." && exit 1
-        current_cloak_ver=$(ck-server -v | grep ck-server | cut -d\  -f2)
+        current_cloak_ver=$(ck-server -v | grep ck-server | cut -d\  -f2 | sed 's/v//g')
         if ! check_latest_version ${current_cloak_ver} ${cloak_ver}; then
             echo -e "${Point} cloak当前已是最新版本${current_cloak_ver}不需要更新."
             echo

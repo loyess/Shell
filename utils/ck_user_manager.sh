@@ -355,12 +355,12 @@ download_ck_clinet(){
 ck2_users_manager(){
     if [[ ! -e ${CLOAK_CLIENT_BIN_PATH} ]]; then
         # Download cloak client
-        cloak_ver=$(ck-server -v | grep ck-server | cut -d\  -f2)
+        cloak_ver=$(ck-server -v | grep ck-server | cut -d\  -f2 | sed 's/v//g')
         download_ck_clinet ${cloak_ver}
     fi
     
-    ck_server_v=$(ck-server -v | grep ck-server | cut -d\  -f2)
-    ck_client_v=$(ck-client -v | grep ck-client | cut -d\  -f2)
+    ck_server_v=$(ck-server -v | grep ck-server | cut -d\  -f2 | sed 's/v//g')
+    ck_client_v=$(ck-client -v | grep ck-client | cut -d\  -f2 | sed 's/v//g')
     if version_gt ${ck_server_v} ${ck_client_v}; then
         # Download cloak client
         cloak_ver=${ck_server_v}

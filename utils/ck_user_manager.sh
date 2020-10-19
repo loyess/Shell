@@ -43,7 +43,7 @@ UserInfo=$(cat <<EOF
 EOF
 )
 
-    curl -X POST -d UserInfo="${UserInfo}" http://127.0.0.1:8080/admin/users/$(echo "${CK_UID}" | tr '+' '-' | tr '/' '_') -sS
+    curl -H "Content-type: application/json" -X POST -d "${UserInfo}" http://127.0.0.1:8080/admin/users/$(echo "${CK_UID}" | tr '+' '-' | tr '/' '_') -sS
     
     sleep 0.5
     

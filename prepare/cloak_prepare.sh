@@ -55,15 +55,24 @@ get_input_domain(){
 }
 
 get_input_rediraddr_of_domain(){
+    local index
+
     while true
     do
         echo
-        echo -e "请为Cloak输入与重定向域名对应的IP（默认为自动获取）"
-        read -e -p "(默认: ${domain_ip}:443):" ckwebaddr
-        [ -z "$ckwebaddr" ] && ckwebaddr="${domain_ip}:443"
-        if [ -z "$(echo $ckwebaddr | grep -E ${IPV4_PORT_RE})" ]; then
+        echo -e "请选择RedirAddr字段对应的值"
+        echo -e "${Green}  1.${suffix} ${domain}"
+        echo -e "${Green}  2.${suffix} ${domain_ip} (自动获取)"
+        echo
+        read -e -p "(默认: ${domain}):" index
+        [ -z "$index" ] && index=1
+        if [[ "$index" -eq 1 ]]; then
+            ckwebaddr=${domain}
+        elif [[ "$index" -eq 2 ]]; then
+            ckwebaddr=${domain_ip}
+        else
             echo
-            echo -e "${Error} 请输入正确合法的IP:443组合."
+            echo -e "${Error} 请输入一个数字在 [1-2] 之间."
             echo
             continue
         fi

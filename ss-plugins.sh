@@ -968,7 +968,7 @@ do_uninstall(){
     else
         local pkgName="Shadowsocks"
     fi
-    echo -e "\n你确定要卸载 ${pkgName} 吗? [y/n]\n"
+    echo -e "\n你确定要卸载 ${pkgName} 吗? [y/n]"
     read -e -p "(默认: n):" answer
     [ -z ${answer} ] && answer="n"
     if [ "${answer}" != "y" ] && [ "${answer}" != "Y" ]; then

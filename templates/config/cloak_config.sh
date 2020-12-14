@@ -10,8 +10,7 @@ cloak2_server_config(){
 	    "RedirAddr":"${ckwebaddr}",
 	    "PrivateKey":"${ckpv}",
 	    "AdminUID":"${ckauid}",
-	    "DatabasePath":"${CK_DB_PATH}/userinfo.db",
-	    "StreamTimeout":300
+	    "DatabasePath":"${CK_DB_PATH}/userinfo.db"
 	}
 	EOF
 }

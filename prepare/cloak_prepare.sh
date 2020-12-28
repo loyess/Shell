@@ -1,7 +1,8 @@
 # cloak encryption method
 CLOAK_ENCRYPTION_METHOD=(
 plain
-aes-gcm
+aes-128-gcm
+aes-256-gcm
 chacha20-poly1305
 )
 

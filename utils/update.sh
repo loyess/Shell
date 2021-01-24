@@ -274,6 +274,41 @@ update_simple_tls(){
     fi
 }
 
+update_gost_plugin(){
+    cd ${CUR_DIR}
+
+    if [[ -e ${GOST_PLUGIN_BIN_PATH} ]]; then
+        gost_plugin_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/maskedeken/gost-plugin/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        [ -z ${gost_plugin_ver} ] && echo -e "${Error} 获取 gost-plugin 最新版本失败." && exit 1
+        read current_gost_plugin_ver < ${GOST_PLUGIN_VERSION_FILE}
+
+        if ! check_latest_version ${current_gost_plugin_ver} ${gost_plugin_ver}; then
+            echo -e "${Point} gost-plugin当前已是最新版本${current_gost_plugin_ver}不需要更新."
+            if [[ ! -e ${CADDY_BIN_PATH} ]]; then
+                echo
+                exit 1
+            fi
+            update_caddy
+            exit 0
+        fi
+
+        local plugin_num="9"
+        echo -e "${Info} 检测到gost-plugin有新版本，开始下载."
+        download_plugins_file
+        echo -e "${Info} 下载完成，开始安装."
+        improt_package "plugins" "gost_plugin_install.sh"
+        do_stop > /dev/null 2>&1
+        install_gost_plugin
+        do_restart > /dev/null 2>&1
+
+        echo -e "${Info} gost-plugin已成功升级为最新版本${gost_plugin_ver}"
+        echo
+
+        install_cleanup
+        update_caddy
+    fi
+}
+
 update_caddy_v1(){
     cd ${CUR_DIR}
     
@@ -352,6 +387,7 @@ update_shadowsocks_libev(){
         update_mtt
         update_rabbit_tcp
         update_simple_tls
+        update_gost_plugin
         
         exit 1
     fi
@@ -375,6 +411,7 @@ update_shadowsocks_libev(){
     update_mtt
     update_rabbit_tcp
     update_simple_tls
+    update_gost_plugin
 }
 
 update_shadowsocks_rust(){
@@ -395,6 +432,7 @@ update_shadowsocks_rust(){
         update_mtt
         update_rabbit_tcp
         update_simple_tls
+        update_gost_plugin
         
         exit 1
     fi
@@ -418,6 +456,7 @@ update_shadowsocks_rust(){
     update_mtt
     update_rabbit_tcp
     update_simple_tls
+    update_gost_plugin
 }
 
 update_go_shadowsocks2(){
@@ -438,6 +477,7 @@ update_go_shadowsocks2(){
         update_mtt
         update_rabbit_tcp
         update_simple_tls
+        update_gost_plugin
 
         exit 1
     fi
@@ -461,6 +501,7 @@ update_go_shadowsocks2(){
     update_mtt
     update_rabbit_tcp
     update_simple_tls
+    update_gost_plugin
 }
 
 update_logic(){

@@ -37,7 +37,7 @@ download_ss_file(){
         download_service_file ${SHADOWSOCKS_LIBEV_INIT} ${SHADOWSOCKS_LIBEV_INIT_ONLINE} ${SHADOWSOCKS_LIBEV_INIT_LOCAL}
     elif [[ ${SS_VERSION} = "ss-rust" ]]; then
         # Download Shadowsocks-rust
-        rust_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/shadowsocks-rust/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        rust_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/shadowsocks-rust/releases | grep -o '"tag_name": ".*"' | grep -v 'alpha' | head -n 1 | sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
         [ -z ${rust_ver} ] && echo -e "${Error} 获取 shadowsocks-rust 最新版本失败." && exit 1
         
         shadowsocks_rust_file="shadowsocks-v${rust_ver}.x86_64-unknown-linux-musl"
@@ -138,5 +138,17 @@ download_plugins_file(){
         simple_tls_file="simple-tls-linux-amd64"
         simple_tls_url="https://github.com/IrineSistiana/simple-tls/releases/download/v${simple_tls_ver}/simple-tls-linux-amd64.zip"
         download "${simple_tls_file}.zip" "${simple_tls_url}"
+    elif [[ "${plugin_num}" == "9" ]]; then
+        # Download gost-plugin
+        gost_plugin_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/maskedeken/gost-plugin/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        [ -z ${gost_plugin_ver} ] && echo -e "${Error} 获取 gost-plugin 最新版本失败." && exit 1
+        # wriet version num
+        if [ ! -d "$(dirname ${GOST_PLUGIN_VERSION_FILE})" ]; then
+            mkdir -p $(dirname ${GOST_PLUGIN_VERSION_FILE})
+        fi
+        echo ${gost_plugin_ver} > ${GOST_PLUGIN_VERSION_FILE}
+        gost_plugin_file="gost-plugin_linux_amd64-${gost_plugin_ver}"
+        gost_plugin_url="https://github.com/maskedeken/gost-plugin/releases/download/v${gost_plugin_ver}/${gost_plugin_file}.zip"
+        download "${gost_plugin_file}.zip" "${gost_plugin_url}"
     fi
 }

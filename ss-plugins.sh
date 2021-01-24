@@ -5,7 +5,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.6.8"
+SHELL_VERSION="2.6.9"
 # ====================
 
 
@@ -113,6 +113,12 @@ RABBIT_INIT_ONLINE="${BASE_URL}/service/rabbit-tcp.sh"
 SIMPLE_TLS_INSTALL_PATH="/usr/local/bin"
 SIMPLE_TLS_BIN_PATH="/usr/local/bin/simple-tls"
 SIMPLE_TLS_VERSION_FILE="/etc/shadowsocks/simple-tls.v"
+
+
+# gost-plugin
+GOST_PLUGIN_INSTALL_PATH="/usr/local/bin"
+GOST_PLUGIN_BIN_PATH="/usr/local/bin/gost-plugin"
+GOST_PLUGIN_VERSION_FILE="/etc/shadowsocks/gost-plugin.v"
 
 
 # caddy
@@ -229,6 +235,10 @@ status_init(){
         pluginName="Simple-tls"
         pluginPath=${SIMPLE_TLS_BIN_PATH}
         pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep simple-tls | awk '{print $2}'`
+    elif [[ -e ${GOST_PLUGIN_BIN_PATH} ]]; then
+        pluginName="Gost-plugin"
+        pluginPath=${GOST_PLUGIN_BIN_PATH}
+        pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep gost-plugin | awk '{print $2}'`
     fi
 
     if [[ -e ${CADDY_BIN_PATH} ]]; then
@@ -606,6 +616,9 @@ config_ss(){
     elif [[ ${plugin_num} == "8" ]]; then
         improt_package "templates/config" "simple_tls_config.sh"
         config_ss_simple_tls
+    elif [[ ${plugin_num} == "9" ]]; then
+        improt_package "templates/config" "gost_plugin_config.sh"
+        config_ss_gost_plugin
     else
         improt_package "templates/config" "ss_original_config.sh"
         ss_config_standalone
@@ -637,6 +650,9 @@ gen_ss_links(){
     elif [[ ${plugin_num} == "8" ]]; then
         improt_package "templates/links" "simple_tls_link.sh"
         gen_ss_simple_tls_link
+    elif [[ ${plugin_num} == "9" ]]; then
+        improt_package "templates/links" "gost_plugin_link.sh"
+        gen_ss_gost_plugin_link
     else
         improt_package "templates/links" "ss_original_link.sh"
         ss_link
@@ -677,6 +693,9 @@ install_completed(){
     elif [[ ${plugin_num} == "8" ]]; then
         improt_package "templates/visible" "simple_tls_visible.sh"
         ss_simple_tls_visible
+    elif [[ ${plugin_num} == "9" ]]; then
+        improt_package "templates/visible" "gost_plugin_visible.sh"
+        ss_gost_plugin_visible
     else
         improt_package "templates/visible" "ss_original_visible.sh"
         ss_show
@@ -694,6 +713,7 @@ install_prepare(){
         mos-tls-tunnel
         rabbit-tcp
         simple-tls
+        gost-plugin
     )
 
     check_script_update "notShow"
@@ -739,6 +759,9 @@ install_prepare(){
     elif [[ ${plugin_num} == "8" ]]; then
         improt_package "prepare" "simple_tls_prepare.sh"
         install_prepare_libev_simple_tls
+    elif [[ ${plugin_num} == "9" ]]; then
+        improt_package "prepare" "gost_plugin_prepare.sh"
+        install_prepare_libev_gost_plugin
     elif [[ ${plugin_num} == "" ]]; then
         :
     else
@@ -817,6 +840,17 @@ install_main(){
         install_simple_tls
         gen_credentials_cca "${serverName}"
         plugin_client_name="simple-tls"
+    elif [ "${plugin_num}" == "9" ]; then
+        improt_package "plugins" "gost_plugin_install.sh"
+        install_gost_plugin
+        if [[ ${web_flag} = "1" ]]; then
+            improt_package "tools" "caddy_install.sh"
+            install_caddy
+        elif [[ ${web_flag} = "2" ]]; then
+            improt_package "tools" "nginx_install.sh"
+            install_nginx
+        fi
+        plugin_client_name="gost-plugin"
     fi
 }
 
@@ -885,6 +919,9 @@ install_cleanup(){
 
     #simple-tls
     rm -rf ${simple_tls_file}.zip LICENSE  README.md README_zh.md
+
+    # gost-plugin
+    rm -rf ${gost_plugin_file}.zip
 }
 
 do_uid(){

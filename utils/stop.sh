@@ -85,6 +85,14 @@ simple_tls_stop(){
     fi
 }
 
+gost_plugin_stop(){
+    ps -ef |grep -v grep | grep gost-plugin |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+
+    if [ "$(command -v gost-plugin)" ]; then
+        echo -e "Stopping gost-plugin success"
+    fi
+}
+
 caddy_stop(){
     ps -ef |grep -v grep | grep caddy |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
     
@@ -115,6 +123,7 @@ stop_services(){
     mtt_stop
     rabbit_tcp_stop
     simple_tls_stop
+    gost_plugin_stop
     caddy_stop
     nginx_stop
 }

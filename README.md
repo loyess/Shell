@@ -122,6 +122,13 @@ Available Options:
       2. wss
   7. rabbit-tcp
   8. simple-tls
+  9. gost-plugin
+      1. [m]ws
+      2. [m]wss
+      3. [m]tls
+      4. xtls
+      5. quic
+      6. http2
 
 
 注意：
@@ -217,3 +224,6 @@ Available Options:
 - [rabbit-tcp](https://github.com/ihciah/rabbit-tcp/releases)
 - [rabbit-plugin](https://github.com/ihciah/rabbit-plugin/releases)
 - [simple-tls](https://github.com/IrineSistiana/simple-tls/releases)
+- [simple-tls-android](https://github.com/IrineSistiana/simple-tls-android)
+- [gost-plugin](https://github.com/maskedeken/gost-plugin/releases)
+- [gost-plugin-android](https://github.com/maskedeken/gost-plugin-android/releases)

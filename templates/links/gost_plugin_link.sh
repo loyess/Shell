@@ -19,7 +19,7 @@ ss_gost_plugin_wss_or_mwss_with_cdn_link(){
     local link_head="ss://"
     local cipher_pwd=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}")
     local ip_port_plugin="@${domain}:${shadowsocksport}/?plugin=${plugin_client_name}"
-    local plugin_opts=$(get_str_replace ";serverName=${domain};path=${path};mode=${mode}")
+    local plugin_opts=$(get_str_replace ";serverName=${domain};host=${domain};path=${path};mode=${mode}")
     ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
 }
 
@@ -34,7 +34,7 @@ ss_gost_plugin_tls_or_mtls_link(){
 ss_gost_plugin_xtls_link(){
     local link_head="ss://"
     local cipher_pwd=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}")
-    local ip_port_plugin="@${domain}:443/?plugin=${plugin_client_name}"    
+    local ip_port_plugin="@${domain}:${shadowsocksport}/?plugin=${plugin_client_name}"
     local plugin_opts=$(get_str_replace ";serverName=${domain};mode=${mode}")
     ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
 }
@@ -42,7 +42,7 @@ ss_gost_plugin_xtls_link(){
 ss_gost_plugin_quic_link(){
     local link_head="ss://"
     local cipher_pwd=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}")
-    local ip_port_plugin="@${domain}:443/?plugin=${plugin_client_name}"    
+    local ip_port_plugin="@${domain}:${shadowsocksport}/?plugin=${plugin_client_name}"
     local plugin_opts=$(get_str_replace ";serverName=${domain};mode=${mode}")
     ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
 }
@@ -50,7 +50,7 @@ ss_gost_plugin_quic_link(){
 ss_gost_plugin_http2_link(){
     local link_head="ss://"
     local cipher_pwd=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}")
-    local ip_port_plugin="@${domain}:443/?plugin=${plugin_client_name}"    
+    local ip_port_plugin="@${domain}:${shadowsocksport}/?plugin=${plugin_client_name}"
     local plugin_opts=$(get_str_replace ";serverName=${domain};mode=${mode}")
     ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
 }
@@ -58,6 +58,7 @@ ss_gost_plugin_http2_link(){
 gen_ss_gost_plugin_link(){
     if [[ ${libev_gost_plugin} = "1" ]]; then
         if [[ ${isEnableWeb} == enable ]]; then
+            shadowsocksport=443
             if [[ ${mode} == mws ]]; then
                 mode=mwss
             elif [[ ${mode} == ws ]]; then

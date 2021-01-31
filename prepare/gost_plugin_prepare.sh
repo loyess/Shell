@@ -77,7 +77,7 @@ get_input_server_name(){
             continue
         fi
 
-        if [[ ${libev_gost_plugin} = "2" ]]; then
+        if [[ ${libev_gost_plugin} = "1" ]] || [[ ${libev_gost_plugin} = "2" ]]; then
             if is_cdn_proxied ${domain_ip}; then
                 info_display_of_domain "CDN"
                 break

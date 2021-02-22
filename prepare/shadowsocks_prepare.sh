@@ -149,7 +149,7 @@ install_prepare_cipher(){
             local tempNum=14
             local SHADOWSOCKS_CIPHERS=( ${SHADOWSOCKS_LIBEV_CIPHERS[@]} )
         elif [[ ${SS_VERSION} = "ss-rust" ]]; then
-            local tempNum=15
+            local tempNum=2
             local SHADOWSOCKS_CIPHERS=( ${SHADOWSOCKS_RUST_CIPHERS[@]} )
         elif [[ ${SS_VERSION} = "go-ss2" ]]; then
             local tempNum=2

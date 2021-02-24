@@ -5,7 +5,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.6.9"
+SHELL_VERSION="2.7.0"
 # ====================
 
 
@@ -119,6 +119,12 @@ SIMPLE_TLS_VERSION_FILE="/etc/shadowsocks/simple-tls.v"
 GOST_PLUGIN_INSTALL_PATH="/usr/local/bin"
 GOST_PLUGIN_BIN_PATH="/usr/local/bin/gost-plugin"
 GOST_PLUGIN_VERSION_FILE="/etc/shadowsocks/gost-plugin.v"
+
+
+# xray-plugin
+XRAY_PLUGIN_INSTALL_PATH="/usr/local/bin"
+XRAY_PLUGIN_BIN_PATH="/usr/local/bin/xray-plugin"
+XRAY_PLUGIN_VERSION_FILE="/etc/shadowsocks/xray-plugin.v"
 
 
 # caddy
@@ -239,6 +245,10 @@ status_init(){
         pluginName="Gost-plugin"
         pluginPath=${GOST_PLUGIN_BIN_PATH}
         pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep gost-plugin | awk '{print $2}'`
+    elif [[ -e ${XRAY_PLUGIN_BIN_PATH} ]]; then
+        pluginName="Xray-plugin"
+        pluginPath=${XRAY_PLUGIN_BIN_PATH}
+        pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep xray-plugin | awk '{print $2}'`
     fi
 
     if [[ -e ${CADDY_BIN_PATH} ]]; then
@@ -619,6 +629,9 @@ config_ss(){
     elif [[ ${plugin_num} == "9" ]]; then
         improt_package "templates/config" "gost_plugin_config.sh"
         config_ss_gost_plugin
+    elif [[ ${plugin_num} == "10" ]]; then
+        improt_package "templates/config" "xray_plugin_config.sh"
+        config_ss_xray_plugin
     else
         improt_package "templates/config" "ss_original_config.sh"
         ss_config_standalone
@@ -653,6 +666,9 @@ gen_ss_links(){
     elif [[ ${plugin_num} == "9" ]]; then
         improt_package "templates/links" "gost_plugin_link.sh"
         gen_ss_gost_plugin_link
+    elif [[ ${plugin_num} == "10" ]]; then
+        improt_package "templates/links" "xray_plugin_link.sh"
+        gen_ss_xray_plugin_link
     else
         improt_package "templates/links" "ss_original_link.sh"
         ss_link
@@ -696,6 +712,9 @@ install_completed(){
     elif [[ ${plugin_num} == "9" ]]; then
         improt_package "templates/visible" "gost_plugin_visible.sh"
         ss_gost_plugin_visible
+    elif [[ ${plugin_num} == "10" ]]; then
+        improt_package "templates/visible" "xray_plugin_visible.sh"
+        ss_xray_plugin_visible
     else
         improt_package "templates/visible" "ss_original_visible.sh"
         ss_show
@@ -714,6 +733,7 @@ install_prepare(){
         rabbit-tcp
         simple-tls
         gost-plugin
+        xray-plugin
     )
 
     check_script_update "notShow"
@@ -762,6 +782,9 @@ install_prepare(){
     elif [[ ${plugin_num} == "9" ]]; then
         improt_package "prepare" "gost_plugin_prepare.sh"
         install_prepare_libev_gost_plugin
+    elif [[ ${plugin_num} == "10" ]]; then
+        improt_package "prepare" "xray_plugin_prepare.sh"
+        install_prepare_libev_xray_plugin
     elif [[ ${plugin_num} == "" ]]; then
         :
     else
@@ -851,6 +874,17 @@ install_main(){
             install_nginx
         fi
         plugin_client_name="gost-plugin"
+    elif [ "${plugin_num}" == "10" ]; then
+        improt_package "plugins" "xray_plugin_install.sh"
+        install_xray_plugin
+        if [[ ${web_flag} = "1" ]]; then
+            improt_package "tools" "caddy_install.sh"
+            install_caddy
+        elif [[ ${web_flag} = "2" ]]; then
+            improt_package "tools" "nginx_install.sh"
+            install_nginx
+        fi
+        plugin_client_name="xray-plugin"
     fi
 }
 
@@ -922,6 +956,9 @@ install_cleanup(){
 
     # gost-plugin
     rm -rf ${gost_plugin_file}.zip
+
+    # xray-plugin
+    rm -rf ${xray_plugin_file}.tar.gz
 }
 
 do_uid(){

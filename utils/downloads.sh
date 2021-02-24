@@ -150,5 +150,17 @@ download_plugins_file(){
         gost_plugin_file="gost-plugin_linux_amd64-${gost_plugin_ver}"
         gost_plugin_url="https://github.com/maskedeken/gost-plugin/releases/download/v${gost_plugin_ver}/${gost_plugin_file}.zip"
         download "${gost_plugin_file}.zip" "${gost_plugin_url}"
+    elif [[ "${plugin_num}" == "10" ]]; then
+        # Download xray-plugin
+        xray_plugin_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/teddysun/xray-plugin/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        [ -z ${xray_plugin_ver} ] && echo -e "${Error} 获取 xray-plugin 最新版本失败." && exit 1
+        # wriet version num
+        if [ ! -d "$(dirname ${XRAY_PLUGIN_VERSION_FILE})" ]; then
+            mkdir -p $(dirname ${XRAY_PLUGIN_VERSION_FILE})
+        fi
+        echo ${xray_plugin_ver} > ${XRAY_PLUGIN_VERSION_FILE}
+        xray_plugin_file="xray-plugin-linux-amd64-v${xray_plugin_ver}"
+        xray_plugin_url="https://github.com/teddysun/xray-plugin/releases/download/v${xray_plugin_ver}/xray-plugin-linux-amd64-v${xray_plugin_ver}.tar.gz"
+        download "${xray_plugin_file}.tar.gz" "${xray_plugin_url}"
     fi
 }

@@ -309,6 +309,41 @@ update_gost_plugin(){
     fi
 }
 
+update_xray_plugin(){
+    cd ${CUR_DIR}
+
+    if [[ -e ${XRAY_PLUGIN_BIN_PATH} ]]; then
+        xray_plugin_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/teddysun/xray-plugin/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        [ -z ${xray_plugin_ver} ] && echo -e "${Error} 获取 xray-plugin 最新版本失败." && exit 1
+        read current_xray_plugin_ver < ${XRAY_PLUGIN_VERSION_FILE}
+
+        if ! check_latest_version ${current_xray_plugin_ver} ${xray_plugin_ver}; then
+            echo -e "${Point} xray-plugin当前已是最新版本${current_xray_plugin_ver}不需要更新."
+            if [[ ! -e ${CADDY_BIN_PATH} ]]; then
+                echo
+                exit 1
+            fi
+            update_caddy
+            exit 0
+        fi
+
+        local plugin_num="10"
+        echo -e "${Info} 检测到xray-plugin有新版本，开始下载."
+        download_plugins_file
+        echo -e "${Info} 下载完成，开始安装."
+        improt_package "plugins" "xray_plugin_install.sh"
+        do_stop > /dev/null 2>&1
+        install_xray_plugin
+        do_restart > /dev/null 2>&1
+
+        echo -e "${Info} xray-plugin已成功升级为最新版本${xray_plugin_ver}"
+        echo
+
+        install_cleanup
+        update_caddy
+    fi
+}
+
 update_caddy_v1(){
     cd ${CUR_DIR}
     
@@ -388,6 +423,7 @@ update_shadowsocks_libev(){
         update_rabbit_tcp
         update_simple_tls
         update_gost_plugin
+        update_xray_plugin
         
         exit 1
     fi
@@ -412,6 +448,7 @@ update_shadowsocks_libev(){
     update_rabbit_tcp
     update_simple_tls
     update_gost_plugin
+    update_xray_plugin
 }
 
 update_shadowsocks_rust(){
@@ -433,6 +470,7 @@ update_shadowsocks_rust(){
         update_rabbit_tcp
         update_simple_tls
         update_gost_plugin
+        update_xray_plugin
         
         exit 1
     fi
@@ -457,6 +495,7 @@ update_shadowsocks_rust(){
     update_rabbit_tcp
     update_simple_tls
     update_gost_plugin
+    update_xray_plugin
 }
 
 update_go_shadowsocks2(){
@@ -478,6 +517,7 @@ update_go_shadowsocks2(){
         update_rabbit_tcp
         update_simple_tls
         update_gost_plugin
+        update_xray_plugin
 
         exit 1
     fi
@@ -502,6 +542,7 @@ update_go_shadowsocks2(){
     update_rabbit_tcp
     update_simple_tls
     update_gost_plugin
+    update_xray_plugin
 }
 
 update_logic(){

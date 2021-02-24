@@ -141,6 +141,15 @@ gost_plugin_start(){
     fi
 }
 
+xray_plugin_start(){
+    if [ "$(command -v xray-plugin)" ]; then
+        local NAME="xray-plugin"
+        local PID=`ps -ef |grep -Ev 'grep|-plugin-opts' | grep xray-plugin |awk '{print $2}'`
+
+        sip003_plugin_start "${NAME}" "${PID}"
+    fi
+}
+
 caddy_start(){
     if [ -e "${CADDY_BIN_PATH}" ]; then
         /etc/init.d/caddy start
@@ -171,6 +180,7 @@ start_services(){
     rabbit_tcp_start
     simple_tls_start
     gost_plugin_start
+    xray_plugin_start
     caddy_start
     nginx_start
 }

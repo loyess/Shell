@@ -129,7 +129,10 @@ Available Options:
       4. xtls
       5. quic
       6. http2
-
+ 10. xray-plugin
+      1. ws
+      2. wss
+      3. quic
 
 注意：
     kcptun仅用于加速。
@@ -227,3 +230,5 @@ Available Options:
 - [simple-tls-android](https://github.com/IrineSistiana/simple-tls-android)
 - [gost-plugin](https://github.com/maskedeken/gost-plugin/releases)
 - [gost-plugin-android](https://github.com/maskedeken/gost-plugin-android/releases)
+- [xray-plugin](https://github.com/teddysun/xray-plugin/releases)
+- [xray-plugin-android](https://github.com/teddysun/xray-plugin-android/releases)

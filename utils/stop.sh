@@ -93,6 +93,14 @@ gost_plugin_stop(){
     fi
 }
 
+xray_plugin_stop(){
+    ps -ef |grep -v grep | grep xray-plugin |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+
+    if [ "$(command -v xray-plugin)" ]; then
+        echo -e "Stopping xray-plugin success"
+    fi
+}
+
 caddy_stop(){
     ps -ef |grep -v grep | grep caddy |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
     
@@ -124,6 +132,7 @@ stop_services(){
     rabbit_tcp_stop
     simple_tls_stop
     gost_plugin_stop
+    xray_plugin_stop
     caddy_stop
     nginx_stop
 }

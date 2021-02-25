@@ -55,6 +55,14 @@ ss_gost_plugin_http2_link(){
     ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
 }
 
+ss_gost_plugin_grpc_link(){
+    local link_head="ss://"
+    local cipher_pwd=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}")
+    local ip_port_plugin="@${domain}:${shadowsocksport}/?plugin=${plugin_client_name}"
+    local plugin_opts=$(get_str_replace ";serverName=${domain};mode=${mode}")
+    ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
+}
+
 gen_ss_gost_plugin_link(){
     if [[ ${libev_gost_plugin} = "1" ]]; then
         if [[ ${isEnableWeb} == enable ]]; then
@@ -78,5 +86,7 @@ gen_ss_gost_plugin_link(){
         ss_gost_plugin_quic_link
     elif [[ ${libev_gost_plugin} = "6" ]]; then
         ss_gost_plugin_http2_link
+    elif [[ ${libev_gost_plugin} = "7" ]]; then
+        ss_gost_plugin_grpc_link
     fi
 }

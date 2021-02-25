@@ -8,6 +8,7 @@ GOST_PLUGIN_TRANSPORT_MODE=(
 xtls
 quic
 http2
+grpc
 )
 
 
@@ -298,6 +299,13 @@ http2_mode_logic(){
     acme_get_certificate_by_force "${domain}"
 }
 
+grpc_mode_logic(){
+    mode=grpc
+    get_input_server_name
+    gost_plugin_prot_reset 443
+    acme_get_certificate_by_force "${domain}"
+}
+
 install_prepare_libev_gost_plugin(){
     transport_mode_menu
 
@@ -313,6 +321,8 @@ install_prepare_libev_gost_plugin(){
         quic_mode_logic
     elif [[ ${libev_gost_plugin} = "6" ]]; then
         http2_mode_logic
+    elif [[ ${libev_gost_plugin} = "7" ]]; then
+        grpc_mode_logic
     fi
 }
 

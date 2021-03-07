@@ -5,7 +5,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.7.0"
+SHELL_VERSION="2.7.1"
 # ====================
 
 
@@ -591,10 +591,21 @@ config_ss(){
     local server_value="\"0.0.0.0\""
 
     if get_ipv6; then
-        local V=${SS_VERSION}
-        local N=${plugin_num}
-        if [[ ${V} = "ss-libev" ]] && [[ ${N} = "2" ]] || [[ ${N} = "3" ]] || [[ ${N} == "5" ]] || [[ -z ${N} ]]; then
+        local ssVer=${SS_VERSION}
+        local pluginNum=${plugin_num}
+
+        if [[ ${ssVer} = "ss-libev" ]]; then
             server_value="[\"[::0]\",\"0.0.0.0\"]"
+        elif [[ ${ssVer} = "ss-rust" ]]; then
+            server_value="\"::\""
+        fi
+
+        if [[ ${pluginNum} = "4" ]]; then
+            server_value="\"0.0.0.0\""
+        elif [[ ${pluginNum} = "6" ]]; then
+            server_value="\"0.0.0.0\""
+        elif [[ ${pluginNum} = "7" ]]; then
+            server_value="\"0.0.0.0\""
         fi
     fi
 

@@ -9,6 +9,8 @@ ss_simple_tls_link(){
         local ataArgs=';rh'
     elif [[ ${SimpleTlsVer} = "2" ]] && [[ ${isEnable} == enable ]]; then
         local ataArgs=';pd'
+    elif [[ ${SimpleTlsVer} = "3" ]] && [[ ${isEnable} == enable ]]; then
+        local ataArgs=";auth=${auth}"
     fi
     if [[ ${domainType} = DNS-Only ]]; then
         local plugin_opts=$(get_str_replace "${ataArgs};n=${serverName}")

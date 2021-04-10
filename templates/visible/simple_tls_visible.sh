@@ -13,6 +13,8 @@ ss_simple_tls_show(){
         local ataArgs='rh;'
     elif [[ ${SimpleTlsVer} = "2" ]] && [[ ${isEnable} == enable ]]; then
         local ataArgs='pd;'
+    elif [[ ${SimpleTlsVer} = "3" ]] && [[ ${isEnable} == enable ]]; then
+        local ataArgs="auth=${auth};"
     fi
     if [[ ${domainType} = DNS-Only ]]; then
         echo -e " 插件选项 : ${Red}${ataArgs}n=${serverName}${suffix}" >> ${HUMAN_CONFIG}

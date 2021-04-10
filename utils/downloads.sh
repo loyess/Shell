@@ -129,6 +129,8 @@ download_plugins_file(){
         [ -z ${simple_tls_ver} ] && echo -e "${Error} 获取 simple-tls 最新版本失败." && exit 1
         if [[ ${SimpleTlsVer} = "1" ]]; then
             simple_tls_ver="0.3.4"
+        elif [[ ${SimpleTlsVer} = "2" ]]; then
+            simple_tls_ver="0.4.7"
         fi
         # wriet version num
         if [ ! -d "$(dirname ${SIMPLE_TLS_VERSION_FILE})" ]; then

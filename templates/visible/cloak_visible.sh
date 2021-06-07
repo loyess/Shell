@@ -8,7 +8,7 @@ ss_cloak_show_new(){
     echo -e " 密码     : ${Red}${shadowsockspwd}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " 插件选项 : ${Red}Transport=direct;ProxyMethod=shadowsocks;EncryptionMethod=${encryptionMethod};UID=${ckauid};PublicKey=${ckpub};ServerName=${domain};NumConn=4;BrowserSig=chrome;StreamTimeout=300${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件选项 : ${Red}Transport=direct;ProxyMethod=shadowsocks;EncryptionMethod=${encryptionMethod};UID=${ckauid};PublicKey=${ckpub};ServerName=${domain};NumConn=${NumConn};BrowserSig=chrome;StreamTimeout=300${AlternativeNames}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件参数 : " >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " AdminUID : ${ckauid}" >> ${HUMAN_CONFIG}

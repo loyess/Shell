@@ -126,6 +126,55 @@ get_cloak_encryption_method(){
     done
 }
 
+get_input_alternativenames(){
+    while true
+    do
+        echo
+        echo -e "请为Cloak输入AlternativeNames的值(例：cloudflare.com,github.com 英文逗号分隔)"
+        read -e -p "(默认：跳过)：" altNames
+        if [ -z "$altNames" ]; then
+            NumConn=4
+            AlternativeNames=""
+
+            echo
+            echo -e "${Red}  AlternativeNames = 跳过${suffix}"
+            echo
+            echo -e "${Tip} 可自行在客户端设置，如自行设置请注意将 ${Red}NumConn${suffix} 设置为 0"
+            echo
+            break
+        else
+            local domain
+            local noError=0
+
+            altNamesArray=(`echo $altNames | tr ',' ' '`)
+            if [[ "${#altNamesArray[@]}" -eq 0 ]]; then
+                echo -e "${Error} 检测到输入的字符${Red}仅存在逗号${suffix}，请重新输入。"
+                continue
+            fi
+            for domain in ${altNamesArray[@]}; do
+                if ! auto_get_ip_of_domain ${domain}; then
+                    noError=$((${noError} + 1))
+                    if [[ "$noError" -eq 1 ]]; then
+                        echo -e "${Error} 输入的字符中存在${Red}无效字符${suffix}或${Red}无法获取到ip的域名${suffix}："
+                    fi
+                    echo -e "  ${domain}"
+                fi
+            done
+
+            if [[ "$noError" -ne 0 ]]; then
+                continue
+            fi
+
+            NumConn=0
+            AlternativeNames=";AlternativeNames=$(echo $altNames | sed -E 's/^,+//g;s/,+$//g' | sed -E 's/,+/%2C/g')"
+
+            echo
+            echo -e "${Red}  AlternativeNames = $(echo $altNames | sed -E 's/^,+//g;s/,+$//g' | sed -E 's/,+/,/g')${suffix}"
+            echo
+            break
+        fi
+    done
+}
 
 install_prepare_libev_cloak(){
     if check_port_occupy "443"; then
@@ -134,4 +183,5 @@ install_prepare_libev_cloak(){
     get_input_domain
     get_input_rediraddr_of_domain
     get_cloak_encryption_method
+    get_input_alternativenames
 }

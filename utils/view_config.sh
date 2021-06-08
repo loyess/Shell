@@ -8,7 +8,7 @@ view_json_config(){
     cat ${args} | jq .
 }
 
-wiew_webserver_config(){
+view_webserver_config(){
     local args=$1
     echo
     echo -e "${Green}配置路径：${suffix}${args}"
@@ -38,11 +38,11 @@ view_config_logic(){
 
     if [[ ${isEnable} == enable ]]; then
         if [[ -e ${CADDY_CONF_FILE} ]]; then
-            wiew_webserver_config "${CADDY_CONF_FILE}"
+            view_webserver_config "${CADDY_CONF_FILE}"
         fi
 
         if [[ -e ${NGINX_CONFIG} ]]; then
-            wiew_webserver_config "${NGINX_CONFIG}"
+            view_webserver_config "${NGINX_CONFIG}"
         fi
     fi
 

@@ -5,7 +5,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.7.1"
+SHELL_VERSION="2.7.2"
 # ====================
 
 
@@ -183,6 +183,7 @@ usage() {
 	  script           升级脚本
 	  show             可视化配置
 	  log              查看日志文件
+	  catcfg           查看原始配置文件
 	  uid              添加一个新的uid用户(Cloak)
 	  cert             为.cf .ga .gq .ml .tk申请证书(90天)
 	  link             用新添加的uid生成一个新的SS://链接(Cloak)
@@ -1010,6 +1011,11 @@ do_cert(){
     acme_get_certificate_by_manual_force "$1"
 }
 
+do_catcfg(){
+    improt_package "utils" "view_config.sh"
+    view_config_logic
+}
+
 do_start(){
     status_init
     if [[ -z "${ssPath}" ]]; then
@@ -1142,6 +1148,9 @@ case ${action} in
         do_${action}
         ;;
     cert)
+        do_${action} "${2}"
+        ;;
+    catcfg)
         do_${action} "${2}"
         ;;
     help)

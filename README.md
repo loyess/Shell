@@ -24,6 +24,7 @@ Available Options:
   script           升级脚本
   show             可视化配置
   log              查看日志文件
+  catcfg           查看原始配置文件
   uid              添加一个新的uid用户(Cloak)
   cert             为.cf .ga .gq .ml .tk申请证书(90天)
   link             用新添加的uid生成一个新的SS://链接(Cloak)

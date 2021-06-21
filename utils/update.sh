@@ -278,7 +278,8 @@ update_gost_plugin(){
     cd ${CUR_DIR}
 
     if [[ -e ${GOST_PLUGIN_BIN_PATH} ]]; then
-        gost_plugin_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/maskedeken/gost-plugin/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        # gost_plugin_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/maskedeken/gost-plugin/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        gost_plugin_ver="1.6.1"
         [ -z ${gost_plugin_ver} ] && echo -e "${Error} 获取 gost-plugin 最新版本失败." && exit 1
         read current_gost_plugin_ver < ${GOST_PLUGIN_VERSION_FILE}
 

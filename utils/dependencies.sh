@@ -4,7 +4,7 @@ LIBSODIUM_FILE="libsodium-${LIBSODIUM_VERSION}"
 LIBSODIUM_VERSION_FILE=~/.deps-ver/libsodium.v
 LIBSODIUM_URL="https://github.com/jedisct1/libsodium/releases/download/${LIBSODIUM_VERSION}-RELEASE/libsodium-${LIBSODIUM_VERSION}.tar.gz"
 
-MBEDTLS_VERSION="2.16.7"
+MBEDTLS_VERSION="2.16.10"
 MBEDTLS_FILE="mbedtls-${MBEDTLS_VERSION}"
 MBEDTLS_VERSION_FILE=~/.deps-ver/mbedtls.v
 MBEDTLS_URL="https://github.com/ARMmbed/mbedtls/archive/${MBEDTLS_FILE}.tar.gz"
@@ -71,6 +71,8 @@ error_detect_depends(){
 }
 
 install_dependencies(){
+    local depends=($*)
+
     if check_sys packageManager yum; then
         echo -e "${Info} 检查EPEL存储库."
         if [ ! -f /etc/yum.repos.d/epel.repo ]; then
@@ -78,70 +80,77 @@ install_dependencies(){
         fi
         [ ! -f /etc/yum.repos.d/epel.repo ] && echo -e "${Error} 安装EPEL存储库失败，请检查它。" && exit 1
         [ ! "$(command -v yum-config-manager)" ] && yum install -y yum-utils > /dev/null 2>&1
-        [ x"$(yum-config-manager epel | grep -w enabled | awk '{print $3}')" != x"True" ] && yum-config-manager --enable epel > /dev/null 2>&1
+        if centosversion 8; then
+            [ x"$(yum repolist epel | grep -w epel | awk '{print $NF}')" != x"enabled" ] && yum-config-manager --enable epel > /dev/null 2>&1
+        else
+            [ x"$(yum-config-manager epel | grep -w enabled | awk '{print $3}')" != x"True" ] && yum-config-manager --enable epel > /dev/null 2>&1
+        fi
         echo -e "${Info} EPEL存储库检查完成."
 
-        yum_depends=(
-            gettext gcc pcre pcre-devel autoconf libtool automake make asciidoc xmlto c-ares-devel libev-devel zlib-devel openssl-devel git qrencode jq
-        )
-        for depend in ${yum_depends[@]}; do
+        for depend in ${depends[@]}; do
             error_detect_depends "yum -y install ${depend}"
         done
     elif check_sys packageManager apt; then
-        apt_depends=(
-            gettext gcc build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libc-ares-dev automake libssl-dev git qrencode jq
-        )
 
         apt-get -y update
-        for depend in ${apt_depends[@]}; do
+        for depend in ${depends[@]}; do
             error_detect_depends "apt-get -y install ${depend}"
         done
     fi
 }
 
-install_libsodium(){    
+install_dependencies_logic(){
+    if [[ ${SS_VERSION} = "ss-libev" ]] || [[ "${plugin_num}" == "3" ]]; then
+        if check_sys packageManager yum; then
+            local depends=(
+                gettext gcc pcre pcre-devel autoconf libtool automake make asciidoc xmlto c-ares-devel libev-devel zlib-devel openssl-devel git qrencode jq
+            )
+        elif check_sys packageManager apt; then
+            local depends=(
+                gettext gcc build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libc-ares-dev automake libssl-dev git qrencode jq
+            )
+        fi
+        install_dependencies "${depends[*]}"
+    fi
+
+    if [ ! "$(command -v qrencode)" ] || [ ! "$(command -v jq)" ]; then
+        local depends=(qrencode jq)
+        install_dependencies "${depends[*]}"
+    fi
+}
+
+install_libsodium(){
+    local installStatus=$1
+
+    cd ${CUR_DIR}
+    echo -e "${Info} 下载${LIBSODIUM_FILE}."
+    download "${LIBSODIUM_FILE}.tar.gz" "${LIBSODIUM_URL}"
+    echo -e "${Info} 解压${LIBSODIUM_FILE}."
+    tar zxf ${LIBSODIUM_FILE}.tar.gz && cd ${LIBSODIUM_FILE}
+    echo -e "${Info} 编译安装${LIBSODIUM_FILE}."
+    ./configure --prefix=/usr && make && make install
+    if [ $? -ne 0 ]; then
+        echo -e "${Error} ${LIBSODIUM_FILE} ${installStatus}失败 !"
+        install_cleanup
+        exit 1
+    fi
+    # wriet version num
+    if [ ! -d "$(dirname ${LIBSODIUM_VERSION_FILE})" ]; then
+        mkdir -p $(dirname ${LIBSODIUM_VERSION_FILE})
+    fi
+    echo ${LIBSODIUM_VERSION} > ${LIBSODIUM_VERSION_FILE}
+    echo -e "${Info} ${LIBSODIUM_FILE} ${installStatus}成功 !"
+}
+
+install_libsodium_logic(){
     if [ ! -f ${LIBSODIUM_VERSION_FILE} ]; then
-        cd ${CUR_DIR}
-        echo -e "${Info} 下载${LIBSODIUM_FILE}."
-        download "${LIBSODIUM_FILE}.tar.gz" "${LIBSODIUM_URL}"
-        echo -e "${Info} 解压${LIBSODIUM_FILE}."
-        tar zxf ${LIBSODIUM_FILE}.tar.gz && cd ${LIBSODIUM_FILE}
-        echo -e "${Info} 编译安装${LIBSODIUM_FILE}."
-        ./configure --prefix=/usr && make && make install
-        if [ $? -ne 0 ]; then
-            echo -e "${Error} ${LIBSODIUM_FILE} 安装失败 !"
-            install_cleanup
-            exit 1
-        fi
-        # wriet version num
-        if [ ! -d "$(dirname ${LIBSODIUM_VERSION_FILE})" ]; then
-            mkdir -p $(dirname ${LIBSODIUM_VERSION_FILE})
-        fi
-        echo ${LIBSODIUM_VERSION} > ${LIBSODIUM_VERSION_FILE}
-        echo -e "${Info} ${LIBSODIUM_FILE} 安装成功 !"
+        install_libsodium '安装'
     else
         read  currentLibsodiumVer < ${LIBSODIUM_VERSION_FILE}
         latestLibsodiumVer=${LIBSODIUM_VERSION}
 
         if check_latest_version ${currentLibsodiumVer} ${latestLibsodiumVer}; then
-            cd ${CUR_DIR}
-            echo -e "${Info} 下载${LIBSODIUM_FILE}."
-            download "${LIBSODIUM_FILE}.tar.gz" "${LIBSODIUM_URL}"
-            echo -e "${Info} 解压${LIBSODIUM_FILE}."
-            tar zxf ${LIBSODIUM_FILE}.tar.gz && cd ${LIBSODIUM_FILE}
-            echo -e "${Info} 编译安装${LIBSODIUM_FILE}."
-            ./configure --prefix=/usr && make && make install
-            if [ $? -ne 0 ]; then
-                echo -e "${Error} ${LIBSODIUM_FILE} 更新失败 !"
-                install_cleanup
-                exit 1
-            fi
-            # wriet version num
-            if [ ! -d "$(dirname ${LIBSODIUM_VERSION_FILE})" ]; then
-                mkdir -p $(dirname ${LIBSODIUM_VERSION_FILE})
-            fi
-            echo ${LIBSODIUM_VERSION} > ${LIBSODIUM_VERSION_FILE}
-            echo -e "${Info} ${LIBSODIUM_FILE} 更新成功 !"
+            install_libsodium '更新'
         else
             echo -e "${Info} ${LIBSODIUM_FILE} 已经安装最新版本."
         fi
@@ -149,54 +158,40 @@ install_libsodium(){
 }
 
 install_mbedtls(){
+    local installStatus=$1
+
+    cd ${CUR_DIR}
+    echo -e "${Info} 下载${MBEDTLS_FILE}."
+    download "${MBEDTLS_FILE}.tar.gz" "${MBEDTLS_URL}"
+    echo -e "${Info} 解压${MBEDTLS_FILE}."
+    tar zxf ${MBEDTLS_FILE}.tar.gz
+    mv "mbedtls-${MBEDTLS_FILE}" ${MBEDTLS_FILE}
+    cd ${MBEDTLS_FILE}
+    echo -e "${Info} 编译安装${MBEDTLS_FILE}."
+    make SHARED=1 CFLAGS=-fPIC
+    make DESTDIR=/usr install
+    if [ $? -ne 0 ]; then
+        echo -e "${Error} ${MBEDTLS_FILE} ${installStatus}失败."
+        install_cleanup
+        exit 1
+    fi
+    # wriet version num
+    if [ ! -d "$(dirname ${MBEDTLS_VERSION_FILE})" ]; then
+        mkdir -p $(dirname ${MBEDTLS_VERSION_FILE})
+    fi
+    echo ${MBEDTLS_VERSION} > ${MBEDTLS_VERSION_FILE}
+    echo -e "${Info} ${MBEDTLS_FILE} ${installStatus}成功 !"
+}
+
+install_mbedtls_logic(){
     if [ ! -f ${MBEDTLS_VERSION_FILE} ]; then
-        cd ${CUR_DIR}
-        echo -e "${Info} 下载${MBEDTLS_FILE}."
-        download "${MBEDTLS_FILE}.tar.gz" "${MBEDTLS_URL}"
-        echo -e "${Info} 解压${MBEDTLS_FILE}."
-        tar zxf ${MBEDTLS_FILE}.tar.gz
-        mv "mbedtls-${MBEDTLS_FILE}" ${MBEDTLS_FILE}
-        cd ${MBEDTLS_FILE}
-        echo -e "${Info} 编译安装${MBEDTLS_FILE}."
-        make SHARED=1 CFLAGS=-fPIC
-        make DESTDIR=/usr install
-        if [ $? -ne 0 ]; then
-            echo -e "${Error} ${MBEDTLS_FILE} 安装失败."
-            install_cleanup
-            exit 1
-        fi
-        # wriet version num
-        if [ ! -d "$(dirname ${MBEDTLS_VERSION_FILE})" ]; then
-            mkdir -p $(dirname ${MBEDTLS_VERSION_FILE})
-        fi
-        echo ${MBEDTLS_VERSION} > ${MBEDTLS_VERSION_FILE}
-        echo -e "${Info} ${MBEDTLS_FILE} 安装成功 !"
+        install_mbedtls '安装'
     else
         read  currentMbedtlsVer < ${MBEDTLS_VERSION_FILE}
         latestMbedtlsVer=${MBEDTLS_VERSION}
 
         if check_latest_version ${currentMbedtlsVer} ${latestMbedtlsVer}; then
-            cd ${CUR_DIR}
-            echo -e "${Info} 下载${MBEDTLS_FILE}."
-            download "${MBEDTLS_FILE}.tar.gz" "${MBEDTLS_URL}"
-            echo -e "${Info} 解压${MBEDTLS_FILE}."
-            tar zxf ${MBEDTLS_FILE}.tar.gz
-            mv "mbedtls-${MBEDTLS_FILE}" ${MBEDTLS_FILE}
-            cd ${MBEDTLS_FILE}
-            echo -e "${Info} 编译安装${MBEDTLS_FILE}."
-            make SHARED=1 CFLAGS=-fPIC
-            make DESTDIR=/usr install
-            if [ $? -ne 0 ]; then
-                echo -e "${Error} ${MBEDTLS_FILE} 更新失败."
-                install_cleanup
-                exit 1
-            fi
-            # wriet version num
-            if [ ! -d "$(dirname ${MBEDTLS_VERSION_FILE})" ]; then
-                mkdir -p $(dirname ${MBEDTLS_VERSION_FILE})
-            fi
-            echo ${MBEDTLS_VERSION} > ${MBEDTLS_VERSION_FILE}
-            echo -e "${Info} ${MBEDTLS_FILE} 更新成功 !"
+            install_mbedtls '更新'
         else
             echo -e "${Info} ${MBEDTLS_FILE} 已经安装最新版本."
         fi

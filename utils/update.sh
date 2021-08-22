@@ -154,7 +154,7 @@ update_cloak(){
     if [[ -e ${CLOAK_SERVER_BIN_PATH} ]]; then
         cloak_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/cbeuw/Cloak/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
         [ -z ${cloak_ver} ] && echo -e "${Error} 获取 cloak 最新版本失败." && exit 1
-        current_cloak_ver=$(ck-server -v | grep ck-server | cut -d\  -f2)
+        current_cloak_ver=$(ck-server -v | grep ck-server | cut -d\  -f2 | sed 's/v//g')
         if ! check_latest_version ${current_cloak_ver} ${cloak_ver}; then
             echo -e "${Point} cloak当前已是最新版本${current_cloak_ver}不需要更新."
             echo
@@ -248,7 +248,7 @@ update_simple_tls(){
         [ -z ${simple_tls_ver} ] && echo -e "${Error} 获取 simple-tls 最新版本失败." && exit 1
         read current_simple_tls_ver < ${SIMPLE_TLS_VERSION_FILE}
 
-        if ! check_latest_version "0.3.4" ${current_simple_tls_ver}; then
+        if ! check_latest_version "0.4.7" ${current_simple_tls_ver}; then
             echo -e "${Point} simple-tls当前版本是${current_simple_tls_ver}及以下版本，与最新版本不兼容，脚本不提供更新."
             exit 0
         fi
@@ -274,26 +274,103 @@ update_simple_tls(){
     fi
 }
 
+update_gost_plugin(){
+    cd ${CUR_DIR}
+
+    if [[ -e ${GOST_PLUGIN_BIN_PATH} ]]; then
+        # gost_plugin_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/maskedeken/gost-plugin/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        gost_plugin_ver="1.6.1"
+        [ -z ${gost_plugin_ver} ] && echo -e "${Error} 获取 gost-plugin 最新版本失败." && exit 1
+        read current_gost_plugin_ver < ${GOST_PLUGIN_VERSION_FILE}
+
+        if ! check_latest_version ${current_gost_plugin_ver} ${gost_plugin_ver}; then
+            echo -e "${Point} gost-plugin当前已是最新版本${current_gost_plugin_ver}不需要更新."
+            if [[ ! -e ${CADDY_BIN_PATH} ]]; then
+                echo
+                exit 1
+            fi
+            update_caddy
+            exit 0
+        fi
+
+        local plugin_num="9"
+        echo -e "${Info} 检测到gost-plugin有新版本，开始下载."
+        download_plugins_file
+        echo -e "${Info} 下载完成，开始安装."
+        improt_package "plugins" "gost_plugin_install.sh"
+        do_stop > /dev/null 2>&1
+        install_gost_plugin
+        do_restart > /dev/null 2>&1
+
+        echo -e "${Info} gost-plugin已成功升级为最新版本${gost_plugin_ver}"
+        echo
+
+        install_cleanup
+        update_caddy
+    fi
+}
+
+update_xray_plugin(){
+    cd ${CUR_DIR}
+
+    if [[ -e ${XRAY_PLUGIN_BIN_PATH} ]]; then
+        xray_plugin_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/teddysun/xray-plugin/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        [ -z ${xray_plugin_ver} ] && echo -e "${Error} 获取 xray-plugin 最新版本失败." && exit 1
+        read current_xray_plugin_ver < ${XRAY_PLUGIN_VERSION_FILE}
+
+        if ! check_latest_version ${current_xray_plugin_ver} ${xray_plugin_ver}; then
+            echo -e "${Point} xray-plugin当前已是最新版本${current_xray_plugin_ver}不需要更新."
+            if [[ ! -e ${CADDY_BIN_PATH} ]]; then
+                echo
+                exit 1
+            fi
+            update_caddy
+            exit 0
+        fi
+
+        local plugin_num="10"
+        echo -e "${Info} 检测到xray-plugin有新版本，开始下载."
+        download_plugins_file
+        echo -e "${Info} 下载完成，开始安装."
+        improt_package "plugins" "xray_plugin_install.sh"
+        do_stop > /dev/null 2>&1
+        install_xray_plugin
+        do_restart > /dev/null 2>&1
+
+        echo -e "${Info} xray-plugin已成功升级为最新版本${xray_plugin_ver}"
+        echo
+
+        install_cleanup
+        update_caddy
+    fi
+}
+
 update_caddy_v1(){
     cd ${CUR_DIR}
     
-    caddy_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/caddyserver/caddy/releases | grep -o '"tag_name": ".*"' | sed 's/"//g;s/v//g' | sed 's/tag_name: //g' | grep -E '^1' | head -n 1)
-    [ -z ${caddy_ver} ] && echo -e "${Error} 获取 caddy 最新版本失败." && exit 1
-    current_caddy_ver=${caddyCurrentVer}
-    if ! check_latest_version ${current_caddy_ver} ${caddy_ver}; then
-        echo -e "${Point} caddy当前已是最新版本${current_caddy_ver}不需要更新."
-        echo
-        exit 1
-    fi
-
-    echo -e "${Info} 检测到caddy有新版本，开始下载并安装."
-    do_stop > /dev/null 2>&1
-    improt_package "tools" "caddy_install.sh"
-    install_caddy
-    do_restart > /dev/null 2>&1
-
-    echo -e "${Info} caddy已成功升级为最新版本${caddy_ver}"
-    echo
+    caddy_ver=$(caddy -version)
+    echo -e "${Info} 当前版本：${caddy_ver}"
+    read -p "是否强制覆盖安装caddy(默认: n) [y/n]: " yn
+    [ -z "${yn}" ] && yn="N"
+    case "${yn:0:1}" in
+        y|Y)
+            do_stop > /dev/null 2>&1
+            improt_package "tools" "caddy_install.sh"
+            install_caddy
+            do_restart > /dev/null 2>&1
+            caddy_ver=$(caddy -version)
+            echo -e "${Info} 覆盖版本：${caddy_ver}"
+            ;;
+        n|N)
+            echo -e "${Info} 跳过强制安装。"
+            ;;
+        *)
+            echo
+            echo -e "${Error} 输入有误，请重新输入!"
+            echo
+            continue
+            ;;
+    esac
 
     install_cleanup
 }
@@ -352,6 +429,8 @@ update_shadowsocks_libev(){
         update_mtt
         update_rabbit_tcp
         update_simple_tls
+        update_gost_plugin
+        update_xray_plugin
         
         exit 1
     fi
@@ -375,28 +454,17 @@ update_shadowsocks_libev(){
     update_mtt
     update_rabbit_tcp
     update_simple_tls
+    update_gost_plugin
+    update_xray_plugin
 }
 
 update_shadowsocks_rust(){
     local SS_VERSION="ss-rust"
     
     echo -e "${Info} 正在进行版本比对请稍等."
-    rust_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/shadowsocks-rust/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+    rust_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/shadowsocks-rust/releases | grep -o '"tag_name": ".*"' | grep -v 'alpha' | head -n 1 | sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
     [ -z ${rust_ver} ] && echo -e "${Error} 获取 shadowsocks-rust 最新版本失败." && exit 1
     current_rust_ver=$(ssserver -V | grep shadowsocks | cut -d\  -f2)
-    
-    if ! $(echo ${rust_ver} | grep -q 'alpha') && $(echo ${current_rust_ver} | grep -q 'alpha'); then 
-        current_rust_ver='0.0.0'
-    fi
-    
-    if $(echo ${rust_ver} | grep -q 'alpha'); then 
-        rust_ver=$(echo ${rust_ver} | sed 's/-alpha//g')
-    fi
-    
-    if $(echo ${current_rust_ver} | grep -q 'alpha'); then 
-        current_rust_ver=$(echo ${current_rust_ver} | sed 's/-alpha//g')
-    fi
-
     if ! check_latest_version ${current_rust_ver} ${rust_ver}; then
         echo -e "${Point} shadowsocklibev-rust当前已是最新版本$(ssserver -V | grep shadowsocks | cut -d\  -f2)不需要更新."
         
@@ -408,6 +476,8 @@ update_shadowsocks_rust(){
         update_mtt
         update_rabbit_tcp
         update_simple_tls
+        update_gost_plugin
+        update_xray_plugin
         
         exit 1
     fi
@@ -431,6 +501,8 @@ update_shadowsocks_rust(){
     update_mtt
     update_rabbit_tcp
     update_simple_tls
+    update_gost_plugin
+    update_xray_plugin
 }
 
 update_go_shadowsocks2(){
@@ -451,6 +523,8 @@ update_go_shadowsocks2(){
         update_mtt
         update_rabbit_tcp
         update_simple_tls
+        update_gost_plugin
+        update_xray_plugin
 
         exit 1
     fi
@@ -474,4 +548,16 @@ update_go_shadowsocks2(){
     update_mtt
     update_rabbit_tcp
     update_simple_tls
+    update_gost_plugin
+    update_xray_plugin
+}
+
+update_logic(){
+    if [[ -e ${SHADOWSOCKS_LIBEV_BIN_PATH} ]]; then
+        update_shadowsocks_libev
+    elif [[ -e ${SHADOWSOCKS_RUST_BIN_PATH} ]]; then
+        update_shadowsocks_rust
+    elif [[ -e ${GO_SHADOWSOCKS2_BIN_PATH} ]]; then
+        update_go_shadowsocks2
+    fi
 }

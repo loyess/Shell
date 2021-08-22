@@ -30,23 +30,8 @@ chacha20-ietf-poly1305
 
 SHADOWSOCKS_RUST_CIPHERS=(
 none
-rc4-md5
-salsa20
-chacha20
-chacha20-ietf
-aes-256-cfb
-aes-192-cfb
-aes-128-cfb
-aes-256-ctr
-aes-192-ctr
-aes-128-ctr
-bf-cfb
-camellia-128-cfb
-camellia-192-cfb
-camellia-256-cfb
 aes-256-gcm
 aes-128-gcm
-xchacha20-ietf-poly1305
 chacha20-ietf-poly1305
 )
 
@@ -164,7 +149,7 @@ install_prepare_cipher(){
             local tempNum=14
             local SHADOWSOCKS_CIPHERS=( ${SHADOWSOCKS_LIBEV_CIPHERS[@]} )
         elif [[ ${SS_VERSION} = "ss-rust" ]]; then
-            local tempNum=15
+            local tempNum=2
             local SHADOWSOCKS_CIPHERS=( ${SHADOWSOCKS_RUST_CIPHERS[@]} )
         elif [[ ${SS_VERSION} = "go-ss2" ]]; then
             local tempNum=2

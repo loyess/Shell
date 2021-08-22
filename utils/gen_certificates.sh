@@ -15,6 +15,16 @@ intall_acme_tool(){
     fi
 }
 
+get_latest_acme_sh(){
+    echo -e "${Info} 升级 acme.sh 为最新的代码. "
+    ~/.acme.sh/acme.sh --upgrade
+}
+
+set_defualt_ca_for_acme_sh(){
+    echo -e "${Info} 设置默认 ca 为  letsencrypt."
+    ~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
+}
+
 get_input_api_info(){
     while true
     do
@@ -79,6 +89,8 @@ acme_get_certificate_by_force(){
     local domain=$1
 
     intall_acme_tool
+    get_latest_acme_sh
+    set_defualt_ca_for_acme_sh
             
     if [ ! "$(command -v socat)" ]; then
         echo -e "${Info} 开始安装强制生成时必要的socat 软件包."
@@ -103,6 +115,8 @@ acme_get_certificate_by_api(){
 
     choose_api_get_mode
     intall_acme_tool
+    get_latest_acme_sh
+    set_defualt_ca_for_acme_sh
 
     echo
     echo -e "${Info} 开始生成域名 ${domain} 相关的证书 "
@@ -124,6 +138,8 @@ acme_get_certificate_by_manual(){
     local isForce=${2:-""}
 
     intall_acme_tool
+    get_latest_acme_sh
+    set_defualt_ca_for_acme_sh
 
     echo
     echo -e "${Info} 开始生成域名 ${domain} 相关的证书 "
@@ -231,4 +247,17 @@ acme_get_certificate_by_api_or_manual(){
     else
         acme_get_certificate_by_api "${domain}"
     fi
+}
+
+acme_get_certificate_by_manual_force(){
+    local domain=$1
+
+    get_domain_ip "${domain}"
+    if ! (echo ${domain} | grep -qE '.cf$|.ga$|.gq$|.ml$|.tk$' && is_cdn_proxied "${domain_ip}"); then
+        echo
+        echo -e "${Error} 此选项为手动申请Cloudflare CDN模式 证书(有效期3个月)，仅支持后缀为.cf .ga .gq .ml .tk的域名。"
+        echo
+        exit 1
+    fi
+    acme_get_certificate_by_manual "${domain}" "--force"
 }

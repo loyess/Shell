@@ -22,11 +22,12 @@ Available Options:
   restart          重启
   status           查看状态
   script           升级脚本
-  show             显示可视化配置
+  show             可视化配置
   log              查看日志文件
-  cert             手动申请Cloudflare CDN证书(仅 .cf .ga .gq .ml .tk，有效期90天)
-  uid              为cloak添加一个新的uid用户(仅 Cloak)
-  link             用新添加的uid生成一个新的SS://链接(仅 Cloak)
+  catcfg           查看原始配置文件
+  uid              添加一个新的uid用户(Cloak)
+  cert             为.cf .ga .gq .ml .tk申请证书(90天)
+  link             用新添加的uid生成一个新的SS://链接(Cloak)
   scan             用ss://链接在当前终端上生成一个可供扫描的二维码
   help             打印帮助信息并退出
 ```
@@ -62,7 +63,6 @@ Available Options:
 
   caddy安装目录：/usr/local/caddy
   caddy配置文件: /usr/local/caddy/Caddyfile
-  caddy生成证书目录：~/.caddy/acme/acme-v02.api.letsencrypt.org/sites/xxx.xxx(域名)/
 
   nginx二进制文件：/usr/sbin/nginx
   nginx配置文件：/etc/nginx/nginx.conf
@@ -123,7 +123,17 @@ Available Options:
       2. wss
   7. rabbit-tcp
   8. simple-tls
-
+  9. gost-plugin
+      1. [m]ws
+      2. [m]wss
+      3. [m]tls
+      4. xtls
+      5. quic
+      6. http2
+ 10. xray-plugin
+      1. ws
+      2. wss
+      3. quic
 
 注意：
     kcptun仅用于加速。
@@ -138,7 +148,9 @@ Available Options:
     使用v2ray-plugin的选项5时，请将CloudFlare后台Crypto页面里的SSL设置，改为 Full 或 Full (strict) 模式（前者不验证
 服务器证书，后者则会），否则，在浏览器打开你的域名会提示 ”重定向的次数过多“ 的错误！！！
 	
-    使用mos-tls-tunnel时，client开启了跳过验证模式，通信过程中client不会验证server的certificate chain 和 host name，用于自签证书的域名可以随意（不需要自备域名）。
+    使用mos-tls-tunnel时，client开启了跳过验证模式，通信过程中client不会验证server的certificate chain 和 host name，用于自签证书的域名可以随意（不需要自备域名）。mos-tls-tunnel已停止开发。但不影响使用。simple-tls是mos-tls-tunnel仅保留tls的后续版本，仍在更新。
+
+    使用simple-tls时，由于v0.3.4版本和最新版本只有部分兼容，请注意使用对应版本的客户端。
 
 	 
 ~~~
@@ -196,22 +208,28 @@ Available Options:
 - [shadowsocks-libev](https://github.com/shadowsocks/shadowsocks-libev)
 - [shadowsocks-rust](https://github.com/shadowsocks/shadowsocks-rust)
 - [go-shadowsocks2](https://github.com/shadowsocks/go-shadowsocks2)
-- [shadowsocks-windows](<https://github.com/shadowsocks/shadowsocks-windows/releases>)
-- [shadowsocks-android](<https://github.com/shadowsocks/shadowsocks-android/releases>)
-- [v2ray-plugin](<https://github.com/shadowsocks/v2ray-plugin/releases>)
-- [v2ray-plugin (teddysun)](<https://github.com/teddysun/v2ray-plugin/releases>)
-- [v2ray-plugin-android](<https://github.com/shadowsocks/v2ray-plugin-android/releases>)
-- [v2ray-plugin-android (teddysun)](<https://github.com/teddysun/v2ray-plugin-android/releases>)
-- [kcptun](https://github.com/xtaci/kcptun/releases)
-- [kcptun-android](https://github.com/shadowsocks/kcptun-android/releases)
-- [simple-obfs(Deprecated)](https://github.com/shadowsocks/simple-obfs/releases)
-- [simple-obfs-android](https://github.com/shadowsocks/simple-obfs-android/releases)
-- [GoQuiet (unofficial)](https://github.com/cbeuw/GoQuiet/releases)
-- [GoQuiet-android](https://github.com/cbeuw/GoQuiet-android/releases)
-- [Cloak (based goquiet)](https://github.com/cbeuw/Cloak/releases)
-- [Cloak-android](https://github.com/cbeuw/Cloak-android/releases)
-- [mos-tls-tunnel](https://github.com/IrineSistiana/mos-tls-tunnel/releases)
-- [mostunnel-android](https://github.com/IrineSistiana/mostunnel-android/releases)
-- [rabbit-tcp](https://github.com/ihciah/rabbit-tcp/releases)
-- [rabbit-plugin](https://github.com/ihciah/rabbit-plugin/releases)
-- [simple-tls](https://github.com/IrineSistiana/simple-tls/releases)
+- [shadowsocks-windows](<https://github.com/shadowsocks/shadowsocks-windows>)
+- [shadowsocks-android](<https://github.com/shadowsocks/shadowsocks-android>)
+- [v2ray-plugin](<https://github.com/shadowsocks/v2ray-plugin>)
+- [v2ray-plugin (teddysun)](<https://github.com/teddysun/v2ray-plugin>)
+- [v2ray-plugin-android](<https://github.com/shadowsocks/v2ray-plugin-android>)
+- [v2ray-plugin-android (teddysun)](<https://github.com/teddysun/v2ray-plugin-android>)
+- [kcptun](https://github.com/xtaci/kcptun)
+- [kcptun-android](https://github.com/shadowsocks/kcptun-android)
+- [simple-obfs](https://github.com/shadowsocks/simple-obfs)
+- [simple-obfs-android](https://github.com/shadowsocks/simple-obfs-android)
+- [GoQuiet](https://github.com/cbeuw/GoQuiet)
+- [GoQuiet-android](https://github.com/cbeuw/GoQuiet-android)
+- [GoQuiet-android (Support Android10)](https://github.com/notsure2/GoQuiet-android)
+- [Cloak](https://github.com/cbeuw/Cloak)
+- [Cloak-android](https://github.com/cbeuw/Cloak-android)
+- [mos-tls-tunnel](https://github.com/IrineSistiana/mos-tls-tunnel)
+- [mostunnel-android](https://github.com/IrineSistiana/mostunnel-android)
+- [rabbit-tcp](https://github.com/ihciah/rabbit-tcp)
+- [rabbit-plugin](https://github.com/ihciah/rabbit-plugin)
+- [simple-tls](https://github.com/IrineSistiana/simple-tls)
+- [simple-tls-android](https://github.com/IrineSistiana/simple-tls-android)
+- [gost-plugin](https://github.com/maskedeken/gost-plugin)
+- [gost-plugin-android](https://github.com/maskedeken/gost-plugin-android)
+- [xray-plugin](https://github.com/teddysun/xray-plugin)
+- [xray-plugin-android](https://github.com/teddysun/xray-plugin-android)

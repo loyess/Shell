@@ -43,7 +43,7 @@ UserInfo=$(cat <<EOF
 EOF
 )
 
-    curl -X POST -d UserInfo="${UserInfo}" http://127.0.0.1:8080/admin/users/$(echo "${CK_UID}" | tr '+' '-' | tr '/' '_') -sS
+    curl -H "Content-type: application/json" -X POST -d "${UserInfo}" http://127.0.0.1:8080/admin/users/$(echo "${CK_UID}" | tr '+' '-' | tr '/' '_') -sS
     
     sleep 0.5
     
@@ -340,8 +340,9 @@ download_ck_clinet(){
     local CK_CLIENT_V=$1
     
     # Download cloak client
-    local cloak_file="ck-client-linux-amd64-${CK_CLIENT_V}"
-    local cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${CK_CLIENT_V}/ck-client-linux-amd64-${CK_CLIENT_V}"
+    local cloak_file="ck-client-linux-amd64-v${CK_CLIENT_V}"
+    local cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${CK_CLIENT_V}/ck-client-linux-amd64-v${CK_CLIENT_V}"
+    improt_package "utils" "downloads.sh"
     download "${cloak_file}" "${cloak_url}"
     
     # install ck-client
@@ -354,12 +355,12 @@ download_ck_clinet(){
 ck2_users_manager(){
     if [[ ! -e ${CLOAK_CLIENT_BIN_PATH} ]]; then
         # Download cloak client
-        cloak_ver=$(ck-server -v | grep ck-server | cut -d\  -f2)
+        cloak_ver=$(ck-server -v | grep ck-server | cut -d\  -f2 | sed 's/v//g')
         download_ck_clinet ${cloak_ver}
     fi
     
-    ck_server_v=$(ck-server -v | grep ck-server | cut -d\  -f2)
-    ck_client_v=$(ck-client -v | grep ck-client | cut -d\  -f2)
+    ck_server_v=$(ck-server -v | grep ck-server | cut -d\  -f2 | sed 's/v//g')
+    ck_client_v=$(ck-client -v | grep ck-client | cut -d\  -f2 | sed 's/v//g')
     if version_gt ${ck_server_v} ${ck_client_v}; then
         # Download cloak client
         cloak_ver=${ck_server_v}
@@ -448,4 +449,15 @@ ck2_users_manager(){
             echo
             ;;
     esac
+}
+
+user_manager_by_uid(){
+    if [ ! "$(command -v ck-server)" ]; then
+        echo -e "\n${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行.\n"
+        exit 1
+    fi
+
+    ck2_users_manager
+    sleep 0.5
+    is_the_api_open "stop"
 }

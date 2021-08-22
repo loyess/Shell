@@ -5,7 +5,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.6.4"
+SHELL_VERSION="2.7.2"
 # ====================
 
 
@@ -115,6 +115,18 @@ SIMPLE_TLS_BIN_PATH="/usr/local/bin/simple-tls"
 SIMPLE_TLS_VERSION_FILE="/etc/shadowsocks/simple-tls.v"
 
 
+# gost-plugin
+GOST_PLUGIN_INSTALL_PATH="/usr/local/bin"
+GOST_PLUGIN_BIN_PATH="/usr/local/bin/gost-plugin"
+GOST_PLUGIN_VERSION_FILE="/etc/shadowsocks/gost-plugin.v"
+
+
+# xray-plugin
+XRAY_PLUGIN_INSTALL_PATH="/usr/local/bin"
+XRAY_PLUGIN_BIN_PATH="/usr/local/bin/xray-plugin"
+XRAY_PLUGIN_VERSION_FILE="/etc/shadowsocks/xray-plugin.v"
+
+
 # caddy
 CADDY_INSTALL_PATH="/usr/local/caddy"
 CADDY_BIN_PATH="/usr/local/caddy/caddy"
@@ -157,140 +169,121 @@ Separator_1="——————————————————————�
 
 usage() {
 	cat >&1 <<-EOF
-Usage: 
-  ./ss-plugins.sh [options...] [args...]
-    
-Available Options:
-  install          安装
-  uninstall        卸载
-  update           升级
-  start            启动
-  stop             关闭
-  restart          重启
-  status           查看状态
-  script           升级脚本
-  show             显示可视化配置
-  log              查看日志文件
-  cert             手动申请Cloudflare CDN证书(仅 .cf .ga .gq .ml .tk，有效期90天)
-  uid              为cloak添加一个新的uid用户(仅 Cloak)
-  link             用新添加的uid生成一个新的SS://链接(仅 Cloak)
-  scan             用ss://链接在当前终端上生成一个可供扫描的二维码
-  help             打印帮助信息并退出
+	Usage:
+	  ./ss-plugins.sh [options...] [args...]
+
+	Available Options:
+	  install          安装
+	  uninstall        卸载
+	  update           升级
+	  start            启动
+	  stop             关闭
+	  restart          重启
+	  status           查看状态
+	  script           升级脚本
+	  show             可视化配置
+	  log              查看日志文件
+	  catcfg           查看原始配置文件
+	  uid              添加一个新的uid用户(Cloak)
+	  cert             为.cf .ga .gq .ml .tk申请证书(90天)
+	  link             用新添加的uid生成一个新的SS://链接(Cloak)
+	  scan             用ss://链接在当前终端上生成一个可供扫描的二维码
+	  help             打印帮助信息并退出
 
 	EOF
 
-    exit $1
+	exit $1
 }
 
-menu_status(){
-    local BIN_PATH=$1
-    local SS_PID=$2
+status_init(){
+    if [[ -e ${SHADOWSOCKS_LIBEV_BIN_PATH} ]]; then
+        ssName="Shadowsocks-libev"
+        ssPath=${SHADOWSOCKS_LIBEV_BIN_PATH}
+        ssPid=`ps -ef | grep -v grep | grep ss-server | awk '{print $2}'`
+    elif [[ -e ${SHADOWSOCKS_RUST_BIN_PATH} ]]; then
+        ssName="Shadowsocks-rust"
+        ssPath=${SHADOWSOCKS_RUST_BIN_PATH}
+        ssPid=`ps -ef | grep -v grep | grep ssserver | awk '{print $2}'`
+    elif [[ -e ${GO_SHADOWSOCKS2_BIN_PATH} ]]; then
+        ssName="Go-shadowsocks2"
+        ssPath=${GO_SHADOWSOCKS2_BIN_PATH}
+        ssPid=`ps -ef | grep -v grep | grep go-shadowsocks2 | awk '{print $2}'`
+    fi
+
+    if [[ -e ${V2RAY_PLUGIN_BIN_PATH} ]]; then
+        pluginName="V2ray-plugin"
+        pluginPath=${V2RAY_PLUGIN_BIN_PATH}
+        pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep v2ray-plugin | awk '{print $2}'`
+    elif [[ -e ${KCPTUN_BIN_PATH} ]]; then
+        pluginName="KcpTun"
+        pluginPath=${KCPTUN_BIN_PATH}
+        pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep kcptun-server | awk '{print $2}'`
+    elif [[ -e ${SIMPLE_OBFS_BIN_PATH} ]]; then
+        pluginName="Simple-obfs"
+        pluginPath=${SIMPLE_OBFS_BIN_PATH}
+        pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep obfs-server | awk '{print $2}'`
+    elif [[ -e ${GOQUIET_BIN_PATH} ]]; then
+        pluginName="GoQuiet"
+        pluginPath=${GOQUIET_BIN_PATH}
+        pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep gq-server | awk '{print $2}'`
+    elif [[ -e ${CLOAK_SERVER_BIN_PATH} ]]; then
+        pluginName="Cloak"
+        pluginPath=${CLOAK_SERVER_BIN_PATH}
+        pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep ck-server | awk '{print $2}'`
+    elif [[ -e ${MTT_BIN_PATH} ]]; then
+        pluginName="Mos-tls-tunnel"
+        pluginPath=${MTT_BIN_PATH}
+        pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep mtt-server | awk '{print $2}'`
+    elif [[ -e ${RABBIT_BIN_PATH} ]]; then
+        pluginName="Rabbit-Tcp"
+        pluginPath=${RABBIT_BIN_PATH}
+        pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep rabbit-tcp | awk '{print $2}'`
+    elif [[ -e ${SIMPLE_TLS_BIN_PATH} ]]; then
+        pluginName="Simple-tls"
+        pluginPath=${SIMPLE_TLS_BIN_PATH}
+        pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep simple-tls | awk '{print $2}'`
+    elif [[ -e ${GOST_PLUGIN_BIN_PATH} ]]; then
+        pluginName="Gost-plugin"
+        pluginPath=${GOST_PLUGIN_BIN_PATH}
+        pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep gost-plugin | awk '{print $2}'`
+    elif [[ -e ${XRAY_PLUGIN_BIN_PATH} ]]; then
+        pluginName="Xray-plugin"
+        pluginPath=${XRAY_PLUGIN_BIN_PATH}
+        pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep xray-plugin | awk '{print $2}'`
+    fi
+
+    if [[ -e ${CADDY_BIN_PATH} ]]; then
+        webName="Caddy"
+        webPath=${CADDY_BIN_PATH}
+        webPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep caddy | awk '{print $2}'`
+    elif [[ -e ${NGINX_BIN_PATH} ]]; then
+        webName="Nginx"
+        webPath=${NGINX_BIN_PATH}
+        webPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep nginx.conf | awk '{print $2}'`
+    fi
+}
+
+status_menu(){
     local NoInstall=" 当前状态: ${Red}未安装${suffix}"
     local InstallStart=" 当前状态: ${Green}已安装${suffix} 并 ${Green}已启动${suffix}"
     local InstallNoStart=" 当前状态: ${Green}已安装${suffix} 但 ${Red}未启动${suffix}"
-    
-    if [[ -e ${BIN_PATH} ]] && [[ -e ${V2RAY_PLUGIN_BIN_PATH} ]] && [[ -e ${CADDY_BIN_PATH}  ]]; then
-        V2_PID=`ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}'`
-        CADDY_PID=`ps -ef |grep -v grep | grep caddy |awk '{print $2}'`
-        
-        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${V2_PID} ]] && [[ ! -z ${CADDY_PID} ]]; then
-            echo -e "${InstallStart}"
-        else
-            echo -e "${InstallNoStart}"
-        fi
-    elif [[ -e ${BIN_PATH} ]] && [[ -e ${V2RAY_PLUGIN_BIN_PATH} ]] && [[ -e ${NGINX_BIN_PATH}  ]]; then
-        V2_PID=`ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}'`
-        NGINX_PID=`ps -ef |grep -v grep | grep nginx.conf |awk '{print $2}'`
-        
-        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${V2_PID} ]] && [[ ! -z ${NGINX_PID} ]]; then
-            echo -e "${InstallStart}"
-        else
-            echo -e "${InstallNoStart}"
-        fi
-    elif [[ -e ${BIN_PATH} ]] && [[ -e ${V2RAY_PLUGIN_BIN_PATH} ]]; then
-        V2_PID=`ps -ef |grep -v grep | grep v2ray-plugin |awk '{print $2}'`
-        
-        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${V2_PID} ]]; then
-            echo -e "${InstallStart}"
-        else
-            echo -e "${InstallNoStart}"
-        fi
-    elif [[ -e ${BIN_PATH} ]] && [[ -e ${KCPTUN_BIN_PATH} ]]; then
-        KP_PID=`ps -ef |grep -v grep | grep kcptun-server |awk '{print $2}'`
-        
-        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${KP_PID} ]]; then
-            echo -e "${InstallStart}"
-        else
-            echo -e "${InstallNoStart}"
-        fi
-    elif [[ -e ${BIN_PATH} ]] && [[ -e ${SIMPLE_OBFS_BIN_PATH} ]]; then
-        OBFS_PID=`ps -ef |grep -v grep | grep obfs-server |awk '{print $2}'`
-        
-        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${OBFS_PID} ]]; then
-            echo -e "${InstallStart}"
-        else
-            echo -e "${InstallNoStart}"
-        fi
-    elif [[ -e ${BIN_PATH} ]] && [[ -e ${GOQUIET_BIN_PATH} ]]; then    
-        GQ_PID=`ps -ef |grep -v grep | grep gq-server |awk '{print $2}'`
-        
-        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${GQ_PID} ]]; then
-            echo -e "${InstallStart}"
-        else
-            echo -e "${InstallNoStart}"
-        fi
-    elif [[ -e ${BIN_PATH} ]] && [[ -e ${CLOAK_SERVER_BIN_PATH} ]]; then
-        CK_PID=`ps -ef |grep -v grep | grep ck-server |awk '{print $2}'`
-        
-        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${CK_PID} ]]; then
-            echo -e "${InstallStart}"
-        else
-            echo -e "${InstallNoStart}"
-        fi
-    elif [[ -e ${BIN_PATH} ]] && [[ -e ${MTT_BIN_PATH} ]] && [[ -e ${CADDY_BIN_PATH}  ]]; then
-        MTT_PID=`ps -ef |grep -v grep | grep mtt-server |awk '{print $2}'`
-        CADDY_PID=`ps -ef |grep -v grep | grep caddy |awk '{print $2}'`
-        
-        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${MTT_PID} ]] && [[ ! -z ${CADDY_PID} ]]; then
-            echo -e "${InstallStart}"
-        else
-            echo -e "${InstallNoStart}"
-        fi
-    elif [[ -e ${BIN_PATH} ]] && [[ -e ${MTT_BIN_PATH} ]] && [[ -e ${NGINX_BIN_PATH}  ]]; then
-        MTT_PID=`ps -ef |grep -v grep | grep mtt-server |awk '{print $2}'`
-        NGINX_PID=`ps -ef |grep -v grep | grep nginx.conf |awk '{print $2}'`
-        
-        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${MTT_PID} ]] && [[ ! -z ${NGINX_PID} ]]; then
-            echo -e "${InstallStart}"
-        else
-            echo -e "${InstallNoStart}"
-        fi
-    elif [[ -e ${BIN_PATH} ]] && [[ -e ${MTT_BIN_PATH} ]]; then    
-        MTT_PID=`ps -ef |grep -v grep | grep mtt-server |awk '{print $2}'`
-        
-        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${MTT_PID} ]]; then
-            echo -e "${InstallStart}"
-        else
-            echo -e "${InstallNoStart}"
-        fi
-    elif [[ -e ${BIN_PATH} ]] && [[ -e ${RABBIT_BIN_PATH} ]]; then
-        RABBIT_PID=`ps -ef |grep -v grep | grep rabbit-tcp |awk '{print $2}'`
-        
-        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${RABBIT_PID} ]]; then
-            echo -e "${InstallStart}"
-        else
-            echo -e "${InstallNoStart}"
-        fi
-    elif [[ -e ${BIN_PATH} ]] && [[ -e ${SIMPLE_TLS_BIN_PATH} ]]; then
-        SIMPLE_TLS_PID=`ps -ef |grep -v grep | grep simple-tls |awk '{print $2}'`
 
-        if [[ ! -z ${SS_PID} ]] && [[ ! -z ${SIMPLE_TLS_PID} ]]; then
+    status_init
+
+    if [[ -e ${ssPath} ]] && [[ -e ${pluginPath} ]] && [[ -e ${webPath} ]]; then
+        if [[ -n ${ssPid} ]] && [[ -n ${pluginPid} ]] && [[ -n ${webPid} ]]; then
             echo -e "${InstallStart}"
         else
             echo -e "${InstallNoStart}"
         fi
-    elif [[ -e ${BIN_PATH} ]]; then
-        if [[ ! -z ${SS_PID} ]]; then
+    elif [[ -e ${ssPath} ]] && [[ -e ${pluginPath} ]]; then
+        if [[ -n ${ssPid} ]] && [[ -n ${pluginPid} ]]; then
+            echo -e "${InstallStart}"
+        else
+            echo -e "${InstallNoStart}"
+        fi
+    elif [[ -e ${ssPath} ]]; then
+        if [[ -n ${ssPid} ]]; then
             echo -e "${InstallStart}"
         else
             echo -e "${InstallNoStart}"
@@ -444,6 +437,8 @@ check_port_occupy(){
 }
 
 check_script_update(){
+    local isShow=${1:-"show"}
+
     SHELL_VERSION_NEW=$(wget --no-check-certificate -qO- "https://git.io/fjlbl"|grep 'SHELL_VERSION="'|awk -F "=" '{print $NF}'|sed 's/\"//g'|head -1)
     [[ -z ${SHELL_VERSION_NEW} ]] && echo -e "${Error} 无法链接到 Github !" && exit 0
     if version_gt ${SHELL_VERSION_NEW} ${SHELL_VERSION}; then
@@ -454,9 +449,11 @@ check_script_update(){
         wget -N --no-check-certificate -O ss-plugins.sh "https://git.io/fjlbl" && chmod +x ss-plugins.sh
         echo -e "脚本已更新为最新版本[ ${SHELL_VERSION_NEW} ] !(注意：因为更新方式为直接覆盖当前运行的脚本，所以可能下面会提示一些报错，无视即可)" && exit 0
     else
-        echo
-        echo -e "${Info} 当前脚本版本为: ${SHELL_VERSION} 未检测到更新版本."
-        echo
+        if [[ ${isShow} == "show" ]]; then
+            echo
+            echo -e "${Info} 当前脚本版本为: ${SHELL_VERSION} 未检测到更新版本."
+            echo
+        fi
     fi
 }
 
@@ -595,10 +592,21 @@ config_ss(){
     local server_value="\"0.0.0.0\""
 
     if get_ipv6; then
-        local V=${SS_VERSION}
-        local N=${plugin_num}
-        if [[ ${V} = "ss-libev" ]] && [[ ${N} = "2" ]] || [[ ${N} = "3" ]] || [[ ${N} == "5" ]] || [[ -z ${N} ]]; then
+        local ssVer=${SS_VERSION}
+        local pluginNum=${plugin_num}
+
+        if [[ ${ssVer} = "ss-libev" ]]; then
             server_value="[\"[::0]\",\"0.0.0.0\"]"
+        elif [[ ${ssVer} = "ss-rust" ]]; then
+            server_value="\"::\""
+        fi
+
+        if [[ ${pluginNum} = "4" ]]; then
+            server_value="\"0.0.0.0\""
+        elif [[ ${pluginNum} = "6" ]]; then
+            server_value="\"0.0.0.0\""
+        elif [[ ${pluginNum} = "7" ]]; then
+            server_value="\"0.0.0.0\""
         fi
     fi
 
@@ -606,212 +614,76 @@ config_ss(){
         mkdir -p $(dirname ${SHADOWSOCKS_CONFIG})
     fi
 
-    # start wriet config
-    improt_package "templates" "config_file_templates.sh"
-
-    # Only SS
-    if [[ ${plugin_num} == "" ]]; then
-        ss_config_standalone
-    fi
-
-    # SS + V2ray-plugin
     if [[ ${plugin_num} == "1" ]]; then
-        if [[ ${libev_v2ray} == "1" ]]; then
-           ss_v2ray_ws_http_config
-        elif [[ ${libev_v2ray} == "2" ]]; then    
-           ss_v2ray_ws_tls_cdn_config
-        elif [[ ${libev_v2ray} == "3" ]]; then
-            ss_v2ray_quic_tls_cdn_config
-        elif [[ ${libev_v2ray} == "4" ]]; then
-            ss_v2ray_ws_tls_web_config
-            if [[ ${web_flag} = "1" ]]; then
-                caddy_config
-            elif [[ ${web_flag} = "2" ]]; then
-                mirror_domain=$(echo ${mirror_site} | sed 's/https:\/\///g')
-                nginx_config
-            fi 
-        elif [[ ${libev_v2ray} == "5" ]]; then
-            ss_v2ray_ws_tls_web_cdn_config
-            if [[ ${web_flag} = "1" ]]; then
-                caddy_config
-            elif [[ ${web_flag} = "2" ]]; then
-                mirror_domain=$(echo ${mirror_site} | sed 's/https:\/\///g')
-                nginx_config
-            fi 
-        fi
-        # disable mux
-        if [[ ${isDisable} == disable ]] && [[ ${libev_v2ray} != "3" ]]; then
-            sed 's/"plugin_opts":"/"plugin_opts":"mux=0;/' -i ${SHADOWSOCKS_CONFIG}
-        fi
-    fi
-
-    # SS + KcpTun
-    if [[ ${plugin_num} == "2" ]]; then
-        if [ ! -d "$(dirname ${KCPTUN_CONFIG})" ]; then
-            mkdir -p $(dirname ${KCPTUN_CONFIG})
-        fi
-        ss_config_standalone
-        kcptun_config_standalone
-    fi
-
-    # SS + Simple-obfs
-    if [[ ${plugin_num} == "3" ]]; then
-        if [[ ${libev_obfs} == "1" ]]; then
-           ss_obfs_http_config
-        elif [[ ${libev_obfs} == "2" ]]; then    
-           ss_obfs_tls_config
-        fi
-    fi
-
-    # SS + Goquite
-    if [[ ${plugin_num} == "4" ]]; then
+        improt_package "templates/config" "v2ray_plugin_config.sh"
+        config_ss_v2ray_plugin
+    elif [[ ${plugin_num} == "2" ]]; then
+        improt_package "templates/config" "kcptun_config.sh"
+        config_ss_kcptun
+    elif [[ ${plugin_num} == "3" ]]; then
+        improt_package "templates/config" "simple_obfs_config.sh"
+        config_ss_simple_obfs
+    elif [[ ${plugin_num} == "4" ]]; then
+        improt_package "templates/config" "goquiet_config.sh"
         ss_goquiet_config
-    fi
-
-    # SS + Cloak
-    if [[ ${plugin_num} == "5" ]]; then
-        if [ ! -d "$(dirname ${CK_SERVER_CONFIG})" ]; then
-            mkdir -p $(dirname ${CK_SERVER_CONFIG})
-        fi
+    elif [[ ${plugin_num} == "5" ]]; then
+        improt_package "templates/config" "cloak_config.sh"
+        config_ss_cloak
+    elif [[ ${plugin_num} == "6" ]]; then
+        improt_package "templates/config" "mos_tls_tunnel_config.sh"
+        config_ss_mos_tls_tunnel
+    elif [[ ${plugin_num} == "7" ]]; then
+        improt_package "templates/config" "rabbit_tcp_config.sh"
+        config_ss_rabbit_tcp
+    elif [[ ${plugin_num} == "8" ]]; then
+        improt_package "templates/config" "simple_tls_config.sh"
+        config_ss_simple_tls
+    elif [[ ${plugin_num} == "9" ]]; then
+        improt_package "templates/config" "gost_plugin_config.sh"
+        config_ss_gost_plugin
+    elif [[ ${plugin_num} == "10" ]]; then
+        improt_package "templates/config" "xray_plugin_config.sh"
+        config_ss_xray_plugin
+    else
+        improt_package "templates/config" "ss_original_config.sh"
         ss_config_standalone
-        cloak2_server_config
-        cloak2_client_config
-    fi
-
-    # SS + Mos-tls-tunnel
-    if [[ ${plugin_num} == "6" ]]; then
-        if [[ ${libev_mtt} == "1" ]]; then
-            if [[ ${domainType} = DNS-Only ]]; then
-                ss_mtt_tls_dns_only_config
-            else
-                ss_mtt_tls_config
-            fi
-        elif [[ ${libev_mtt} == "2" ]]; then
-            if [[ ${isEnableWeb} = disable ]]; then
-                ss_mtt_wss_dns_only_or_cdn_config
-            elif [[ ${isEnableWeb} = enable ]]; then
-                ss_mtt_wss_dns_only_or_cdn_web_config
-                domain=${serverName}
-                path=${wssPath}
-                if [[ ${web_flag} = "1" ]]; then
-                    caddy_config
-                elif [[ ${web_flag} = "2" ]]; then
-                    mirror_domain=$(echo ${mirror_site} | sed 's/https:\/\///g')
-                    nginx_config
-                fi 
-            else
-                ss_mtt_wss_config
-            fi
-        fi
-        
-        if [[ ${isEnable} == enable ]]; then
-            sed 's/"plugin_opts":"/"plugin_opts":"mux;/' -i ${SHADOWSOCKS_CONFIG}
-        fi
-    fi
-
-    # SS + Rabbit-tcp
-    if [[ ${plugin_num} == "7" ]]; then
-        if [ ! -d "$(dirname ${RABBIT_CONFIG})" ]; then
-            mkdir -p $(dirname ${RABBIT_CONFIG})
-        fi
-        ss_config_standalone
-        rabbit_tcp_config_standalone
-    fi
-
-    # SS + Simple-tls
-    if [[ ${plugin_num} == "8" ]]; then
-        if [[ ${libev_simple_tls} == "1" ]]; then
-            ss_simple_tls_config
-        elif [[ ${libev_simple_tls} == "2" ]]; then
-            ss_simple_tls_wss_config
-        fi
-
-        if [[ ${SimpleTlsVer} = "1" ]] && [[ ${isEnable} == enable ]]; then
-            sed 's/"plugin_opts":"s/"plugin_opts":"s;rh/' -i ${SHADOWSOCKS_CONFIG}
-        elif [[ ${SimpleTlsVer} = "2" ]] && [[ ${isEnable} == enable ]]; then
-            sed 's/"plugin_opts":"s/"plugin_opts":"s;pd/' -i ${SHADOWSOCKS_CONFIG}
-        fi
     fi
 }
 
 gen_ss_links(){
-    improt_package "templates" "sip002_url_templates.sh"
-
-    # Only SS
-    if [[ ${plugin_num} == "" ]]; then
-        ss_link
-    fi
-
-    # SS + V2ray-plugin
     if [[ ${plugin_num} == "1" ]]; then
-        if [[ ${libev_v2ray} == "1" ]]; then
-            ss_v2ray_ws_http_link
-        elif [[ ${libev_v2ray} == "2" ]]; then
-            ss_v2ray_ws_tls_cdn_link
-        elif [[ ${libev_v2ray} == "3" ]]; then
-            ss_v2ray_quic_tls_cdn_link
-        elif [[ ${libev_v2ray} == "4" ]]; then
-            ss_v2ray_ws_tls_web_link
-        elif [[ ${libev_v2ray} == "5" ]]; then
-            ss_v2ray_ws_tls_web_cdn_link
-        fi
-    fi
-
-    # SS + KcpTun
-    if [[ ${plugin_num} == "2" ]]; then
+        improt_package "templates/links" "v2ray_plugin_link.sh"
+        gen_ss_v2ray_plugin_link
+    elif [[ ${plugin_num} == "2" ]]; then
+        improt_package "templates/links" "kcptun_link.sh"
         ss_kcptun_link
-    fi
-
-    # SS + Simple-obfs
-    if [[ ${plugin_num} == "3" ]]; then
-        if [[ ${libev_obfs} == "1" ]]; then
-           ss_obfs_http_link
-        elif [[ ${libev_obfs} == "2" ]]; then    
-           ss_obfs_tls_link
-        fi
-    fi
-
-    # SS + Goquite
-    if [[ ${plugin_num} == "4" ]]; then
+    elif [[ ${plugin_num} == "3" ]]; then
+        improt_package "templates/links" "simple_obfs_link.sh"
+        gen_ss_simple_obfs_link
+    elif [[ ${plugin_num} == "4" ]]; then
+        improt_package "templates/links" "goquiet_link.sh"
         ss_goquiet_link
-    fi
-
-    # SS + Cloak
-    if [[ ${plugin_num} == "5" ]]; then
+    elif [[ ${plugin_num} == "5" ]]; then
+        improt_package "templates/links" "cloak_link.sh"
         ss_cloak_link_new
-    fi
-
-    # SS + Mos-tls-tunnel
-    if [[ ${plugin_num} == "6" ]]; then
-        if [[ ${libev_mtt} == "1" ]]; then
-            if [[ ${domainType} = DNS-Only ]]; then
-                ss_mtt_tls_dns_only_link
-            else
-                ss_mtt_tls_link
-            fi
-        elif [[ ${libev_mtt} == "2" ]]; then
-            if [[ ${isEnableWeb} = disable ]]; then
-                ss_mtt_wss_dns_only_or_cdn_link
-            elif [[ ${isEnableWeb} = enable ]]; then
-                ss_mtt_wss_dns_only_or_cdn_web_link
-            else
-                ss_mtt_wss_link
-            fi
-        fi
-    fi
-
-    # SS + Rabbit-tcp
-    if [[ ${plugin_num} == "7" ]]; then
+    elif [[ ${plugin_num} == "6" ]]; then
+        improt_package "templates/links" "mos_tls_tunnel_link.sh"
+        gen_ss_mos_tls_tunnel_link
+    elif [[ ${plugin_num} == "7" ]]; then
+        improt_package "templates/links" "rabbit_tcp_link.sh"
         ss_rabbit_tcp_link
-    fi
-
-    # SS + Simple-tls
-    if [[ ${plugin_num} == "8" ]]; then
-        if [[ ${libev_simple_tls} == "1" ]]; then
-            ss_simple_tls_link
-        elif [[ ${libev_simple_tls} == "2" ]]; then
-            ss_simple_tls_wss_link
-        fi
+    elif [[ ${plugin_num} == "8" ]]; then
+        improt_package "templates/links" "simple_tls_link.sh"
+        gen_ss_simple_tls_link
+    elif [[ ${plugin_num} == "9" ]]; then
+        improt_package "templates/links" "gost_plugin_link.sh"
+        gen_ss_gost_plugin_link
+    elif [[ ${plugin_num} == "10" ]]; then
+        improt_package "templates/links" "xray_plugin_link.sh"
+        gen_ss_xray_plugin_link
+    else
+        improt_package "templates/links" "ss_original_link.sh"
+        ss_link
     fi
 }
 
@@ -824,127 +696,77 @@ install_completed(){
     elif [[ ${SS_VERSION} = "go-ss2" ]]; then
         ${GO_SHADOWSOCKS2_INIT} start > /dev/null 2>&1
     fi
-    
-    clear -x
-    
-    improt_package "templates" "terminal_config_templates.sh"
 
-    # Only SS
-    if [[ ${plugin_num} == "" ]]; then
-        ss_show
-    fi
-
-    # SS + V2ray-plugin
     if [[ ${plugin_num} == "1" ]]; then
-        if [[ ${libev_v2ray} == "1" ]]; then
-            ss_v2ray_ws_http_show
-        elif [[ ${libev_v2ray} == "2" ]]; then
-            ss_v2ray_ws_tls_cdn_show
-        elif [[ ${libev_v2ray} == "3" ]]; then
-            ss_v2ray_quic_tls_cdn_show
-        elif [[ ${libev_v2ray} == "4" ]]; then
-            if [[ ${web_flag} = "1" ]]; then
-                # start caddy
-                /etc/init.d/caddy start > /dev/null 2>&1
-            elif [[ ${web_flag} = "2" ]]; then
-                systemctl start nginx
-            fi 
-            ss_v2ray_ws_tls_web_show
-        elif [[ ${libev_v2ray} == "5" ]]; then
-            if [[ ${web_flag} = "1" ]]; then
-                /etc/init.d/caddy start > /dev/null 2>&1
-            elif [[ ${web_flag} = "2" ]]; then
-                systemctl start nginx
-            fi 
-            ss_v2ray_ws_tls_web_cdn_show
-        fi
-    fi
-
-    if [[ ${plugin_num} == "2" ]]; then
-        ${KCPTUN_INIT} start  > /dev/null 2>&1
-        ss_kcptun_show
-    fi
-
-    # SS + Simple-obfs
-    if [[ ${plugin_num} == "3" ]]; then
-        if [[ ${libev_obfs} == "1" ]]; then
-           ss_obfs_http_show
-        elif [[ ${libev_obfs} == "2" ]]; then    
-           ss_obfs_tls_show
-        fi
-    fi
-
-    # SS + Goquite
-    if [[ ${plugin_num} == "4" ]]; then
+        improt_package "templates/visible" "v2ray_plugin_visible.sh"
+        ss_v2ray_plugin_visible
+    elif [[ ${plugin_num} == "2" ]]; then
+        improt_package "templates/visible" "kcptun_visible.sh"
+        ss_kcptun_visible
+    elif [[ ${plugin_num} == "3" ]]; then
+        improt_package "templates/visible" "simple_obfs_visible.sh"
+        ss_simple_obfs_visible
+    elif [[ ${plugin_num} == "4" ]]; then
+        improt_package "templates/visible" "goquiet_visible.sh"
         ss_goquiet_show
-    fi
-
-    # SS + Cloak
-    if [[ ${plugin_num} == "5" ]]; then
-        ${CLOAK_INIT} start  > /dev/null 2>&1
-        ss_cloak_show_new
-    fi
-
-    # SS + Mos-tls-tunnel
-    if [[ ${plugin_num} == "6" ]]; then
-        if [[ ${libev_mtt} == "1" ]]; then
-            if [[ ${domainType} = DNS-Only ]]; then
-                ss_mtt_tls_dns_only_show
-            else
-                ss_mtt_tls_show
-            fi
-        elif [[ ${libev_mtt} == "2" ]]; then
-            if [[ ${isEnableWeb} = disable ]]; then
-                ss_mtt_wss_dns_only_or_cdn_show
-            elif [[ ${isEnableWeb} = enable ]]; then
-                if [[ ${web_flag} = "1" ]]; then
-                    # start caddy
-                    /etc/init.d/caddy start > /dev/null 2>&1
-                elif [[ ${web_flag} = "2" ]]; then
-                    systemctl start nginx
-                fi 
-                ss_mtt_wss_dns_only_or_cdn_web_show
-            else
-                ss_mtt_wss_show
-            fi
-        fi
-    fi
-
-    # SS + Rabbit-tcp
-    if [[ ${plugin_num} == "7" ]]; then
-        ${RABBIT_INIT} start  > /dev/null 2>&1
-        ss_rabbit_tcp_show
-    fi
-
-    # SS + Simple-tls
-    if [[ ${plugin_num} == "8" ]]; then
-        if [[ ${libev_simple_tls} == "1" ]]; then
-            ss_simple_tls_show
-        elif [[ ${libev_simple_tls} == "2" ]]; then
-            ss_simple_tls_wss_show
-        fi
+    elif [[ ${plugin_num} == "5" ]]; then
+        improt_package "templates/visible" "cloak_visible.sh"
+        ss_cloak_visible
+    elif [[ ${plugin_num} == "6" ]]; then
+        improt_package "templates/visible" "mos_tls_tunnel_visible.sh"
+        ss_mos_tls_tunnel_visible
+    elif [[ ${plugin_num} == "7" ]]; then
+        improt_package "templates/visible" "rabbit_tcp_visible.sh"
+        ss_rabbit_tcp_visible
+    elif [[ ${plugin_num} == "8" ]]; then
+        improt_package "templates/visible" "simple_tls_visible.sh"
+        ss_simple_tls_visible
+    elif [[ ${plugin_num} == "9" ]]; then
+        improt_package "templates/visible" "gost_plugin_visible.sh"
+        ss_gost_plugin_visible
+    elif [[ ${plugin_num} == "10" ]]; then
+        improt_package "templates/visible" "xray_plugin_visible.sh"
+        ss_xray_plugin_visible
+    else
+        improt_package "templates/visible" "ss_original_visible.sh"
+        ss_show
     fi
 }
 
 install_prepare(){
+    local plugin
+    local pluginName=(
+        v2ray-plugin
+        kcptun
+        simple-obfs
+        goquiet
+        cloak
+        mos-tls-tunnel
+        rabbit-tcp
+        simple-tls
+        gost-plugin
+        xray-plugin
+    )
+
+    check_script_update "notShow"
     improt_package "prepare" "shadowsocks_prepare.sh"
     choose_ss_install_version
     install_prepare_port
     install_prepare_password
     install_prepare_cipher
-    echo && echo -e "请选择要安装的SS插件
-    
-  ${Green}1.${suffix} v2ray-plugin
-  ${Green}2.${suffix} kcptun
-  ${Green}3.${suffix} simple-obfs
-  ${Green}4.${suffix} goquiet (unofficial)
-  ${Green}5.${suffix} cloak (based goquiet)
-  ${Green}6.${suffix} mos-tls-tunnel
-  ${Green}7.${suffix} rabbit-tcp
-  ${Green}8.${suffix} simple-tls
-  "
+
+    echo -e "\n请选择要安装的Shadowsocks插件\n"
+    for ((i=1;i<=${#pluginName[@]};i++ )); do
+        plugin="${pluginName[$i-1]}"
+        if [[ ${i} -le 9 ]]; then
+            echo -e "${Green}  ${i}.${suffix} ${plugin}"
+        else
+            echo -e "${Green} ${i}.${suffix} ${plugin}"
+        fi
+    done
     echo && read -e -p "(默认: 不安装)：" plugin_num
     [[ -z "${plugin_num}" ]] && plugin_num="" && echo -e "\n${Tip} 当前未选择任何插件，仅安装${SS_VERSION}."
+
     if [[ ${plugin_num} == "1" ]]; then
         improt_package "prepare" "v2ray_plugin_prepare.sh"
         install_prepare_libev_v2ray
@@ -969,30 +791,31 @@ install_prepare(){
     elif [[ ${plugin_num} == "8" ]]; then
         improt_package "prepare" "simple_tls_prepare.sh"
         install_prepare_libev_simple_tls
+    elif [[ ${plugin_num} == "9" ]]; then
+        improt_package "prepare" "gost_plugin_prepare.sh"
+        install_prepare_libev_gost_plugin
+    elif [[ ${plugin_num} == "10" ]]; then
+        improt_package "prepare" "xray_plugin_prepare.sh"
+        install_prepare_libev_xray_plugin
     elif [[ ${plugin_num} == "" ]]; then
         :
     else
-        echo -e "${Error} 请输入正确的数字 [1-7]" && exit 1
+        echo -e "${Error} 请输入正确的数字 [1-8]" && exit 1
     fi
     
     echo
     echo "按任意键开始…或按Ctrl+C取消"
     char=`get_char`
-    
-    if [[ ${SS_VERSION} = "ss-rust" ]] || [[ ${SS_VERSION} = "go-ss2" ]] && [[ "${plugin_num}" != "3" ]]; then
-        echo
-        echo -e "${Info} 即将开始下载相关文件请稍等."
-    fi
 }
 
 install_main(){
     if [[ ${SS_VERSION} = "ss-libev" ]]; then
-        install_libsodium
+        install_libsodium_logic
         if ! ldconfig -p | grep -wq "/usr/lib"; then
             echo "/usr/lib" > /etc/ld.so.conf.d/lib.conf
         fi
         ldconfig
-        install_mbedtls
+        install_mbedtls_logic
     fi
     
     improt_package "tools" "shadowsocks_install.sh"
@@ -1052,37 +875,52 @@ install_main(){
         install_simple_tls
         gen_credentials_cca "${serverName}"
         plugin_client_name="simple-tls"
+    elif [ "${plugin_num}" == "9" ]; then
+        improt_package "plugins" "gost_plugin_install.sh"
+        install_gost_plugin
+        if [[ ${web_flag} = "1" ]]; then
+            improt_package "tools" "caddy_install.sh"
+            install_caddy
+        elif [[ ${web_flag} = "2" ]]; then
+            improt_package "tools" "nginx_install.sh"
+            install_nginx
+        fi
+        plugin_client_name="gost-plugin"
+    elif [ "${plugin_num}" == "10" ]; then
+        improt_package "plugins" "xray_plugin_install.sh"
+        install_xray_plugin
+        if [[ ${web_flag} = "1" ]]; then
+            improt_package "tools" "caddy_install.sh"
+            install_caddy
+        elif [[ ${web_flag} = "2" ]]; then
+            improt_package "tools" "nginx_install.sh"
+            install_nginx
+        fi
+        plugin_client_name="xray-plugin"
+    fi
+}
+
+status_install(){
+    status_init
+
+    if [[ -e ${ssPath} ]] && [[ -e ${pluginPath} ]] && [[ -e ${webPath} ]]; then
+        echo -e "\n${Info} ${ssName} ${pluginName} ${webName} 已经安装.\n"
+        exit 1
+    elif [[ -e ${ssPath} ]] && [[ -e ${pluginPath} ]]; then
+        echo -e "\n${Info} ${ssName} ${pluginName} 已经安装.\n"
+        exit 1
+    elif [[ -e ${ssPath} ]]; then
+        echo -e "\n${Info} ${ssName} 已经安装.\n"
+        exit 1
     fi
 }
 
 install_step_all(){
-    [[ -e ${SHADOWSOCKS_LIBEV_BIN_PATH} ]] && echo -e "${Info} Shadowsocks-libev 已经安装." && exit 1
-    [[ -e ${SHADOWSOCKS_RUST_BIN_PATH} ]] && echo -e "${Info} Shadowsocks-rust 已经安装." && exit 1
-    [[ -e ${GO_SHADOWSOCKS2_BIN_PATH} ]] && echo -e "${Info} Go-shadowsocks2 已经安装." && exit 1
+    status_install
     disable_selinux
     install_prepare
     improt_package "utils" "dependencies.sh"
-    if [[ ${SS_VERSION} = "ss-libev" ]]; then
-        install_dependencies
-    fi
-    if [[ ${SS_VERSION} = "ss-rust" ]] || [[ ${SS_VERSION} = "go-ss2" ]]; then
-        if [ ! "$(command -v qrencode)" ]; then
-            package_install "qrencode" > /dev/null 2>&1
-        fi
-    fi
-    if [[ ${SS_VERSION} = "ss-rust" ]] || [[ ${SS_VERSION} = "go-ss2" ]] && [[ "${plugin_num}" == "3" ]]; then
-        install_dependencies
-    fi
-    if [[ ${SS_VERSION} = "ss-rust" ]] && [[ "${plugin_num}" == "5" ]] || [[ "${plugin_num}" == "7" ]]; then
-        if [ ! "$(command -v jq)" ]; then
-            package_install "jq" > /dev/null 2>&1
-        fi
-    fi
-    if [[ ${SS_VERSION} = "go-ss2" ]]; then
-        if [ ! "$(command -v jq)" ]; then
-            package_install "jq" > /dev/null 2>&1
-        fi
-    fi
+    install_dependencies_logic
     improt_package "utils" "downloads.sh"
     download_ss_file
     download_plugins_file
@@ -1094,8 +932,7 @@ install_step_all(){
     config_ss
     gen_ss_links
     install_completed
-    improt_package "utils" "view_config.sh"
-    show_config "all"
+    do_show
 }
 
 install_cleanup(){
@@ -1127,46 +964,41 @@ install_cleanup(){
     rm -rf ${mtt_file}.zip LICENSE README.md mtt-client
 
     #simple-tls
-    rm -rf ${simple_tls_file}.zip LICENSE  README.md
+    rm -rf ${simple_tls_file}.zip LICENSE  README.md README_zh.md
+
+    # gost-plugin
+    rm -rf ${gost_plugin_file}.zip
+
+    # xray-plugin
+    rm -rf ${xray_plugin_file}.tar.gz
 }
 
 do_uid(){
-    if [ "$(command -v ck-server)" ]; then
-        improt_package "utils" "ck_user_manager.sh"
-        ck2_users_manager
-        sleep 0.5
-        
-        is_the_api_open "stop"
-    else
-        echo
-        echo -e "${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行."
-        echo
-    fi
+    improt_package "utils" "ck_user_manager.sh"
+    user_manager_by_uid
 }
 
 do_link(){
-    local CK_UID=$1
-    
-    if [ "$(command -v ck-server)" ]; then
-        improt_package "utils" "ck_sslink.sh"
-        get_link_of_ck2 "${CK_UID}"
-    else
-        echo
-        echo -e "${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行."
-        echo
-    fi
+    improt_package "utils" "ck_sslink.sh"
+    gen_ssurl_by_uid "$1"
 }
 
 do_scan(){
-    local SS_URL=$1
-    
     improt_package "utils" "qr_code.sh"
-    gen_qr_code "${SS_URL}"
+    gen_qr_code "$1"
 }
 
 do_show(){
-    improt_package "utils" "view_config.sh"
-    show_config "standalone"
+    local mark=$1
+
+    if [ ! -e $HUMAN_CONFIG ]; then
+        echo "The visible config not found."
+        exit 1
+    fi
+    if [[ ${mark} == "cleanScreen" ]]; then
+        clear -x
+    fi
+    cat $HUMAN_CONFIG
 }
 
 do_log(){
@@ -1175,27 +1007,21 @@ do_log(){
 }
 
 do_cert(){
-    local domain=$1
-
     improt_package "utils" "gen_certificates.sh"
-    get_domain_ip "${domain}"
-    if ! (echo ${domain} | grep -qE '.cf$|.ga$|.gq$|.ml$|.tk$' && is_cdn_proxied "${domain_ip}"); then
-        echo
-        echo -e "${Error} 此选项为手动申请Cloudflare CDN模式 证书(有效期3个月)，仅支持后缀为.cf .ga .gq .ml .tk的域名。"
-        echo
-        exit 1
-    fi
-    acme_get_certificate_by_manual "${domain}" "--force"
+    acme_get_certificate_by_manual_force "$1"
+}
+
+do_catcfg(){
+    improt_package "utils" "view_config.sh"
+    view_config_logic
 }
 
 do_start(){
-    if [[ ! "$(command -v ss-server)" ]] && [[ ! "$(command -v ssserver)" ]] && [[ ! "$(command -v go-shadowsocks2)" ]]; then
-        echo
-        echo -e " ${Red} Shadowsocks 未安装，请尝试安装后，再来执行此操作。${suffix}"
-        echo
+    status_init
+    if [[ -z "${ssPath}" ]]; then
+        echo -e "\n ${Red} Shadowsocks 未安装，请尝试安装后，再来执行此操作。${suffix}\n"
         exit 1
     fi
-    
     improt_package "utils" "start.sh"
     start_services
 }
@@ -1211,65 +1037,40 @@ do_restart(){
 }
 
 do_status(){
-    local mark=$1
-    if [ "$(command -v ss-server)" ]; then
-        PID=`ps -ef |grep -v grep | grep ss-server |awk '{print $2}'`
-        local BIN_PATH=${SHADOWSOCKS_LIBEV_BIN_PATH}
-        local SS_PID=${PID}
-    elif [ "$(command -v ssserver)" ]; then
-        RUST_PID=`ps -ef |grep -v grep | grep ssserver |awk '{print $2}'`
-        local BIN_PATH=${SHADOWSOCKS_RUST_BIN_PATH}
-        local SS_PID=${RUST_PID}
-    elif [ "$(command -v go-shadowsocks2)" ]; then
-        GO_PID=`ps -ef |grep -v grep | grep go-shadowsocks2 |awk '{print $2}'`
-        local BIN_PATH=${GO_SHADOWSOCKS2_BIN_PATH}
-        local SS_PID=${GO_PID}
-    fi
-    
-    if [[ ${mark} == "menu" ]]; then
-        menu_status ${BIN_PATH} ${SS_PID}
-    else
-        if [[ ! -e ${BIN_PATH} ]]; then
-            echo
-            echo -e "${Error} shadowsocks and related plugins are not installed."
-            echo
-            exit 1
-        fi
-        
-        improt_package "utils" "status.sh"
-        other_status
-    fi
+    improt_package "utils" "status.sh"
+    other_status
 }
 
 do_update(){
     cd ${CUR_DIR}
-    
     improt_package "utils" "update.sh"
-    
-    if [[ -e ${SHADOWSOCKS_LIBEV_BIN_PATH} ]]; then
-        update_shadowsocks_libev
-    elif [[ -e ${SHADOWSOCKS_RUST_BIN_PATH} ]]; then
-        update_shadowsocks_rust
-    elif [[ -e ${GO_SHADOWSOCKS2_BIN_PATH} ]]; then
-        update_go_shadowsocks2
-    fi
+    update_logic
 }
 
 do_uninstall(){
-    printf "你确定要卸载Shadowsocks吗? [y/n]\n"
+    status_init
+
+    if [[ -e ${ssPath} ]] && [[ -e ${pluginPath} ]] && [[ -e ${webPath} ]]; then
+        local pkgName="${ssName} ${pluginName} ${webName}"
+    elif [[ -e ${ssPath} ]] && [[ -e ${pluginPath} ]]; then
+        local pkgName="${ssName} ${pluginName}"
+    elif [[ -e ${ssPath} ]]; then
+        local pkgName="${ssName}"
+    else
+        local pkgName="Shadowsocks"
+    fi
+    echo -e "\n你确定要卸载 ${pkgName} 吗? [y/n]"
     read -e -p "(默认: n):" answer
     [ -z ${answer} ] && answer="n"
     if [ "${answer}" != "y" ] && [ "${answer}" != "Y" ]; then
-        echo
-        echo -e "${Info} Shadowsocks 卸载取消."
-        echo
+        echo -e "\n${Info} ${pkgName} 卸载取消.\n"
         exit 1
     fi
     
     # start uninstall
     improt_package "utils" "uninstall.sh"
     uninstall_services
-    echo -e "${Info} Shadowsocks 卸载成功."
+    echo -e "\n${Info} ${pkgName} 卸载成功.\n"
 }
 
 do_install(){
@@ -1298,7 +1099,7 @@ do_install(){
     ${Green}2.${suffix} Install
     ${Green}3.${suffix} Uninstall
      "
-    do_status "menu"
+    status_menu
     echo && read -e -p "请输入数字 [1-3]：" menu_num
     case "${menu_num}" in
         1)   
@@ -1326,7 +1127,7 @@ case ${action} in
         do_${action}
         ;;
     status)
-        do_${action} "status"
+        do_${action}
         ;;
     script)
         check_script_update
@@ -1341,12 +1142,15 @@ case ${action} in
         do_${action}  "${2}"
         ;;
     show)
-        do_${action}
+        do_${action} "cleanScreen"
         ;;
     log)
         do_${action}
         ;;
     cert)
+        do_${action} "${2}"
+        ;;
+    catcfg)
         do_${action} "${2}"
         ;;
     help)

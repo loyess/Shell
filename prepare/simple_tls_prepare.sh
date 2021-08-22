@@ -3,6 +3,7 @@ improt_package "utils" "gen_certificates.sh"
 # simple-tls version
 SIMPLE_TLS_VERSION=(
 v0.3.4
+v0.4.7
 LatestRelease
 )
 
@@ -22,8 +23,8 @@ simple_tls_version(){
             echo -e "${Green}  ${i}.${suffix} ${hint}"
         done
         echo
-        read -e -p "(默认: ${SIMPLE_TLS_VERSION[0]}):" SimpleTlsVer
-        [ -z "$SimpleTlsVer" ] && SimpleTlsVer=1
+        read -e -p "(默认: ${SIMPLE_TLS_VERSION[2]}):" SimpleTlsVer
+        [ -z "$SimpleTlsVer" ] && SimpleTlsVer=3
         expr ${SimpleTlsVer} + 1 &>/dev/null
         if [ $? -ne 0 ]; then
             echo
@@ -207,6 +208,45 @@ is_enable_padding_data(){
     done
 }
 
+is_enable_auth(){
+    while true
+    do
+        echo
+        echo -e "是否启用身份验证密码，以过滤扫描流量(auth)"
+        read -p "(默认: n) [y/n]: " yn
+        [ -z "${yn}" ] && yn="N"
+        case "${yn:0:1}" in
+            y|Y)
+                isEnable=enable
+                ;;
+            n|N)
+                isEnable=disable
+                ;;
+            *)
+                echo
+                echo -e "${Error} 输入有误，请重新输入!"
+                echo
+                continue
+                ;;
+        esac
+
+        echo
+        echo -e "${Red}  isEnableAuth = ${isEnable}${suffix}"
+        echo
+        break
+    done
+}
+
+get_input_auth_passwd(){
+    gen_random_str
+    echo -e "\n请输入身份验证密码"
+    read -e -p "(默认: ${ran_str8}):" auth
+    [ -z "${auth}" ] && auth=${ran_str8}
+    echo
+    echo -e "${Red}  auth = ${auth}${suffix}"
+    echo
+}
+
 check_port_for_simple_tls(){
     shadowsocksport=443
 
@@ -224,11 +264,21 @@ install_prepare_libev_simple_tls(){
         is_add_random_header
     fi
 
-    # LatestRelease
+    # v0.4.7
     if [[ ${SimpleTlsVer} = "2" ]]; then
         libev_simple_tls=1
         get_input_server_name
         is_enable_padding_data
+    fi
+
+    # LatestRelease
+    if [[ ${SimpleTlsVer} = "3" ]]; then
+        libev_simple_tls=1
+        get_input_server_name
+        is_enable_auth
+        if [[ ${isEnable} = enable ]]; then
+            get_input_auth_passwd
+        fi
     fi
 
     check_port_for_simple_tls

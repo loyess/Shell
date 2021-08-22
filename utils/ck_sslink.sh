@@ -26,3 +26,14 @@ get_link_of_ck2(){
         exit 1
     fi
 }
+
+gen_ssurl_by_uid(){
+    local CK_UID=$1
+
+    if [ ! "$(command -v ck-server)" ]; then
+        echo -e "\n${Error} 仅支持 ss + cloak 组合下使用，请确认是否是以该组合形式运行.\n"
+        exit 1
+    fi
+
+    get_link_of_ck2 "${CK_UID}"
+}

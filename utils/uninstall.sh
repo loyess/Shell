@@ -182,6 +182,22 @@ simple_tls_uninstall(){
     rm -rf /etc/simple-tls
 }
 
+gost_plugin_uninstall(){
+    ps -ef |grep -v grep | grep gost-plugin |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+
+    # uninstall gost-plugin
+    rm -f /var/run/gost-plugin.pid
+    rm -f /usr/local/bin/gost-plugin
+}
+
+xray_plugin_uninstall(){
+    ps -ef |grep -v grep | grep xray-plugin |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+
+    # uninstall xray-plugin
+    rm -f /var/run/xray-plugin.pid
+    rm -f /usr/local/bin/xray-plugin
+}
+
 caddy_uninstall(){
     if [[ -e ${CADDY_BIN_PATH} ]]; then
         PID=`ps -ef |grep "caddy" |grep -v "grep" |grep -v "init.d" |grep -v "service" |grep -v "caddy_install" |awk '{print $2}'`
@@ -242,6 +258,8 @@ uninstall_services(){
     mtt_uninstall
     rabbit_tcp_uninstall
     simple_tls_uninstall
+    gost_plugin_uninstall
+    xray_plugin_uninstall
     caddy_uninstall
     nginx_uninstall
     ipcalc_uninstall

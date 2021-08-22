@@ -37,11 +37,11 @@ download_ss_file(){
         download_service_file ${SHADOWSOCKS_LIBEV_INIT} ${SHADOWSOCKS_LIBEV_INIT_ONLINE} ${SHADOWSOCKS_LIBEV_INIT_LOCAL}
     elif [[ ${SS_VERSION} = "ss-rust" ]]; then
         # Download Shadowsocks-rust
-        rust_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/shadowsocks-rust/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        rust_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/shadowsocks-rust/releases | grep -o '"tag_name": ".*"' | grep -v 'alpha' | head -n 1 | sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
         [ -z ${rust_ver} ] && echo -e "${Error} 获取 shadowsocks-rust 最新版本失败." && exit 1
         
-        shadowsocks_rust_file="shadowsocks-v${rust_ver}.x86_64-unknown-linux-musl"
-        shadowsocks_rust_url="https://github.com/shadowsocks/shadowsocks-rust/releases/download/v${rust_ver}/shadowsocks-v${rust_ver}.x86_64-unknown-linux-musl.tar.xz"
+        shadowsocks_rust_file="shadowsocks-v${rust_ver}.x86_64-unknown-linux-gnu"
+        shadowsocks_rust_url="https://github.com/shadowsocks/shadowsocks-rust/releases/download/v${rust_ver}/shadowsocks-v${rust_ver}.x86_64-unknown-linux-gnu.tar.xz"
         download "${shadowsocks_rust_file}.tar.xz" "${shadowsocks_rust_url}"
         download_service_file ${SHADOWSOCKS_RUST_INIT} ${SHADOWSOCKS_RUST_INIT_ONLINE} ${SHADOWSOCKS_RUST_INIT_LOCAL}
     elif [[ ${SS_VERSION} = "go-ss2" ]]; then
@@ -93,8 +93,8 @@ download_plugins_file(){
         cloak_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/cbeuw/Cloak/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
         [ -z ${cloak_ver} ] && echo -e "${Error} 获取 cloak 最新版本失败." && exit 1
         # cloak_ver="2.1.1"
-        cloak_file="ck-server-linux-amd64-${cloak_ver}"
-        cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${cloak_ver}/ck-server-linux-amd64-${cloak_ver}"
+        cloak_file="ck-server-linux-amd64-v${cloak_ver}"
+        cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${cloak_ver}/ck-server-linux-amd64-v${cloak_ver}"
         download "${cloak_file}" "${cloak_url}"
         download_service_file ${CLOAK_INIT} ${CLOAK_INIT_ONLINE} ${CLOAK_INIT_LOCAL}
     
@@ -129,6 +129,8 @@ download_plugins_file(){
         [ -z ${simple_tls_ver} ] && echo -e "${Error} 获取 simple-tls 最新版本失败." && exit 1
         if [[ ${SimpleTlsVer} = "1" ]]; then
             simple_tls_ver="0.3.4"
+        elif [[ ${SimpleTlsVer} = "2" ]]; then
+            simple_tls_ver="0.4.7"
         fi
         # wriet version num
         if [ ! -d "$(dirname ${SIMPLE_TLS_VERSION_FILE})" ]; then
@@ -138,5 +140,30 @@ download_plugins_file(){
         simple_tls_file="simple-tls-linux-amd64"
         simple_tls_url="https://github.com/IrineSistiana/simple-tls/releases/download/v${simple_tls_ver}/simple-tls-linux-amd64.zip"
         download "${simple_tls_file}.zip" "${simple_tls_url}"
+    elif [[ "${plugin_num}" == "9" ]]; then
+        # Download gost-plugin
+        # gost_plugin_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/maskedeken/gost-plugin/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        gost_plugin_ver="1.6.1"
+        [ -z ${gost_plugin_ver} ] && echo -e "${Error} 获取 gost-plugin 最新版本失败." && exit 1
+        # wriet version num
+        if [ ! -d "$(dirname ${GOST_PLUGIN_VERSION_FILE})" ]; then
+            mkdir -p $(dirname ${GOST_PLUGIN_VERSION_FILE})
+        fi
+        echo ${gost_plugin_ver} > ${GOST_PLUGIN_VERSION_FILE}
+        gost_plugin_file="gost-plugin_linux_amd64-${gost_plugin_ver}"
+        gost_plugin_url="https://github.com/maskedeken/gost-plugin/releases/download/v${gost_plugin_ver}/${gost_plugin_file}.zip"
+        download "${gost_plugin_file}.zip" "${gost_plugin_url}"
+    elif [[ "${plugin_num}" == "10" ]]; then
+        # Download xray-plugin
+        xray_plugin_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/teddysun/xray-plugin/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        [ -z ${xray_plugin_ver} ] && echo -e "${Error} 获取 xray-plugin 最新版本失败." && exit 1
+        # wriet version num
+        if [ ! -d "$(dirname ${XRAY_PLUGIN_VERSION_FILE})" ]; then
+            mkdir -p $(dirname ${XRAY_PLUGIN_VERSION_FILE})
+        fi
+        echo ${xray_plugin_ver} > ${XRAY_PLUGIN_VERSION_FILE}
+        xray_plugin_file="xray-plugin-linux-amd64-v${xray_plugin_ver}"
+        xray_plugin_url="https://github.com/teddysun/xray-plugin/releases/download/v${xray_plugin_ver}/xray-plugin-linux-amd64-v${xray_plugin_ver}.tar.gz"
+        download "${xray_plugin_file}.tar.gz" "${xray_plugin_url}"
     fi
 }

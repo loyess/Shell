@@ -8,8 +8,8 @@ ss_obfs_http_show(){
     echo -e " 密码     : ${Red}${shadowsockspwd}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " 插件选项 : ${Red}obfs=${shadowsocklibev_obfs}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " 插件参数 : ${Red}obfs-host=${domain}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件选项 : ${Red}obfs=${shadowsocklibev_obfs};obfs-host=${domain}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件参数 : " >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}
@@ -30,8 +30,8 @@ ss_obfs_tls_show(){
     echo -e " 密码     : ${Red}${shadowsockspwd}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 加密     : ${Red}${shadowsockscipher}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " 插件程序 : ${Red}${plugin_client_name}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " 插件选项 : ${Red}obfs=${shadowsocklibev_obfs}${suffix}" >> ${HUMAN_CONFIG}
-    echo -e " 插件参数 : ${Red}obfs-host=${domain}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件选项 : ${Red}obfs=${shadowsocklibev_obfs};obfs-host=${domain}${suffix}" >> ${HUMAN_CONFIG}
+    echo -e " 插件参数 : " >> ${HUMAN_CONFIG}
     echo >> ${HUMAN_CONFIG}
     echo -e " SS  链接 : ${Green}${ss_link}${suffix}" >> ${HUMAN_CONFIG}
     echo -e " SS二维码 : ./ss-plugins.sh scan < A link at the beginning of ss:// >" >> ${HUMAN_CONFIG}

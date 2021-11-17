@@ -5,7 +5,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.7.2"
+SHELL_VERSION="2.7.3"
 # ====================
 
 
@@ -336,6 +336,21 @@ check_sys(){
             return 1
         fi
     fi
+}
+
+check_arch(){
+    case "$(uname -m)" in
+      'amd64' | 'x86_64')
+        ARCH='amd64'
+        ;;
+      'armv8' | 'aarch64')
+        ARCH='arm64'
+        ;;
+      *)
+        echo "[${Red}Error${suffix}] The architecture is not supported."
+        exit 1
+        ;;
+    esac
 }
 
 package_install(){
@@ -946,19 +961,13 @@ install_cleanup(){
     rm -rf ${shadowsocks_rust_file}.tar.xz
     
     # v2ray-plugin
-    rm -rf v2ray-plugin_linux_amd64 ${v2ray_plugin_file}.tar.gz
+    rm -rf ${v2ray_plugin_file}.tar.gz
     
     # kcptun
-    rm -rf client_linux_amd64 server_linux_amd64 ${kcptun_file}.tar.gz
+    rm -rf client_linux_${ARCH} ${kcptun_file}.tar.gz
     
     # simple-obfs
     rm -rf simple-obfs
-    
-    # goquiet
-    rm -rf ${goquiet_file}
-    
-    # cloak
-    rm -rf ${cloak_file}
     
     # mos-tls-tunnel
     rm -rf ${mtt_file}.zip LICENSE README.md mtt-client
@@ -1120,6 +1129,7 @@ do_install(){
 
 
 # install and tools
+check_arch
 action=${1:-"install"}
 
 case ${action} in

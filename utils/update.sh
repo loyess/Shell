@@ -248,7 +248,7 @@ update_simple_tls(){
         [ -z ${simple_tls_ver} ] && echo -e "${Error} 获取 simple-tls 最新版本失败." && exit 1
         read current_simple_tls_ver < ${SIMPLE_TLS_VERSION_FILE}
 
-        if ! check_latest_version "0.4.7" ${current_simple_tls_ver}; then
+        if ! check_latest_version "0.5.2" ${current_simple_tls_ver}; then
             echo -e "${Point} simple-tls当前版本是${current_simple_tls_ver}及以下版本，与最新版本不兼容，脚本不提供更新."
             exit 0
         fi

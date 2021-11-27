@@ -28,8 +28,7 @@ nginx_config(){
 	        server_name ${domain};
 	        ssl_certificate ${cerPath};
 	        ssl_certificate_key ${keyPath};
-	        ssl_ciphers HIGH:!aNULL:!MD5;
-	        ssl_protocols TLSv1.2 TLSv1.3;
+	        ssl_protocols TLSv1.3;
 	        ssl_session_cache shared:SSL:10m;
 	        ssl_session_timeout  10m;
 	        add_header Strict-Transport-Security "max-age=31536000";

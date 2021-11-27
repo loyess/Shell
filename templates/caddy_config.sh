@@ -4,7 +4,9 @@ caddy_v1_config(){
 	    gzip
 	    log /var/log/caddy-access.log
 	    errors /var/log/caddy-error.log
-	    tls ${cerPath} ${keyPath}
+	    tls ${cerPath} ${keyPath} {
+	        protocols tls1.3
+	    }
 	    proxy ${path} localhost:${shadowsocksport} {
 	        websocket
 	        header_upstream -Origin
@@ -25,7 +27,9 @@ caddy_v2_config(){
 	        output file /var/log/caddy-access.log
 	        format json
 	    }
-	    tls ${cerPath} ${keyPath}
+	    tls ${cerPath} ${keyPath} {
+	        protocols tls1.3
+	    }
 	    reverse_proxy ${path} localhost:${shadowsocksport}
 	    reverse_proxy ${mirror_site} {
 	        header_up Host {http.reverse_proxy.upstream.hostport}

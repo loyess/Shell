@@ -71,6 +71,23 @@ check_running() {
     fi
 }
 
+get_config_args(){
+    local JsonFilePath=$1
+
+    if [ ! -f $JsonFilePath ]; then
+        echo "$NAME config file $JsonFilePath not found"
+        exit 1
+    fi
+
+    if [ ! "$(command -v jq)" ]; then
+        echo "Cannot find dependent package 'jq' Please use yum or apt to install and try again"
+        exit 1
+    fi
+
+    NameServer=$(cat ${JsonFilePath} | jq -r .nameserver)
+    [ -z "$NameServer" ] && echo -e "Configuration option 'nameserver' acquisition failed" && exit 1
+}
+
 do_status() {
     check_running
     case $? in
@@ -90,7 +107,8 @@ do_start() {
         return 0
     fi
     ulimit -n 51200
-    nohup $DAEMON -c $CONF -v > $LOG 2>&1 &
+    get_config_args $CONF
+    nohup $DAEMON -c $CONF --dns $NameServer -vvv > $LOG 2>&1 &
     check_pid
     echo $get_pid > $PID_FILE
     if check_running; then

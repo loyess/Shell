@@ -268,6 +268,7 @@ uninstall_services(){
     simple_tls_uninstall
     gost_plugin_uninstall
     xray_plugin_uninstall
+    qtun_uninstall
     caddy_uninstall
     nginx_uninstall
     ipcalc_uninstall

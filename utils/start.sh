@@ -150,6 +150,15 @@ xray_plugin_start(){
     fi
 }
 
+qtun_start(){
+    if [ "$(command -v qtun-server)" ]; then
+        local NAME="qtun"
+        local PID=`ps -ef |grep -Ev 'grep|-plugin-opts' | grep qtun-server |awk '{print $2}'`
+
+        sip003_plugin_start "${NAME}" "${PID}"
+    fi
+}
+
 caddy_start(){
     if [ -e "${CADDY_BIN_PATH}" ]; then
         /etc/init.d/caddy start
@@ -181,6 +190,7 @@ start_services(){
     simple_tls_start
     gost_plugin_start
     xray_plugin_start
+    qtun_start
     caddy_start
     nginx_start
 }

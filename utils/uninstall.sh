@@ -198,6 +198,14 @@ xray_plugin_uninstall(){
     rm -f /usr/local/bin/xray-plugin
 }
 
+qtun_uninstall(){
+    ps -ef |grep -v grep | grep qtun-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+
+    # uninstall qtun
+    rm -f /var/run/qtun.pid
+    rm -f /usr/local/bin/qtun-server
+}
+
 caddy_uninstall(){
     if [[ -e ${CADDY_BIN_PATH} ]]; then
         PID=`ps -ef |grep "caddy" |grep -v "grep" |grep -v "init.d" |grep -v "service" |grep -v "caddy_install" |awk '{print $2}'`

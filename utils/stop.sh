@@ -101,6 +101,14 @@ xray_plugin_stop(){
     fi
 }
 
+qtun_stop(){
+    ps -ef |grep -v grep | grep qtun-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+
+    if [ "$(command -v qtun-server)" ]; then
+        echo -e "Stopping qtun-server success"
+    fi
+}
+
 caddy_stop(){
     ps -ef |grep -v grep | grep caddy |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
     
@@ -133,6 +141,7 @@ stop_services(){
     simple_tls_stop
     gost_plugin_stop
     xray_plugin_stop
+    qtun_stop
     caddy_stop
     nginx_stop
 }

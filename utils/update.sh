@@ -345,6 +345,36 @@ update_xray_plugin(){
     fi
 }
 
+update_qtun(){
+    cd ${CUR_DIR}
+
+    if [[ -e ${QTUN_BIN_PATH} ]]; then
+        qtun_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/qtun/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        [ -z ${qtun_ver} ] && echo -e "${Error} 获取 qtun 最新版本失败." && exit 1
+        read current_qtun_ver < ${QTUN_VERSION_FILE}
+
+        if ! check_latest_version ${current_qtun_ver} ${qtun_ver}; then
+            echo -e "${Point} qtun当前已是最新版本${current_qtun_ver}不需要更新."
+            echo
+            exit 1
+        fi
+
+        local plugin_num="11"
+        echo -e "${Info} 检测到qtun有新版本，开始下载."
+        download_plugins_file
+        echo -e "${Info} 下载完成，开始安装."
+        improt_package "plugins" "qtun_install.sh"
+        do_stop > /dev/null 2>&1
+        install_qtun
+        do_restart > /dev/null 2>&1
+
+        echo -e "${Info} qtun已成功升级为最新版本${xray_plugin_ver}"
+        echo
+
+        install_cleanup
+    fi
+}
+
 update_caddy_v1(){
     cd ${CUR_DIR}
     
@@ -411,6 +441,20 @@ update_caddy(){
     fi
 }
 
+update_plugins(){
+    update_v2ray_plugin
+    update_kcptun
+    update_simple_obfs
+    update_goquiet
+    update_cloak
+    update_mtt
+    update_rabbit_tcp
+    update_simple_tls
+    update_gost_plugin
+    update_xray_plugin
+    update_qtun
+}
+
 update_shadowsocks_libev(){
     local SS_VERSION="ss-libev"
     
@@ -420,18 +464,7 @@ update_shadowsocks_libev(){
     current_libev_ver=$(ss-server -v | grep shadowsocks-libev | cut -d\  -f2)
     if ! check_latest_version ${current_libev_ver} ${libev_ver}; then
         echo -e "${Point} shadowsocklibev-libev当前已是最新版本${current_libev_ver}不需要更新."
-        
-        update_v2ray_plugin
-        update_kcptun
-        update_simple_obfs
-        update_goquiet
-        update_cloak
-        update_mtt
-        update_rabbit_tcp
-        update_simple_tls
-        update_gost_plugin
-        update_xray_plugin
-        
+        update_plugins
         exit 1
     fi
     
@@ -445,17 +478,7 @@ update_shadowsocks_libev(){
     echo -e "${Info} shadowsocklibev-libev已成功升级为最新版本${libev_ver}"
     
     install_cleanup
-
-    update_v2ray_plugin
-    update_kcptun
-    update_simple_obfs
-    update_goquiet
-    update_cloak
-    update_mtt
-    update_rabbit_tcp
-    update_simple_tls
-    update_gost_plugin
-    update_xray_plugin
+    update_plugins
 }
 
 update_shadowsocks_rust(){
@@ -467,18 +490,7 @@ update_shadowsocks_rust(){
     current_rust_ver=$(ssserver -V | grep shadowsocks | cut -d\  -f2)
     if ! check_latest_version ${current_rust_ver} ${rust_ver}; then
         echo -e "${Point} shadowsocklibev-rust当前已是最新版本$(ssserver -V | grep shadowsocks | cut -d\  -f2)不需要更新."
-        
-        update_v2ray_plugin
-        update_kcptun
-        update_simple_obfs
-        update_goquiet
-        update_cloak
-        update_mtt
-        update_rabbit_tcp
-        update_simple_tls
-        update_gost_plugin
-        update_xray_plugin
-        
+        update_plugins
         exit 1
     fi
     
@@ -492,17 +504,7 @@ update_shadowsocks_rust(){
     echo -e "${Info} shadowsocklibev-rust已成功升级为最新版本${rust_ver}"
     
     install_cleanup
-
-    update_v2ray_plugin
-    update_kcptun
-    update_simple_obfs
-    update_goquiet
-    update_cloak
-    update_mtt
-    update_rabbit_tcp
-    update_simple_tls
-    update_gost_plugin
-    update_xray_plugin
+    update_plugins
 }
 
 update_go_shadowsocks2(){
@@ -514,18 +516,7 @@ update_go_shadowsocks2(){
     read current_go_ver < ${GO_SHADOWSOCKS2_VERSION_FILE}
     if ! check_latest_version ${current_go_ver} ${go_ver}; then
         echo -e "${Point} go-shadowsocks2当前已是最新版本${current_go_ver}不需要更新."
-
-        update_v2ray_plugin
-        update_kcptun
-        update_simple_obfs
-        update_goquiet
-        update_cloak
-        update_mtt
-        update_rabbit_tcp
-        update_simple_tls
-        update_gost_plugin
-        update_xray_plugin
-
+        update_plugins
         exit 1
     fi
 
@@ -539,17 +530,7 @@ update_go_shadowsocks2(){
     echo -e "${Info} go-shadowsocks2已成功升级为最新版本${go_ver}"
 
     install_cleanup
-
-    update_v2ray_plugin
-    update_kcptun
-    update_simple_obfs
-    update_goquiet
-    update_cloak
-    update_mtt
-    update_rabbit_tcp
-    update_simple_tls
-    update_gost_plugin
-    update_xray_plugin
+    update_plugins
 }
 
 update_logic(){

@@ -179,5 +179,22 @@ download_plugins_file(){
         xray_plugin_file="xray-plugin-linux-${ARCH}-v${xray_plugin_ver}"
         xray_plugin_url="https://github.com/teddysun/xray-plugin/releases/download/v${xray_plugin_ver}/xray-plugin-linux-${ARCH}-v${xray_plugin_ver}.tar.gz"
         download "${xray_plugin_file}.tar.gz" "${xray_plugin_url}"
+    elif [[ "${plugin_num}" == "11" ]]; then
+        # Download qtun
+        qtun_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/qtun/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        [ -z ${qtun_ver} ] && echo -e "${Error} 获取 qtun 最新版本失败." && exit 1
+        # wriet version num
+        if [ ! -d "$(dirname ${QTUN_VERSION_FILE})" ]; then
+            mkdir -p $(dirname ${QTUN_VERSION_FILE})
+        fi
+        echo ${qtun_ver} > ${QTUN_VERSION_FILE}
+        if [[ ${ARCH} = "amd64" ]]; then
+            local MACHINE="x86_64"
+        else
+            local MACHINE="aarch64"
+        fi
+        qtun_file="qtun-v${qtun_ver}.${MACHINE}-unknown-linux-musl"
+        qtun_url="https://github.com/shadowsocks/qtun/releases/download/v${qtun_ver}/qtun-v${qtun_ver}.${MACHINE}-unknown-linux-musl.tar.xz"
+        download "${qtun_file}.tar.xz" "${qtun_url}"
     fi
 }

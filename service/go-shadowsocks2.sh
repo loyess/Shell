@@ -79,6 +79,8 @@ get_config_args(){
     [ -z "$Password" ] && echo -e "Configuration option 'password' acquisition failed" && exit 1
     Method=$(cat ${JsonFilePath} | jq -r .method)
     [ -z "$Method" ] && echo -e "Configuration option 'method' acquisition failed" && exit 1
+    Mode=$(cat ${JsonFilePath} | jq -r .mode)
+    [ -z "$Mode" ] && echo -e "Configuration option 'Mode' acquisition failed" && exit 1
 
     if [[ ${Method} == "aes-128-gcm" ]]; then
         Method="AEAD_AES_128_GCM"
@@ -86,6 +88,14 @@ get_config_args(){
         Method="AEAD_AES_256_GCM"
     elif [[ ${Method} == "chacha20-ietf-poly1305" ]]; then
         Method="AEAD_CHACHA20_POLY1305"
+    fi
+
+    if [[ ${Mode} == "tcp_only" ]]; then
+        Mode="-tcp"
+    elif [[ ${Mode} == "udp_only" ]]; then
+        Mode="-udp"
+    elif [[ ${Mode} == "tcp_and_udp" ]]; then
+        Mode="-tcp -udp"
     fi
 
     if $(cat ${JsonFilePath} | grep -qE 'plugin|plugin_opts'); then
@@ -139,9 +149,9 @@ do_start() {
     fi
     ulimit -n 51200
     if $(cat ${CONF} | grep -qE 'plugin|plugin_opts'); then
-        nohup $DAEMON -s "ss://${Method}:${Password}@:${ServerPort}" -verbose -plugin ${Plugin} -plugin-opts "${PluginOpts}" > $LOG 2>&1 &
+        nohup $DAEMON -s "ss://${Method}:${Password}@:${ServerPort}" ${Mode} -verbose -plugin ${Plugin} -plugin-opts "${PluginOpts}" > $LOG 2>&1 &
     else
-        nohup $DAEMON -s "ss://${Method}:${Password}@:${ServerPort}" -verbose > $LOG 2>&1 &
+        nohup $DAEMON -s "ss://${Method}:${Password}@:${ServerPort}" ${Mode} -verbose > $LOG 2>&1 &
     fi
     check_pid "${DAEMON}"
     echo $GET_PID > $PID_FILE

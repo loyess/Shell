@@ -5,7 +5,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.7.3"
+SHELL_VERSION="2.7.4"
 # ====================
 
 
@@ -125,6 +125,12 @@ GOST_PLUGIN_VERSION_FILE="/etc/shadowsocks/gost-plugin.v"
 XRAY_PLUGIN_INSTALL_PATH="/usr/local/bin"
 XRAY_PLUGIN_BIN_PATH="/usr/local/bin/xray-plugin"
 XRAY_PLUGIN_VERSION_FILE="/etc/shadowsocks/xray-plugin.v"
+
+
+# qtun
+QTUN_INSTALL_PATH="/usr/local/bin"
+QTUN_BIN_PATH="/usr/local/bin/qtun-server"
+QTUN_VERSION_FILE="/etc/shadowsocks/qtun.v"
 
 
 # caddy
@@ -250,6 +256,10 @@ status_init(){
         pluginName="Xray-plugin"
         pluginPath=${XRAY_PLUGIN_BIN_PATH}
         pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep xray-plugin | awk '{print $2}'`
+    elif [[ -e ${QTUN_BIN_PATH} ]]; then
+        pluginName="qtun"
+        pluginPath=${QTUN_BIN_PATH}
+        pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep qtun-server | awk '{print $2}'`
     fi
 
     if [[ -e ${CADDY_BIN_PATH} ]]; then
@@ -659,6 +669,9 @@ config_ss(){
     elif [[ ${plugin_num} == "10" ]]; then
         improt_package "templates/config" "xray_plugin_config.sh"
         config_ss_xray_plugin
+    elif [[ ${plugin_num} == "11" ]]; then
+        improt_package "templates/config" "qtun_config.sh"
+        config_ss_qtun
     else
         improt_package "templates/config" "ss_original_config.sh"
         ss_config_standalone
@@ -696,6 +709,9 @@ gen_ss_links(){
     elif [[ ${plugin_num} == "10" ]]; then
         improt_package "templates/links" "xray_plugin_link.sh"
         gen_ss_xray_plugin_link
+    elif [[ ${plugin_num} == "11" ]]; then
+        improt_package "templates/links" "qtun_link.sh"
+        gen_ss_qtun_link
     else
         improt_package "templates/links" "ss_original_link.sh"
         ss_link
@@ -742,6 +758,9 @@ install_completed(){
     elif [[ ${plugin_num} == "10" ]]; then
         improt_package "templates/visible" "xray_plugin_visible.sh"
         ss_xray_plugin_visible
+    elif [[ ${plugin_num} == "11" ]]; then
+        improt_package "templates/visible" "qtun_visible.sh"
+        ss_qtun_visible
     else
         improt_package "templates/visible" "ss_original_visible.sh"
         ss_show
@@ -761,6 +780,7 @@ install_prepare(){
         simple-tls
         gost-plugin
         xray-plugin
+        qtun
     )
 
     check_script_update "notShow"
@@ -812,10 +832,13 @@ install_prepare(){
     elif [[ ${plugin_num} == "10" ]]; then
         improt_package "prepare" "xray_plugin_prepare.sh"
         install_prepare_libev_xray_plugin
+    elif [[ ${plugin_num} == "11" ]]; then
+        improt_package "prepare" "qtun_prepare.sh"
+        install_prepare_libev_qtun
     elif [[ ${plugin_num} == "" ]]; then
         :
     else
-        echo -e "${Error} 请输入正确的数字 [1-8]" && exit 1
+        echo -e "${Error} 请输入正确的数字 [1-${#pluginName[@]}]" && exit 1
     fi
     
     echo
@@ -912,6 +935,10 @@ install_main(){
             install_nginx
         fi
         plugin_client_name="xray-plugin"
+    elif [ "${plugin_num}" == "11" ]; then
+        improt_package "plugins" "qtun_install.sh"
+        install_qtun
+        plugin_client_name="qtun-client"
     fi
 }
 
@@ -980,6 +1007,9 @@ install_cleanup(){
 
     # xray-plugin
     rm -rf ${xray_plugin_file}.tar.gz
+
+    # qtun
+    rm -rf qtun-client ${qtun_file}.tar.xz
 }
 
 do_uid(){

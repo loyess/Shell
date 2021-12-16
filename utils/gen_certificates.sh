@@ -193,8 +193,8 @@ _acme_cmd_by_manual(){
         ~/.acme.sh/acme.sh --issue --dns -d ${domain} --yes-I-know-dns-manual-mode-enough-go-ahead-please ${isForce}
         if [[ $? -ne 0 && $? -ne 2 ]]; then
             echo
-            echo -e "${Info}请根据上方提示，去Cloudflare上添加txt记录，完成后按任意键开始。"
-            echo -e "${Info}如果出现“too many certificates already issued for exact set of domains”错误，请按Ctrl+C终止。"
+            echo -e "${Info} 请根据上方提示，去Cloudflare上添加txt记录，完成后按任意键开始。"
+            echo -e "${Info} 如果出现“too many certificates already issued for exact set of domains”错误，请按Ctrl+C终止。"
             char=`get_char` && count_down 30
             ~/.acme.sh/acme.sh --renew -d ${domain} --yes-I-know-dns-manual-mode-enough-go-ahead-please ${isForce}
         fi
@@ -202,8 +202,8 @@ _acme_cmd_by_manual(){
         ~/.acme.sh/acme.sh --issue --dns -d ${domain} -k ec-256 --yes-I-know-dns-manual-mode-enough-go-ahead-please ${isForce}
         if [[ $? -ne 0 && $? -ne 2 ]]; then
             echo
-            echo -e "${Info}请根据上方提示，去Cloudflare上添加txt记录，完成后按任意键开始。"
-            echo -e "${Info}如果出现“too many certificates already issued for exact set of domains”错误，请按Ctrl+C终止。"
+            echo -e "${Info} 请根据上方提示，去Cloudflare上添加txt记录，完成后按任意键开始。"
+            echo -e "${Info} 如果出现“too many certificates already issued for exact set of domains”错误，请按Ctrl+C终止。"
             char=`get_char` && count_down 30
             ~/.acme.sh/acme.sh --renew -d ${domain} --ecc --yes-I-know-dns-manual-mode-enough-go-ahead-please ${isForce}
         fi

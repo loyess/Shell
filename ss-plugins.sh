@@ -1000,7 +1000,7 @@ install_cleanup(){
     rm -rf ${mtt_file}.zip LICENSE README.md mtt-client
 
     #simple-tls
-    rm -rf ${simple_tls_file}.zip LICENSE  README.md README_zh.md
+    rm -rf ${simple_tls_file}.zip LICENSE  README.md README_zh.md README_en.md
 
     # gost-plugin
     rm -rf ${gost_plugin_file}.zip

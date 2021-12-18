@@ -24,43 +24,51 @@ download_service_file(){
     fi
 }
 
+get_version_by_github_api(){
+    local owner=$1
+    local repositoryName=$2
+    local apiUrl allVersion latestVersion
+
+    apiUrl="https://api.github.com/repos/${owner}/${repositoryName}/releases"
+    allVersion=$(wget --no-check-certificate -qO- ${apiUrl} | grep -o '"tag_name": ".*"')
+    if [ "${repositoryName}" = "shadowsocks-rust" ]; then
+        allVersion=$(echo "${allVersion}" | grep -v "alpha")
+    fi
+    latestVersion=$(echo "${allVersion}" | head -n 1 | sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+    echo ${latestVersion}
+}
+
 get_ss_version(){
     local ssName=$1
 
-    if [ ${ssName} = "shadowsocks-libev" ]; then
-        echo $(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/shadowsocks-libev/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
-    elif [ ${ssName} = "shadowsocks-rust" ]; then
-        echo $(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/shadowsocks-rust/releases | grep -o '"tag_name": ".*"' | grep -v 'alpha' | head -n 1 | sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
-    elif [ ${ssName} = "go-shadowsocks2" ]; then
-        echo $(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/go-shadowsocks2/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
-    fi
+    get_version_by_github_api "shadowsocks" "${ssName}"
 }
 
 get_plugins_version(){
     local pluginName=$1
 
     if [ ${pluginName} = "v2ray-plugin" ]; then
-        echo $(wget --no-check-certificate -qO- https://api.github.com/repos/teddysun/v2ray-plugin/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        get_version_by_github_api "teddysun" "${pluginName}"
     elif [ ${pluginName} = "kcptun" ]; then
-        echo $(wget --no-check-certificate -qO- https://api.github.com/repos/xtaci/kcptun/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        get_version_by_github_api "xtaci" "${pluginName}"
     elif [ ${pluginName} = "simple-obfs" ]; then
-        echo $(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/simple-obfs/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        get_version_by_github_api "shadowsocks" "${pluginName}"
     elif [ ${pluginName} = "GoQuiet" ]; then
-        echo $(wget --no-check-certificate -qO- https://api.github.com/repos/cbeuw/GoQuiet/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        get_version_by_github_api "cbeuw" "${pluginName}"
     elif [ ${pluginName} = "Cloak" ]; then
-        echo $(wget --no-check-certificate -qO- https://api.github.com/repos/cbeuw/Cloak/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        get_version_by_github_api "cbeuw" "${pluginName}"
     elif [ ${pluginName} = "mos-tls-tunnel" ]; then
-        echo $(wget --no-check-certificate -qO- https://api.github.com/repos/IrineSistiana/mos-tls-tunnel/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        get_version_by_github_api "IrineSistiana" "${pluginName}"
     elif [ ${pluginName} = "rabbit-tcp" ]; then
-        echo $(wget --no-check-certificate -qO- https://api.github.com/repos/ihciah/rabbit-tcp/releases | grep -o '"tag_name": ".*"' |head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        get_version_by_github_api "ihciah" "${pluginName}"
     elif [ ${pluginName} = "simple-tls" ]; then
-        echo $(wget --no-check-certificate -qO- https://api.github.com/repos/IrineSistiana/simple-tls/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        get_version_by_github_api "IrineSistiana" "${pluginName}"
     elif [ ${pluginName} = "gost-plugin" ]; then
-        echo $(wget --no-check-certificate -qO- https://api.github.com/repos/maskedeken/gost-plugin/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        get_version_by_github_api "maskedeken" "${pluginName}"
     elif [ ${pluginName} = "xray-plugin" ]; then
-        echo $(wget --no-check-certificate -qO- https://api.github.com/repos/teddysun/xray-plugin/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        get_version_by_github_api "teddysun" "${pluginName}"
     elif [ ${pluginName} = "qtun" ]; then
-        echo $(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/qtun/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
+        get_version_by_github_api "shadowsocks" "${pluginName}"
     fi
 }
 

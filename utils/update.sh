@@ -23,7 +23,7 @@ judge_not_update_and_output_point_info(){
     local latestVersion=$3
     
     if ! check_latest_version ${currentVersion} ${latestVersion}; then
-        echo -e "${Point} ${appName}当前已是最新版本${currentVersion}不需要更新."
+        echo -e "${Point} ${appName}当前已是最新版本${latestVersion}不需要更新."
         exit 0
     fi
 }

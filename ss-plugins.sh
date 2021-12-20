@@ -5,7 +5,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.7.5"
+SHELL_VERSION="2.7.6"
 # ====================
 
 
@@ -131,6 +131,12 @@ XRAY_PLUGIN_VERSION_FILE="/etc/shadowsocks/xray-plugin.v"
 QTUN_INSTALL_PATH="/usr/local/bin"
 QTUN_BIN_PATH="/usr/local/bin/qtun-server"
 QTUN_VERSION_FILE="/etc/shadowsocks/qtun.v"
+
+
+# gun
+GUN_INSTALL_PATH="/usr/local/bin"
+GUN_BIN_PATH="/usr/local/bin/gun-server"
+GUN_VERSION_FILE="/etc/shadowsocks/gun.v"
 
 
 # caddy
@@ -260,6 +266,10 @@ status_init(){
         pluginName="qtun"
         pluginPath=${QTUN_BIN_PATH}
         pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep qtun-server | awk '{print $2}'`
+    elif [[ -e ${GUN_BIN_PATH} ]]; then
+        pluginName="gun"
+        pluginPath=${GUN_BIN_PATH}
+        pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep gun-server | awk '{print $2}'`
     fi
 
     if [[ -e ${CADDY_BIN_PATH} ]]; then
@@ -672,6 +682,9 @@ config_ss(){
     elif [[ ${plugin_num} == "11" ]]; then
         improt_package "templates/config" "qtun_config.sh"
         config_ss_qtun
+    elif [[ ${plugin_num} == "12" ]]; then
+        improt_package "templates/config" "gun_config.sh"
+        config_ss_gun
     else
         improt_package "templates/config" "ss_original_config.sh"
         ss_config_standalone
@@ -712,6 +725,9 @@ gen_ss_links(){
     elif [[ ${plugin_num} == "11" ]]; then
         improt_package "templates/links" "qtun_link.sh"
         gen_ss_qtun_link
+    elif [[ ${plugin_num} == "12" ]]; then
+        improt_package "templates/links" "gun_link.sh"
+        gen_ss_gun_link
     else
         improt_package "templates/links" "ss_original_link.sh"
         ss_link
@@ -761,6 +777,9 @@ install_completed(){
     elif [[ ${plugin_num} == "11" ]]; then
         improt_package "templates/visible" "qtun_visible.sh"
         ss_qtun_visible
+    elif [[ ${plugin_num} == "12" ]]; then
+        improt_package "templates/visible" "gun_visible.sh"
+        ss_gun_visible
     else
         improt_package "templates/visible" "ss_original_visible.sh"
         ss_show
@@ -781,6 +800,7 @@ install_prepare(){
         gost-plugin
         xray-plugin
         qtun
+        gun
     )
 
     check_script_update "notShow"
@@ -835,6 +855,9 @@ install_prepare(){
     elif [[ ${plugin_num} == "11" ]]; then
         improt_package "prepare" "qtun_prepare.sh"
         install_prepare_libev_qtun
+    elif [[ ${plugin_num} == "12" ]]; then
+        improt_package "prepare" "gun_prepare.sh"
+        install_prepare_libev_gun
     elif [[ ${plugin_num} == "" ]]; then
         :
     else
@@ -939,6 +962,10 @@ install_main(){
         improt_package "plugins" "qtun_install.sh"
         install_qtun
         plugin_client_name="qtun-client"
+    elif [ "${plugin_num}" == "12" ]; then
+        improt_package "plugins" "gun_install.sh"
+        install_gun
+        plugin_client_name="gun-client"
     fi
 }
 

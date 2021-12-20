@@ -69,6 +69,8 @@ get_plugins_version(){
         get_version_by_github_api "teddysun" "${pluginName}"
     elif [ ${pluginName} = "qtun" ]; then
         get_version_by_github_api "shadowsocks" "${pluginName}"
+    elif [ ${pluginName} = "gun" ]; then
+        get_version_by_github_api "Qv2ray" "${pluginName}"
     fi
 }
 
@@ -268,5 +270,19 @@ download_plugins_file(){
         qtun_file="qtun-v${qtun_ver}.${MACHINE}-unknown-linux-musl"
         qtun_url="https://github.com/shadowsocks/qtun/releases/download/v${qtun_ver}/qtun-v${qtun_ver}.${MACHINE}-unknown-linux-musl.tar.xz"
         download "${qtun_file}.tar.xz" "${qtun_url}"
+    elif [[ "${plugin_num}" == "12" ]]; then
+        local pluginName="gun"
+        gun_ver=$(get_plugins_version "${pluginName}")
+        judge_latest_version_num_is_none_and_output_error_info "${pluginName}" "${gun_ver}"
+
+        # wriet version num
+        if [ ! -d "$(dirname ${GUN_VERSION_FILE})" ]; then
+            mkdir -p $(dirname ${GUN_VERSION_FILE})
+        fi
+        echo ${gun_ver} > ${GUN_VERSION_FILE}
+
+        gun_file="gun-sip003-linux-${ARCH}"
+        gun_url="https://github.com/Qv2ray/gun/releases/download/${gun_ver}/gun-sip003-linux-${ARCH}"
+        download "${gun_file}" "${gun_url}"
     fi
 }

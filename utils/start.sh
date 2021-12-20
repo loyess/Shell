@@ -101,6 +101,7 @@ start_services(){
     sip003_way_start "gost-plugin" "gost-plugin"
     sip003_way_start "xray-plugin" "xray-plugin"
     sip003_way_start "qtun-server" "qtun"
+    sip003_way_start "gun-server" "gun"
     nginx_start
 }
 

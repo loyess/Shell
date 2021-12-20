@@ -207,6 +207,14 @@ qtun_uninstall(){
     rm -f /usr/local/bin/qtun-server
 }
 
+gun_uninstall(){
+    ps -ef |grep -v grep | grep gun-server |awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+
+    # uninstall gun
+    rm -f /var/run/gun.pid
+    rm -f /usr/local/bin/gun-server
+}
+
 caddy_uninstall(){
     if [[ -e ${CADDY_BIN_PATH} ]]; then
         PID=`ps -ef |grep "caddy" |grep -v "grep" |grep -v "init.d" |grep -v "service" |grep -v "caddy_install" |awk '{print $2}'`
@@ -270,6 +278,7 @@ uninstall_services(){
     gost_plugin_uninstall
     xray_plugin_uninstall
     qtun_uninstall
+    gun_uninstall
     caddy_uninstall
     nginx_uninstall
     ipcalc_uninstall

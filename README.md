@@ -135,6 +135,9 @@ Available Options:
       2. wss
       3. quic
  11. qtun
+ 12. gun
+      1. grpc-with-tls
+      2. grpc-without-tls
 
 注意：
     kcptun仅用于加速。
@@ -235,3 +238,4 @@ Available Options:
 - [xray-plugin](https://github.com/teddysun/xray-plugin)
 - [xray-plugin-android](https://github.com/teddysun/xray-plugin-android)
 - [qtun](https://github.com/shadowsocks/qtun)
+- [gun](https://github.com/Qv2ray/gun)

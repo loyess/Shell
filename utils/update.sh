@@ -190,6 +190,13 @@ plugins_update_preparation(){
         pluginUpdateCalledFuncName="install_qtun"
         pluginLatestVersion=$(get_plugins_version "${pluginNameUpdate}")
         pluginCurrentVersion=$(read_version_num "${QTUN_VERSION_FILE}")
+    elif [[ -e ${GUN_BIN_PATH} ]]; then
+        pluginNameUpdate="gun"
+        pluginUpdateDownloadMark="12"
+        pluginUpdateShFileName="gun_install.sh"
+        pluginUpdateCalledFuncName="install_gun"
+        pluginLatestVersion=$(get_plugins_version "${pluginNameUpdate}")
+        pluginCurrentVersion=$(read_version_num "${GUN_VERSION_FILE}")
     fi
 }
 

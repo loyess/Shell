@@ -24,6 +24,7 @@ stop_services(){
     kill_process "gost-plugin" "gost-plugin"
     kill_process "xray-plugin" "xray-plugin"
     kill_process "qtun-server" "qtun"
+    kill_process "gun-server" "gun"
     kill_process "caddy" "caddy"
     kill_process "nginx" "nginx"
 }

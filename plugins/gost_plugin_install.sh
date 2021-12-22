@@ -4,6 +4,11 @@ install_gost_plugin(){
     if [ ! "$(command -v unzip)" ]; then
         package_install "unzip" > /dev/null 2>&1
     fi
+    if check_sys packageManager yum; then
+        package_install "xz" > /dev/null 2>&1
+    elif check_sys packageManager apt; then
+        package_install "xz-utils" > /dev/null 2>&1
+    fi
     
     unzip -oq ${gost_plugin_file}.zip
     chmod +x gost-plugin

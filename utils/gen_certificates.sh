@@ -268,6 +268,9 @@ acme_get_certificate_by_manual_force(){
         algorithmType="RSA"
     elif [ -d "/root/.acme.sh/${domain}_ecc" ]; then
         algorithmType="ECC"
+    else
+        _echo -e "在/root/.acme.sh/目录中找不到${domain}的申请记录，不提供强制续期申请。"
+        exit 1
     fi
     acme_get_certificate_by_manual "${domain}" "${algorithmType}" "${isForce}"
 }

@@ -116,7 +116,7 @@ acme_get_certificate_by_force(){
         echo -e "${Info} 开始安装强制生成时必要的socat 软件包."
         package_install "socat"
     fi
-    _echo -i "$开始生成域名 ${domain} 相关的证书 "
+    _echo -i "开始生成域名 ${domain} 相关的证书 "
     _acme_cmd_by_force "${domain}" "${algorithmType}"
     _echo -i "${domain} 证书生成完成. "
 }

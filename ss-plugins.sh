@@ -243,9 +243,7 @@ _echo(){
         echo -e "${Info} ${2}"
         ;;
     -e|error)
-        echo
         echo -e "${Error} ${2}"
-        echo
         ;;
     -t|tip)
         echo
@@ -453,18 +451,18 @@ package_install(){
     if check_sys packageManager yum; then
         yum install -y $1 > /dev/null 2>&1
         if [ $? -ne 0 ]; then
-            echo -e "${Error} 安装 $1 失败."
+            _echo -e "安装 $1 失败."
             exit 1
         fi
     elif check_sys packageManager apt; then
         apt-get -y update > /dev/null 2>&1
         apt-get -y install $1 > /dev/null 2>&1
         if [ $? -ne 0 ]; then
-            echo -e "${Error} 安装 $1 失败."
+            _echo -e "安装 $1 失败."
             exit 1
         fi
     fi
-    echo -e "${Info} $1 安装完成."
+    _echo -i "$1 安装完成."
 }
 
 improt_package(){
@@ -594,7 +592,7 @@ check_script_update(){
     local isShow="${1:-"show"}"
 
     SHELL_VERSION_NEW=$(wget --no-check-certificate -qO- "https://git.io/fjlbl"|grep 'SHELL_VERSION="'|awk -F "=" '{print $NF}'|sed 's/\"//g'|head -1)
-    [ -z "${SHELL_VERSION_NEW}" ] && echo -e "${Error} 无法链接到 Github !" && exit 0
+    [ -z "${SHELL_VERSION_NEW}" ] && _echo -e "无法链接到 Github !" && exit 0
     if version_gt "${SHELL_VERSION_NEW}" "${SHELL_VERSION}"; then
         _echo -u "${Green}当前脚本版本为：${SHELL_VERSION} 检测到有新版本可更新.${suffix}"
         _echo -d "按任意键开始…或按Ctrl+C取消"
@@ -623,7 +621,7 @@ choose_script_bbr(){
             source <(curl -sL "${CHIAKGE_BBR_SCRIPT_URL}")
             ;;
         *)
-            echo -e "${Error} 请输入正确的数字 [1-2]"
+            _echo -e "请输入正确的数字 [1-2]"
             ;;
     esac
 }
@@ -1067,7 +1065,7 @@ whether_to_install_the_plugin(){
                 isInstallPlugin=No
                 ;;
             *)
-                _echo -e "${Error} 输入有误，请重新输入."
+                _echo -e "输入有误，请重新输入."
                 continue
                 ;;
         esac

@@ -192,10 +192,7 @@ add_restricted_users_logic_code(){
                 break
                 ;;
             *)
-                echo
-                echo -e "${Error} 输入有误，请重新输入!"
-                echo
-                
+                _echo -e "输入有误，请重新输入!"
                 continue
                 ;;
         esac
@@ -224,10 +221,7 @@ add_unrestricted_users_logic_code(){
                 break
                 ;;
             *)
-                echo
-                echo -e "${Error} 输入有误，请重新输入!"
-                echo
-                
+                _echo -e "输入有误，请重新输入!"
                 continue
                 ;;
         esac
@@ -256,9 +250,7 @@ del_restricted_users_logic_code(){
             # Del the user by UID
             del_restricted_users
         else
-            echo
-            echo -e "${Error} 请输入一个正确的数 [1-${#UsersArray[*]}]"
-            echo
+            _echo -e "请输入一个正确的数 [1-${#UsersArray[*]}]"
             continue
         fi
         
@@ -275,10 +267,7 @@ del_restricted_users_logic_code(){
                 break
                 ;;
             *)
-                echo
-                echo -e "${Error} 输入有误，请重新输入!"
-                echo
-                
+                _echo -e "输入有误，请重新输入!"
                 continue
                 ;;
         esac
@@ -307,9 +296,7 @@ del_unrestricted_users_logic_cade(){
             # Del the user by UID
             del_unrestricted_users
         else
-            echo
-            echo -e "${Error} 请输入一个正确的数 [1-${#UIDS[*]}]"
-            echo
+            _echo -e "请输入一个正确的数 [1-${#UIDS[*]}]"
             continue
         fi
         
@@ -326,10 +313,7 @@ del_unrestricted_users_logic_cade(){
                 break
                 ;;
             *)
-                echo
-                echo -e "${Error} 输入有误，请重新输入!"
-                echo
-                
+                _echo -e "输入有误，请重新输入!"
                 continue
                 ;;
         esac
@@ -395,9 +379,7 @@ ck2_users_manager(){
                     add_unrestricted_users_logic_code
                     ;;
                 *)
-                    echo
-                    echo -e "${Error} 请输入正确的数字 [1-2]"
-                    echo
+                    _echo -e "请输入正确的数字 [1-2]"
                     ;;
             esac
             ;;
@@ -416,9 +398,7 @@ ck2_users_manager(){
                     list_unrestricted_users
                     ;;
                 *)
-                    echo
-                    echo -e "${Error} 请输入正确的数字 [1-2]"
-                    echo
+                    _echo -e "请输入正确的数字 [1-2]"
                     ;;
             esac
             ;;
@@ -437,16 +417,12 @@ ck2_users_manager(){
                     del_unrestricted_users_logic_cade
                     ;;
                 *)
-                    echo
-                    echo -e "${Error} 请输入正确的数字 [1-2]"
-                    echo
+                    _echo -e "请输入正确的数字 [1-2]"
                     ;;
             esac
             ;;
         *)
-            echo
-            echo -e "${Error} 请输入正确的数字 [1-3]"
-            echo
+            _echo -e "请输入正确的数字 [1-3]"
             ;;
     esac
 }

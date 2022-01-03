@@ -4,7 +4,6 @@ install_rabbit_tcp(){
     if [ ! "$(command -v gunzip)" ]; then
         package_install "gunzip" > /dev/null 2>&1
     fi
-    
     gunzip -q ${rabbit_file}.gz
     chmod +x ${rabbit_file}
     mv ${rabbit_file} ${RABBIT_BIN_PATH}
@@ -18,11 +17,9 @@ install_rabbit_tcp(){
             update-rc.d -f ${service_name} defaults
         fi
         [ -f ${RABBIT_BIN_PATH} ] && ln -fs ${RABBIT_BIN_PATH} /usr/bin
-        echo -e "${Info} rabbit-tcp安装成功."
+        _echo -i "rabbit-tcp安装成功."
     else
-        echo
-        echo -e "${Error} rabbit-tcp安装失败."
-        echo
+        _echo -e "rabbit-tcp安装失败."
         install_cleanup
         exit 1
     fi

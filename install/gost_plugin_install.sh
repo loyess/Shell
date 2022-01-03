@@ -4,17 +4,14 @@ install_gost_plugin(){
     if [ ! "$(command -v unzip)" ]; then
         package_install "unzip" > /dev/null 2>&1
     fi
-    
     unzip -oq ${gost_plugin_file}.zip
     chmod +x gost-plugin
     mv gost-plugin ${GOST_PLUGIN_INSTALL_PATH}
     if [ $? -eq 0 ]; then
         [ -f ${GOST_PLUGIN_BIN_PATH} ] && ln -fs ${GOST_PLUGIN_BIN_PATH} /usr/bin
-        echo -e "${Info} gost-plugin安装成功."
+        _echo -i "gost-plugin安装成功."
     else
-        echo
-        echo -e "${Error} gost-plugin安装失败."
-        echo
+        _echo -e "gost-plugin安装失败."
         install_cleanup
         exit 1
     fi

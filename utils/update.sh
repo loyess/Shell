@@ -14,7 +14,7 @@ judge_current_version_num_is_none_and_output_error_info(){
     local appName=$1
     local currentVersion=$2
     
-    [ -z ${currentVersion} ] && echo -e "${Error} 获取${appName}当前版本号失败，退出运行." && exit 1
+    [ -z ${currentVersion} ] && _echo -e "获取${appName}当前版本号失败，退出运行." && exit 1
 }
 
 judge_not_update_and_output_point_info(){
@@ -45,7 +45,7 @@ update_download(){
     local downloadFileName=$2
     local SS_VERSION plugin_num
     
-    echo -e "${Info} 检测到${downloadFileName}有新版本，开始下载."
+    _echo -i "检测到${downloadFileName}有新版本，开始下载."
     if $(judge_is_num "${downloadMark}"); then
         plugin_num=${downloadMark}
         download_plugins_file
@@ -53,7 +53,7 @@ update_download(){
         SS_VERSION=${downloadMark}
         download_ss_file
     fi
-    echo -e "${Info} ${downloadFileName}下载完成，等待安装."
+    _echo -i "${downloadFileName}下载完成，等待安装."
 }
 
 update_install(){
@@ -71,7 +71,7 @@ update_completed(){
     local appName=$1
     local latestVersion=$2
 
-    echo -e "${Info} ${appName}已成功升级为最新版本${latestVersion}" && echo
+    _echo -i "${appName}已成功升级为最新版本${latestVersion}" && echo
     install_cleanup
 }
 
@@ -212,7 +212,7 @@ update_caddy_v1(){
 
     cd ${CUR_DIR}
     currentVersion=$(caddy -version)
-    echo -e "${Info} 当前版本：${currentVersion}"
+    _echo -i "当前版本：${currentVersion}"
     read -p "是否强制覆盖安装caddy(默认: n) [y/n]: " yn
     [ -z "${yn}" ] && yn="N"
     case "${yn:0:1}" in
@@ -220,10 +220,10 @@ update_caddy_v1(){
             caddyVerFlag="${versionMark}"
             update_install "${packageName}" "${shFileName}" "${calledFuncName}"
             latestVersion=$(caddy -version)
-            echo -e "${Info} 覆盖版本：${latestVersion}"
+            _echo -i "覆盖版本：${latestVersion}"
             ;;
         *)
-            echo -e "${Info} 跳过强制安装。"
+            _echo -i "跳过强制安装。"
             ;;
     esac
 
@@ -247,7 +247,7 @@ update_caddy_v2(){
     judge_current_version_num_is_none_and_output_error_info "${appName}" "${currentVersion}"
     judge_latest_version_num_is_none_and_output_error_info "${appName}" "${latestVersion}"
     judge_not_update_and_output_point_info "${appName}" "${currentVersion}" "${latestVersion}"
-    echo -e "${Info} 检测到${appName}有新版本，开始下载."
+    _echo -i "检测到${appName}有新版本，开始下载."
     caddyVerFlag="${versionMark}"
     update_install "${packageName}" "${shFileName}" "${calledFuncName}"
     update_completed "${ssNameUpdate}" "${ssLatestVersion}"

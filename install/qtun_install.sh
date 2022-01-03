@@ -7,11 +7,9 @@ install_qtun(){
     mv qtun-server ${QTUN_BIN_PATH}
     if [ $? -eq 0 ]; then
         [ -f ${QTUN_BIN_PATH} ] && ln -fs ${QTUN_BIN_PATH} /usr/bin
-        echo -e "${Info} qtun安装成功."
+        _echo -i "qtun安装成功."
     else
-        echo
-        echo -e "${Error} qtun安装失败."
-        echo
+        _echo -e "qtun安装失败."
         install_cleanup
         exit 1
     fi

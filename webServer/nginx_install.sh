@@ -37,7 +37,7 @@ check_sys_and_add_source(){
         fi
         
         if [ $? -eq 0 ]; then
-            echo -e "${Info} nginx安装成功."
+            _echo -i "nginx安装成功."
         fi
        
     elif check_sys sysRelease debian; then
@@ -67,7 +67,7 @@ check_sys_and_add_source(){
         sudo apt install -y nginx
         
         if [ $? -eq 0 ]; then
-            echo -e "${Info} nginx安装成功."
+            _echo -i "nginx安装成功."
         fi
         
     elif check_sys sysRelease ubuntu && version_ge ${version} 16.04; then
@@ -97,7 +97,7 @@ check_sys_and_add_source(){
         sudo apt install -y nginx
         
         if [ $? -eq 0 ]; then
-            echo -e "${Info} nginx安装成功."
+            _echo -i "nginx安装成功."
         fi
     fi
 }

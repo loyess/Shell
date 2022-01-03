@@ -13,11 +13,9 @@ install_shadowsocks_libev(){
             update-rc.d -f ${service_name} defaults
         fi
         [ -f ${SHADOWSOCKS_LIBEV_BIN_PATH} ] && ln -fs ${SHADOWSOCKS_LIBEV_BIN_PATH} /usr/bin
-        echo -e "${Info} shadowsocks-libev安装成功."
+        _echo -i "shadowsocks-libev安装成功."
     else
-        echo
-        echo -e "${Error} shadowsocks-libev安装失败."
-        echo
+        _echo -e "shadowsocks-libev安装失败."
         install_cleanup
         exit 1
     fi
@@ -38,11 +36,9 @@ install_shadowsocks_rust(){
             update-rc.d -f ${service_name} defaults
         fi
         [ -f ${SHADOWSOCKS_RUST_BIN_PATH} ] && ln -fs ${SHADOWSOCKS_RUST_BIN_PATH} /usr/bin
-        echo -e "${Info} shadowsocks-rust安装成功."
+        _echo -i "shadowsocks-rust安装成功."
     else
-        echo
-        echo -e "${Error} shadowsocks-rust安装失败."
-        echo
+        _echo -e "shadowsocks-rust安装失败."
         install_cleanup
         exit 1
     fi
@@ -68,11 +64,9 @@ install_go_shadowsocks2(){
             update-rc.d -f ${service_name} defaults
         fi
         [ -f ${GO_SHADOWSOCKS2_BIN_PATH} ] && ln -fs ${GO_SHADOWSOCKS2_BIN_PATH} /usr/bin
-        echo -e "${Info} go-shadowsocks2安装成功."
+        _echo -i "go-shadowsocks2安装成功."
     else
-        echo
-        echo -e "${Error} go-shadowsocks2安装失败."
-        echo
+        _echo -e "go-shadowsocks2安装失败."
         install_cleanup
         exit 1
     fi

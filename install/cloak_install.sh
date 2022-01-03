@@ -12,11 +12,9 @@ install_cloak(){
             update-rc.d -f ${service_name} defaults
         fi
         [ -f ${CLOAK_SERVER_BIN_PATH} ] && ln -fs ${CLOAK_SERVER_BIN_PATH} /usr/bin
-        echo -e "${Info} Cloak安装成功."
+        _echo -i "Cloak安装成功."
     else
-        echo
-        echo -e "${Error} Cloak安装失败."
-        echo
+        _echo -e "Cloak安装失败."
         install_cleanup
         exit 1
     fi

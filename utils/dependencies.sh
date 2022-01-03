@@ -23,7 +23,7 @@ error_detect_deps_of_ubuntu(){
     sudo killall -q apt apt-get
     ${command} > /dev/null 2>&1
     if [ $? -ne 0 ]; then
-        echo -e "${Error} 依赖包${Red}${depend}${suffix}安装失败，请检查. "
+        _echo -e "依赖包${Red}${depend}${suffix}安装失败，请检查. "
         echo "Checking the error message and run the script again."
         exit 1
     fi
@@ -43,7 +43,7 @@ error_asciidos_deps_of_ubuntu1901(){
         fi
         ${command} > /dev/null 2>&1
         if [ $? -ne 0 ]; then
-            echo -e "${Error} 依赖包${Red}${depend}${suffix}安装失败，请检查. "
+            _echo -e "依赖包${Red}${depend}${suffix}安装失败，请检查. "
             echo "Checking the error message and run the script again."
             exit 1
         fi
@@ -53,7 +53,7 @@ error_asciidos_deps_of_ubuntu1901(){
 error_detect_depends(){
     local command=$1
     local depend=`echo "${command}" | awk '{print $4}'`
-    echo -e "${Info} 开始安装依赖包 ${depend}"
+    _echo -i "开始安装依赖包 ${depend}"
     ${command} > /dev/null 2>&1
     if [ $? -ne 0 ]; then
         if check_sys sysRelease ubuntu || check_sys sysRelease debian; then
@@ -63,7 +63,7 @@ error_detect_depends(){
                   error_detect_deps_of_ubuntu "${command}" "${depend}"
             fi
         else
-            echo -e "${Error} 依赖包${Red}${depend}${suffix}安装失败，请检查. "
+            _echo -e "依赖包${Red}${depend}${suffix}安装失败，请检查. "
             echo "Checking the error message and run the script again."
             exit 1
         fi
@@ -74,18 +74,18 @@ install_dependencies(){
     local depends=($*)
 
     if check_sys packageManager yum; then
-        echo -e "${Info} 检查EPEL存储库."
+        _echo -i "检查EPEL存储库."
         if [ ! -f /etc/yum.repos.d/epel.repo ]; then
             yum install -y epel-release > /dev/null 2>&1
         fi
-        [ ! -f /etc/yum.repos.d/epel.repo ] && echo -e "${Error} 安装EPEL存储库失败，请检查它。" && exit 1
+        [ ! -f /etc/yum.repos.d/epel.repo ] && _echo -e "安装EPEL存储库失败，请检查它。" && exit 1
         [ ! "$(command -v yum-config-manager)" ] && yum install -y yum-utils > /dev/null 2>&1
         if centosversion 8; then
             [ x"$(yum repolist epel | grep -w epel | awk '{print $NF}')" != x"enabled" ] && yum-config-manager --enable epel > /dev/null 2>&1
         else
             [ x"$(yum-config-manager epel | grep -w enabled | awk '{print $3}')" != x"True" ] && yum-config-manager --enable epel > /dev/null 2>&1
         fi
-        echo -e "${Info} EPEL存储库检查完成."
+        _echo -i "EPEL存储库检查完成."
 
         for depend in ${depends[@]}; do
             error_detect_depends "yum -y install ${depend}"
@@ -123,14 +123,14 @@ install_libsodium(){
     local installStatus=$1
 
     cd ${CUR_DIR}
-    echo -e "${Info} 下载${LIBSODIUM_FILE}."
+    _echo -i "下载${LIBSODIUM_FILE}."
     download "${LIBSODIUM_FILE}.tar.gz" "${LIBSODIUM_URL}"
-    echo -e "${Info} 解压${LIBSODIUM_FILE}."
+    _echo -i "解压${LIBSODIUM_FILE}."
     tar zxf ${LIBSODIUM_FILE}.tar.gz && cd ${LIBSODIUM_FILE}
-    echo -e "${Info} 编译安装${LIBSODIUM_FILE}."
+    _echo -i "编译安装${LIBSODIUM_FILE}."
     ./configure --prefix=/usr && make && make install
     if [ $? -ne 0 ]; then
-        echo -e "${Error} ${LIBSODIUM_FILE} ${installStatus}失败 !"
+        _echo -e "${LIBSODIUM_FILE} ${installStatus}失败 !"
         install_cleanup
         exit 1
     fi
@@ -139,7 +139,7 @@ install_libsodium(){
         mkdir -p $(dirname ${LIBSODIUM_VERSION_FILE})
     fi
     echo ${LIBSODIUM_VERSION} > ${LIBSODIUM_VERSION_FILE}
-    echo -e "${Info} ${LIBSODIUM_FILE} ${installStatus}成功 !"
+    _echo -i "${LIBSODIUM_FILE} ${installStatus}成功 !"
 }
 
 install_libsodium_logic(){
@@ -152,7 +152,7 @@ install_libsodium_logic(){
         if check_latest_version ${currentLibsodiumVer} ${latestLibsodiumVer}; then
             install_libsodium '更新'
         else
-            echo -e "${Info} ${LIBSODIUM_FILE} 已经安装最新版本."
+            _echo -i "${LIBSODIUM_FILE} 已经安装最新版本."
         fi
     fi
 }
@@ -161,17 +161,17 @@ install_mbedtls(){
     local installStatus=$1
 
     cd ${CUR_DIR}
-    echo -e "${Info} 下载${MBEDTLS_FILE}."
+    _echo -i "下载${MBEDTLS_FILE}."
     download "${MBEDTLS_FILE}.tar.gz" "${MBEDTLS_URL}"
-    echo -e "${Info} 解压${MBEDTLS_FILE}."
+    _echo -i "解压${MBEDTLS_FILE}."
     tar zxf ${MBEDTLS_FILE}.tar.gz
     mv "mbedtls-${MBEDTLS_FILE}" ${MBEDTLS_FILE}
     cd ${MBEDTLS_FILE}
-    echo -e "${Info} 编译安装${MBEDTLS_FILE}."
+    _echo -i "编译安装${MBEDTLS_FILE}."
     make SHARED=1 CFLAGS=-fPIC
     make DESTDIR=/usr install
     if [ $? -ne 0 ]; then
-        echo -e "${Error} ${MBEDTLS_FILE} ${installStatus}失败."
+        _echo -e "${MBEDTLS_FILE} ${installStatus}失败."
         install_cleanup
         exit 1
     fi
@@ -180,7 +180,7 @@ install_mbedtls(){
         mkdir -p $(dirname ${MBEDTLS_VERSION_FILE})
     fi
     echo ${MBEDTLS_VERSION} > ${MBEDTLS_VERSION_FILE}
-    echo -e "${Info} ${MBEDTLS_FILE} ${installStatus}成功 !"
+    _echo -i "${MBEDTLS_FILE} ${installStatus}成功 !"
 }
 
 install_mbedtls_logic(){
@@ -193,7 +193,7 @@ install_mbedtls_logic(){
         if check_latest_version ${currentMbedtlsVer} ${latestMbedtlsVer}; then
             install_mbedtls '更新'
         else
-            echo -e "${Info} ${MBEDTLS_FILE} 已经安装最新版本."
+            _echo -i "${MBEDTLS_FILE} 已经安装最新版本."
         fi
     fi
 }
@@ -204,7 +204,7 @@ add_more_entropy(){
     # CentOS 6 is installed by default but not started. CentOS 7 is not started by default after installation. CentOS 8 is installed and started by default.
     local ENTROPY_SIZE_BEFORE=$(cat /proc/sys/kernel/random/entropy_avail)
     if [[ ${ENTROPY_SIZE_BEFORE} -lt 1000 ]]; then
-        echo -e "${Info} 安装rng-tools之前熵池的熵值为${Green}${ENTROPY_SIZE_BEFORE}${suffix}"
+        _echo -i "安装rng-tools之前熵池的熵值为${Green}${ENTROPY_SIZE_BEFORE}${suffix}"
         if [[ ! $(command -v rngd) ]]; then
             package_install "rng-tools"
         fi
@@ -223,8 +223,8 @@ add_more_entropy(){
         fi
         sleep 5
         local ENTROPY_SIZE_BEHIND=$(cat /proc/sys/kernel/random/entropy_avail)
-        echo -e "${Info} 安装rng-tools之后熵池的熵值为${Green}${ENTROPY_SIZE_BEHIND}${suffix}"
+        _echo -i "安装rng-tools之后熵池的熵值为${Green}${ENTROPY_SIZE_BEHIND}${suffix}"
     else
-        echo -e "${Info} 当前熵池熵值大于或等于1000，未进行更多添加."
+        _echo -i "当前熵池熵值大于或等于1000，未进行更多添加."
     fi 
 }

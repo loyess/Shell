@@ -12,7 +12,7 @@ is_enable_web_server(){
                 isEnableWeb=disable
                 ;;
             *)
-                _echo -e "${Error} 输入有误，请重新输入."
+                _echo -e "输入有误，请重新输入."
                 continue
                 ;;
         esac

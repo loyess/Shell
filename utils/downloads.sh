@@ -6,7 +6,7 @@ download(){
         echo "${filename} 当前目录中不存在, 现在开始下载."
         wget --no-check-certificate -c -t3 -T60 -O ${1} ${2}
         if [ $? -ne 0 ]; then
-            echo -e "${Error} 下载 ${filename} 失败."
+            _echo -e "下载 ${filename} 失败."
             exit 1
         fi
     fi
@@ -78,7 +78,7 @@ judge_latest_version_num_is_none_and_output_error_info(){
     local appName=$1
     local latestVersion=$2
 
-    [ -z ${latestVersion} ] && echo -e "${Error} 获取${appName}最新版本号失败，退出运行." && exit 1
+    [ -z ${latestVersion} ] && _echo -e "获取${appName}最新版本号失败，退出运行." && exit 1
 }
 
 download_ss_file(){

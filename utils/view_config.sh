@@ -67,7 +67,7 @@ view_config_logic(){
     fi
 
     echo
-    echo -e "${Info} 如果什么都没有，表示未安装。"
+    _echo -i "如果什么都没有，表示未安装。"
     echo
 }
 

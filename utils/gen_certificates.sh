@@ -113,7 +113,7 @@ acme_get_certificate_by_force(){
     get_latest_acme_sh
     set_defualt_ca_for_acme_sh
     if [ ! "$(command -v socat)" ]; then
-        echo -e "${Info} 开始安装强制生成时必要的socat 软件包."
+        _echo -i "开始安装强制生成时必要的socat 软件包."
         package_install "socat"
     fi
     _echo -i "开始生成域名 ${domain} 相关的证书 "

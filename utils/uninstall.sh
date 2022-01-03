@@ -265,6 +265,14 @@ log_file_remove(){
     rm -f /var/log/nginx-access.log
 }
 
+remove_cron_job(){
+    if [ -z "$(crontab -l | grep 'ss-plugins.sh renew')" ]; then
+        return
+    fi
+    crontab -l | sed '/ss-plugins.sh renew/d' | crontab -
+    add_cron_job_for_acme
+}
+
 uninstall_services(){
     shadowsocks_uninstall
     v2ray_plugin_uninstall
@@ -283,6 +291,7 @@ uninstall_services(){
     nginx_uninstall
     ipcalc_uninstall
     log_file_remove
+    remove_cron_job
 }
 
 

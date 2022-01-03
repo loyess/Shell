@@ -1260,6 +1260,43 @@ install_webserver(){
     esac
 }
 
+gen_random_minute(){
+    local _t="$(date -u "+%s")"
+    echo "$(($_t % 60))"
+}
+
+certificate_renew_by_acme(){
+    if ! check_port_occupy "80"; then
+        return
+    fi
+    do_stop > /dev/null
+    "/root/.acme.sh"/acme.sh --cron --home "/root/.acme.sh" > /dev/null
+    do_start > /dev/null
+}
+
+add_cron_job_for_acme(){
+    random_minute="$(gen_random_minute)"
+    (crontab -l ; echo "${random_minute} 0 * * * \"/root/.acme.sh\"/acme.sh --cron --home \"/root/.acme.sh\" > /dev/null") | sort - | uniq - | crontab -
+}
+
+remove_cron_job_for_acme(){
+    if [ -z "$(crontab -l | grep 'acme.sh --cron')" ]; then
+        return
+    fi
+    crontab -l | sed '/acme.sh --cron/d' | crontab -
+}
+
+add_cron_job(){
+    local random_minute
+
+    if ! check_port_occupy "80"; then
+        return
+    fi
+    remove_cron_job_for_acme
+    random_minute="$(gen_random_minute)"
+    (crontab -l ; echo "${random_minute} 0 * * * \"${CUR_DIR}\"/ss-plugins.sh renew > /dev/null") | sort - | uniq - | crontab -
+}
+
 install_status(){
     status_init
 
@@ -1297,6 +1334,7 @@ install_step_all(){
     install_completed
     ldconfig
     do_start
+    add_cron_job
     do_show
 }
 
@@ -1513,6 +1551,9 @@ case ${action} in
         ;;
     catcfg)
         do_${action} "${2}"
+        ;;
+    renew)
+        certificate_renew_by_acme
         ;;
     help)
         usage 0

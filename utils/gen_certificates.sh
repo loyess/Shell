@@ -38,7 +38,8 @@ get_input_api_info(){
 
     while true
     do
-        _read "请输入Cloudflare - Global API Key：" CF_Key
+        _read "请输入Cloudflare - Global API Key："
+        CF_Key="${inputInfo}"
         if [[ $(echo ${#CF_Key}) -ne 37 ]]; then
             _echo -e "请输入正确合法的Global API Key."
             continue

@@ -894,6 +894,9 @@ config_ss(){
             server_value="[\"[::0]\",\"0.0.0.0\"]"
         elif [ "${ssVer}" = "ss-rust" ]; then
             server_value="\"::\""
+            if [ "${pluginNum}" = "3" ]; then
+                server_value="\"0.0.0.0\""
+            fi
         fi
 
         if [ "${pluginNum}" = "4" ]; then

@@ -83,7 +83,7 @@ install_prepare_cipher(){
     while true
     do
         if [ "${SS_VERSION}" = "ss-libev" ]; then
-            local tempNum=16
+            local tempNum=17
             local SHADOWSOCKS_CIPHERS=( "${SHADOWSOCKS_LIBEV_CIPHERS[@]}" )
         elif [ "${SS_VERSION}" = "ss-rust" ]; then
             local tempNum=3

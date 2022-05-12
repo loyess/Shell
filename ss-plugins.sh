@@ -884,6 +884,7 @@ generate_menu_logic(){
 }
 
 config_ss(){
+    local ipv6First="false"
     local server_value="\"0.0.0.0\""
 
     if get_ipv6; then
@@ -905,6 +906,10 @@ config_ss(){
             server_value="\"0.0.0.0\""
         elif [ "${pluginNum}" = "7" ]; then
             server_value="\"0.0.0.0\""
+        fi
+
+        if [ "${server_value}" != "\"0.0.0.0\"" ]; then
+            ipv6First="true"
         fi
     fi
 

@@ -893,20 +893,25 @@ config_ss(){
 
         if [ "${ssVer}" = "ss-libev" ]; then
             server_value="[\"[::0]\",\"0.0.0.0\"]"
+            case "${pluginNum}" in
+                8|9|12)
+                    server_value="\"0.0.0.0\""
+                    ;;
+            esac
         elif [ "${ssVer}" = "ss-rust" ]; then
             server_value="\"::\""
-            if [ "${pluginNum}" = "3" ]; then
-                server_value="\"0.0.0.0\""
-            fi
+            case "${pluginNum}" in
+                3)
+                    server_value="\"0.0.0.0\""
+                    ;;
+            esac
         fi
 
-        if [ "${pluginNum}" = "4" ]; then
-            server_value="\"0.0.0.0\""
-        elif [ "${pluginNum}" = "6" ]; then
-            server_value="\"0.0.0.0\""
-        elif [ "${pluginNum}" = "7" ]; then
-            server_value="\"0.0.0.0\""
-        fi
+        case "${pluginNum}" in
+            4|6|7)
+                server_value="\"0.0.0.0\""
+                ;;
+        esac
 
         if [ "${server_value}" != "\"0.0.0.0\"" ]; then
             ipv6First="true"

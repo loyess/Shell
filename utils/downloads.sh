@@ -103,8 +103,8 @@ download_ss_file(){
             local MACHINE="aarch64"
         fi
 
-        shadowsocks_rust_file="shadowsocks-v${rust_ver}.${MACHINE}-unknown-linux-gnu"
-        shadowsocks_rust_url="https://github.com/shadowsocks/shadowsocks-rust/releases/download/v${rust_ver}/shadowsocks-v${rust_ver}.${MACHINE}-unknown-linux-gnu.tar.xz"
+        shadowsocks_rust_file="shadowsocks-v${rust_ver}.${MACHINE}-unknown-linux-musl"
+        shadowsocks_rust_url="https://github.com/shadowsocks/shadowsocks-rust/releases/download/v${rust_ver}/shadowsocks-v${rust_ver}.${MACHINE}-unknown-linux-musl.tar.xz"
         download "${shadowsocks_rust_file}.tar.xz" "${shadowsocks_rust_url}"
         download_service_file ${SHADOWSOCKS_RUST_INIT} ${SHADOWSOCKS_RUST_INIT_ONLINE} ${SHADOWSOCKS_RUST_INIT_LOCAL}
     elif [[ ${SS_VERSION} = "go-ss2" ]]; then

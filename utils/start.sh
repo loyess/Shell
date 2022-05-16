@@ -74,7 +74,7 @@ sip003_way_start(){
 }
 
 nginx_start(){
-    if [ -e "${NGINX_BIN_PATH}" ]; then
+    if [ -e "${NGINX_BIN_PATH}" ] && [ -e "${WEB_INSTALL_MARK}" ]; then
         systemctl start nginx
         
         if $(systemctl status nginx | grep -q '\(running\)'); then 
@@ -92,7 +92,9 @@ start_services(){
     initd_file_start "kcptun-server" "${KCPTUN_INIT}"
     initd_file_start "ck-server" "${CLOAK_INIT}"
     initd_file_start "rabbit-tcp" "${RABBIT_INIT}"
-    initd_file_start "caddy" "${CADDY_INIT}"
+    if [ -e "${WEB_INSTALL_MARK}" ]; then
+        initd_file_start "caddy" "${CADDY_INIT}"
+    fi
     sip003_way_start "v2ray-plugin" "v2ray-plugin"
     sip003_way_start "obfs-server" "simple-obfs"
     sip003_way_start "gq-server" "GoQuiet"

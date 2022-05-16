@@ -25,7 +25,9 @@ stop_services(){
     kill_process "xray-plugin" "xray-plugin"
     kill_process "qtun-server" "qtun"
     kill_process "gun-server" "gun"
-    kill_process "caddy" "caddy"
-    kill_process "nginx" "nginx"
+    if [ -e "${WEB_INSTALL_MARK}" ]; then
+        kill_process "caddy" "caddy"
+        kill_process "nginx" "nginx"
+    fi
 }
 

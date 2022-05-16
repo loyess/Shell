@@ -216,7 +216,7 @@ gun_uninstall(){
 }
 
 caddy_uninstall(){
-    if [[ -e ${CADDY_BIN_PATH} ]]; then
+    if [[ -e ${CADDY_BIN_PATH} ]] && [[ -e ${WEB_INSTALL_MARK} ]]; then
         PID=`ps -ef |grep "caddy" |grep -v "grep" |grep -v "init.d" |grep -v "service" |grep -v "caddy_install" |awk '{print $2}'`
         [[ ! -z ${PID} ]] && kill -9 ${PID}
         if check_sys packageManager yum; then
@@ -227,11 +227,12 @@ caddy_uninstall(){
         rm -rf $(dirname ${CADDY_BIN_PATH})
         rm -rf /etc/init.d/caddy
         rm -rf /usr/bin/caddy
+        rm -rf ${WEB_INSTALL_MARK}
     fi
 }
 
 nginx_uninstall(){
-    if [[ -e ${NGINX_BIN_PATH} ]]; then
+    if [[ -e ${NGINX_BIN_PATH} ]] && [[ -e ${WEB_INSTALL_MARK} ]]; then
         if check_sys packageManager yum; then
             sudo yum remove -y nginx > /dev/null 2>&1
             rm -rf $(dirname ${NGINX_CONFIG})
@@ -239,6 +240,7 @@ nginx_uninstall(){
             sudo apt remove -y nginx --purge > /dev/null 2>&1
             rm -rf $(dirname ${NGINX_CONFIG})
         fi
+        rm -rf ${WEB_INSTALL_MARK}
     fi
 }
 

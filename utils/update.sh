@@ -276,7 +276,7 @@ plugins_update_logic(){
 }
 
 caddy_update_logic(){
-    if [[ -e ${CADDY_BIN_PATH} ]]; then
+    if [[ -e ${CADDY_BIN_PATH} ]] && [[ -e ${WEB_INSTALL_MARK} ]]; then
         local versionMark currentVersion
 
         IFS=, read versionMark currentVersion < ${CADDY_VERSION_FILE}

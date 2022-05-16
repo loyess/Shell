@@ -155,6 +155,10 @@ gun
 )
 
 
+# file exist：install
+WEB_INSTALL_MARK="/root/.WebInstallMark"
+
+
 # caddy
 CADDY_INSTALL_PATH="/usr/local/caddy"
 CADDY_BIN_PATH="/usr/local/caddy/caddy"
@@ -344,11 +348,11 @@ status_init(){
         pluginPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep gun-server | awk '{print $2}'`
     fi
 
-    if [ -e "${CADDY_BIN_PATH}" ]; then
+    if [ -e "${CADDY_BIN_PATH}" ] && [ -e "${WEB_INSTALL_MARK}" ]; then
         webName="Caddy"
         webPath="${CADDY_BIN_PATH}"
         webPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep caddy | awk '{print $2}'`
-    elif [ -e "${NGINX_BIN_PATH}" ]; then
+    elif [ -e "${NGINX_BIN_PATH}" ] && [ -e "${WEB_INSTALL_MARK}" ]; then
         webName="Nginx"
         webPath="${NGINX_BIN_PATH}"
         webPid=`ps -ef | grep -vE 'grep|-plugin-opts' | grep nginx.conf | awk '{print $2}'`
@@ -1271,6 +1275,7 @@ install_webserver(){
             install_nginx
         ;;
     esac
+    touch "${WEB_INSTALL_MARK}"
 }
 
 gen_random_minute(){

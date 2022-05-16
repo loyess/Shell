@@ -1269,13 +1269,14 @@ install_webserver(){
         1)
             improt_package "webServer" "caddy_install.sh"
             install_caddy
+            touch "${WEB_INSTALL_MARK}"
         ;;
         2)
             improt_package "webServer" "nginx_install.sh"
             install_nginx
+            touch "${WEB_INSTALL_MARK}"
         ;;
     esac
-    touch "${WEB_INSTALL_MARK}"
 }
 
 gen_random_minute(){

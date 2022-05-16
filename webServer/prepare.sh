@@ -1,4 +1,12 @@
 is_enable_web_server(){
+    if [ -e "${CADDY_BIN_PATH}" ] && [ ! -e "${WEB_INSTALL_MARK}" ]; then
+        _echo -i "检测到caddy已经安装：${CADDY_BIN_PATH}，跳过启用web服务器伪装设置步骤。"
+        return
+    elif [ -e "${NGINX_BIN_PATH}" ] && [ ! -e "${WEB_INSTALL_MARK}" ]; then
+        _echo -i "检测到nginx已经安装：${NGINX_BIN_PATH}，跳过启用web服务器伪装设置步骤。"
+        return
+    fi
+
     while true
     do
         _read "是否启用web服务器伪装 (默认: n) [y/n]:"

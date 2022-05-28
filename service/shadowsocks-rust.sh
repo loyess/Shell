@@ -85,7 +85,6 @@ get_config_args(){
     fi
 
     NameServer=$(cat ${JsonFilePath} | jq -r .nameserver)
-    [ -z "$NameServer" ] && echo -e "Configuration option 'nameserver' acquisition failed" && exit 1
 }
 
 do_status() {
@@ -108,7 +107,11 @@ do_start() {
     fi
     ulimit -n 51200
     get_config_args $CONF
-    nohup $DAEMON -c $CONF --dns $NameServer -vvv > $LOG 2>&1 &
+    if [ -z "$NameServer" ]; then
+        nohup $DAEMON -c $CONF -vvv > $LOG 2>&1 &
+    else
+        nohup $DAEMON -c $CONF --dns $NameServer -vvv > $LOG 2>&1 &
+    fi
     check_pid
     echo $get_pid > $PID_FILE
     if check_running; then

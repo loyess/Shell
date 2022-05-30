@@ -59,13 +59,13 @@ if [ ! "$(command -v jq)" ]; then
     exit 1
 fi
 
-Mode=$(cat ${CONF} | jq -r .mode)
+Mode=$(cat ${CONF} | jq -r '.mode // empty')
 [ -z "$Mode" ] && echo -e "Configuration option 'mode' acquisition failed" && exit 1
-RabbitAddr=$(cat ${CONF} | jq -r .rabbit_addr) 
+RabbitAddr=$(cat ${CONF} | jq -r '.rabbit_addr // empty')
 [ -z "$RabbitAddr" ] && echo -e "Configuration option 'rabbit_addr' acquisition failed" && exit 1
-PassWord=$(cat ${CONF} | jq -r .password)
+PassWord=$(cat ${CONF} | jq -r '.password // empty')
 [ -z "$PassWord" ] && echo -e "Configuration option 'password' acquisition failed" && exit 1
-Verbose=$(cat ${CONF} | jq -r .verbose)
+Verbose=$(cat ${CONF} | jq -r '.verbose // empty')
 [ -z "$Verbose" ] && echo -e "Configuration option 'verbose' acquisition failed" && exit 1
 
 

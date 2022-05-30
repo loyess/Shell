@@ -73,13 +73,13 @@ get_config_args(){
         exit 1
     fi
 
-    ServerPort=$(cat ${JsonFilePath} | jq -r .server_port)
+    ServerPort=$(cat ${JsonFilePath} | jq -r '.server_port // empty')
     [ -z "$ServerPort" ] && echo -e "Configuration option 'server_port' acquisition failed" && exit 1
-    Password=$(cat ${JsonFilePath} | jq -r .password) 
+    Password=$(cat ${JsonFilePath} | jq -r '.password // empty')
     [ -z "$Password" ] && echo -e "Configuration option 'password' acquisition failed" && exit 1
-    Method=$(cat ${JsonFilePath} | jq -r .method)
+    Method=$(cat ${JsonFilePath} | jq -r '.method // empty')
     [ -z "$Method" ] && echo -e "Configuration option 'method' acquisition failed" && exit 1
-    Mode=$(cat ${JsonFilePath} | jq -r .mode)
+    Mode=$(cat ${JsonFilePath} | jq -r '.mode // empty')
     [ -z "$Mode" ] && echo -e "Configuration option 'Mode' acquisition failed" && exit 1
 
     if [[ ${Method} == "aes-128-gcm" ]]; then
@@ -99,9 +99,9 @@ get_config_args(){
     fi
 
     if $(cat ${JsonFilePath} | grep -qE 'plugin|plugin_opts'); then
-        Plugin=$(cat ${JsonFilePath} | jq -r .plugin)
+        Plugin=$(cat ${JsonFilePath} | jq -r '.plugin // empty')
         [ -z "$Plugin" ] && echo -e "Configuration option 'plugin' acquisition failed" && exit 1
-        PluginOpts=$(cat ${JsonFilePath} | jq -r .plugin_opts)
+        PluginOpts=$(cat ${JsonFilePath} | jq -r '.plugin_opts // empty')
         [ -z "$PluginOpts" ] && echo -e "Configuration option 'plugin_opts' acquisition failed" && exit 1
     fi
 }

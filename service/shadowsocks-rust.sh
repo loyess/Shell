@@ -84,7 +84,9 @@ get_config_args(){
         exit 1
     fi
 
-    NameServer=$(cat ${JsonFilePath} | jq -r .nameserver)
+    # ref: https://stackoverflow.com/questions/53135035/jq-returning-null-as-string-if-the-json-is-empty
+    # ref: https://github.com/stedolan/jq/issues/354#issuecomment-43147898
+    NameServer=$(cat ${JsonFilePath} | jq -r '.nameserver // empty')
     [ -z "$NameServer" ] && echo -e "Configuration option 'nameserver' acquisition failed" && exit 1
 }
 

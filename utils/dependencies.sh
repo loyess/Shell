@@ -107,7 +107,7 @@ install_dependencies_logic(){
             )
         elif check_sys packageManager apt; then
             local depends=(
-                gettext gcc build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libc-ares-dev automake libssl-dev git qrencode jq
+                gettext gcc build-essential autoconf libtool libpcre3-dev asciidoc xmlto libev-dev libc-ares-dev automake libssl-dev git qrencode jq xz-utils
             )
         fi
         install_dependencies "${depends[*]}"

@@ -79,7 +79,6 @@ v2ray_plugin_uninstall(){
     # uninstall v2ray-plugin
     rm -f /var/run/v2ray-plugin.pid
     rm -f /usr/local/bin/v2ray-plugin
-
 }
 
 kcptun_uninstall(){
@@ -275,6 +274,20 @@ remove_cron_job(){
     add_cron_job_for_acme
 }
 
+remove_added_port(){
+    improt_package "utils" "firewalls.sh"
+    get_env_variable "PORXY_INBOUND_PORT"
+    [ -z "${PORXY_INBOUND_PORT}" ] && return
+    get_env_variable "FIREWALL_MANAGE_TOOL"
+    [ -z "${FIREWALL_MANAGE_TOOL}" ] && return
+    remove_firewall_rule "${PORXY_INBOUND_PORT}" "tcp"
+    remove_firewall_rule "${PORXY_INBOUND_PORT}" "udp"
+}
+
+remove_env_folder(){
+    rm -rf ${SS_PLUGINS_SCRIPT_ENV_DIR}
+}
+
 uninstall_services(){
     shadowsocks_uninstall
     v2ray_plugin_uninstall
@@ -294,12 +307,6 @@ uninstall_services(){
     ipcalc_uninstall
     log_file_remove
     remove_cron_job
+    remove_added_port
+    remove_env_folder
 }
-
-
-
-
-
-
-
-

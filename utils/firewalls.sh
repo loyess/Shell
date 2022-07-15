@@ -1,57 +1,131 @@
-config_firewall(){
-    local PORT=$1
-
-    if centosversion 6; then
-        /etc/init.d/iptables status > /dev/null 2>&1
-        if [ $? -eq 0 ]; then
-            if ! $(iptables -L -n | grep -q ${PORT}); then
-                iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${PORT} -j ACCEPT
-                iptables -I INPUT -m state --state NEW -m udp -p udp --dport ${PORT} -j ACCEPT
-                /etc/init.d/iptables save
-                /etc/init.d/iptables restart
-            fi
-        else
-            _echo -w "iptables没有运行或没有安装，请自行排查问题后，手动启用端口: ${PORT}."
-        fi
-    elif centosversion 7 || centosversion 8; then
-        systemctl status firewalld > /dev/null 2>&1
-        if [ $? -eq 0 ]; then
-            if ! $(firewall-cmd --list-all | grep -q ${PORT}); then
-                firewall-cmd --permanent --zone=public --add-port=${PORT}/tcp
-                firewall-cmd --permanent --zone=public --add-port=${PORT}/udp
-                firewall-cmd --reload
-            fi
-        else
-            _echo -w "firewalld没有运行或没有安装，请自行排查问题后，手动启用端口: ${PORT}."
-        fi
-    else
-        if [ "$(command -v ufw)" ] && [ -n "$(ufw status | head -n 1 | grep 'Status: active')" ]; then
-            ufw allow ${PORT}/tcp
-            ufw allow ${PORT}/udp
-            ufw reload
-        else
-            _echo -w "ufw没有运行或没有安装，请自行排查问题后，手动启用端口: ${PORT}."
-        fi
+iptables_start(){
+    if ! systemctl is-active iptables 2>/dev/null | head -n 1 | grep -qE '^active$'; then
+        systemctl start iptables
+        systemctl enable iptables
     fi
 }
 
-open_port_for_oracle_cloud(){
+ip6tables_start(){
+    if ! systemctl is-active ip6tables 2>/dev/null | head -n 1 | grep -qE '^active$'; then
+        systemctl start ip6tables
+        systemctl enable ip6tables
+    fi
+}
+
+iptables_persistent(){
+    if [ "${PKGMER}" = 'dnf' ] || [ "${PKGMER}" = 'yum' ]; then
+        if [ ! -e "/etc/systemd/system/multi-user.target.wants/iptables.service" ]; then
+            package_install "iptables-services"
+        fi
+        iptables_start
+        iptables-save > /etc/sysconfig/iptables
+        ip6tables_start
+        ip6tables-save > /etc/sysconfig/ip6tables
+    else
+        if [ ! -e "/etc/systemd/system/multi-user.target.wants/netfilter-persistent.service" ]; then
+            # ref: https://gist.github.com/alonisser/a2c19f5362c2091ac1e7
+            echo 'iptables-persistent iptables-persistent/autosave_v4 boolean true' | debconf-set-selections
+            echo 'iptables-persistent iptables-persistent/autosave_v6 boolean true' | debconf-set-selections
+            package_install "iptables-persistent"
+        fi
+        iptables_start
+        iptables-save > /etc/iptables/rules.v4
+        ip6tables_start
+        ip6tables-save > /etc/iptables/rules.v6
+    fi
+}
+
+add_firewall_rule(){
+    local PORT=$1
+    local PROTOCOL=$2
+
+    if [ "${FIREWALL_MANAGE_TOOL}" = 'firewall-cmd' ]; then
+        if firewall-cmd --list-ports --permanent 2>/dev/null | grep -qw "${PORT}/${PROTOCOL}"; then
+            return
+        fi
+        firewall-cmd --permanent --zone=public --add-port="${PORT}"/"${PROTOCOL}" > /dev/null 2>&1
+        firewall-cmd --reload > /dev/null 2>&1
+    elif [ "${FIREWALL_MANAGE_TOOL}" = 'ufw' ]; then
+        if ufw status 2>/dev/null | grep -qw "${PORT}/${PROTOCOL}"; then
+            return
+        fi
+        ufw allow "${PORT}"/"${PROTOCOL}" > /dev/null 2>&1
+        ufw reload > /dev/null 2>&1
+    elif [ "${FIREWALL_MANAGE_TOOL}" = 'iptables' ]; then
+        if iptables -L 2>/dev/null | grep -q "allow ${PORT}/${PROTOCOL}(SS_PLUGINS_SH)"; then
+            return
+        fi
+        iptables -I INPUT -p "${PROTOCOL}" --dport "${PORT}" -m comment --comment "allow ${PORT}/${PROTOCOL}(SS_PLUGINS_SH)" -j ACCEPT > /dev/null 2>&1
+        ip6tables -I INPUT -p "${PROTOCOL}" --dport "${PORT}" -m comment --comment "allow ${PORT}/${PROTOCOL}(SS_PLUGINS_SH)" -j ACCEPT > /dev/null 2>&1
+        iptables_persistent
+    fi
+}
+
+remove_firewall_rule(){
+    local PORT=$1
+    local PROTOCOL=$2
+
+    if [ "${FIREWALL_MANAGE_TOOL}" = 'firewall-cmd' ]; then
+        if ! firewall-cmd --list-ports --permanent 2>/dev/null | grep -qw "${PORT}/${PROTOCOL}"; then
+            return
+        fi
+        firewall-cmd --permanent --zone=public --remove-port="${PORT}"/"${PROTOCOL}" > /dev/null 2>&1
+        firewall-cmd --reload > /dev/null 2>&1
+    elif [ "${FIREWALL_MANAGE_TOOL}" = 'ufw' ]; then
+        if ! ufw status 2>/dev/null | grep -qw "${PORT}/${PROTOCOL}"; then
+            return
+        fi
+        ufw delete allow "${PORT}"/"${PROTOCOL}" > /dev/null 2>&1
+        ufw reload > /dev/null 2>&1
+    elif [ "${FIREWALL_MANAGE_TOOL}" = 'iptables' ]; then
+        if ! iptables -L 2>/dev/null | grep -q "allow ${PORT}/${PROTOCOL}(SS_PLUGINS_SH)"; then
+            return
+        fi
+        iptables-save |  sed -e '/SS_PLUGINS_SH/d' | iptables-restore
+        ip6tables-save |  sed -e '/SS_PLUGINS_SH/d' | ip6tables-restore
+        iptables_persistent
+    fi
+}
+
+view_firewll_rule(){
     local PORT=$1
 
-    if [ "$(command -v iptables)" ]; then
-        if [ -z "$(iptables -L -n | grep ${PORT})" ]; then
-            iptables -I INPUT -m state --state NEW -m tcp -p tcp --dport ${PORT} -j ACCEPT
-            iptables -I INPUT -m state --state NEW -m udp -p udp --dport ${PORT} -j ACCEPT
-        fi
-    else
-        _echo -w "iptables命令不存在，请自行排查问题后，手动启用端口: ${PORT}."
+    if [ "${FIREWALL_MANAGE_TOOL}" = 'firewall-cmd' ]; then
+        _echo -i "Firewall Manager: ${Green}firewall-cmd${suffix}"
+        _echo -i "All open ports will be listed below including port: ${PORT}"
+        firewall-cmd --list-ports --permanent
+        _echo -i "If it does not include port: ${Green}${PORT}${suffix} then opening the port fails, please check the firewall settings yourself"
+    elif [ "${FIREWALL_MANAGE_TOOL}" = 'ufw' ]; then
+        _echo -i "Firewall Manager: ${Green}ufw${suffix}"
+        _echo -i "All open ports will be listed below including port: ${PORT}"
+        ufw status
+        _echo -i "If it does not include port: ${Green}${PORT}${suffix} then opening the port fails, please check the firewall settings yourself"
+    elif [ "${FIREWALL_MANAGE_TOOL}" = 'iptables' ]; then
+        _echo -i "Firewall Manager: ${Green}iptables${suffix}"
+        _echo -i "All open ports will be listed below including port: ${PORT}"
+        iptables -L INPUT --line-numbers
+        _echo -i "Firewall Manager: ${Green}ip6tables${suffix}"
+        _echo -i "All open ports will be listed below including port: ${PORT}"
+        ip6tables -L INPUT --line-numbers
+        _echo -i "If it does not include port: ${Green}${PORT}${suffix} then opening the port fails, please check the firewall settings yourself"
+    fi
+}
+
+firewall_status(){
+    if [ "$(command -v firewall-cmd)" ] && firewall-cmd --state 2>/dev/null | head -n 1 | grep -Eq '^running$'; then
+        FIREWALL_MANAGE_TOOL='firewall-cmd'
+    elif [ "$(command -v ufw)" ] && ufw status numbered 2>/dev/null | head -n 1 | cut -d\  -f2 | grep -Eq '^active$'; then
+        FIREWALL_MANAGE_TOOL='ufw'
+    elif [ "$(command -v iptables)" ] && [ "$(command -v ip6tables)" ]; then
+        FIREWALL_MANAGE_TOOL='iptables'
     fi
 }
 
 config_firewall_logic(){
-    if [ -z "$(ps aux | grep -v 'grep' | grep 'oracle-cloud-agent')" ]; then
-        config_firewall "${firewallNeedOpenPort}"
-    else
-        open_port_for_oracle_cloud "${firewallNeedOpenPort}"
-    fi
+    firewall_status
+    add_firewall_rule "${firewallNeedOpenPort}" "tcp"
+    add_firewall_rule "${firewallNeedOpenPort}" "udp"
+    view_firewll_rule "${firewallNeedOpenPort}"
+    write_env_variable "PORXY_INBOUND_PORT=${firewallNeedOpenPort}"
+    write_env_variable "FIREWALL_MANAGE_TOOL=${FIREWALL_MANAGE_TOOL}"
 }

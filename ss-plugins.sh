@@ -31,6 +31,11 @@ CHIAKGE_BBR_SCRIPT_URL="https://git.io/vxJ1I"
 HUMAN_CONFIG="/etc/shadowsocks/humanization.conf"
 
 
+# script env dir
+SS_PLUGINS_SCRIPT_ENV_DIR="/root/.ssPluginsScriptEnv"
+SS_PLUGINS_SCRIPT_ENV_VARIABLES_FILE="${SS_PLUGINS_SCRIPT_ENV_DIR}/env.info"
+
+
 # shadowsocks config
 SHADOWSOCKS_CONFIG="/etc/shadowsocks/config.json"
 
@@ -709,6 +714,25 @@ get_version(){
     else
         grep -oE  "[0-9.]+" /etc/issue
     fi
+}
+
+get_env_variable(){
+    local varName=$1
+    local keyValuePair
+
+    if [ -e "${SS_PLUGINS_SCRIPT_ENV_VARIABLES_FILE}" ]; then
+        keyValuePair=$(grep "${varName}" "${SS_PLUGINS_SCRIPT_ENV_VARIABLES_FILE}")
+        [ -n "${keyValuePair}" ] && export "${keyValuePair}" && return 0
+    else
+        return 1
+    fi
+}
+
+write_env_variable(){
+    local keyValuePairText=$1
+
+    [ ! -e "${SS_PLUGINS_SCRIPT_ENV_DIR}" ] && mkdir -p "${SS_PLUGINS_SCRIPT_ENV_DIR}"
+    echo "${keyValuePairText}" >> "${SS_PLUGINS_SCRIPT_ENV_VARIABLES_FILE}"
 }
 
 centosversion(){

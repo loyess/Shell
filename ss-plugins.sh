@@ -23,8 +23,7 @@ fi
 
 
 # bbr
-TEDDYSUN_BBR_SCRIPT_URL="https://git.io/vbUk0"
-CHIAKGE_BBR_SCRIPT_URL="https://git.io/vxJ1I"
+TEDDYSUN_BBR_SCRIPT_URL="https://raw.githubusercontent.com/teddysun/across/master/bbr.sh"
 
 
 # Humanization config PATH
@@ -613,26 +612,6 @@ check_script_update(){
             _echo -i "当前脚本版本为: ${SHELL_VERSION} 未检测到更新版本."
         fi
     fi
-}
-
-choose_script_bbr(){
-    local bbrVersion=(
-        "秋水逸冰-BBR"
-        "BBR|BBR魔改|BBRplus|Lotserver版本"
-    )
-    generate_menu_logic "${bbrVersion[*]}" "BBR的安装脚本" "1"
-    bbr_menu_num="${inputInfo}"
-    case "${bbr_menu_num}" in
-        1)
-            source <(curl -sL "${TEDDYSUN_BBR_SCRIPT_URL}")
-            ;;
-        2)
-            source <(curl -sL "${CHIAKGE_BBR_SCRIPT_URL}")
-            ;;
-        *)
-            _echo -e "请输入正确的数字 [1-2]"
-            ;;
-    esac
 }
 
 get_ip(){
@@ -1544,7 +1523,7 @@ do_install(){
     [ -z "${menu_num}" ] && menu_num=2
     case "${menu_num}" in
         1)   
-            choose_script_bbr
+            source <(curl -sL "${TEDDYSUN_BBR_SCRIPT_URL}")
             ;;
         2)
             install_step_all

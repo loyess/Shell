@@ -117,6 +117,15 @@ install_dependencies_logic(){
         local depends=(qrencode jq)
         install_dependencies "${depends[*]}"
     fi
+
+    if [ "${CipherMark}" != "Non-AEAD-2022" ]; then
+        if check_sys packageManager yum; then
+            local depends=(chrony)
+        elif check_sys packageManager apt; then
+            local depends=(ntpdate)
+        fi
+        install_dependencies "${depends[*]}"
+    fi
 }
 
 install_libsodium(){

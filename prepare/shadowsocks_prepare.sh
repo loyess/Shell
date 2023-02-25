@@ -32,6 +32,9 @@ none
 aes-256-gcm
 aes-128-gcm
 chacha20-ietf-poly1305
+2022-blake3-aes-128-gcm
+2022-blake3-aes-256-gcm
+2022-blake3-chacha20-poly1305
 )
 
 GO_SHADOWSOCKS2_CIPHERS=(
@@ -79,6 +82,12 @@ install_prepare_password(){
     _echo -r "  password = ${shadowsockspwd}"
 }
 
+gen_random_psk(){
+    shadowsockspwd=$(openssl rand -base64 "$1")
+    _echo -i "你选择了AEAD-2022加密方式, SS-Rust密码变更为自动生成的PSK, 如下："
+    _echo -r "  password = ${shadowsockspwd}"
+}
+
 install_prepare_cipher(){
     while true
     do
@@ -100,6 +109,15 @@ install_prepare_cipher(){
             shadowsockscipher="aes-256-gcm"
         elif [ "${shadowsockscipher}" == "AEAD_CHACHA20_POLY1305" ]; then
             shadowsockscipher="chacha20-ietf-poly1305"
+        fi
+        if [ "${shadowsockscipher}" = "2022-blake3-aes-128-gcm" ]; then
+            gen_random_psk 16
+        elif [ "${shadowsockscipher}" = "2022-blake3-aes-256-gcm" ]; then
+            gen_random_psk 32
+        elif [ "${shadowsockscipher}" = "2022-blake3-chacha20-poly1305" ]; then
+            gen_random_psk 32
+        else
+            CipherMark="Non-AEAD-2022"
         fi
         break
     done

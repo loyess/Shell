@@ -1319,6 +1319,20 @@ add_cron_job(){
     (crontab -l ; echo "${random_minute} 0 * * * \"${CUR_DIR}\"/ss-plugins.sh renew > /dev/null") | sort - | uniq - | crontab -
 }
 
+sync_time(){
+    if [ "${CipherMark}" = "Non-AEAD-2022" ]; then
+        return
+    fi
+    _echo -i "开始同步时间.."
+    if [ "$(command -v ntpdate)" ]; then
+        ntpdate pool.ntp.org
+        [ $? -eq 0 ] && _echo -i "现在时间: $(date -R) 同步完成..."
+    elif [ "$(command -v chronyc)" ]; then
+        chronyc -a makestep
+        [ $? -eq 0 ] && _echo -i "现在时间: $(date -R) 同步完成..."
+    fi
+}
+
 install_status(){
     status_init
 
@@ -1347,6 +1361,7 @@ install_step_all(){
     config_firewall_logic
     install_main
     install_webserver
+    sync_time
     add_more_entropy
     install_cleanup
     improt_package "templates" "config.sh"

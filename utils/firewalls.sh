@@ -13,7 +13,7 @@ ip6tables_start(){
 }
 
 iptables_persistent(){
-    if [ "${PKGMER}" = 'dnf' ] || [ "${PKGMER}" = 'yum' ]; then
+    if check_sys packageManager yum; then
         if [ ! -e "/etc/systemd/system/multi-user.target.wants/iptables.service" ]; then
             package_install "iptables-services"
         fi
@@ -21,7 +21,7 @@ iptables_persistent(){
         iptables-save > /etc/sysconfig/iptables
         ip6tables_start
         ip6tables-save > /etc/sysconfig/ip6tables
-    else
+    elif check_sys packageManager apt; then
         if [ ! -e "/etc/systemd/system/multi-user.target.wants/netfilter-persistent.service" ]; then
             # ref: https://gist.github.com/alonisser/a2c19f5362c2091ac1e7
             echo 'iptables-persistent iptables-persistent/autosave_v4 boolean true' | debconf-set-selections

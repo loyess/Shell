@@ -52,11 +52,11 @@ add_firewall_rule(){
         ufw allow "${PORT}"/"${PROTOCOL}" > /dev/null 2>&1
         ufw reload > /dev/null 2>&1
     elif [ "${FIREWALL_MANAGE_TOOL}" = 'iptables' ]; then
-        if iptables -L 2>/dev/null | grep -q "allow ${PORT}/${PROTOCOL}(SS_PLUGINS_SH)"; then
+        if iptables -L INPUT -n --line-numbers 2>/dev/null | grep -qw "${PROTOCOL} dpt:${PORT}"; then
             return
         fi
-        iptables -I INPUT -p "${PROTOCOL}" --dport "${PORT}" -m comment --comment "allow ${PORT}/${PROTOCOL}(SS_PLUGINS_SH)" -j ACCEPT > /dev/null 2>&1
-        ip6tables -I INPUT -p "${PROTOCOL}" --dport "${PORT}" -m comment --comment "allow ${PORT}/${PROTOCOL}(SS_PLUGINS_SH)" -j ACCEPT > /dev/null 2>&1
+        iptables -I INPUT -p "${PROTOCOL}" --dport "${PORT}" -j ACCEPT > /dev/null 2>&1
+        ip6tables -I INPUT -p "${PROTOCOL}" --dport "${PORT}" -j ACCEPT > /dev/null 2>&1
         iptables_persistent
     fi
 }
@@ -78,11 +78,11 @@ remove_firewall_rule(){
         ufw delete allow "${PORT}"/"${PROTOCOL}" > /dev/null 2>&1
         ufw reload > /dev/null 2>&1
     elif [ "${FIREWALL_MANAGE_TOOL}" = 'iptables' ]; then
-        if ! iptables -L 2>/dev/null | grep -q "allow ${PORT}/${PROTOCOL}(SS_PLUGINS_SH)"; then
+        if ! iptables -L INPUT -n --line-numbers 2>/dev/null | grep -qw "${PROTOCOL} dpt:${PORT}"; then
             return
         fi
-        iptables-save |  sed -e '/SS_PLUGINS_SH/d' | iptables-restore
-        ip6tables-save |  sed -e '/SS_PLUGINS_SH/d' | ip6tables-restore
+        iptables -D INPUT -p "${PROTOCOL}" --dport "${PORT}" -j ACCEPT  > /dev/null 2>&1
+        ip6tables -D INPUT -p "${PROTOCOL}" --dport "${PORT}" -j ACCEPT  > /dev/null 2>&1
         iptables_persistent
     fi
 }
@@ -103,10 +103,10 @@ view_firewll_rule(){
     elif [ "${FIREWALL_MANAGE_TOOL}" = 'iptables' ]; then
         _echo -i "Firewall Manager: ${Green}iptables${suffix}"
         _echo -i "All open ports will be listed below including port: ${PORT}"
-        iptables -L INPUT --line-numbers
+        iptables -L INPUT -n --line-numbers
         _echo -i "Firewall Manager: ${Green}ip6tables${suffix}"
         _echo -i "All open ports will be listed below including port: ${PORT}"
-        ip6tables -L INPUT --line-numbers
+        ip6tables -L INPUT -n --line-numbers
         _echo -i "If it does not include port: ${Green}${PORT}${suffix} then opening the port fails, please check the firewall settings yourself"
     fi
 }

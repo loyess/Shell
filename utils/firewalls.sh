@@ -121,8 +121,28 @@ firewall_status(){
     fi
 }
 
+add_ssh_port(){
+    if [ "${FIREWALL_MANAGE_TOOL}" = 'firewall-cmd' ]; then
+        if firewall-cmd --list-ports --permanent 2>/dev/null | grep -qw "22/tcp"; then
+            return
+        fi
+        add_firewall_rule "22" "tcp"
+    elif [ "${FIREWALL_MANAGE_TOOL}" = 'ufw' ]; then
+        if ufw status 2>/dev/null | grep -qwE "OpenSSH|22/tcp"; then
+            return
+        fi
+        add_firewall_rule "22" "tcp"
+    elif [ "${FIREWALL_MANAGE_TOOL}" = 'iptables' ]; then
+        if iptables -L INPUT -n --line-numbers 2>/dev/null | grep -qwE "tcp dpt:ssh|tcp dpt:22"; then
+            return
+        fi
+        add_firewall_rule "22" "tcp"
+    fi
+}
+
 config_firewall_logic(){
     firewall_status
+    add_ssh_port
     add_firewall_rule "${firewallNeedOpenPort}" "tcp"
     add_firewall_rule "${firewallNeedOpenPort}" "udp"
     view_firewll_rule "${firewallNeedOpenPort}"

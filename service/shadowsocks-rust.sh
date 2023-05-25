@@ -13,10 +13,10 @@
 ### END INIT INFO
 
 
-if [ -f /usr/local/bin/ssserver ]; then
-    DAEMON=/usr/local/bin/ssserver
-elif [ -f /usr/bin/ssserver ]; then
-    DAEMON=/usr/bin/ssserver
+if [ -f /usr/local/bin/ssservice ]; then
+    DAEMON=/usr/local/bin/ssservice
+elif [ -f /usr/bin/ssservice ]; then
+    DAEMON=/usr/bin/ssservice
 fi
 NAME=Shadowsocks-rust
 CONF=/etc/shadowsocks/config.json
@@ -32,7 +32,7 @@ if [ ! -d "$(dirname ${LOG})" ]; then
 fi
 
 check_pid(){
-	get_pid=`ps -ef |grep -v grep | grep ssserver |awk '{print $2}'`
+	get_pid=`ps -ef |grep -v grep | grep ssservice |awk '{print $2}'`
 }
 
 check_pid
@@ -111,9 +111,9 @@ do_start() {
     ulimit -n 51200
     if $(grep -q 'nameserver' $CONF); then
         get_config_args $CONF
-        nohup $DAEMON -c $CONF --dns $NameServer -vvv > $LOG 2>&1 &
+        nohup $DAEMON server -c $CONF --dns $NameServer -vvv > $LOG 2>&1 &
     else
-        nohup $DAEMON -c $CONF -vvv > $LOG 2>&1 &
+        nohup $DAEMON server -c $CONF -vvv > $LOG 2>&1 &
     fi
     check_pid
     echo $get_pid > $PID_FILE

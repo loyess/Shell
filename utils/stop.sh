@@ -11,7 +11,7 @@ kill_process(){
 
 stop_services(){
     kill_process "ss-server" "shadowsocks-libev"
-    kill_process "ssserver" "shadowsocks-rust"
+    kill_process "ssservice" "shadowsocks-rust"
     kill_process "go-shadowsocks2" "go-shadowsocks"
     kill_process "v2ray-plugin" "v2ray-plugin"
     kill_process "obfs-server" "simple-obfs"

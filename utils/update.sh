@@ -98,7 +98,7 @@ ss_update_preparation(){
         ssUpdateShFileName="shadowsocks_install.sh"
         ssUpdateCalledFuncName="install_shadowsocks_rust"
         ssLatestVersion=$(get_ss_version "${ssNameUpdate}")
-        ssCurrentVersion=$(ssserver -V | grep shadowsocks | cut -d\  -f2)
+        ssCurrentVersion=$(ssservice -V | grep shadowsocks | cut -d\  -f2)
     elif [[ -e ${GO_SHADOWSOCKS2_BIN_PATH} ]]; then
         ssNameUpdate="go-shadowsocks2"
         ssUpdateDownloadMark="go-ss2"

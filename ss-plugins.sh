@@ -47,7 +47,7 @@ SHADOWSOCKS_LIBEV_INIT_ONLINE="${BASE_URL}/service/shadowsocks-libev.sh"
 
 # shadowsocks-rust config and init
 SHADOWSOCKS_RUST_INSTALL_PATH="/usr/local/bin"
-SHADOWSOCKS_RUST_BIN_PATH="/usr/local/bin/ssserver"
+SHADOWSOCKS_RUST_BIN_PATH="/usr/local/bin/ssservice"
 SHADOWSOCKS_RUST_INIT="/etc/init.d/shadowsocks-rust"
 SHADOWSOCKS_RUST_INIT_LOCAL="./service/shadowsocks-rust.sh"
 SHADOWSOCKS_RUST_INIT_ONLINE="${BASE_URL}/service/shadowsocks-rust.sh"
@@ -295,7 +295,7 @@ status_init(){
     elif [ -e "${SHADOWSOCKS_RUST_BIN_PATH}" ]; then
         ssName="Shadowsocks-rust"
         ssPath="${SHADOWSOCKS_RUST_BIN_PATH}"
-        ssPid=`ps -ef | grep -v grep | grep ssserver | awk '{print $2}'`
+        ssPid=`ps -ef | grep -v grep | grep ssservice | awk '{print $2}'`
     elif [ -e "${GO_SHADOWSOCKS2_BIN_PATH}" ]; then
         ssName="Go-shadowsocks2"
         ssPath="${GO_SHADOWSOCKS2_BIN_PATH}"
@@ -1383,7 +1383,7 @@ install_cleanup(){
     rm -rf "${shadowsocks_libev_file}" "${shadowsocks_libev_file}.tar.gz"
     
     # ss-rust
-    rm -rf "${shadowsocks_rust_file}.tar.xz"
+    rm -rf "${shadowsocks_rust_file}.tar.xz" sslocal ssserver ssurl ssmanager
     
     # v2ray-plugin
     rm -rf "${v2ray_plugin_file}.tar.gz"

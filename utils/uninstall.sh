@@ -11,7 +11,7 @@ shadowsocks_uninstall(){
         elif check_sys packageManager apt; then
             update-rc.d -f ${ss_service_name} remove
         fi
-    elif [ "$(command -v ssserver)" ]; then
+    elif [ "$(command -v ssservice)" ]; then
         # check Shadowsocks-rust status
         ${SHADOWSOCKS_RUST_INIT} status > /dev/null 2>&1
         if [ $? -eq 0 ]; then

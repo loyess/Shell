@@ -87,7 +87,7 @@ nginx_start(){
 
 start_services(){
     initd_file_start "ss-server" "${SHADOWSOCKS_LIBEV_INIT}"
-    initd_file_start "ssserver" "${SHADOWSOCKS_RUST_INIT}"
+    initd_file_start "ssservice" "${SHADOWSOCKS_RUST_INIT}"
     initd_file_start "go-shadowsocks2" "${GO_SHADOWSOCKS2_INIT}"
     initd_file_start "kcptun-server" "${KCPTUN_INIT}"
     initd_file_start "ck-server" "${CLOAK_INIT}"

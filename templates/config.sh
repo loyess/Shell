@@ -109,7 +109,7 @@ ss_plugins_client_links(){
     cipher=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}")
     ipPort="@${clientIpOrDomain}:${firewallNeedOpenPort}"
     pluginName="/?plugin=${clientPluginName}"
-    plugin_opts=$(get_str_replace ";${clientPluginOpts}")
+    plugin_opts=$(url_encode ";${clientPluginOpts}")
     sslinks="${head}${cipher}${ipPort}${pluginName}${plugin_opts}"
 }
 

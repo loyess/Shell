@@ -614,6 +614,21 @@ check_script_update(){
     fi
 }
 
+url_encode() {
+    local length="${#1}"
+    for (( i = 0; i < length; i++ )); do
+        local c="${1:i:1}"
+        case $c in
+            [a-zA-Z0-9.~_-])
+                printf "%s" "$c"
+                ;;
+            *)
+                printf "%%%02X" "'$c"
+                ;;
+        esac
+    done
+}
+
 get_ip(){
     local IP=$( ip addr | egrep -o '[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | egrep -v "^192\.168|^172\.1[6-9]\.|^172\.2[0-9]\.|^172\.3[0-2]\.|^10\.|^127\.|^255\.|^0\." | head -n 1 )
     [ -z "${IP}" ] && IP=$( wget -qO- -t1 -T2 ipv4.icanhazip.com )
@@ -654,10 +669,6 @@ get_domain_ip(){
     else
         return 1
     fi
-}
-
-get_str_replace(){
-    echo -n $1 | sed 's/:/%3A/g;s/;/%3B/g;s/=/%3D/g;s/\//%2F/g'
 }
 
 get_str_base64_encode(){

@@ -100,7 +100,7 @@ get_input_alternativenames(){
             continue
         fi
         NumConn=0
-        AlternativeNames=";AlternativeNames=$(echo $altNames | sed -E 's/\ /,/g;s/,+/,/g;s/^,+//g;s/,+$//g' | sed -E 's/,+/%2C/g')"
+        AlternativeNames=";AlternativeNames=$(echo $altNames | sed -E 's/\ /,/g;s/,+/,/g;s/^,+//g;s/,+$//g')"
         _echo -r "  AlternativeNames = $(echo $altNames | sed -E 's/\ /,/g;s/,+/,/g;s/^,+//g;s/,+$//g')"
         break
     done

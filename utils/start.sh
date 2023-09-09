@@ -68,7 +68,7 @@ sip003_way_start(){
     local processPid
 
     if [ "$(command -v "${binaryName}")" ]; then
-        processPid=`ps -ef | grep -Ev 'grep|-plugin-opts' | grep v2ray-plugin | awk '{print $2}'`
+        processPid=`ps -ef | grep -Ev 'grep|-plugin-opts' | grep "${binaryName}" | awk '{print $2}'`
         sip003_plugin_start "${projectName}" "${processPid}"
     fi
 }

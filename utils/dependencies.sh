@@ -4,7 +4,7 @@ LIBSODIUM_FILE="libsodium-${LIBSODIUM_VERSION}"
 LIBSODIUM_VERSION_FILE=~/.deps-ver/libsodium.v
 LIBSODIUM_URL="https://github.com/jedisct1/libsodium/releases/download/${LIBSODIUM_VERSION}-RELEASE/libsodium-${LIBSODIUM_VERSION}.tar.gz"
 
-MBEDTLS_VERSION="2.16.12"
+MBEDTLS_VERSION="2.28.4"
 MBEDTLS_FILE="mbedtls-${MBEDTLS_VERSION}"
 MBEDTLS_VERSION_FILE=~/.deps-ver/mbedtls.v
 MBEDTLS_URL="https://github.com/ARMmbed/mbedtls/archive/${MBEDTLS_FILE}.tar.gz"

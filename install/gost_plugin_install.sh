@@ -4,6 +4,7 @@ install_gost_plugin(){
     if [ ! "$(command -v unzip)" ]; then
         package_install "unzip" > /dev/null 2>&1
     fi
+    pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
     unzip -oq ${gost_plugin_file}.zip
     chmod +x gost-plugin
     mv gost-plugin ${GOST_PLUGIN_INSTALL_PATH}
@@ -15,4 +16,5 @@ install_gost_plugin(){
         install_cleanup
         exit 1
     fi
+    popd > /dev/null 2>&1
 }

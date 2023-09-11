@@ -1,5 +1,6 @@
 install_qtun(){
     cd ${CUR_DIR}
+    pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
     tar xf ${qtun_file}.tar.xz
     if [ ! -d ${QTUN_INSTALL_PATH} ]; then
         mkdir -p ${QTUN_INSTALL_PATH}
@@ -13,4 +14,5 @@ install_qtun(){
         install_cleanup
         exit 1
     fi
+    popd > /dev/null 2>&1
 }

@@ -1363,6 +1363,8 @@ install_step_all(){
     install_status
     disable_selinux
     install_prepare
+    TEMP_DIR_PATH=$(mktemp -d)
+    trap "rm -rf $TEMP_DIR_PATH; exit" 2
     improt_package "utils" "dependencies.sh"
     install_dependencies_logic
     improt_package "utils" "downloads.sh"
@@ -1388,37 +1390,7 @@ install_step_all(){
 
 install_cleanup(){
     cd "${CUR_DIR}"
-    # ss-libev
-    rm -rf "${LIBSODIUM_FILE}" "${LIBSODIUM_FILE}.tar.gz"
-    rm -rf "${MBEDTLS_FILE}" "${MBEDTLS_FILE}.tar.gz"
-    rm -rf "${shadowsocks_libev_file}" "${shadowsocks_libev_file}.tar.gz"
-    
-    # ss-rust
-    rm -rf "${shadowsocks_rust_file}.tar.xz" sslocal ssserver ssurl ssmanager
-    
-    # v2ray-plugin
-    rm -rf "${v2ray_plugin_file}.tar.gz"
-    
-    # kcptun
-    rm -rf "client_linux_${ARCH}" "${kcptun_file}.tar.gz"
-    
-    # simple-obfs
-    rm -rf simple-obfs
-    
-    # mos-tls-tunnel
-    rm -rf "${mtt_file}.zip" LICENSE README.md mtt-client
-
-    #simple-tls
-    rm -rf "${simple_tls_file}.zip" LICENSE  README.md README_zh.md README_en.md
-
-    # gost-plugin
-    rm -rf "${gost_plugin_file}.zip"
-
-    # xray-plugin
-    rm -rf "${xray_plugin_file}.tar.gz"
-
-    # qtun
-    rm -rf qtun-client "${qtun_file}.tar.xz"
+    rm -rf  ${TEMP_DIR_PATH}
 }
 
 do_uid(){

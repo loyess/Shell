@@ -4,6 +4,7 @@ install_simple_obfs(){
     simple_obfs_ver=$(wget --no-check-certificate -qO- https://api.github.com/repos/shadowsocks/simple-obfs/releases | grep -o '"tag_name": ".*"' | head -n 1| sed 's/"//g;s/v//g' | sed 's/tag_name: //g')
     [ -z ${simple_obfs_ver} ] && _echo -e "获取 simple-obfs 最新版本失败." && exit 1
         
+    pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
     git clone https://github.com/shadowsocks/simple-obfs.git
     [ -d simple-obfs ] && cd simple-obfs || _echo -e "git clone simple-obfs 失败."
     git submodule update --init --recursive
@@ -32,4 +33,5 @@ install_simple_obfs(){
     fi
     [ -f ${SIMPLE_OBFS_BIN_PATH} ] && ln -fs ${SIMPLE_OBFS_BIN_PATH} /usr/bin
     _echo -i "simple-obfs-${simple_obfs_ver} 安装成功."
+    popd > /dev/null 2>&1
 }

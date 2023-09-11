@@ -1,5 +1,6 @@
 install_cloak(){
     cd ${CUR_DIR}
+    pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
     chmod +x ${cloak_file}
     mv ${cloak_file} ${CLOAK_SERVER_BIN_PATH}
     if [ $? -eq 0 ]; then
@@ -18,4 +19,5 @@ install_cloak(){
         install_cleanup
         exit 1
     fi
+    popd > /dev/null 2>&1
 }

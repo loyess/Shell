@@ -1,5 +1,6 @@
 install_v2ray_plugin(){
     cd ${CUR_DIR}
+    pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
     tar zxf ${v2ray_plugin_file}.tar.gz
     if [ ! -d ${V2RAY_PLUGIN_INSTALL_PATH} ]; then
         mkdir -p ${V2RAY_PLUGIN_INSTALL_PATH}
@@ -13,4 +14,5 @@ install_v2ray_plugin(){
         install_cleanup
         exit 1
     fi
+    popd > /dev/null 2>&1
 }

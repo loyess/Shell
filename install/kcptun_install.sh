@@ -1,5 +1,6 @@
 install_kcptun(){
     cd ${CUR_DIR}
+    pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
     tar zxf ${kcptun_file}.tar.gz
     if [ ! -d ${KCPTUN_INSTALL_PATH} ]; then
         mkdir -p ${KCPTUN_INSTALL_PATH}
@@ -21,4 +22,5 @@ install_kcptun(){
         install_cleanup
         exit 1
     fi
+    popd > /dev/null 2>&1
 }

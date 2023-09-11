@@ -1,5 +1,6 @@
 install_xray_plugin(){
     cd ${CUR_DIR}
+    pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
     tar zxf ${xray_plugin_file}.tar.gz
     if [ ! -d ${XRAY_PLUGIN_INSTALL_PATH} ]; then
         mkdir -p ${XRAY_PLUGIN_INSTALL_PATH}
@@ -13,4 +14,5 @@ install_xray_plugin(){
         install_cleanup
         exit 1
     fi
+    popd > /dev/null 2>&1
 }

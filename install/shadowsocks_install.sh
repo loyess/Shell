@@ -1,5 +1,6 @@
 install_shadowsocks_libev(){
     cd ${CUR_DIR}
+    pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
     tar zxf ${shadowsocks_libev_file}.tar.gz
     cd ${shadowsocks_libev_file}
     ./configure --disable-documentation && make && make install
@@ -19,10 +20,12 @@ install_shadowsocks_libev(){
         install_cleanup
         exit 1
     fi
+    popd > /dev/null 2>&1
 }
 
 install_shadowsocks_rust(){
     cd ${CUR_DIR}
+    pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
     tar xf ${shadowsocks_rust_file}.tar.xz
     chmod +x ssservice
     mv ssservice ${SHADOWSOCKS_RUST_INSTALL_PATH}
@@ -42,6 +45,7 @@ install_shadowsocks_rust(){
         install_cleanup
         exit 1
     fi
+    popd > /dev/null 2>&1
 }
 
 install_go_shadowsocks2(){
@@ -51,6 +55,7 @@ install_go_shadowsocks2(){
         package_install "gunzip" > /dev/null 2>&1
     fi
 
+    pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
     gunzip -q ${go_shadowsocks2_file}.gz
     chmod +x ${go_shadowsocks2_file}
     mv ${go_shadowsocks2_file} ${GO_SHADOWSOCKS2_BIN_PATH}
@@ -70,4 +75,5 @@ install_go_shadowsocks2(){
         install_cleanup
         exit 1
     fi
+    popd > /dev/null 2>&1
 }

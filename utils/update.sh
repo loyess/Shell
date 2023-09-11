@@ -45,6 +45,8 @@ update_download(){
     local downloadFileName=$2
     local SS_VERSION plugin_num
     
+    TEMP_DIR_PATH=$(mktemp -d)
+    trap "rm -rf $TEMP_DIR_PATH; exit" 2
     _echo -i "检测到${downloadFileName}有新版本，开始下载."
     if $(judge_is_num "${downloadMark}"); then
         plugin_num=${downloadMark}
@@ -61,6 +63,10 @@ update_install(){
     local shFileName=$2
     local calledFuncName=$3
 
+    if [ -z ${TEMP_DIR_PATH} ]; then
+        TEMP_DIR_PATH=$(mktemp -d)
+        trap "rm -rf $TEMP_DIR_PATH; exit" 2
+    fi
     improt_package "${packageName}" "${shFileName}"
     do_stop > /dev/null 2>&1
     ${calledFuncName}

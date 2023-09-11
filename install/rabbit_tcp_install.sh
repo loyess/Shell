@@ -4,6 +4,7 @@ install_rabbit_tcp(){
     if [ ! "$(command -v gunzip)" ]; then
         package_install "gunzip" > /dev/null 2>&1
     fi
+    pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
     gunzip -q ${rabbit_file}.gz
     chmod +x ${rabbit_file}
     mv ${rabbit_file} ${RABBIT_BIN_PATH}
@@ -23,4 +24,5 @@ install_rabbit_tcp(){
         install_cleanup
         exit 1
     fi
+    popd > /dev/null 2>&1
 }

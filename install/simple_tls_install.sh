@@ -4,6 +4,7 @@ install_simple_tls(){
     if [ ! "$(command -v unzip)" ]; then
         package_install "unzip" > /dev/null 2>&1
     fi
+    pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
     unzip -oq ${simple_tls_file}.zip
     chmod +x simple-tls
     mv simple-tls ${SIMPLE_TLS_INSTALL_PATH}
@@ -15,4 +16,5 @@ install_simple_tls(){
         install_cleanup
         exit 1
     fi
+    popd > /dev/null 2>&1
 }

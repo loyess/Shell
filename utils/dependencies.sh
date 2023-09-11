@@ -132,6 +132,7 @@ install_libsodium(){
     local installStatus=$1
 
     cd ${CUR_DIR}
+    pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
     _echo -i "下载${LIBSODIUM_FILE}."
     download "${LIBSODIUM_FILE}.tar.gz" "${LIBSODIUM_URL}"
     _echo -i "解压${LIBSODIUM_FILE}."
@@ -143,6 +144,7 @@ install_libsodium(){
         install_cleanup
         exit 1
     fi
+    popd > /dev/null 2>&1
     # wriet version num
     if [ ! -d "$(dirname ${LIBSODIUM_VERSION_FILE})" ]; then
         mkdir -p $(dirname ${LIBSODIUM_VERSION_FILE})
@@ -170,6 +172,7 @@ install_mbedtls(){
     local installStatus=$1
 
     cd ${CUR_DIR}
+    pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
     _echo -i "下载${MBEDTLS_FILE}."
     download "${MBEDTLS_FILE}.tar.gz" "${MBEDTLS_URL}"
     _echo -i "解压${MBEDTLS_FILE}."
@@ -184,6 +187,7 @@ install_mbedtls(){
         install_cleanup
         exit 1
     fi
+    popd > /dev/null 2>&1
     # wriet version num
     if [ ! -d "$(dirname ${MBEDTLS_VERSION_FILE})" ]; then
         mkdir -p $(dirname ${MBEDTLS_VERSION_FILE})

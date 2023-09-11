@@ -90,7 +90,9 @@ download_ss_file(){
 
         shadowsocks_libev_file="shadowsocks-libev-${libev_ver}"
         shadowsocks_libev_url="https://github.com/shadowsocks/shadowsocks-libev/releases/download/v${libev_ver}/shadowsocks-libev-${libev_ver}.tar.gz"
+        pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
         download "${shadowsocks_libev_file}.tar.gz" "${shadowsocks_libev_url}"
+        popd > /dev/null 2>&1
         download_service_file ${SHADOWSOCKS_LIBEV_INIT} ${SHADOWSOCKS_LIBEV_INIT_ONLINE} ${SHADOWSOCKS_LIBEV_INIT_LOCAL}
     elif [[ ${SS_VERSION} = "ss-rust" ]]; then
         local ssName="shadowsocks-rust"
@@ -105,7 +107,9 @@ download_ss_file(){
 
         shadowsocks_rust_file="shadowsocks-v${rust_ver}.${MACHINE}-unknown-linux-musl"
         shadowsocks_rust_url="https://github.com/shadowsocks/shadowsocks-rust/releases/download/v${rust_ver}/shadowsocks-v${rust_ver}.${MACHINE}-unknown-linux-musl.tar.xz"
+        pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
         download "${shadowsocks_rust_file}.tar.xz" "${shadowsocks_rust_url}"
+        popd > /dev/null 2>&1
         download_service_file ${SHADOWSOCKS_RUST_INIT} ${SHADOWSOCKS_RUST_INIT_ONLINE} ${SHADOWSOCKS_RUST_INIT_LOCAL}
     elif [[ ${SS_VERSION} = "go-ss2" ]]; then
         if [[ ${ARCH} != "amd64" ]]; then
@@ -125,7 +129,9 @@ download_ss_file(){
 
         go_shadowsocks2_file="shadowsocks2-linux"
         go_shadowsocks2_url="https://github.com/shadowsocks/go-shadowsocks2/releases/download/v${go_ver}/shadowsocks2-linux.gz"
+        pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
         download "${go_shadowsocks2_file}.gz" "${go_shadowsocks2_url}"
+        popd > /dev/null 2>&1
         download_service_file ${GO_SHADOWSOCKS2_INIT} ${GO_SHADOWSOCKS2_INIT_ONLINE} ${GO_SHADOWSOCKS2_INIT_LOCAL}
     fi
 }
@@ -139,7 +145,9 @@ download_plugins_file(){
 
         v2ray_plugin_file="v2ray-plugin-linux-${ARCH}-v${v2ray_plugin_ver}"
         v2ray_plugin_url="https://github.com/teddysun/v2ray-plugin/releases/download/v${v2ray_plugin_ver}/v2ray-plugin-linux-${ARCH}-v${v2ray_plugin_ver}.tar.gz"
+        pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
         download "${v2ray_plugin_file}.tar.gz" "${v2ray_plugin_url}"
+        popd > /dev/null 2>&1
     elif [[ "${plugin_num}" == "2" ]]; then        
         local pluginName="kcptun"
         kcptun_ver=$(get_plugins_version "${pluginName}")
@@ -147,7 +155,9 @@ download_plugins_file(){
 
         kcptun_file="kcptun-linux-${ARCH}-${kcptun_ver}"
         kcptun_url="https://github.com/xtaci/kcptun/releases/download/v${kcptun_ver}/kcptun-linux-${ARCH}-${kcptun_ver}.tar.gz"
+        pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
         download "${kcptun_file}.tar.gz" "${kcptun_url}"
+        popd > /dev/null 2>&1
         download_service_file ${KCPTUN_INIT} ${KCPTUN_INIT_ONLINE} ${KCPTUN_INIT_LOCAL}
     elif [[ "${plugin_num}" == "4" ]]; then        
         local pluginName="GoQuiet"
@@ -156,7 +166,9 @@ download_plugins_file(){
 
         goquiet_file="gq-server-linux-${ARCH}-${goquiet_ver}"
         goquiet_url="https://github.com/cbeuw/GoQuiet/releases/download/v${goquiet_ver}/gq-server-linux-${ARCH}-${goquiet_ver}"
+        pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
         download "${goquiet_file}" "${goquiet_url}"
+        popd > /dev/null 2>&1
     elif [[ "${plugin_num}" == "5" ]]; then
         local pluginName="Cloak"
         cloak_ver=$(get_plugins_version "${pluginName}")
@@ -165,7 +177,9 @@ download_plugins_file(){
 
         cloak_file="ck-server-linux-${ARCH}-v${cloak_ver}"
         cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${cloak_ver}/ck-server-linux-${ARCH}-v${cloak_ver}"
+        pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
         download "${cloak_file}" "${cloak_url}"
+        popd > /dev/null 2>&1
         download_service_file ${CLOAK_INIT} ${CLOAK_INIT_ONLINE} ${CLOAK_INIT_LOCAL}
     elif [[ "${plugin_num}" == "6" ]]; then
         if [[ ${ARCH} != "amd64" ]]; then
@@ -185,7 +199,9 @@ download_plugins_file(){
 
         mtt_file="mos-tls-tunnel-linux-amd64"
         mtt_url="https://github.com/IrineSistiana/mos-tls-tunnel/releases/download/v${mtt_ver}/mos-tls-tunnel-linux-amd64.zip"
+        pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
         download "${mtt_file}.zip" "${mtt_url}"
+        popd > /dev/null 2>&1
     elif [[ "${plugin_num}" == "7" ]]; then
         local pluginName="rabbit-tcp"
         rabbit_ver=$(get_plugins_version "${pluginName}")
@@ -199,7 +215,9 @@ download_plugins_file(){
 
         rabbit_file="rabbit-linux-${ARCH}"
         rabbit_url="https://github.com/ihciah/rabbit-tcp/releases/download/v${rabbit_ver}/rabbit-linux-${ARCH}.gz"
+        pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
         download "${rabbit_file}.gz" "${rabbit_url}"
+        popd > /dev/null 2>&1
         download_service_file ${RABBIT_INIT} ${RABBIT_INIT_ONLINE} ${RABBIT_INIT_LOCAL}
     elif [[ "${plugin_num}" == "8" ]]; then
         local pluginName="simple-tls"
@@ -219,7 +237,9 @@ download_plugins_file(){
 
         simple_tls_file="simple-tls-linux-${ARCH}"
         simple_tls_url="https://github.com/IrineSistiana/simple-tls/releases/download/v${simple_tls_ver}/simple-tls-linux-${ARCH}.zip"
+        pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
         download "${simple_tls_file}.zip" "${simple_tls_url}"
+        popd > /dev/null 2>&1
     elif [[ "${plugin_num}" == "9" ]]; then
         local pluginName="gost-plugin"
         # gost_plugin_ver=$(get_plugins_version "${pluginName}")
@@ -234,7 +254,9 @@ download_plugins_file(){
 
         gost_plugin_file="gost-plugin_linux_${ARCH}-${gost_plugin_ver}"
         gost_plugin_url="https://github.com/maskedeken/gost-plugin/releases/download/v${gost_plugin_ver}/${gost_plugin_file}.zip"
+        pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
         download "${gost_plugin_file}.zip" "${gost_plugin_url}"
+        popd > /dev/null 2>&1
     elif [[ "${plugin_num}" == "10" ]]; then
         local pluginName="xray-plugin"
         xray_plugin_ver=$(get_plugins_version "${pluginName}")
@@ -248,7 +270,9 @@ download_plugins_file(){
 
         xray_plugin_file="xray-plugin-linux-${ARCH}-v${xray_plugin_ver}"
         xray_plugin_url="https://github.com/teddysun/xray-plugin/releases/download/v${xray_plugin_ver}/xray-plugin-linux-${ARCH}-v${xray_plugin_ver}.tar.gz"
+        pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
         download "${xray_plugin_file}.tar.gz" "${xray_plugin_url}"
+        popd > /dev/null 2>&1
     elif [[ "${plugin_num}" == "11" ]]; then
         local pluginName="qtun"
         qtun_ver=$(get_plugins_version "${pluginName}")
@@ -268,7 +292,9 @@ download_plugins_file(){
 
         qtun_file="qtun-v${qtun_ver}.${MACHINE}-unknown-linux-musl"
         qtun_url="https://github.com/shadowsocks/qtun/releases/download/v${qtun_ver}/qtun-v${qtun_ver}.${MACHINE}-unknown-linux-musl.tar.xz"
+        pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
         download "${qtun_file}.tar.xz" "${qtun_url}"
+        popd > /dev/null 2>&1
     elif [[ "${plugin_num}" == "12" ]]; then
         local pluginName="gun"
         gun_ver=$(get_plugins_version "${pluginName}")
@@ -282,6 +308,8 @@ download_plugins_file(){
 
         gun_file="gun-sip003-linux-${ARCH}"
         gun_url="https://github.com/Qv2ray/gun/releases/download/${gun_ver}/gun-sip003-linux-${ARCH}"
+        pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
         download "${gun_file}" "${gun_url}"
+        popd > /dev/null 2>&1
     fi
 }

@@ -323,17 +323,22 @@ del_unrestricted_users_logic_cade(){
 download_ck_clinet(){
     local CK_CLIENT_V=$1
     
+    cd ${CUR_DIR}
     # Download cloak client
     local cloak_file="ck-client-linux-${ARCH}-v${CK_CLIENT_V}"
     local cloak_url="https://github.com/cbeuw/Cloak/releases/download/v${CK_CLIENT_V}/ck-client-linux-${ARCH}-v${CK_CLIENT_V}"
+    TEMP_DIR_PATH=$(mktemp -d)
+    trap "rm -rf $TEMP_DIR_PATH; exit" 2
+    pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
     improt_package "utils" "downloads.sh"
     download "${cloak_file}" "${cloak_url}"
     
     # install ck-client
-    cd ${CUR_DIR}
     chmod +x ${cloak_file}
     mv ${cloak_file} ${CLOAK_CLIENT_BIN_PATH}
     [ -f ${CLOAK_CLIENT_BIN_PATH} ] && ln -fs ${CLOAK_CLIENT_BIN_PATH} /usr/bin
+    popd > /dev/null 2>&1
+    install_cleanup
 }
 
 ck2_users_manager(){

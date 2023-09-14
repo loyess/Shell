@@ -80,7 +80,7 @@ install_dependencies(){
         fi
         [ ! -f /etc/yum.repos.d/epel.repo ] && _echo -e "安装EPEL存储库失败，请检查它。" && exit 1
         [ ! "$(command -v yum-config-manager)" ] && yum install -y yum-utils > /dev/null 2>&1
-        if centosversion 8; then
+        if version_ge $(get_version) 8; then
             [ x"$(yum repolist epel | grep -w epel | awk '{print $NF}')" != x"enabled" ] && yum-config-manager --enable epel > /dev/null 2>&1
         else
             [ x"$(yum-config-manager epel | grep -w enabled | awk '{print $3}')" != x"True" ] && yum-config-manager --enable epel > /dev/null 2>&1

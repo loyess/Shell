@@ -215,6 +215,9 @@ add_more_entropy(){
     # Ubuntu series is started by default after installation
     # Debian series needs to add configuration to start after installation
     # CentOS 6 is installed by default but not started. CentOS 7 is not started by default after installation. CentOS 8 is installed and started by default.
+    if [ "${SS_VERSION}" != "ss-libev" ]; then return; fi
+    local KERNEL_VERSION=$(uname -r | cut -d'-' -f1)
+    if version_ge ${KERNEL_VERSION} 5.6; then return; fi
     local ENTROPY_SIZE_BEFORE=$(cat /proc/sys/kernel/random/entropy_avail)
     if [[ ${ENTROPY_SIZE_BEFORE} -lt 1000 ]]; then
         _echo -i "安装rng-tools之前熵池的熵值为${Green}${ENTROPY_SIZE_BEFORE}${suffix}"

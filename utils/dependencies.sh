@@ -1,6 +1,7 @@
 # shadowsocks-libev dependencies
-LIBSODIUM_VERSION="1.0.18"
+LIBSODIUM_VERSION="1.0.19"
 LIBSODIUM_FILE="libsodium-${LIBSODIUM_VERSION}"
+UNCOMPRESS_FOLDER_NAME="libsodium-stable"
 LIBSODIUM_VERSION_FILE=~/.deps-ver/libsodium.v
 LIBSODIUM_URL="https://github.com/jedisct1/libsodium/releases/download/${LIBSODIUM_VERSION}-RELEASE/libsodium-${LIBSODIUM_VERSION}.tar.gz"
 
@@ -136,7 +137,7 @@ install_libsodium(){
     _echo -i "下载${LIBSODIUM_FILE}."
     download "${LIBSODIUM_FILE}.tar.gz" "${LIBSODIUM_URL}"
     _echo -i "解压${LIBSODIUM_FILE}."
-    tar zxf ${LIBSODIUM_FILE}.tar.gz && cd ${LIBSODIUM_FILE}
+    tar zxf ${LIBSODIUM_FILE}.tar.gz && cd ${UNCOMPRESS_FOLDER_NAME}
     _echo -i "编译安装${LIBSODIUM_FILE}."
     ./configure --prefix=/usr && make && make install
     if [ $? -ne 0 ]; then

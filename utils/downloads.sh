@@ -221,7 +221,8 @@ download_plugins_file(){
         download_service_file ${RABBIT_INIT} ${RABBIT_INIT_ONLINE} ${RABBIT_INIT_LOCAL}
     elif [[ "${plugin_num}" == "8" ]]; then
         local pluginName="simple-tls"
-        simple_tls_ver=$(get_plugins_version "${pluginName}")
+        # simple_tls_ver=$(get_plugins_version "${pluginName}")
+        simple_tls_ver="0.5.2"
         judge_latest_version_num_is_none_and_output_error_info "${pluginName}" "${simple_tls_ver}"
         if [[ ${SimpleTlsVer} = "1" ]]; then
             simple_tls_ver="0.3.4"

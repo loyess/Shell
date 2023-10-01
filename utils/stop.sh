@@ -1,33 +1,33 @@
 kill_process(){
-    local binaryName=$1
+    local binaryFilePath=$1
     local projectName=$2
 
-    ps -ef | grep -v grep | grep "${binaryName}" | awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
+    ps -ef | grep -v grep | grep "${binaryFilePath}" | awk '{print $2}' | xargs kill -9 > /dev/null 2>&1
 
-    if [ "$(command -v "${binaryName}")" ]; then
+    if [ "$(command -v "${binaryFilePath}")" ]; then
         echo -e "Stopping ${projectName} success"
     fi
 }
 
 stop_services(){
-    kill_process "ss-server" "shadowsocks-libev"
-    kill_process "ssservice" "shadowsocks-rust"
-    kill_process "go-shadowsocks2" "go-shadowsocks"
-    kill_process "v2ray-plugin" "v2ray-plugin"
-    kill_process "obfs-server" "simple-obfs"
-    kill_process "kcptun-server" "kcptun"
-    kill_process "gq-server" "GoQuiet"
-    kill_process "ck-server" "Cloak"
-    kill_process "mtt-server" "mos-tls-tunnel"
-    kill_process "rabbit-tcp" "rabbit-tcp"
-    kill_process "simple-tls" "simple-tls"
-    kill_process "gost-plugin" "gost-plugin"
-    kill_process "xray-plugin" "xray-plugin"
-    kill_process "qtun-server" "qtun"
-    kill_process "gun-server" "gun"
+    kill_process "$SHADOWSOCKS_LIBEV_BIN_PATH" "shadowsocks-libev"
+    kill_process "$SHADOWSOCKS_RUST_BIN_PATH" "shadowsocks-rust"
+    kill_process "$GO_SHADOWSOCKS2_BIN_PATH" "go-shadowsocks"
+    kill_process "$V2RAY_PLUGIN_BIN_PATH" "v2ray-plugin"
+    kill_process "$SIMPLE_OBFS_BIN_PATH" "simple-obfs"
+    kill_process "$KCPTUN_BIN_PATH" "kcptun"
+    kill_process "$GOQUIET_BIN_PATH" "GoQuiet"
+    kill_process "$CLOAK_SERVER_BIN_PATH" "Cloak"
+    kill_process "$MTT_BIN_PATH" "mos-tls-tunnel"
+    kill_process "$RABBIT_BIN_PATH" "rabbit-tcp"
+    kill_process "$SIMPLE_TLS_BIN_PATH" "simple-tls"
+    kill_process "$GOST_PLUGIN_BIN_PATH" "gost-plugin"
+    kill_process "$XRAY_PLUGIN_BIN_PATH" "xray-plugin"
+    kill_process "$QTUN_BIN_PATH" "qtun"
+    kill_process "$GUN_BIN_PATH" "gun"
     if [ -e "${WEB_INSTALL_MARK}" ]; then
-        kill_process "caddy" "caddy"
-        kill_process "nginx" "nginx"
+        kill_process "$CADDY_BIN_PATH" "caddy"
+        kill_process "$NGINX_BIN_PATH" "nginx"
     fi
 }
 

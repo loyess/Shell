@@ -122,21 +122,28 @@ firewall_status(){
 }
 
 add_ssh_port(){
+    local sshdPort
+
+    if $(grep -qwE "^Port" /etc/ssh/sshd_config); then
+        sshdPort=$(cat /etc/ssh/sshd_config | grep -wE "^Port" | cut -d\  -f2)
+    else
+        sshdPort=22
+    fi
     if [ "${FIREWALL_MANAGE_TOOL}" = 'firewall-cmd' ]; then
-        if firewall-cmd --list-ports --permanent 2>/dev/null | grep -qw "22/tcp"; then
+        if firewall-cmd --list-ports --permanent 2>/dev/null | grep -qw "${sshdPort}/tcp"; then
             return
         fi
-        add_firewall_rule "22" "tcp"
+        add_firewall_rule "${sshdPort}" "tcp"
     elif [ "${FIREWALL_MANAGE_TOOL}" = 'ufw' ]; then
-        if ufw status 2>/dev/null | grep -qwE "OpenSSH|22/tcp"; then
+        if ufw status 2>/dev/null | grep -qwE "OpenSSH|${sshdPort}/tcp"; then
             return
         fi
-        add_firewall_rule "22" "tcp"
+        add_firewall_rule "${sshdPort}" "tcp"
     elif [ "${FIREWALL_MANAGE_TOOL}" = 'iptables' ]; then
-        if iptables -L INPUT -n --line-numbers 2>/dev/null | grep -qwE "tcp dpt:ssh|tcp dpt:22"; then
+        if iptables -L INPUT -n --line-numbers 2>/dev/null | grep -qwE "tcp dpt:ssh|tcp dpt:${sshdPort}"; then
             return
         fi
-        add_firewall_rule "22" "tcp"
+        add_firewall_rule "${sshdPort}" "tcp"
     fi
 }
 

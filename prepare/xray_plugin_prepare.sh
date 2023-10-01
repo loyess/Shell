@@ -19,9 +19,10 @@ ws_mode_logic(){
         firewallNeedOpenPort="${shadowsocksport}"
     elif [ "${isEnableWeb}" = "enable" ]; then
         reset_if_ss_port_is_443
-        firewallNeedOpenPort=443
-        kill_process_if_port_occupy "${firewallNeedOpenPort}"
         get_cdn_or_dnsonly_type_domain
+        get_input_inbound_port 443 "TO_COMPARE_PORTS"
+        firewallNeedOpenPort="${INBOUND_PORT}"
+        kill_process_if_port_occupy "${firewallNeedOpenPort}"
         web_server_menu
     fi
     if [ "${web_flag}" = "1" ]; then
@@ -39,10 +40,11 @@ ws_mode_logic(){
 }
 
 wss_mode_logic(){
-    firewallNeedOpenPort=443
+    get_cdn_or_dnsonly_type_domain
+    get_input_inbound_port 443
+    firewallNeedOpenPort="${INBOUND_PORT}"
     shadowsocksport="${firewallNeedOpenPort}"
     kill_process_if_port_occupy "${firewallNeedOpenPort}"
-    get_cdn_or_dnsonly_type_domain
     get_input_ws_path
     is_disable_mux_logic
     if [ "${domainType}" = "DNS-Only" ]; then
@@ -53,7 +55,8 @@ wss_mode_logic(){
 }
 
 quic_mode_logic(){
-    firewallNeedOpenPort=443
+    get_input_inbound_port 443
+    firewallNeedOpenPort="${INBOUND_PORT}"
     shadowsocksport="${firewallNeedOpenPort}"
     kill_process_if_port_occupy "${firewallNeedOpenPort}"
     get_specified_type_domain "DNS-Only"
@@ -62,10 +65,11 @@ quic_mode_logic(){
 }
 
 grpc_mode_logic(){
-    firewallNeedOpenPort=443
+    get_cdn_or_dnsonly_type_domain
+    get_input_inbound_port 443
+    firewallNeedOpenPort="${INBOUND_PORT}"
     shadowsocksport="${firewallNeedOpenPort}"
     kill_process_if_port_occupy "${firewallNeedOpenPort}"
-    get_cdn_or_dnsonly_type_domain
     is_disable_mux_logic
     if [ "${domainType}" = "DNS-Only" ]; then
         acme_get_certificate_by_force "${domain}"

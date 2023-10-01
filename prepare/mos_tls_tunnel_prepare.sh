@@ -13,7 +13,8 @@ tls_mode_logic(){
         firewallNeedOpenPort="${shadowsocksport}"
         get_all_type_domain
     elif [ "${doYouHaveDomian}" = "Yes" ]; then
-        firewallNeedOpenPort=443
+        get_input_inbound_port 443
+        firewallNeedOpenPort="${INBOUND_PORT}"
         shadowsocksport="${firewallNeedOpenPort}"
         kill_process_if_port_occupy "${firewallNeedOpenPort}"
         get_specified_type_domain "DNS-Only"
@@ -30,7 +31,8 @@ wss_mode_logic(){
         firewallNeedOpenPort="${shadowsocksport}"
         get_all_type_domain
     elif [ "${doYouHaveDomian}" = "Yes" ]; then
-        firewallNeedOpenPort=443
+        get_input_inbound_port 443
+        firewallNeedOpenPort="${INBOUND_PORT}"
         shadowsocksport="${firewallNeedOpenPort}"
         kill_process_if_port_occupy "${firewallNeedOpenPort}"
         get_specified_type_domain "DNS-Only"

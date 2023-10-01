@@ -6,10 +6,11 @@ get_link_of_ck2(){
         local ckpub=$(cat ${CK_CLIENT_CONFIG} | jq -r .PublicKey)
         local ckservername=$(cat ${CK_CLIENT_CONFIG} | jq -r .ServerName)
         local encryptionMethod=$(cat ${CK_CLIENT_CONFIG} | jq -r .EncryptionMethod)
+        local clientport=$(cat ${CK_SERVER_CONFIG} | jq .BindAddr | grep -o '[0-9]\+' | head -n 1)
         
         local link_head="ss://"
         local cipher_pwd=$(get_str_base64_encode "${shadowsockscipher}:${shadowsockspwd}")
-        local ip_port_plugin="@$(get_ip):443/?plugin=ck-client"    
+        local ip_port_plugin="@$(get_ip):${clientport}/?plugin=ck-client"
         local plugin_opts=$(url_encode ";Transport=direct;ProxyMethod=shadowsocks;EncryptionMethod=${encryptionMethod};UID=${ckauid};PublicKey=${ckpub};ServerName=${ckservername};NumConn=4;BrowserSig=chrome;StreamTimeout=300")
         local ss_link="${link_head}${cipher_pwd}${ip_port_plugin}${plugin_opts}"
         

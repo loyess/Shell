@@ -23,8 +23,8 @@ nginx_config(){
 	    }
 	    
 	    server{
-	        listen 443 ssl;
-	        listen [::]:443 ssl;
+	        listen ${firewallNeedOpenPort} ssl;
+	        listen [::]:${firewallNeedOpenPort} ssl;
 	        server_name ${domain};
 	        ssl_certificate ${cerPath};
 	        ssl_certificate_key ${keyPath};

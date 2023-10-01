@@ -41,7 +41,9 @@ get_input_gqkey(){
 }
 
 install_prepare_libev_goquiet(){
-    firewallNeedOpenPort=443
+    improt_package "utils" "common_prepare.sh"
+    get_input_inbound_port 443
+    firewallNeedOpenPort="${INBOUND_PORT}"
     shadowsocksport="${firewallNeedOpenPort}"
     kill_process_if_port_occupy "${firewallNeedOpenPort}"
     get_input_domain

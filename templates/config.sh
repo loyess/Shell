@@ -56,7 +56,7 @@ cloak_server_config(){
 	    "ProxyBook":{
 	    "shadowsocks":["tcp","127.0.0.1:${shadowsocksport}"]
 	    },
-	    "BindAddr":[":443",":80"],
+	    "BindAddr":[":${firewallNeedOpenPort}",":80"],
 	    "BypassUID":[],
 	    "RedirAddr":"${ckwebaddr}",
 	    "PrivateKey":"${ckpv}",

@@ -108,7 +108,9 @@ get_input_alternativenames(){
 
 install_prepare_libev_cloak(){
     reset_if_ss_port_is_443
-    firewallNeedOpenPort=443
+    improt_package "utils" "common_prepare.sh"
+    get_input_inbound_port 443 "TO_COMPARE_PORTS"
+    firewallNeedOpenPort="${INBOUND_PORT}"
     kill_process_if_port_occupy "${firewallNeedOpenPort}"
     get_input_domain
     get_input_rediraddr

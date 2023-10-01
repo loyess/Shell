@@ -9,10 +9,11 @@ grpc-without-tls
 
 
 grpc_with_tls_mode_logic(){
-    firewallNeedOpenPort=443
+    get_cdn_or_dnsonly_type_domain
+    get_input_inbound_port 443
+    firewallNeedOpenPort="${INBOUND_PORT}"
     shadowsocksport="${firewallNeedOpenPort}"
     kill_process_if_port_occupy "${firewallNeedOpenPort}"
-    get_cdn_or_dnsonly_type_domain
     if [ "${domainType}" = "DNS-Only" ]; then
         acme_get_certificate_by_force "${domain}"
     elif [ "${domainType}" = "CDN" ]; then

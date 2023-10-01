@@ -27,9 +27,10 @@ ws_mode_logic(){
         firewallNeedOpenPort="${shadowsocksport}"
     elif [ "${isEnableWeb}" = "enable" ]; then
         reset_if_ss_port_is_443
-        firewallNeedOpenPort=443
-        kill_process_if_port_occupy "${firewallNeedOpenPort}"
         get_cdn_or_dnsonly_type_domain
+        get_input_inbound_port 443 "TO_COMPARE_PORTS"
+        firewallNeedOpenPort="${INBOUND_PORT}"
+        kill_process_if_port_occupy "${firewallNeedOpenPort}"
         web_server_menu
     fi
     if [ "${web_flag}" = "1" ]; then
@@ -47,7 +48,8 @@ ws_mode_logic(){
 }
 
 wss_mode_logic(){
-    firewallNeedOpenPort=443
+    get_input_inbound_port 443
+    firewallNeedOpenPort="${INBOUND_PORT}"
     shadowsocksport="${firewallNeedOpenPort}"
     kill_process_if_port_occupy "${firewallNeedOpenPort}"
     get_cdn_or_dnsonly_type_domain
@@ -66,7 +68,8 @@ wss_mode_logic(){
 }
 
 tls_mode_logic(){
-    firewallNeedOpenPort=443
+    get_input_inbound_port 443
+    firewallNeedOpenPort="${INBOUND_PORT}"
     shadowsocksport="${firewallNeedOpenPort}"
     kill_process_if_port_occupy "${firewallNeedOpenPort}"
     get_specified_type_domain "DNS-Only"
@@ -87,7 +90,8 @@ xtls_mode_logic(){
         _echo -d "       Shadowsocks版本和加密方式已被更改为${Green}${SS_VERSION}${suffix} 和 ${Green}${shadowsockscipher}${suffix}"
     fi
     mode=xtls
-    firewallNeedOpenPort=443
+    get_input_inbound_port 443
+    firewallNeedOpenPort="${INBOUND_PORT}"
     shadowsocksport="${firewallNeedOpenPort}"
     kill_process_if_port_occupy "${firewallNeedOpenPort}"
     get_specified_type_domain "DNS-Only"
@@ -96,7 +100,8 @@ xtls_mode_logic(){
 
 quic_mode_logic(){
     mode=quic
-    firewallNeedOpenPort=443
+    get_input_inbound_port 443
+    firewallNeedOpenPort="${INBOUND_PORT}"
     shadowsocksport="${firewallNeedOpenPort}"
     kill_process_if_port_occupy "${firewallNeedOpenPort}"
     get_specified_type_domain "DNS-Only"
@@ -105,7 +110,8 @@ quic_mode_logic(){
 
 http2_mode_logic(){
     mode=h2
-    firewallNeedOpenPort=443
+    get_input_inbound_port 443
+    firewallNeedOpenPort="${INBOUND_PORT}"
     shadowsocksport="${firewallNeedOpenPort}"
     kill_process_if_port_occupy "${firewallNeedOpenPort}"
     get_specified_type_domain "DNS-Only"
@@ -114,7 +120,8 @@ http2_mode_logic(){
 
 grpc_mode_logic(){
     mode=grpc
-    firewallNeedOpenPort=443
+    get_input_inbound_port 443
+    firewallNeedOpenPort="${INBOUND_PORT}"
     shadowsocksport="${firewallNeedOpenPort}"
     kill_process_if_port_occupy "${firewallNeedOpenPort}"
     get_cdn_or_dnsonly_type_domain

@@ -103,7 +103,8 @@ tls_mode_logic_for_v043(){
         firewallNeedOpenPort="${shadowsocksport}"
         get_all_type_domain
     elif [ "${doYouHaveDomian}" = "Yes" ]; then
-        firewallNeedOpenPort=443
+        get_input_inbound_port 443
+        firewallNeedOpenPort="${INBOUND_PORT}"
         shadowsocksport="${firewallNeedOpenPort}"
         kill_process_if_port_occupy "${firewallNeedOpenPort}"
         get_specified_type_domain "DNS-Only"
@@ -120,7 +121,8 @@ wss_mode_logic_for_v043(){
         firewallNeedOpenPort="${shadowsocksport}"
         get_all_type_domain
     elif [ "${doYouHaveDomian}" = "Yes" ]; then
-        firewallNeedOpenPort=443
+        get_input_inbound_port 443
+        firewallNeedOpenPort="${INBOUND_PORT}"
         shadowsocksport="${firewallNeedOpenPort}"
         kill_process_if_port_occupy "${firewallNeedOpenPort}"
         get_specified_type_domain "DNS-Only"
@@ -148,7 +150,8 @@ version_047_logic(){
         firewallNeedOpenPort="${shadowsocksport}"
         get_all_type_domain
     elif [ "${doYouHaveDomian}" = "Yes" ]; then
-        firewallNeedOpenPort=443
+        get_input_inbound_port 443
+        firewallNeedOpenPort="${INBOUND_PORT}"
         shadowsocksport="${firewallNeedOpenPort}"
         kill_process_if_port_occupy "${firewallNeedOpenPort}"
         get_specified_type_domain "DNS-Only"
@@ -167,7 +170,8 @@ version_latest_logic(){
         generate_menu_logic "${CERTIFICATE_TYPE[*]}" "证书类型(无合法证书时)" "1"
         certificateTypeOptNum="${inputInfo}"
     elif [ "${doYouHaveDomian}" = "Yes" ]; then
-        firewallNeedOpenPort=443
+        get_input_inbound_port 443
+        firewallNeedOpenPort="${INBOUND_PORT}"
         shadowsocksport="${firewallNeedOpenPort}"
         kill_process_if_port_occupy "${firewallNeedOpenPort}"
         get_specified_type_domain "DNS-Only"

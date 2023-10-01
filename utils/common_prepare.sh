@@ -186,3 +186,46 @@ get_input_mirror_site(){
         break
     done
 }
+
+get_input_inbound_port() {
+    while true
+    do
+        local DEFAULT_PORT="${1}"
+        _read "请输入Server端的入站监听端口（防火墙中最终要放行的端口）[1-65535] (默认: ${DEFAULT_PORT}):"
+        INBOUND_PORT="${inputInfo}"
+        [ -z "${INBOUND_PORT}" ] && INBOUND_PORT="${DEFAULT_PORT}"
+        if ! judge_is_num "${INBOUND_PORT}"; then
+            _echo -e "请输入一个有效数字."
+            continue
+        fi
+        if judge_is_zero_begin_num "${INBOUND_PORT}"; then
+            _echo -e "请输入一个非0开头的数字."
+            continue
+        fi
+        if ! judge_num_in_range "${INBOUND_PORT}" "65535"; then
+            _echo -e "请输入一个在1-65535之间的数字."
+            continue
+        fi
+        if [ "${domainType}" = "CDN" ]; then
+            local CF_CDN_HTTPS_PORTS=(443 2053 2083 2087 2096 8443)
+            if [[ ! " ${CF_CDN_HTTPS_PORTS[@]} " =~ " ${INBOUND_PORT} " ]]; then 
+                _echo -e "CloudFlare允许HTTPS流量走CDN的端口为：443 2053 2083 2087 2096 8443"
+                continue
+            fi
+        fi
+        local WHETHER_TO_COMPARE_PORTS="${2}"
+        if [ "${WHETHER_TO_COMPARE_PORTS}" = "TO_COMPARE_PORTS" ]; then
+            if judge_is_equal_num "${INBOUND_PORT}" "${shadowsocksport}"; then
+                _echo -e "请输入一个与SS端口不同的数字."
+                continue
+            fi
+            if [ "${INBOUND_PORT}" = 80 ]; then
+                _echo -e "Cloak、Caddy、nginx 会占用 80 端口，请重新输入."
+                continue
+            fi
+        fi
+        kill_process_if_port_occupy "${INBOUND_PORT}"
+        _echo -r "  inbound port = ${INBOUND_PORT}"
+        break
+    done
+}

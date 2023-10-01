@@ -5,7 +5,7 @@ export PATH
 
 # shell version
 # ====================
-SHELL_VERSION="2.8.3"
+SHELL_VERSION="2.8.4"
 # ====================
 
 

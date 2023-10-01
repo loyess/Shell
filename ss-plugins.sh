@@ -291,15 +291,15 @@ status_init(){
     if [ -e "${SHADOWSOCKS_LIBEV_BIN_PATH}" ]; then
         ssName="Shadowsocks-libev"
         ssPath="${SHADOWSOCKS_LIBEV_BIN_PATH}"
-        ssPid=`ps -ef | grep -v grep | grep ss-server | awk '{print $2}'`
+        ssPid=`ps -ef | grep -v grep | grep $SHADOWSOCKS_LIBEV_BIN_PATH | awk '{print $2}'`
     elif [ -e "${SHADOWSOCKS_RUST_BIN_PATH}" ]; then
         ssName="Shadowsocks-rust"
         ssPath="${SHADOWSOCKS_RUST_BIN_PATH}"
-        ssPid=`ps -ef | grep -v grep | grep ssservice | awk '{print $2}'`
+        ssPid=`ps -ef | grep -v grep | grep $SHADOWSOCKS_RUST_BIN_PATH | awk '{print $2}'`
     elif [ -e "${GO_SHADOWSOCKS2_BIN_PATH}" ]; then
         ssName="Go-shadowsocks2"
         ssPath="${GO_SHADOWSOCKS2_BIN_PATH}"
-        ssPid=`ps -ef | grep -v grep | grep go-shadowsocks2 | awk '{print $2}'`
+        ssPid=`ps -ef | grep -v grep | grep $GO_SHADOWSOCKS2_BIN_PATH | awk '{print $2}'`
     fi
 
     if [ -e "${V2RAY_PLUGIN_BIN_PATH}" ]; then

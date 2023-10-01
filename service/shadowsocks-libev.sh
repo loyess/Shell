@@ -32,7 +32,7 @@ if [ ! -d "$(dirname ${LOG})" ]; then
 fi
 
 check_pid(){
-	get_pid=`ps -ef |grep -v grep | grep ss-server |awk '{print $2}'`
+	get_pid=`ps -ef |grep -v grep | grep $DAEMON |awk '{print $2}'`
 }
 
 check_pid

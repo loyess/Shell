@@ -6,6 +6,10 @@ _check_running() {
     fi
     
     read PID < $PID_FILE
+    if [ -z "$PID" ]; then
+        return 2
+    fi
+
     if [ -d "/proc/$PID" ]; then
         return 0
     else

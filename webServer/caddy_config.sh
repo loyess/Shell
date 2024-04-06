@@ -10,6 +10,7 @@ caddy_v1_config(){
 	    proxy ${path} localhost:${shadowsocksport} {
 	        websocket
 	        header_upstream -Origin
+	        header_upstream Host {host}
 	    }
 	    proxy / ${mirror_site} {
 	        transparent

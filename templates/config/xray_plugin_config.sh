@@ -1,6 +1,6 @@
 config_ss_xray_plugin(){
     if [ "${libev_xray_plugin}" = "1" ]; then
-        serverPluginOpts="server;path=${path}"
+        serverPluginOpts="server;host=${domain};path=${path}"
     elif [ "${libev_xray_plugin}" = "2" ]; then
         serverPluginOpts="server;tls;host=${domain};cert=${cerPath};key=${keyPath};path=${path}"
     elif [ "${libev_xray_plugin}" = "3" ]; then

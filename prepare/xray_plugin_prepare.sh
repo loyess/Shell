@@ -15,7 +15,7 @@ ws_mode_logic(){
     improt_package "webServer" "prepare.sh"
     is_enable_web_server
     if [ "${isEnableWeb}" = "disable" ]; then
-        domain="cloudfront.com"
+        get_all_type_domain
         firewallNeedOpenPort="${shadowsocksport}"
     elif [ "${isEnableWeb}" = "enable" ]; then
         reset_if_ss_port_is_443

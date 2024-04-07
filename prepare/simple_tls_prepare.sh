@@ -97,7 +97,7 @@ get_input_auth_passwd_for_latest(){
     _echo -r "${Red}  auth = ${auth}${suffix}"
 }
 
-tls_mode_logic_for_v043(){
+tls_mode_logic_for_v034(){
     do_you_have_domain
     if [ "${doYouHaveDomian}" = "No" ]; then
         firewallNeedOpenPort="${shadowsocksport}"
@@ -115,7 +115,7 @@ tls_mode_logic_for_v043(){
     fi
 }
 
-wss_mode_logic_for_v043(){
+wss_mode_logic_for_v034(){
     do_you_have_domain
     if [ "${doYouHaveDomian}" = "No" ]; then
         firewallNeedOpenPort="${shadowsocksport}"
@@ -138,9 +138,9 @@ version_034_logic(){
     generate_menu_logic "${MODE_V034[*]}" "传输模式" "1"
     modeOptsNumV034="${inputInfo}"
     if [ "${modeOptsNumV034}" = "1" ]; then
-        tls_mode_logic_for_v043
+        tls_mode_logic_for_v034
     elif [ "${modeOptsNumV034}" = "2" ]; then
-        wss_mode_logic_for_v043
+        wss_mode_logic_for_v034
     fi
 }
 

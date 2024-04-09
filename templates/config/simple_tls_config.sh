@@ -38,6 +38,10 @@ config_ss_simple_tls(){
     fi
     ss_plugin_server_config
     # ata: against traffic analysis
+    if [ "${isEnableWs}" = "enable" ]; then
+        wsArgs=";ws;ws-path=${path}"
+        sed "s|\"plugin_opts\":\"s|\"plugin_opts\":\"s;ws;ws-path=${path}|" -i "${SHADOWSOCKS_CONFIG}"
+    fi
     if [ "${isEnableRh}" = "enable" ]; then
         ataArgs=';rh'
         sed 's/"plugin_opts":"s/"plugin_opts":"s;rh/' -i "${SHADOWSOCKS_CONFIG}"

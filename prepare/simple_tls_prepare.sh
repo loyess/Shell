@@ -4,6 +4,7 @@ improt_package "utils" "gen_certificates.sh"
 SIMPLE_TLS_VERSION=(
 v0.3.4
 v0.4.7
+v0.7.0
 latest
 )
 
@@ -65,7 +66,31 @@ is_enable_padding_data_for_v047(){
     done
 }
 
-is_enable_auth_for_latest(){
+is_enable_ws_for_v070(){
+    while true
+    do
+        echo
+        _read "是否启用WebSocket (ws) (默认: n) [y/n]: "
+        local yn="${inputInfo}"
+        [ -z "${yn}" ] && yn="N"
+        case "${yn:0:1}" in
+            y|Y)
+                isEnableWs=enable
+                ;;
+            n|N)
+                isEnableWs=disable
+                ;;
+            *)
+                _echo -e "输入有误，请重新输入."
+                continue
+                ;;
+        esac
+        _echo -r "  ws = ${isEnableWs}"
+        break
+    done
+}
+
+is_enable_auth_for_v070(){
     while true
     do
         echo
@@ -89,7 +114,7 @@ is_enable_auth_for_latest(){
     done
 }
 
-get_input_auth_passwd_for_latest(){
+get_input_auth_passwd_for_v070(){
     gen_random_str
     _read "请输入身份验证密码 (默认: ${ran_str12}):"
     auth="${inputInfo}"
@@ -162,7 +187,7 @@ version_047_logic(){
     fi
 }
 
-version_latest_logic(){
+version_v070_logic(){
     do_you_have_domain
     if [ "${doYouHaveDomian}" = "No" ]; then
         firewallNeedOpenPort="${shadowsocksport}"
@@ -177,9 +202,13 @@ version_latest_logic(){
         get_specified_type_domain "DNS-Only"
     fi
     is_disable_mux_logic
-    is_enable_auth_for_latest
+    is_enable_auth_for_v070
     if [ "${isEnableAuth}" = "enable" ]; then
-        get_input_auth_passwd_for_latest
+        get_input_auth_passwd_for_v070
+    fi
+    is_enable_ws_for_v070
+    if [ "${isEnableWs}" = "enable" ]; then
+        get_input_ws_path
     fi
     if [ "${domainType}" = "DNS-Only" ]; then
         acme_get_certificate_by_force "${domain}"
@@ -195,6 +224,6 @@ install_prepare_libev_simple_tls(){
     elif [ "${SimpleTlsVer}" = "2" ]; then
         version_047_logic
     elif [ "${SimpleTlsVer}" = "3" ]; then
-        version_latest_logic
+        version_v070_logic
     fi
 }

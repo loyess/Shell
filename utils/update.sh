@@ -33,8 +33,8 @@ judge_not_update_when_simple_tls_is_specified_version(){
     local currentVersion=$2
 
     if [[ -e ${SIMPLE_TLS_BIN_PATH} ]]; then
-        if ! check_latest_version "0.4.7" ${currentVersion}; then
-            echo -e "${Point} ${appName}当前版本是${currentVersion}及以下版本，与最新版本不兼容，脚本不提供更新."
+        if ! check_latest_version "0.7.0" ${currentVersion}; then
+            echo -e "${Point} ${appName}当前版本 v${currentVersion} 是 v0.7.0 及以下的指定版本，与最新版本不兼容，脚本不提供更新."
             exit 0
         fi
     fi

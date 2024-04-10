@@ -21,7 +21,7 @@ error_detect_deps_of_ubuntu(){
         package_install "psmisc" > /dev/null 2>&1
     fi
     sleep 3
-    sudo killall -q apt apt-get
+    killall -q apt apt-get
     ${command} > /dev/null 2>&1
     if [ $? -ne 0 ]; then
         _echo -e "依赖包${Red}${depend}${suffix}安装失败，请检查. "
@@ -35,12 +35,12 @@ error_asciidos_deps_of_ubuntu1901(){
     local depend=$2
 
     sleep 3
-    sudo dpkg --configure -a > /dev/null 2>&1
+    dpkg --configure -a > /dev/null 2>&1
     ${command} > /dev/null 2>&1
     if [ $? -ne 0 ]; then
         if ls -l /var/lib/dpkg/info | grep -qi 'python-sympy'; then
-            sudo mv -f /var/lib/dpkg/info/python-sympy.* /tmp
-            sudo apt update > /dev/null 2>&1
+            mv -f /var/lib/dpkg/info/python-sympy.* /tmp
+            apt update > /dev/null 2>&1
         fi
         ${command} > /dev/null 2>&1
         if [ $? -ne 0 ]; then

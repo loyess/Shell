@@ -35,13 +35,23 @@ config_ss_simple_tls(){
         else
             serverPluginOpts="s;key=${keyPath};cert=${cerPath}"
         fi
+    elif [ "${SimpleTlsVer}" = "4" ]; then
+        if [ "${certificateTypeOptNum}" = "1" ]; then
+            serverPluginOpts="s;n=${domain}"
+        else
+            serverPluginOpts="s;key=${keyPath};cert=${cerPath}"
+        fi
     fi
     ss_plugin_server_config
-    # ata: against traffic analysis
     if [ "${isEnableWs}" = "enable" ]; then
         wsArgs=";ws;ws-path=${path}"
         sed "s|\"plugin_opts\":\"s|\"plugin_opts\":\"s;ws;ws-path=${path}|" -i "${SHADOWSOCKS_CONFIG}"
     fi
+    if [ "${isEnableGrpc}" = "enable" ]; then
+        grpcArgs=";grpc;grpc-path=${grpcSN}"
+        sed "s|\"plugin_opts\":\"s|\"plugin_opts\":\"s;grpc;grpc-path=${grpcSN}|" -i "${SHADOWSOCKS_CONFIG}"
+    fi
+    # ata: against traffic analysis
     if [ "${isEnableRh}" = "enable" ]; then
         ataArgs=';rh'
         sed 's/"plugin_opts":"s/"plugin_opts":"s;rh/' -i "${SHADOWSOCKS_CONFIG}"

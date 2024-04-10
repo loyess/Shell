@@ -110,6 +110,18 @@ get_input_ws_path(){
     done
 }
 
+get_input_grpc_path(){
+    gen_random_str
+    while true
+    do
+        _read "请输入你的gRPC服务名称 (ServiceName) (默认：${ran_str12}):"
+        grpcSN="${inputInfo}"
+        [ -z "${grpcSN}" ] && grpcSN="${ran_str12}"
+        _echo -r "  ServiceName = ${grpcSN}"
+        break
+    done
+}
+
 _get_input_mux_max_stream() {
     while true
     do

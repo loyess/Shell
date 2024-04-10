@@ -122,6 +122,30 @@ get_input_auth_passwd_for_v070(){
     _echo -r "${Red}  auth = ${auth}${suffix}"
 }
 
+is_enable_grpc_for_latest(){
+    while true
+    do
+        echo
+        _read "是否启用gRPC (grpc) (默认: n) [y/n]: "
+        local yn="${inputInfo}"
+        [ -z "${yn}" ] && yn="N"
+        case "${yn:0:1}" in
+            y|Y)
+                isEnableGrpc=enable
+                ;;
+            n|N)
+                isEnableGrpc=disable
+                ;;
+            *)
+                _echo -e "输入有误，请重新输入."
+                continue
+                ;;
+        esac
+        _echo -r "  grpc = ${isEnableGrpc}"
+        break
+    done
+}
+
 tls_mode_logic_for_v034(){
     do_you_have_domain
     if [ "${doYouHaveDomian}" = "No" ]; then
@@ -215,8 +239,31 @@ version_v070_logic(){
     fi
 }
 
+version_latest_logic(){
+    do_you_have_domain
+    if [ "${doYouHaveDomian}" = "No" ]; then
+        firewallNeedOpenPort="${shadowsocksport}"
+        get_all_type_domain
+        generate_menu_logic "${CERTIFICATE_TYPE[*]}" "证书类型(无合法证书时)" "1"
+        certificateTypeOptNum="${inputInfo}"
+    elif [ "${doYouHaveDomian}" = "Yes" ]; then
+        get_input_inbound_port 443
+        firewallNeedOpenPort="${INBOUND_PORT}"
+        shadowsocksport="${firewallNeedOpenPort}"
+        kill_process_if_port_occupy "${firewallNeedOpenPort}"
+        get_specified_type_domain "DNS-Only"
+    fi
+    is_enable_grpc_for_latest
+    if [ "${isEnableGrpc}" = "enable" ]; then
+        get_input_grpc_path
+    fi
+    if [ "${domainType}" = "DNS-Only" ]; then
+        acme_get_certificate_by_force "${domain}"
+    fi
+}
+
 install_prepare_libev_simple_tls(){
-    generate_menu_logic "${SIMPLE_TLS_VERSION[*]}" "simple-tls版本" "3"
+    generate_menu_logic "${SIMPLE_TLS_VERSION[*]}" "simple-tls版本" "4"
     SimpleTlsVer="${inputInfo}"
     improt_package "utils" "common_prepare.sh"
     if [ "${SimpleTlsVer}" = "1" ]; then
@@ -225,5 +272,7 @@ install_prepare_libev_simple_tls(){
         version_047_logic
     elif [ "${SimpleTlsVer}" = "3" ]; then
         version_v070_logic
+    elif [ "${SimpleTlsVer}" = "4" ]; then
+        version_latest_logic
     fi
 }

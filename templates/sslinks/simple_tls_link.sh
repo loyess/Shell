@@ -29,6 +29,16 @@ gen_ss_simple_tls_link(){
         elif [ "${doYouHaveDomian}" = "Yes" ]; then
             clientPluginOpts="n=${domain}${ataArgs}${wsArgs}${clientMux}"
         fi
+    elif [ "${SimpleTlsVer}" = "4" ]; then
+        if [ "${doYouHaveDomian}" = "No" ]; then
+            if [ "${certificateTypeOptNum}" = "1" ]; then
+                clientPluginOpts="n=${domain};no-verify${grpcArgs}"
+            elif [ "${certificateTypeOptNum}" = "2" ]; then
+                clientPluginOpts="n=${domain};no-verify;cert-hash=${hashCert}${grpcArgs}"
+            fi
+        elif [ "${doYouHaveDomian}" = "Yes" ]; then
+            clientPluginOpts="n=${domain}${grpcArgs}"
+        fi
     fi
     ss_plugins_client_links
 }

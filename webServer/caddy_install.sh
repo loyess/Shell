@@ -16,7 +16,7 @@ service_caddy(){
 
 install_caddy_v1(){
     caddy_file="caddy_linux_${ARCH}"
-    caddy_url="https://dl.lamp.sh/files/caddy_linux_${ARCH}"
+    caddy_url="https://github.com/loyess/caddy-v1.0.5/releases/download/v1.0.5/caddy_linux_${ARCH}"
     pushd ${TEMP_DIR_PATH} > /dev/null 2>&1
     download "${caddy_file}" "${caddy_url}"
     

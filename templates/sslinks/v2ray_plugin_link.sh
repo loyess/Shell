@@ -12,7 +12,7 @@ gen_ss_v2ray_plugin_link(){
     elif [ "${libev_v2ray}" = "3" ]; then
         clientPluginOpts="tls;mode=quic;host=${domain}${clientMux}"
     elif [ "${libev_v2ray}" = "4" ]; then
-        clientPluginOpts="tls;mode=grpc;host=${domain}${clientMux}"
+        clientPluginOpts="tls;mode=grpc;host=${domain};serviceName=${grpcSN}${clientMux}"
     fi
     ss_plugins_client_links
 }

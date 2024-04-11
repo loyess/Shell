@@ -7,7 +7,11 @@ config_ss_v2ray_plugin(){
         serverTcpAndUdp="tcp_only"
         serverPluginOpts="server;tls;mode=quic;host=${domain};cert=${cerPath};key=${keyPath}"
     elif [ "${libev_v2ray}" = "4" ]; then
-        serverPluginOpts="server;tls;mode=grpc;host=${domain};cert=${cerPath};key=${keyPath}"
+        if [ "${isEnableWeb}" = "disable" ]; then
+            serverPluginOpts="server;tls;mode=grpc;host=${domain};serviceName=${grpcSN};cert=${cerPath};key=${keyPath}"
+        elif [ "${isEnableWeb}" = "enable" ]; then
+            serverPluginOpts="server;mode=grpc;serviceName=${grpcSN}"
+        fi
     fi
     ss_plugin_server_config
     if [ "${isDisableMux}" = "disable" ]; then

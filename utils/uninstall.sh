@@ -231,6 +231,8 @@ nginx_uninstall(){
             rm -rf $(dirname ${NGINX_CONFIG})
         fi
         rm -rf ${WEB_INSTALL_MARK}
+        rm -rf /etc/apt/trusted.gpg
+        rm -rf /etc/apt/sources.list.d/nginx.list
     fi
 }
 

@@ -43,14 +43,14 @@ nginx_ws_config(){
 	        }
 	        
 	        location / {
-	            sub_filter ${mirror_domain} ${domain};
+	            sub_filter \$proxy_host \$host;
 	            sub_filter_once off;
+	            proxy_pass ${mirror_site};
+	            proxy_set_header Host \$proxy_host;
 	            proxy_set_header X-Real-IP \$remote_addr;
 	            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-	            proxy_set_header Referer ${mirror_site};
-	            proxy_set_header Host ${mirror_domain};
-	            proxy_pass ${mirror_site};
-	            proxy_set_header Accept-Encoding "";
+	            proxy_set_header X-Forwarded-Port \$server_port;
+	            proxy_set_header X-Forwarded-Proto \$scheme;
 	        }
 	    }
 	}
@@ -105,14 +105,14 @@ nginx_grpc_config(){
 	        }
 	
 	        location / {
-	            sub_filter ${mirror_domain} ${domain};
+	            sub_filter \$proxy_host \$host;
 	            sub_filter_once off;
+	            proxy_pass ${mirror_site};
+	            proxy_set_header Host \$proxy_host;
 	            proxy_set_header X-Real-IP \$remote_addr;
 	            proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-	            proxy_set_header Referer ${mirror_site};
-	            proxy_set_header Host ${mirror_domain};
-	            proxy_pass ${mirror_site};
-	            proxy_set_header Accept-Encoding "";
+	            proxy_set_header X-Forwarded-Port \$server_port;
+	            proxy_set_header X-Forwarded-Proto \$scheme;
 	        }
 	    }
 	}

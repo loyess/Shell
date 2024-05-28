@@ -1,7 +1,7 @@
 # shadowsocks-libev dependencies
-LIBSODIUM_VERSION="1.0.19"
+LIBSODIUM_VERSION="1.0.20"
 LIBSODIUM_FILE="libsodium-${LIBSODIUM_VERSION}"
-UNCOMPRESS_FOLDER_NAME="libsodium-stable"
+UNCOMPRESS_FOLDER_NAME="libsodium-${LIBSODIUM_VERSION}"
 LIBSODIUM_VERSION_FILE=~/.deps-ver/libsodium.v
 LIBSODIUM_URL="https://github.com/jedisct1/libsodium/releases/download/${LIBSODIUM_VERSION}-RELEASE/libsodium-${LIBSODIUM_VERSION}.tar.gz"
 
